@@ -8,3 +8,4 @@ Code name:
 ## Features
 
 * #1: Added extension interface
+* #6: Added backend
