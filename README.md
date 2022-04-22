@@ -6,3 +6,4 @@ Schemas.
 ## Additional Information
 
 * [Changelog](doc/changes/changelog.md)
+* [Software Design](doc/design/design.md)
