@@ -18,7 +18,7 @@ jobs:
       - name: Install Tools
         run: |
           pip install pandoc-plantuml-filter
-          sudo apt-get install -y pandoc
+          sudo apt-get install -y pandoc plantuml
       - name: Generate Doc
         run: pandoc ./doc/design/design.md -o gh-pages/design.html --filter pandoc-plantuml
       - name: Deploy 🚀
