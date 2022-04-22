@@ -4,7 +4,7 @@
 
 The extension installer is split into a backend (running in the database) and a client (running in the Saas ui).
 
-```puml
+```plantuml
 @startuml
 node ExasolCluster{
 rectangle backend as "extension manager backend(go)"{
@@ -37,7 +37,7 @@ The extension manager has an extension mechanism.
 The extension manager itself has no dependencies to the virtual schema projects.
 They are loaded at runtime.
 
-```puml	
+```plantuml	
 postgres as [PostgreSQL Virtual Schema\nExtension definition]
 mysql as [MySQL Virtual Schema\nExtension definition]
 extensionInterface as [Extension manger interface]
@@ -55,7 +55,7 @@ extensionInterface <|-- mysql
 We have one extension definition per extension (integration project).
 All extension definitions implement the same public interface:
 
-```puml
+```plantuml
 interface ExasolExtension{
 
 }
@@ -159,7 +159,7 @@ risk of that seems acceptable, we decided against it since it would look suspici
 During the build (of each virtual-schema project) the extension definitions (written in TypeScript) are compiled to a
 single JavaScript file:
 
-```puml
+```plantuml
 file postgres-extension-def.ts{
 }
 
@@ -180,7 +180,7 @@ postgres-extension-def-2.0.2.js
 
 A crawler collects the JARs and extension definitions and copies them to BucketFS:
 
-```puml
+```plantuml
 storage "prostgres-virtual-schema release 2.0.2"{
 file installerInRepo as "postgres-extension-def-2.0.2.js"
 file jarV2InRepo as "postgresql-vs-2.0.2.jar"
