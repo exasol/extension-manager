@@ -1,5 +1,11 @@
 # Design
 
+<!-- 
+INFO: This file contains nested plantuml diagrams. For displaying them you need to enable editor support.
+For InteliJ see: https://youtrack.jetbrains.com/api/files/74-1236265?sign=MTY1MDg0NDgwMDAwMHwxMS0xfDc0LTEyMzYyNjV8d2VXdWNFVkJfVWZQeV9ZX3JHNF9rYno4cFV2%0D%0AMy1BV2ZSNjZaOUxhdVBOSQ0K%0D%0A&updated=1639999300525
+For VS Code: https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml
+-->
+
 ## Overall Architecture
 
 The extension installer is split into a backend (running in the database) and a client (running in the Saas ui).

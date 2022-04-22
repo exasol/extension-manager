@@ -6,4 +6,5 @@ Schemas.
 ## Additional Information
 
 * [Changelog](doc/changes/changelog.md)
-* [Software Design](doc/design/design.md)
+* [Software Design (online, main branch)](https://exasol.github.io/extension-manager/design.html)
+* [Software Design (local)](doc/design/design.md)
