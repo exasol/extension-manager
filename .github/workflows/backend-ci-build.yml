@@ -1,6 +1,10 @@
-name: CI Build
+name: Backend CI Build
+
 on:
-  - push
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
   build:
@@ -39,7 +43,7 @@ jobs:
       - name: golangci-lint
         run: |
           cd backend 
-          ci/install_and_run_golangci-lint.sh
+          ../ci/install_and_run_golangci-lint.sh
 
       - name: test
         run: |
