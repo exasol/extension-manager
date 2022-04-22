@@ -17,7 +17,7 @@ export interface ExasolExtension {
      *
      * Installing means creating the adapter scripts / UDF definitions.
      *
-     * @param sqlClient sqlClient
+     * @param sqlClient client for running SQL queries
      */
     install: (sqlClient: SqlClient) => void
     /**
@@ -31,10 +31,10 @@ export interface ExasolExtension {
      *
      * This method does not delete the instances first. The caller takes care of this.
      *
-     * @param installation
-     * @param sql
+     * @param installation the installation to uninstall
+     * @param sqlClient client for running SQL queries
      */
-    uninstall: (installation: Installation, sql: SqlClient) => void
+    uninstall: (installation: Installation, sqlClient: SqlClient) => void
     /** Parameter definitions for an instance of this extension. */
     instanceParameters: Parameter[];
     /**
@@ -43,15 +43,15 @@ export interface ExasolExtension {
      * An instance of an extension is for example a Virtual Schema.
      *
      * @param installation installation
-     * @param params parameters parameter values
-     * @param sqlClient sql client
+     * @param params parameter values
+     * @param sqlClient client for running SQL queries
      */
     addInstance: (installation: Installation, params: ParameterValues, sqlClient: SqlClient) => Instance
     /**
      * Find instances of this extension.
      *
      * @param installation installation
-     * @param sqlClient sql client
+     * @param sqlClient client for running SQL queries
      */
     findInstances: (installation: Installation, sqlClient: SqlClient) => Instance[]
     /**
@@ -59,7 +59,7 @@ export interface ExasolExtension {
      *
      * @param installation installation
      * @param instance instance
-     * @param sql
+     * @param sqlClient client for running SQL queries
      */
     readInstanceParameters: (installation: Installation, instance: Instance, sqlClient: SqlClient) => ParameterValues
     /**
@@ -67,7 +67,7 @@ export interface ExasolExtension {
      *
      * @param installation installation
      * @param instance instance to delete
-     * @param sqlClient sql client
+     * @param sqlClient client for running SQL queries
      */
     deleteInstance: (installation: Installation, instance: Instance, sqlClient: SqlClient) => void
 }
@@ -140,7 +140,7 @@ interface BaseParameter {
  */
 export interface StringParameter extends BaseParameter {
     type: "string"
-    regex?: string
+    regex?: RegExp
 }
 
 /**
