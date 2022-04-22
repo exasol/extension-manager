@@ -11,7 +11,7 @@ export interface ExasolExtension {
     /** Description of the extension */
     description: string;
     /** Files that this extension requires in BucketFS. */
-    bucketFsUploads?: BucketFSUploads;
+    bucketFsUploads?: BucketFSUpload[];
     /**
      * Install this extension.
      *
@@ -105,19 +105,15 @@ export interface SqlClient {
 
 
 /**
- * Map key -> BucketFs upload description
- */
-interface BucketFSUploads {
-    [index: string]: BucketFSUpload
-}
-
-/**
  * Description of a file that needs to be uploaded to BucketFS.
  */
 export interface BucketFSUpload {
+    /** Human-readable name or short description of the file */
+    name: string
     downloadUrl: string
     licenseUrl: string
-    licenseAgreementRequired: boolean
+    /** Default: false */
+    licenseAgreementRequired?: boolean
     bucketFsFilename: string
 }
 
