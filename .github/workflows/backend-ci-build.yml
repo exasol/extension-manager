@@ -48,7 +48,7 @@ jobs:
       - name: test
         run: |
           cd backend
-          go test -coverprofile=../coverage.out ./...
+          go test -coverprofile=coverage.out ./...
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master

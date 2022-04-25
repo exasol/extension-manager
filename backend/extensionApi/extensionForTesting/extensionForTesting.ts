@@ -69,8 +69,10 @@ function createExtension(): ExasolExtension {
             return [];
         },
         uninstall(_installation: Installation, _sql: SqlClient): void {
+            //empty on purpose
         },
         deleteInstance(_instance: Instance): void {
+            //empty on purpose
         },
         readInstanceParameters(_installation: Installation, _instance: Instance, _sqlClient: SqlClient): ParameterValues {
             return undefined;
