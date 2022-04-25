@@ -35,7 +35,7 @@ JsVM <- installer: "loaded into"
 ### Do we need a backend?
 
 One option would be to implement everything in the JS client. However, we discarded that option, since it does not allow
-us upgrade the installed adapters automatically.
+us to upgrade the installed adapters automatically. An automated job can't run in a browser.
 
 ### Extensions
 
@@ -72,7 +72,7 @@ ExasolExtension <-- "mysql-virtual-schema (repo).MySqlExtensionDefinition"
 
 ### Language
 
-For a language we decided for TypeScript.
+We decided to implement extensions in TypeScript.
 
 Alternative JSON: We decided for a programming language like JS since some extensions have more complex installation
 mechanisms. Expressing this by just providing SQL scripts with placeholders quickly reaches its limit.
@@ -85,12 +85,12 @@ Alternative Lua: We could also use Lua. We decided for JS since:
   don't need to update the installers.
 
 The compiled JavaScript code is evaluated in the backend using a nested JavaScript interpreter.
-By that it's isolated and for example can't access resources like disc or network.
+By that it's isolated and for example can't access resources like disk or network.
 
 ### Conditional Parameters
 
 We need to have conditional parameters. For example for the s3-document-files-virtual-schema we need to provide a select
-for choosing the source type (AWS S3 / Google Cloud Storage / ...). Depending of the source type we want to show / hide
+for choosing the source type (AWS S3 / Google Cloud Storage / ...). Depending on the source type we want to show / hide
 some parameters. For example the S3 Bucket name.
 
 To solve this, we considered the following options:
@@ -162,7 +162,7 @@ risk of that seems acceptable, we decided against it since it would look suspici
 
 ## Deployment of the Extension Definitions
 
-During the build (of each virtual-schema project) the extension definitions (written in TypeScript) are compiled to a
+During the build of each virtual-schema project the extension definitions (written in TypeScript) are compiled to a
 single JavaScript file:
 
 ```plantuml
@@ -217,7 +217,7 @@ That means that the extension definition must be able to uninstall and update al
 makes testing
 harder but is the only way to have the upgrade path tested.
 The alternative to also version the extension definition would lead to
-unmaintained and untested code (since the old version would not be tested with newer DB versions).
+unmaintained and untested code, since the old version would not be tested with newer DB versions.
 
 The extension definition are placed in a storage that's accessible from the extension-manager backend. Access from
 inside the
