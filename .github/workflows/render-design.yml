@@ -1,0 +1,32 @@
+name: Render design
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+      - name: Install Tools
+        run: |
+          pip install pandoc-plantuml-filter
+          sudo apt-get install -y pandoc plantuml
+      - name: Generate Doc
+        run: |
+          mkdir gh-pages
+          cd gh-pages
+          pandoc ../doc/design/design.md -o design.html --filter pandoc-plantuml
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.3.0
+        with:
+          branch: gh-pages
+          folder: gh-pages
+          single-commit: true
+          force: true
