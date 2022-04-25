@@ -9,7 +9,7 @@ import {
 } from "../../../interface/src/api";
 
 
-function getExtension(): ExasolExtension {
+function createExtension(): ExasolExtension {
     return {
         name: "MyDemoExtension",
         description: "An extension for testing.",
@@ -79,4 +79,4 @@ function getExtension(): ExasolExtension {
     }
 }
 
-registerExtension(getExtension())
+registerExtension(createExtension())
