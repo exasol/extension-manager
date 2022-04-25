@@ -8,11 +8,12 @@ For VS Code: https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml
 
 ## Overall Architecture
 
-The extension installer is split into a backend (running in the database) and a client (running in the Saas ui).
+The extension installer is split into a backend (running in the Exasol SaaS backend) and a client (running in the SaaS
+ui).
 
 ```plantuml
 @startuml
-node ExasolCluster{
+node "Exasol SaaS backend"{
 rectangle backend as "extension manager backend(go)"{
 rectangle JsVM
 }
@@ -21,14 +22,19 @@ file installer as "postgres-extension-def-1.0.0.js"
 }
 }
 
+node customerCluster as "Exasol cluster (per customer)"{
+
+}
+
 node Browser{
 rectangle jsClient{
 
     }
 }
 
-jsClient <---> backend
-JsVM <- installer: "loaded into"
+jsClient <-> backend
+JsVM <- installer: loaded into
+backend --> customerCluster: manages
 @enduml
 ```
 
@@ -40,7 +46,11 @@ us to upgrade the installed adapters automatically. An automated job can't run i
 ### Extensions
 
 The extension manager has an extension mechanism.
-The extension manager itself has no dependencies to the virtual schema projects.
+
+The extensions are integration projects maintained by Exasol. For now, it's not possible to install third party
+extensions, since it would be a security risk.
+
+The extension manager itself has no dependencies to the Virtual Schema projects.
 They are loaded at runtime.
 
 ```plantuml	
@@ -185,6 +195,8 @@ postgres-extension-def-2.0.2.js
 ```
 
 A crawler collects the JARs and extension definitions and copies them to BucketFS:
+The crawler runs at scheduled intervals.
+The crawler is at the moment not part of this project.
 
 ```plantuml
 storage "prostgres-virtual-schema release 2.0.2"{
@@ -197,13 +209,16 @@ file "postgres-extension-def-1.0.0.js"
 file jarV1InRepo as "postgresql-vs-1.0.0.jar"
 }
 
-node ExasolCluster{
+node "Exasol SaaS backend"{
+storage Installers{
+file installerInBucketFS as "postgres-extension-def-2.0.2.js"
+}
+}
+
+node "Exasol cluster (per customer)"{
 storage BucketFS{
 file jarV2InBucketFs as "postgresql-vs-2.0.2.jar"
 file jarV1InBucketFS as "postgresql-vs-1.0.0.jar"
-}
-storage Installers{
-file installerInBucketFS as "postgres-extension-def-2.0.2.js"
 }
 }
 
@@ -213,6 +228,8 @@ jarV1InRepo --> jarV1InBucketFS
 ```
 
 Note that only the latest version of the extension definition is deployed.
+That does not mean that it's impossible to install older versions of an extension. Just the extension definition (the
+plugin for the extensions store) is always the latest version.
 That means that the extension definition must be able to uninstall and update all old versions of its extension. That
 makes testing
 harder but is the only way to have the upgrade path tested.
