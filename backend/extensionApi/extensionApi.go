@@ -103,16 +103,16 @@ type SimpleSqlClient interface {
 func addSqlClient(vm *otto.Otto, sqlClient SimpleSqlClient) (*otto.Object, error) {
 	sqlClientJs, err := vm.Object(`sqlClient={}`)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to set SQL client. Cause %v\n", err.Error()))
+		return nil, fmt.Errorf("failed to set SQL client. Cause %v\n", err.Error())
 	}
 	err = sqlClientJs.Set("runQuery", func(call otto.FunctionCall) otto.Value {
 		sqlClient.RunSqlQuery(call.Argument(0).String())
 		return otto.Value{}
 	})
 	if err != nil {
-		panic("Failed to install sqlClient.runQuery function")
+		return nil, fmt.Errorf("failed to install sqlClient.runQuery function. Cause: %v", err.Error())
 	}
-	return sqlClientJs, err
+	return sqlClientJs, nil
 }
 
 type LoggingSimpleSqlClient struct {
