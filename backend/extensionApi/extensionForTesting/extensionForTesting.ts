@@ -59,23 +59,22 @@ function createExtension(): ExasolExtension {
         install(sqlClient) {
             sqlClient.runQuery("CREATE ADAPTER SCRIPT ...")
         },
-        addInstance(installation: Installation, params: ParameterValues, sql: SqlClient): Instance {
+        addInstance(_installation: Installation, _params: ParameterValues, _sql: SqlClient): Instance {
             return undefined;
         },
-        findInstallations(sqlClient: SqlClient): Installation[] {
+        findInstallations(_sqlClient: SqlClient): Installation[] {
             return [];
         },
-        findInstances(installation: Installation, sql: SqlClient): Instance[] {
+        findInstances(_installation: Installation, _sql: SqlClient): Instance[] {
             return [];
         },
-        uninstall(installation: Installation, sql: SqlClient): void {
+        uninstall(_installation: Installation, _sql: SqlClient): void {
         },
-        deleteInstance(instance: Instance): void {
+        deleteInstance(_instance: Instance): void {
         },
-        readInstanceParameters(installation: Installation, instance: Instance, sqlClient: SqlClient): ParameterValues {
+        readInstanceParameters(_installation: Installation, _instance: Instance, _sqlClient: SqlClient): ParameterValues {
             return undefined;
         }
-
     }
 }
 
