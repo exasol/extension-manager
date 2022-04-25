@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "build": "tsc --build && esbuild dist/backend/extensionApi/extensionForTesting/extensionForTesting.js --bundle --outfile=dist.js --target=es5",
+    "clean": "tsc --build --clean"
+  },
+  "devDependencies": {
+    "typescript": "4.6.3",
+    "esbuild": "0.14.37"
+  }
+}

@@ -1,0 +1,57 @@
+name: Backend CI Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.18
+        id: go
+
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Cache go modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+            ${{ runner.os }}-go-
+
+      - name: Install dependencies
+        run: |
+          cd backend 
+          go get -t ./...
+
+      - name: golangci-lint
+        run: |
+          cd backend 
+          ../ci/install_and_run_golangci-lint.sh
+
+      - name: test
+        run: |
+          cd backend
+          go test -coverprofile=coverage.out ./...
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
