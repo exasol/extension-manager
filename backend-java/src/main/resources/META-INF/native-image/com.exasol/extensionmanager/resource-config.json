@@ -1,0 +1,11 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "com/exasol/jdbc/version.res"
+      }
+    ],
+    "excludes": [
+    ]
+  }
+}

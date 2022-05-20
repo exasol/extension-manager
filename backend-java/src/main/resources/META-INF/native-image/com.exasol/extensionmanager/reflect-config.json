@@ -1,0 +1,9 @@
+[
+  {
+    "name": "com.exasol.extensionmanager.extensionapi.SimpleSqlClient",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allPublicMethods": true,
+    "allPublicFields": true
+  }
+]
