@@ -22,7 +22,7 @@ file installer as "postgres-extension-def-1.0.0.js"
 }
 }
 
-node customerCluster as "Exasol cluster (per customer)"{
+node customerCluster as "Customer Database"{
 
 }
 
@@ -243,3 +243,43 @@ database is not required.
 Most virtual schemas (including for example the postgres virtual schema) require an additional third-party JDBC driver.
 That driver for now must be copied manually into the BucketFS of all SaaS offerings.
 
+## Installation Scope
+
+The installation of an extension is scoped to an Exasol database (new term in SaaS context).
+A user can install multiple versions of an extension.
+
+```plantuml
+rectangle Account as "Exasol Saas Account"{
+rectangle "Database (= 1 COS)"{
+object SYS.EXA_ALL_SCRIPTS{
+
+}
+ 
+object ADAPTERS.MY_ADAPTER{
+
+}
+
+storage BucketFS{
+file 1 as "postgres-vs.jar"{
+}
+}
+}
+}
+
+storage s3Bfs as "S3BucketFs (global)"{
+file 2 as "postgres-vs.jar"{
+}
+}
+s3Bfs -> BucketFS: mirrored
+```
+
+```plantuml
+class Account as "Exasol Saas Account"
+class Database
+class Installation as "Extension-Installation (UDFs, SCRIPTs, ...)"
+class Instance as "Extension-Instance (VIRTUAL SCHEMA)"
+Account "1" o-- "*" Database
+Database "1" o-- "*" Installation
+Database "1" -- "1" BucketFs
+Installation "1" o-- "*" Instance
+```

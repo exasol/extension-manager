@@ -8,7 +8,9 @@ Code name:
 
 * #1: Added extension interface
 * #6: Added backend
+* #10: Added REST API
 
 ## Documentation
 
 * #4: Added design
+
