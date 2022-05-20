@@ -24,16 +24,6 @@ func GetExtensionFromFile(fileName string) (*Extension, error) {
 	return &extensionJs.Extension, nil
 }
 
-func readRequiredStringProperty(extensionJs *goja.Object, propertyName string) (result string, errorResult error) {
-	defer func() {
-		panic := recover()
-		if panic != nil {
-			errorResult = fmt.Errorf("failed to read required extension property %v. Cause: %v", propertyName, panic)
-		}
-	}()
-	return extensionJs.Get(propertyName).String(), nil
-}
-
 func loadExtension(vm *goja.Runtime, fileName string) (*InstalledExtension, error) {
 	const extensionVariable = "installedExtension"
 	err := vm.Set(extensionVariable, nil)
