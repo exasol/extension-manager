@@ -12,6 +12,10 @@ export interface ExasolExtension {
     description: string;
     /** Files that this extension requires in BucketFS. */
     bucketFsUploads?: BucketFSUpload[];
+
+    /** List of versions that this installer can install. */
+    installableVersions: string[]
+
     /**
      * Install this extension.
      *
@@ -24,8 +28,9 @@ export interface ExasolExtension {
      * Find installations of this extension independent of the version.
      *
      * @param sqlClient client for running SQL queries
+     * @param exaAllScripts contents of the EXA_ALL_SCRIPTS table
      */
-    findInstallations: (sqlClient: SqlClient) => Installation[]
+    findInstallations: (sqlClient: SqlClient, exaAllScripts: ExaAllScripts) => Installation[]
     /**
      * Uninstall this extension. (Delete adapter scripts / udf definitions)
      *
@@ -72,12 +77,24 @@ export interface ExasolExtension {
     deleteInstance: (installation: Installation, instance: Instance, sqlClient: SqlClient) => void
 }
 
+export interface ExaAllScripts {
+    rows: ExaAllScriptsRow[]
+}
+
+
+export interface ExaAllScriptsRow {
+    name: string
+    text: string
+}
+
 /**
  * Reference to an installation of this extension.
  */
 export interface Installation {
-
+    name: string
+    version: string
 }
+
 /**
  * Reference to an instance of this extension.
  */
@@ -148,8 +165,8 @@ export type Parameter = StringParameter | SelectParameter;
  * Type for a map for select options.
  * Map: value to select -> display name
  */
-export interface OptionsType{
-    [index:string]: string
+export interface OptionsType {
+    [index: string]: string
 }
 
 /**

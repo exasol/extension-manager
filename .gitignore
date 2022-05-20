@@ -30,3 +30,7 @@ target
 *.orig
 *.old
 *.md.html
+
+pom.xml.versionsBackup
+*.flattened-pom.xml
+vendor/
