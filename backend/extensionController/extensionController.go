@@ -12,10 +12,14 @@ type ExtensionController interface {
 	GetAllExtensions() ([]*extensionApi.Extension, error)
 }
 
-type ExtensionControllerImpl struct {
+func Create() ExtensionController {
+	return &extensionControllerImpl{}
 }
 
-func (controller *ExtensionControllerImpl) GetAllExtensions() ([]*extensionApi.Extension, error) {
+type extensionControllerImpl struct {
+}
+
+func (controller *extensionControllerImpl) GetAllExtensions() ([]*extensionApi.Extension, error) {
 	extension, err := extensionApi.GetExtensionFromFile("extensionApi/extensionForTesting/dist.js")
 	if err != nil {
 		return nil, err
@@ -23,7 +27,7 @@ func (controller *ExtensionControllerImpl) GetAllExtensions() ([]*extensionApi.E
 	return []*extensionApi.Extension{extension}, nil
 }
 
-func (controller *ExtensionControllerImpl) GetAllInstallations(dbConnection *sql.DB) ([]*extensionApi.Installation, error) {
+func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql.DB) ([]*extensionApi.Installation, error) {
 	allScriptTable, err := extensionApi.ReadExaAllScriptTable(dbConnection)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read EXA_ALL_SCRIPT table. Cause: %w", err)

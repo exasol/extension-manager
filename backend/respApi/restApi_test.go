@@ -16,7 +16,7 @@ type RestAPISuite struct {
 	suite.Suite
 	assertJSON *jsonassert.Asserter
 	controller *MockExtensionController
-	restAPI    *RestApi
+	restAPI    *restApiImpl
 }
 
 func TestRestApiSuite(t *testing.T) {
@@ -33,7 +33,7 @@ func (suite *RestAPISuite) SetupSuite() {
 
 func (suite *RestAPISuite) SetupTest() {
 	suite.controller = &MockExtensionController{}
-	suite.restAPI = &RestApi{Controller: suite.controller}
+	suite.restAPI = &restApiImpl{Controller: suite.controller}
 	go suite.restAPI.Serve()
 	time.Sleep(10 * time.Millisecond) // give the server some time to become ready
 }

@@ -1,7 +1,7 @@
 package respApi
 
 import (
-	. "backend/extensionController"
+	cont "backend/extensionController"
 	"context"
 	"database/sql"
 	"fmt"
@@ -11,14 +11,23 @@ import (
 	"sync"
 )
 
-type RestApi struct {
-	Controller   ExtensionController
+type RestApi interface {
+	Serve()
+	Stop()
+}
+
+func Create(controller cont.ExtensionController) RestApi {
+	return &restApiImpl{Controller: controller}
+}
+
+type restApiImpl struct {
+	Controller   cont.ExtensionController
 	server       *http.Server
 	stopped      *bool
 	stoppedMutex *sync.Mutex
 }
 
-func (restApi *RestApi) Serve() {
+func (restApi *restApiImpl) Serve() {
 	if restApi.server != nil {
 		panic("server already running")
 	}
@@ -37,7 +46,7 @@ func (restApi *RestApi) Serve() {
 	}
 }
 
-func (restApi *RestApi) setStopped(stopped bool) {
+func (restApi *restApiImpl) setStopped(stopped bool) {
 	if restApi.stopped == nil {
 		stopped := false
 		restApi.stopped = &stopped
@@ -48,13 +57,13 @@ func (restApi *RestApi) setStopped(stopped bool) {
 	*restApi.stopped = stopped
 }
 
-func (restApi *RestApi) isStopped() bool {
+func (restApi *restApiImpl) isStopped() bool {
 	restApi.stoppedMutex.Lock()
 	defer restApi.stoppedMutex.Unlock()
 	return *restApi.stopped
 }
 
-func (restApi *RestApi) Stop() {
+func (restApi *restApiImpl) Stop() {
 	if restApi.server == nil {
 		panic("cant stop server since it's not running")
 	}
@@ -66,12 +75,12 @@ func (restApi *RestApi) Stop() {
 	restApi.server = nil
 }
 
-func (restApi *RestApi) handleGetExtensions(c *gin.Context) {
+func (restApi *restApiImpl) handleGetExtensions(c *gin.Context) {
 	response, err := restApi.getExtensions(c)
 	restApi.sendResponse(c, response, err)
 }
 
-func (restApi *RestApi) getExtensions(c *gin.Context) (*ExtensionsResponse, error) {
+func (restApi *restApiImpl) getExtensions(c *gin.Context) (*ExtensionsResponse, error) {
 	dbConnection, err := restApi.openDbConnection(c)
 	if err != nil {
 		return nil, err
@@ -101,12 +110,12 @@ type ExtensionsResponseExtension struct {
 	InstallableVersions []string `json:"installableVersions"`
 }
 
-func (restApi *RestApi) handleGetInstallations(c *gin.Context) {
+func (restApi *restApiImpl) handleGetInstallations(c *gin.Context) {
 	response, err := restApi.getInstallations(c)
 	restApi.sendResponse(c, response, err)
 }
 
-func (restApi *RestApi) getInstallations(c *gin.Context) (*InstallationsResponse, error) {
+func (restApi *restApiImpl) getInstallations(c *gin.Context) (*InstallationsResponse, error) {
 	dbConnection, err := restApi.openDbConnection(c)
 	if err != nil {
 		return nil, err
@@ -126,7 +135,7 @@ func (restApi *RestApi) getInstallations(c *gin.Context) (*InstallationsResponse
 	return &response, nil
 }
 
-func (restApi *RestApi) sendResponse(c *gin.Context, response interface{}, err error) {
+func (restApi *restApiImpl) sendResponse(c *gin.Context, response interface{}, err error) {
 	if err != nil {
 		c.String(500, "Internal error.")
 		fmt.Println(err.Error())
@@ -143,7 +152,7 @@ func closeDbConnection(database *sql.DB) {
 	}
 }
 
-func (restApi *RestApi) openDbConnection(c *gin.Context) (*sql.DB, error) {
+func (restApi *restApiImpl) openDbConnection(c *gin.Context) (*sql.DB, error) {
 	database, err := sql.Open("exasol", exasol.NewConfig(c.GetString("dbUser"), c.GetString("dbPass")).Port(c.GetInt("dbPort")).Host(c.GetString("dbHost")).String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to open a database connection. Cause: %v", err.Error())
