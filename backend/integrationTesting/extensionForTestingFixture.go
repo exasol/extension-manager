@@ -1,6 +1,7 @@
 package integrationTesting
 
 import (
+	"bytes"
 	"fmt"
 	"os/exec"
 	"path"
@@ -24,6 +25,9 @@ func GetExtensionForTesting(pathToProjectRoot string) string {
 		buildCommand.Dir = extensionForTestingDir
 		err = buildCommand.Run()
 		if err != nil {
+			var stderr bytes.Buffer
+			buildCommand.Stderr = &stderr
+			fmt.Println(stderr.String())
 			panic(fmt.Sprintf("Failed to build extensionForTesting. Cause: %v", err.Error()))
 		}
 	}
