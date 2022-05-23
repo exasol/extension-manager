@@ -1,4 +1,4 @@
-package extensionApi
+package extensionAPI
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 )
 
+// GetExtensionFromFile loads an extension from a .js file.
 func GetExtensionFromFile(fileName string) (*Extension, error) {
 	vm := goja.New()
 	vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))

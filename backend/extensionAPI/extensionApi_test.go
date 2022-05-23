@@ -1,10 +1,10 @@
-package extensionApi
+package extensionAPI
 
 import (
+	"backend/integrationTesting"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"io/ioutil"
-	"os/exec"
 	"path"
 	"testing"
 )
@@ -19,7 +19,7 @@ func TestExtensionApiSuite(t *testing.T) {
 }
 
 func (suite *ExtensionApiSuite) SetupSuite() {
-	suite.validExtensionFile = buildExtensionForTesting(suite.T())
+	suite.validExtensionFile = integrationTesting.GetExtensionForTesting("../")
 }
 
 func (suite *ExtensionApiSuite) Test_GetExtensionFromFile() {
@@ -72,21 +72,4 @@ func (suite *ExtensionApiSuite) writeExtension(extensionJs string) string {
 	extensionFile := path.Join(suite.T().TempDir(), "extension.js")
 	suite.NoError(ioutil.WriteFile(extensionFile, []byte(extensionJs), 0600))
 	return extensionFile
-}
-
-func buildExtensionForTesting(t *testing.T) string {
-	const extensionForTestingDir = "extensionForTesting"
-	installCommand := exec.Command("npm", "install")
-	installCommand.Dir = extensionForTestingDir
-	err := installCommand.Run()
-	if err != nil {
-		t.Errorf("Failed to install node modules (run 'npm install') for extensionForTesting. Cause: %v", err.Error())
-	}
-	buildCommand := exec.Command("npm", "run", "build")
-	buildCommand.Dir = extensionForTestingDir
-	err = buildCommand.Run()
-	if err != nil {
-		t.Errorf("Failed to build extensionForTesting. Cause: %v", err.Error())
-	}
-	return path.Join(extensionForTestingDir, "dist.js")
 }

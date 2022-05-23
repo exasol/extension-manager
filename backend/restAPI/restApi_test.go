@@ -1,7 +1,7 @@
-package respApi
+package restAPI
 
 import (
-	"backend/extensionApi"
+	"backend/extensionAPI"
 	"database/sql"
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/mock"
@@ -16,7 +16,7 @@ type RestAPISuite struct {
 	suite.Suite
 	assertJSON *jsonassert.Asserter
 	controller *MockExtensionController
-	restAPI    RestApi
+	restAPI    RestAPI
 }
 
 func TestRestApiSuite(t *testing.T) {
@@ -42,24 +42,24 @@ func (suite *RestAPISuite) TearDownTest() {
 	suite.restAPI.Stop()
 }
 
-func (mock *MockExtensionController) GetAllInstallations(dbConnection *sql.DB) ([]*extensionApi.Installation, error) {
+func (mock *MockExtensionController) GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.Installation, error) {
 	args := mock.Called(dbConnection)
-	return args.Get(0).([]*extensionApi.Installation), args.Error(1)
+	return args.Get(0).([]*extensionAPI.Installation), args.Error(1)
 }
 
-func (mock *MockExtensionController) GetAllExtensions() ([]*extensionApi.Extension, error) {
+func (mock *MockExtensionController) GetAllExtensions() ([]*extensionAPI.Extension, error) {
 	args := mock.Called()
-	return args.Get(0).([]*extensionApi.Extension), args.Error(1)
+	return args.Get(0).([]*extensionAPI.Extension), args.Error(1)
 }
 
 func (suite *RestAPISuite) TestGetInstallations() {
-	suite.controller.On("GetAllInstallations", mock.Anything).Return([]*extensionApi.Installation{{Name: "test"}}, nil)
+	suite.controller.On("GetAllInstallations", mock.Anything).Return([]*extensionAPI.Installation{{Name: "test"}}, nil)
 	responseString := suite.makeGetRequest("/installations")
 	suite.assertJSON.Assertf(responseString, `{"installations":[{"name":"test"}]}`)
 }
 
 func (suite *RestAPISuite) TestGetExtensions() {
-	suite.controller.On("GetAllExtensions", mock.Anything).Return([]*extensionApi.Extension{{Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
+	suite.controller.On("GetAllExtensions", mock.Anything).Return([]*extensionAPI.Extension{{Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
 	responseString := suite.makeGetRequest("/extensions")
 	suite.assertJSON.Assertf(responseString, `{"extensions":[{"name":"my-extension","description":"a cool extension","installableVersions":["0.1.0"]}]}`)
 }

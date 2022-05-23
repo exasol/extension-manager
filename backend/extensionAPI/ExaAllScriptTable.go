@@ -1,4 +1,4 @@
-package extensionApi
+package extensionAPI
 
 import (
 	"database/sql"
