@@ -1,4 +1,4 @@
-package extensionApi
+package integrationTesting
 
 import (
 	"database/sql"

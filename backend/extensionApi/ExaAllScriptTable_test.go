@@ -1,12 +1,13 @@
 package extensionApi
 
 import (
+	"backend/integrationTesting"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
 
 type ExaAllScriptsTableSuite struct {
-	IntegrationTestSuite
+	integrationTesting.IntegrationTestSuite
 }
 
 func TestExaAllScriptsTableSuite(t *testing.T) {
@@ -16,23 +17,9 @@ func TestExaAllScriptsTableSuite(t *testing.T) {
 func (suite *ExaAllScriptsTableSuite) TestReadScript() {
 	connection := suite.Exasol.CreateConnection()
 	defer func() { suite.NoError(connection.Close()) }()
-	suite.createTestScript()
-	defer suite.deleteTestScript()
+	luaScriptFixture := integrationTesting.CreateLuaScriptFixture(suite.Connection)
+	defer luaScriptFixture.Close()
 	result, err := ReadExaAllScriptTable(connection)
 	suite.NoError(err)
 	suite.Assert().Equal(ExaAllScriptTable{Rows: []ExaAllScriptRow{{Name: "TEST.MY_SCRIPT", Text: "CREATE LUA SET SCRIPT \"MY_SCRIPT\" (\"a\" DOUBLE) RETURNS DOUBLE AS\nfunction run(ctx)\n  return 1\nend\n"}}}, *result)
-}
-
-func (suite *ExaAllScriptsTableSuite) createTestScript() {
-	suite.ExecSQL("CREATE SCHEMA TEST")
-	suite.ExecSQL(`CREATE LUA SET SCRIPT test.my_script (a DOUBLE)
-    RETURNS DOUBLE AS
-function run(ctx)
-  return 1
-end
-/`)
-}
-
-func (suite *ExaAllScriptsTableSuite) deleteTestScript() {
-	suite.ExecSQL("DROP SCHEMA TEST CASCADE")
 }

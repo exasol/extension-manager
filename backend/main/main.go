@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-	restApi := respApi.Create(extensionController.Create())
+	restApi := respApi.Create(extensionController.Create("../extensionApi/extensionForTesting/"))
 	restApi.Serve()
 }

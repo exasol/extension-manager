@@ -5,6 +5,7 @@ import (
 	"backend/extensionApi"
 	"database/sql"
 	"fmt"
+	"path"
 )
 
 type ExtensionController interface {
@@ -12,15 +13,17 @@ type ExtensionController interface {
 	GetAllExtensions() ([]*extensionApi.Extension, error)
 }
 
-func Create() ExtensionController {
-	return &extensionControllerImpl{}
+func Create(pathToExtensionFolder string) ExtensionController {
+	return &extensionControllerImpl{pathToExtensionFolder: pathToExtensionFolder}
 }
 
 type extensionControllerImpl struct {
+	pathToExtensionFolder string
 }
 
 func (controller *extensionControllerImpl) GetAllExtensions() ([]*extensionApi.Extension, error) {
-	extension, err := extensionApi.GetExtensionFromFile("extensionApi/extensionForTesting/dist.js")
+	extensionPath := path.Join(controller.pathToExtensionFolder, "dist.js")
+	extension, err := extensionApi.GetExtensionFromFile(extensionPath)
 	if err != nil {
 		return nil, err
 	}
