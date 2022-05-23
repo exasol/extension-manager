@@ -34,6 +34,5 @@ end
 }
 
 func (suite *ExaAllScriptsTableSuite) deleteTestScript() {
-	suite.ExecSQL("DROP SCRIPT test.my_script")
-	suite.ExecSQL("DROP SCHEMA TEST")
+	suite.ExecSQL("DROP SCHEMA TEST CASCADE")
 }
