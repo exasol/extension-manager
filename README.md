@@ -10,4 +10,5 @@ Schemas.
 * [Changelog](doc/changes/changelog.md)
 * [Software Design (online, main branch)](https://exasol.github.io/extension-manager/design.html)
 * [Software Design (local)](doc/design/design.md)
+* [Developers Guide](doc/developers_guide/developers_guide.md)
 * [Dependencies](dependencies.md)

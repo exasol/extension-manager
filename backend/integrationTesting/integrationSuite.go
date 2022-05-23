@@ -13,9 +13,14 @@ type IntegrationTestSuite struct {
 }
 
 func (suite *IntegrationTestSuite) SetupSuite() {
+	/** Since the  testSetupAbstraction reuses the container parallel use of this suite would cause conflicts. --> Ww make sure it's not used in parallel using a mutex */
 	exasol := testSetupAbstraction.Create("./exasol-test-setup-config.json") // file does not exist. --> we use the testcontainer test setup
 	suite.Exasol = &exasol
 	suite.Connection = exasol.CreateConnection()
+}
+
+func (suite *IntegrationTestSuite) TearDownSuite() {
+	suite.Exasol.Stop()
 }
 
 func (suite *IntegrationTestSuite) ExecSQL(query string) {
