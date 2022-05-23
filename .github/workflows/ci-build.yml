@@ -49,7 +49,7 @@ jobs:
         run: |
           cd backend
           # -p 1 tells go not to run the tests in parallel. See the developers_guide. 
-          go -p 1 test -coverprofile=coverage.out ./...
+          go test -p 1 -coverprofile=coverage.out ./...
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master

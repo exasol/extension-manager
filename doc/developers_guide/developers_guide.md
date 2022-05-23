@@ -19,5 +19,5 @@ For that reason we currently disabled parallel tests in the CI.
 To run test locally use:
 
 ```shell
-go run -p 1 ./...
+go test -p 1 ./...
 ```
