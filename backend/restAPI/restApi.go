@@ -128,7 +128,7 @@ func (restApi *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResp
 	if err != nil {
 		return nil, err
 	}
-	convertedInstallations := make([]InstallationsResponseInstallation, len(installations))
+	convertedInstallations := make([]InstallationsResponseInstallation, 0, len(installations))
 	for _, installation := range installations {
 		convertedInstallations = append(convertedInstallations, InstallationsResponseInstallation{installation.Name})
 	}
