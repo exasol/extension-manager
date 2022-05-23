@@ -23,27 +23,37 @@ func (suite *ExtensionApiSuite) SetupSuite() {
 }
 
 func (suite *ExtensionApiSuite) Test_GetExtensionFromFile() {
-	extension, err := GetExtensionFromFile(suite.validExtensionFile, LoggingSimpleSqlClient{})
+	extension, err := GetExtensionFromFile(suite.validExtensionFile)
 	suite.NoError(err)
-	suite.Assert().Equal("MyDemoExtension", extension.GetName())
+	suite.Assert().Equal("MyDemoExtension", extension.Name)
 }
 
-type MockSimpleSqlClient struct {
+type MockSimpleSQLClient struct {
 	mock.Mock
 }
 
-func (mock *MockSimpleSqlClient) RunSqlQuery(query string) {
+func (mock *MockSimpleSQLClient) RunQuery(query string) {
 	mock.Called(query)
 }
 
-func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_install() {
-	mockSqlClient := MockSimpleSqlClient{}
-	mockSqlClient.On("RunSqlQuery", "CREATE ADAPTER SCRIPT ...").Return()
-	extension, err := GetExtensionFromFile(suite.validExtensionFile, &mockSqlClient)
+func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_Install() {
+	mockSQLClient := MockSimpleSQLClient{}
+	mockSQLClient.On("RunQuery", "CREATE ADAPTER SCRIPT ...").Return()
+	extension, err := GetExtensionFromFile(suite.validExtensionFile)
 	suite.NoError(err)
-	err = extension.Install()
+	extension.Install(&mockSQLClient)
 	suite.NoError(err)
-	mockSqlClient.AssertCalled(suite.T(), "RunSqlQuery", "CREATE ADAPTER SCRIPT ...")
+	mockSQLClient.AssertCalled(suite.T(), "RunQuery", "CREATE ADAPTER SCRIPT ...")
+}
+
+func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_FindInstallations() {
+	mockSqlClient := MockSimpleSQLClient{}
+	extension, err := GetExtensionFromFile(suite.validExtensionFile)
+	suite.NoError(err)
+	exaAllScripts := ExaAllScriptTable{Rows: []ExaAllScriptRow{{Name: "test"}}}
+	result := extension.FindInstallations(&mockSqlClient, &exaAllScripts)
+	suite.Assert().Equal("test", result[0].Name)
+	suite.NoError(err)
 }
 
 func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_withOutdatedApiVersion() {
@@ -53,17 +63,9 @@ func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_withOutdatedApiVersion
 		apiVersion: "0.0.0"
 	}
 	})()`)
-	_, err := GetExtensionFromFile(extensionFile, LoggingSimpleSqlClient{})
+	_, err := GetExtensionFromFile(extensionFile)
 	suite.Error(err)
 	suite.Assert().Contains(err.Error(), "incompatible extension API version 0.0.0. Please update the extension to use a supported version of the extension API")
-}
-
-func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_withNonCallToInstallExtension() {
-	extensionFile := suite.writeExtension(`(function(){
-	})()`)
-	_, err := GetExtensionFromFile(extensionFile, LoggingSimpleSqlClient{})
-	suite.Error(err)
-	suite.Assert().Contains(err.Error(), "invalid installedExtension. The provided JS file did not set the installedExtension variable or it is not an object. Make sure that the extension fill calls installExtension")
 }
 
 func (suite *ExtensionApiSuite) writeExtension(extensionJs string) string {

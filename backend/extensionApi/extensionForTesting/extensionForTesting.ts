@@ -1,4 +1,5 @@
 import {
+    ExaAllScripts,
     ExasolExtension,
     Installation,
     Instance,
@@ -13,6 +14,7 @@ function createExtension(): ExasolExtension {
     return {
         name: "MyDemoExtension",
         description: "An extension for testing.",
+        installableVersions: ["0.1.0"],
         bucketFsUploads: [{
             name: "My Extension JAR",
             downloadUrl: "https://my.download.de/demo.jar",
@@ -62,8 +64,12 @@ function createExtension(): ExasolExtension {
         addInstance(_installation: Installation, _params: ParameterValues, _sql: SqlClient): Instance {
             return undefined;
         },
-        findInstallations(_sqlClient: SqlClient): Installation[] {
-            return [];
+        findInstallations(_sqlClient: SqlClient, exaAllScripts: ExaAllScripts): Installation[] {
+            let result = exaAllScripts.rows.map(row => {
+                return {name: row.name, version: "0.1.0"}
+            });
+            console.log(JSON.stringify(result))
+            return result;
         },
         findInstances(_installation: Installation, _sql: SqlClient): Instance[] {
             return [];
