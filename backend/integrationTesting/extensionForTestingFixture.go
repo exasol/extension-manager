@@ -15,11 +15,11 @@ func GetExtensionForTesting(pathToProjectRoot string) string {
 	extensionForTestingDir := path.Join(pathToProjectRoot, "integrationTesting", "extensionForTesting")
 	if !isBuilt {
 		isBuilt = true
-		installCommand := exec.Command("npm", "install")
+		installCommand := exec.Command("npm", "ci")
 		installCommand.Dir = extensionForTestingDir
 		err := installCommand.Run()
 		if err != nil {
-			panic(fmt.Sprintf("Failed to install node modules (run 'npm install') for extensionForTesting. Cause: %v", err.Error()))
+			panic(fmt.Sprintf("Failed to install node modules (run 'npm ci') for extensionForTesting. Cause: %v", err.Error()))
 		}
 		buildCommand := exec.Command("npm", "run", "build")
 		buildCommand.Dir = extensionForTestingDir

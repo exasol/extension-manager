@@ -13,7 +13,7 @@ import (
 
 // RestAPI is the interface that provides the REST API server of the extension-manager.
 type RestAPI interface {
-	// Serve starts the server. This method blocks until the server is stopped or failes.
+	// Serve starts the server. This method blocks until the server is stopped or fails.
 	Serve()
 	// Stop stops the server
 	Stop()
