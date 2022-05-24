@@ -1,4 +1,4 @@
-package respApi
+package restAPI
 
 import (
 	cont "backend/extensionController"
@@ -11,23 +11,26 @@ import (
 	"sync"
 )
 
-type RestApi interface {
+// RestAPI is the interface that provides the REST API server of the extension-manager.
+type RestAPI interface {
+	// Serve starts the server. This method blocks until the server is stopped or fails.
 	Serve()
+	// Stop stops the server
 	Stop()
 }
 
-func Create(controller cont.ExtensionController) RestApi {
-	return &restApiImpl{Controller: controller}
+func Create(controller cont.ExtensionController) RestAPI {
+	return &restAPIImpl{Controller: controller}
 }
 
-type restApiImpl struct {
+type restAPIImpl struct {
 	Controller   cont.ExtensionController
 	server       *http.Server
 	stopped      *bool
 	stoppedMutex *sync.Mutex
 }
 
-func (restApi *restApiImpl) Serve() {
+func (restApi *restAPIImpl) Serve() {
 	if restApi.server != nil {
 		panic("server already running")
 	}
@@ -46,7 +49,7 @@ func (restApi *restApiImpl) Serve() {
 	}
 }
 
-func (restApi *restApiImpl) setStopped(stopped bool) {
+func (restApi *restAPIImpl) setStopped(stopped bool) {
 	if restApi.stopped == nil {
 		stopped := false
 		restApi.stopped = &stopped
@@ -57,13 +60,13 @@ func (restApi *restApiImpl) setStopped(stopped bool) {
 	*restApi.stopped = stopped
 }
 
-func (restApi *restApiImpl) isStopped() bool {
+func (restApi *restAPIImpl) isStopped() bool {
 	restApi.stoppedMutex.Lock()
 	defer restApi.stoppedMutex.Unlock()
 	return *restApi.stopped
 }
 
-func (restApi *restApiImpl) Stop() {
+func (restApi *restAPIImpl) Stop() {
 	if restApi.server == nil {
 		panic("cant stop server since it's not running")
 	}
@@ -75,13 +78,13 @@ func (restApi *restApiImpl) Stop() {
 	restApi.server = nil
 }
 
-func (restApi *restApiImpl) handleGetExtensions(c *gin.Context) {
+func (restApi *restAPIImpl) handleGetExtensions(c *gin.Context) {
 	response, err := restApi.getExtensions(c)
 	restApi.sendResponse(c, response, err)
 }
 
-func (restApi *restApiImpl) getExtensions(c *gin.Context) (*ExtensionsResponse, error) {
-	dbConnection, err := restApi.openDbConnection(c)
+func (restApi *restAPIImpl) getExtensions(c *gin.Context) (*ExtensionsResponse, error) {
+	dbConnection, err := restApi.openDBConnection(c)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +93,7 @@ func (restApi *restApiImpl) getExtensions(c *gin.Context) (*ExtensionsResponse, 
 	if err != nil {
 		return nil, err
 	}
-	var convertedExtensions []ExtensionsResponseExtension
+	convertedExtensions := make([]ExtensionsResponseExtension, 0, len(extensions))
 	for _, extension := range extensions {
 		convertedExtensions = append(convertedExtensions, ExtensionsResponseExtension{Name: extension.Name, Description: extension.Description, InstallableVersions: extension.InstallableVersions})
 	}
@@ -110,13 +113,13 @@ type ExtensionsResponseExtension struct {
 	InstallableVersions []string `json:"installableVersions"`
 }
 
-func (restApi *restApiImpl) handleGetInstallations(c *gin.Context) {
+func (restApi *restAPIImpl) handleGetInstallations(c *gin.Context) {
 	response, err := restApi.getInstallations(c)
 	restApi.sendResponse(c, response, err)
 }
 
-func (restApi *restApiImpl) getInstallations(c *gin.Context) (*InstallationsResponse, error) {
-	dbConnection, err := restApi.openDbConnection(c)
+func (restApi *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResponse, error) {
+	dbConnection, err := restApi.openDBConnection(c)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +128,7 @@ func (restApi *restApiImpl) getInstallations(c *gin.Context) (*InstallationsResp
 	if err != nil {
 		return nil, err
 	}
-	var convertedInstallations []InstallationsResponseInstallation
+	convertedInstallations := make([]InstallationsResponseInstallation, 0, len(installations))
 	for _, installation := range installations {
 		convertedInstallations = append(convertedInstallations, InstallationsResponseInstallation{installation.Name})
 	}
@@ -135,7 +138,7 @@ func (restApi *restApiImpl) getInstallations(c *gin.Context) (*InstallationsResp
 	return &response, nil
 }
 
-func (restApi *restApiImpl) sendResponse(c *gin.Context, response interface{}, err error) {
+func (restApi *restAPIImpl) sendResponse(c *gin.Context, response interface{}, err error) {
 	if err != nil {
 		c.String(500, "Internal error.")
 		fmt.Println(err.Error())
@@ -152,7 +155,7 @@ func closeDbConnection(database *sql.DB) {
 	}
 }
 
-func (restApi *restApiImpl) openDbConnection(c *gin.Context) (*sql.DB, error) {
+func (restApi *restAPIImpl) openDBConnection(c *gin.Context) (*sql.DB, error) {
 	database, err := sql.Open("exasol", exasol.NewConfig(c.GetString("dbUser"), c.GetString("dbPass")).Port(c.GetInt("dbPort")).Host(c.GetString("dbHost")).String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to open a database connection. Cause: %v", err.Error())

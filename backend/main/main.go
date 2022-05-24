@@ -2,10 +2,10 @@ package main
 
 import (
 	"backend/extensionController"
-	"backend/respApi"
+	"backend/restAPI"
 )
 
 func main() {
-	restApi := respApi.Create(extensionController.Create("../extensionApi/extensionForTesting/"))
+	restApi := restAPI.Create(extensionController.Create("../extensionApi/extensionForTesting/"))
 	restApi.Serve()
 }

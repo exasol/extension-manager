@@ -2,17 +2,20 @@ package extensionController
 
 import (
 	"backend"
-	"backend/extensionApi"
+	"backend/extensionAPI"
 	"database/sql"
 	"fmt"
-	"path"
 )
 
+// ExtensionController is the core part of the extension-manager that provides the extension handling functionality.
 type ExtensionController interface {
-	GetAllInstallations(dbConnection *sql.DB) ([]*extensionApi.Installation, error)
-	GetAllExtensions() ([]*extensionApi.Extension, error)
+	// GetAllExtensions reports all extension definitions
+	GetAllExtensions() ([]*extensionAPI.Extension, error)
+	// GetAllInstallations searches for installations of any extensions
+	GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.Installation, error)
 }
 
+// Create am instance of ExtensionController
 func Create(pathToExtensionFolder string) ExtensionController {
 	return &extensionControllerImpl{pathToExtensionFolder: pathToExtensionFolder}
 }
@@ -21,17 +24,22 @@ type extensionControllerImpl struct {
 	pathToExtensionFolder string
 }
 
-func (controller *extensionControllerImpl) GetAllExtensions() ([]*extensionApi.Extension, error) {
-	extensionPath := path.Join(controller.pathToExtensionFolder, "dist.js")
-	extension, err := extensionApi.GetExtensionFromFile(extensionPath)
-	if err != nil {
-		return nil, err
+func (controller *extensionControllerImpl) GetAllExtensions() ([]*extensionAPI.Extension, error) {
+	var extensions []*extensionAPI.Extension
+	extensionPaths := FindJSFilesInDir(controller.pathToExtensionFolder)
+	for _, extensionPath := range extensionPaths {
+		extension, err := extensionAPI.GetExtensionFromFile(extensionPath)
+		if err == nil {
+			extensions = append(extensions, extension)
+		} else {
+			fmt.Printf("error: Failed to load extension form file %v. This extension will be ignored. Cause: %v", extensionPath, err.Error())
+		}
 	}
-	return []*extensionApi.Extension{extension}, nil
+	return extensions, nil
 }
 
-func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql.DB) ([]*extensionApi.Installation, error) {
-	allScriptTable, err := extensionApi.ReadExaAllScriptTable(dbConnection)
+func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.Installation, error) {
+	allScriptTable, err := extensionAPI.ReadExaAllScriptTable(dbConnection)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read EXA_ALL_SCRIPT table. Cause: %w", err)
 	}
@@ -40,7 +48,7 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 	if err != nil {
 		return nil, err
 	}
-	var allInstallations []*extensionApi.Installation
+	var allInstallations []*extensionAPI.Installation
 	for _, extension := range extensions {
 		installations := extension.FindInstallations(sqlClient, allScriptTable)
 		allInstallations = append(allInstallations, installations...)
