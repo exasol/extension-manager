@@ -26,7 +26,7 @@ type extensionControllerImpl struct {
 
 func (controller *extensionControllerImpl) GetAllExtensions() ([]*extensionAPI.Extension, error) {
 	var extensions []*extensionAPI.Extension
-	extensionPaths := FindExtensions(controller.pathToExtensionFolder)
+	extensionPaths := FindJSFilesInDir(controller.pathToExtensionFolder)
 	for _, extensionPath := range extensionPaths {
 		extension, err := extensionAPI.GetExtensionFromFile(extensionPath)
 		if err == nil {

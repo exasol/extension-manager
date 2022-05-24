@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-// FindExtensions searches for .js files in the given directory pathToExtensionFolder
-func FindExtensions(pathToExtensionFolder string) []string {
+// FindJSFilesInDir searches for .js files in the given directory pathToExtensionFolder
+func FindJSFilesInDir(pathToExtensionFolder string) []string {
 	var files []string
 	err := filepath.Walk(pathToExtensionFolder, func(path string, info os.FileInfo, err error) error {
 		if strings.HasSuffix(path, ".js") {
