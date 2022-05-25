@@ -348,6 +348,10 @@ github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220519
 github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220519071417-5045b2ace488/go.mod h1:3uqtWyrWa4tmCII5JWyG7sEECJtrHXxrQZ9qGKFwlPI=
 github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220520062645-0dd00179907c h1:vSYj2WRQedfbF29I07rdBqtwsAIdMz7xJGpGnHssM1g=
 github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220520062645-0dd00179907c/go.mod h1:3uqtWyrWa4tmCII5JWyG7sEECJtrHXxrQZ9qGKFwlPI=
+github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220524140408-c54797d08a7a h1:Apxz80RIvSF1XAVp7LnXbMAURKIMBFp4fm+J0fPW2/c=
+github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220524140408-c54797d08a7a/go.mod h1:3uqtWyrWa4tmCII5JWyG7sEECJtrHXxrQZ9qGKFwlPI=
+github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220525134240-05d8109e8ef2 h1:VCl8BHfXYvk3BDNXfKs7l69PB/B/Nmd2PlCMncmsw8w=
+github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220525134240-05d8109e8ef2/go.mod h1:qb0DkEdlBkLYmcuzcdo9xDENHmOVytAudh+S5dlRtPQ=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
 github.com/felixge/httpsnoop v1.0.1/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
 github.com/form3tech-oss/jwt-go v3.2.2+incompatible/go.mod h1:pbq4aXjuKjdthFRnoDwaVPLA+WlJuPGy+QneDUgJi2k=

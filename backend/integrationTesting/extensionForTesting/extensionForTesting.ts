@@ -20,7 +20,8 @@ function createExtension(): ExasolExtension {
             downloadUrl: "https://my.download.de/demo.jar",
             licenseUrl: "https://my.download.de/LICENSE",
             bucketFsFilename: "my-extension.1.2.3.jar", // do we need this?,  maybe we can autogenerate it my extension-id + version  + artifactid
-            licenseAgreementRequired: false
+            licenseAgreementRequired: false,
+            fileSize: 3
         }
         ],
         instanceParameters: [
@@ -35,7 +36,7 @@ function createExtension(): ExasolExtension {
             },
             {
                 id: "",
-                name: "",
+                name: "Export file name",
                 type: "string",
                 regex: /\d+/,
                 condition: {
@@ -43,7 +44,7 @@ function createExtension(): ExasolExtension {
                         {
                             parameter: "direction",
                             operator: Operators.EQ,
-                            value: "Import"
+                            value: "Export"
                         },
                         {
                             parameter: "amount",

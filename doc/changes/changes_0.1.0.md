@@ -10,6 +10,7 @@ Code name:
 * #6: Added backend
 * #10: Added REST API
 * #13: Added extension discovery
+* #17: Added check for preconditions of extensions
 
 ## Documentation
 

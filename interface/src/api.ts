@@ -132,6 +132,8 @@ export interface BucketFSUpload {
     /** Default: false */
     licenseAgreementRequired?: boolean
     bucketFsFilename: string
+    /** File size in bytes */
+    fileSize: number
 }
 
 /**
