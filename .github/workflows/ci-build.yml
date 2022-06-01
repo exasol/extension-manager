@@ -37,18 +37,23 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd backend 
+          cd backend
           go get -t ./...
 
       - name: golangci-lint
         run: |
-          cd backend 
+          cd backend
           ../ci/install_and_run_golangci-lint.sh
 
-      - name: test
+      - name: Unit tests
         run: |
           cd backend
-          # -p 1 tells go not to run the tests in parallel. See the developers_guide. 
+          go test -v -short ./...
+
+      - name: Integration tests
+        run: |
+          cd backend
+          # -p 1 tells go not to run the tests in parallel. See the developers_guide.
           go test -v -p 1 -coverprofile=coverage.out ./...
 
       - name: SonarCloud Scan

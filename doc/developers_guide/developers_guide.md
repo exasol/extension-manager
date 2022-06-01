@@ -21,3 +21,9 @@ To run test locally use:
 ```shell
 go test -p 1 ./...
 ```
+
+To run only unit tests use:
+
+```shell
+go test -short ./...
+```
