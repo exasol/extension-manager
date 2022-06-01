@@ -85,6 +85,9 @@ def run(ctx):
 		}
 		files = append(files, file)
 	}
-	transaction.Rollback()
+	err = transaction.Rollback()
+	if err != nil {
+		return nil, fmt.Errorf("failed to rollback transaction. Cause: %w", err)
+	}
 	return files, nil
 }

@@ -55,7 +55,7 @@ func (suite *ExtensionControllerSuite) copyToExtensionRepo(extensionPath string,
 }
 
 func (suite *ExtensionControllerSuite) TestGetAllExtensions() {
-	suite.Exasol.UploadStringContent("123", "my-extension.1.2.3.jar") // create file with 3B size
+	suite.NoError(suite.Exasol.UploadStringContent("123", "my-extension.1.2.3.jar")) // create file with 3B size
 	defer func() { suite.NoError(suite.Exasol.DeleteFile("my-extension.1.2.3.jar")) }()
 	controller := Create(suite.tempExtensionRepo)
 	dbConnectionWithNoAutocommit, err := suite.Exasol.CreateConnectionWithConfig(false)

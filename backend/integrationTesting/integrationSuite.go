@@ -30,7 +30,7 @@ func (suite *IntegrationTestSuite) SetupSuite() {
 }
 
 func (suite *IntegrationTestSuite) TearDownSuite() {
-	suite.Exasol.Stop()
+	suite.NoError(suite.Exasol.Stop())
 }
 
 func (suite *IntegrationTestSuite) ExecSQL(query string) {
