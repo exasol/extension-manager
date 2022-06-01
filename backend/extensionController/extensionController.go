@@ -44,7 +44,7 @@ func (controller *extensionControllerImpl) GetAllExtensions(dbConnectionWithNoAu
 		bfsAPI := CreateBucketFsAPI(dbConnectionWithNoAutocommit)
 		bfsFiles, err := bfsAPI.ListFiles("default")
 		if err != nil {
-			return nil, fmt.Errorf("failed to search for required files in BucketFS. Cause %w", err)
+			return nil, fmt.Errorf("failed to search for required files in BucketFS. Cause: %w", err)
 		}
 		if controller.checkRequiredFiles(jsExtension, bfsFiles) {
 			extension := Extension{Name: jsExtension.Name, Description: jsExtension.Description, InstallableVersions: jsExtension.InstallableVersions}

@@ -52,7 +52,7 @@ type BfsFile struct {
 func (bfsApi bucketFsAPIImpl) listDirInUDF(directory string) ([]BfsFile, error) {
 	transaction, err := bfsApi.db.Begin()
 	if err != nil {
-		return nil, fmt.Errorf("failed to create a transaction. Cause %w", err)
+		return nil, fmt.Errorf("failed to create a transaction. Cause: %w", err)
 	}
 	_, err = transaction.Exec("CREATE SCHEMA INTERNAL")
 	if err != nil {
