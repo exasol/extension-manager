@@ -15,7 +15,8 @@ func TestExaAllScriptsTableSuite(t *testing.T) {
 }
 
 func (suite *ExaAllScriptsTableSuite) TestReadScript() {
-	connection := suite.Exasol.CreateConnection()
+	connection, err := suite.Exasol.CreateConnection()
+	suite.NoError(err)
 	defer func() { suite.NoError(connection.Close()) }()
 	luaScriptFixture := integrationTesting.CreateLuaScriptFixture(suite.Connection)
 	defer luaScriptFixture.Close()

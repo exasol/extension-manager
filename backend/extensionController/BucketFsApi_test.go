@@ -15,7 +15,8 @@ func TestBucketFsApiSuite(t *testing.T) {
 }
 
 func (suite *BucketFsAPISuite) TestListBuckets() {
-	connectionWithNoAutocommit := suite.Exasol.CreateConnectionWithConfig(false)
+	connectionWithNoAutocommit, err := suite.Exasol.CreateConnectionWithConfig(false)
+	suite.NoError(err)
 	defer func() { suite.NoError(connectionWithNoAutocommit.Close()) }()
 	bfsAPI := CreateBucketFsAPI(connectionWithNoAutocommit)
 	result, err := bfsAPI.ListBuckets()
@@ -24,7 +25,8 @@ func (suite *BucketFsAPISuite) TestListBuckets() {
 }
 
 func (suite *BucketFsAPISuite) TestListFiles() {
-	connectionWithNoAutocommit := suite.Exasol.CreateConnectionWithConfig(false)
+	connectionWithNoAutocommit, err := suite.Exasol.CreateConnectionWithConfig(false)
+	suite.NoError(err)
 	defer func() { suite.NoError(connectionWithNoAutocommit.Close()) }()
 	bfsAPI := CreateBucketFsAPI(connectionWithNoAutocommit)
 	suite.Exasol.UploadStringContent("12345", "myFile.txt")

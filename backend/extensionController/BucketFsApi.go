@@ -52,7 +52,7 @@ type BfsFile struct {
 func (bfsApi bucketFsAPIImpl) listDirInUDF(directory string) ([]BfsFile, error) {
 	transaction, err := bfsApi.db.Begin()
 	if err != nil {
-		return nil, fmt.Errorf("failed to create a transaction. Cuase %w", err)
+		return nil, fmt.Errorf("failed to create a transaction. Cause %w", err)
 	}
 	_, err = transaction.Exec("CREATE SCHEMA INTERNAL")
 	if err != nil {
@@ -65,6 +65,9 @@ def run(ctx):
         size = os.path.getsize(ctx.my_path + "/" + line)
         ctx.emit(line, size)
 /`)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create script for listing bucket. Cause: %w", err)
+	}
 	statement, err := transaction.Prepare("SELECT INTERNAL.LS(?)")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create prepard statement for running list files UDF. Cause: %w", err)
