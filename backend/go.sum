@@ -348,6 +348,8 @@ github.com/exasol/exasol-driver-go v0.4.0 h1:1HE7/QqWkwPnkSTNECxuu7WXu9a6rtMQU6E
 github.com/exasol/exasol-driver-go v0.4.0/go.mod h1:b3REJxgqxUDWglu9i9ffjZ9NQ7kWnOFT4Jlon3/kRr4=
 github.com/exasol/exasol-driver-go v0.4.2 h1:zdXjf6a+pSRN/RHX0GwqAI/vZyITbYBagBTtrqPNpts=
 github.com/exasol/exasol-driver-go v0.4.2/go.mod h1:oDN2RzxsK44apvu32kHVKix8fzYgmsX6HbRCvevn7cA=
+github.com/exasol/exasol-test-setup-abstraction-server v0.2.0 h1:35axZHhHfSDFKdy6v/cw2B0ieVKEsuVvZVU7+bTDMS0=
+github.com/exasol/exasol-test-setup-abstraction-server v0.2.0/go.mod h1:zOGAQmHZahIIvo2KYVY1AC2CvSM1fkxlvHf5DWwzQmg=
 github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220519071417-5045b2ace488 h1:f7lF12uxqeZrqzga6fQqWT+1bkkvY9NW+OkQc6C0gY0=
 github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220519071417-5045b2ace488/go.mod h1:3uqtWyrWa4tmCII5JWyG7sEECJtrHXxrQZ9qGKFwlPI=
 github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220520062645-0dd00179907c h1:vSYj2WRQedfbF29I07rdBqtwsAIdMz7xJGpGnHssM1g=
@@ -358,6 +360,8 @@ github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220525
 github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220525134240-05d8109e8ef2/go.mod h1:qb0DkEdlBkLYmcuzcdo9xDENHmOVytAudh+S5dlRtPQ=
 github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220530070706-8388ba012403 h1:TELfsee/64gSWQEnXcHuJDo4RZNerS33Kf7b9WJKtks=
 github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220530070706-8388ba012403/go.mod h1:UfV/acfWtv/VVsMcW3tkoE+VSUeJOs2qOCPhA4KHyKA=
+github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220607114909-397987f03514 h1:1ABwIYyVHzlALPFQuW+glS4H+EJlmgauW/s9pZ5V07E=
+github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220607114909-397987f03514/go.mod h1:h+CSrKoXVy/yFKlEl9R/pFN1NBngz1EF3mB5IigR2f8=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
 github.com/felixge/httpsnoop v1.0.1/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
 github.com/form3tech-oss/jwt-go v3.2.2+incompatible/go.mod h1:pbq4aXjuKjdthFRnoDwaVPLA+WlJuPGy+QneDUgJi2k=

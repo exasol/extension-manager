@@ -11,7 +11,7 @@ require (
 
 require (
 	github.com/exasol/exasol-driver-go v0.4.2
-	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220530070706-8388ba012403
+	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220607114909-397987f03514
 	github.com/kinbiko/jsonassert v1.1.0
 )
 
@@ -19,6 +19,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.4.1-0.20201116162257-a2a8dda75c91 // indirect
 	github.com/exasol/error-reporting-go v0.1.1 // indirect
+	github.com/exasol/exasol-test-setup-abstraction-server v0.2.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
