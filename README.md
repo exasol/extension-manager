@@ -8,6 +8,7 @@ Schemas.
 ## REST API doc
 
 The extension-manager exposes a REST API for the frontend.
+<!-- markdown-link-check-disable-next-line -->
 This API is documented via Swagger. In order to view it, checkout this repo, run `go run ./main/` and open http://localhost:8080/swagger/index.html.
 
 
