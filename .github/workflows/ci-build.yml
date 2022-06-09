@@ -1,4 +1,4 @@
-name: Backend CI Build
+name: CI Build
 
 on:
   push:
@@ -44,6 +44,8 @@ jobs:
           go install github.com/swaggo/swag/cmd/swag@latest
           go generate
           if [[ `git status --porcelain` ]]; then
+            echo "Project files did change:\n"
+            git --no-pager diff
             exit 1
           fi
           
