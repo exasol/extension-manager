@@ -1,174 +1,174 @@
 {
-  "swagger": "2.0",
-  "info": {
-    "description": "This is a REST API for managing extensions in an Exasol database.",
-    "title": "Exasol extension manager REST API",
-    "contact": {
-      "name": "Exasol Integration team",
-      "email": "opensource@exasol.com"
-    },
-    "license": {
-      "name": "MIT",
-      "url": "https://github.com/exasol/extension-manager/blob/main/LICENSE"
-    },
-    "version": "0.1.0"
-  },
-  "basePath": "/",
-  "paths": {
-    "/extensions": {
-      "get": {
-        "description": "Get a list of all available extensions.",
-        "produces": [
-          "application/json"
-        ],
-        "summary": "Get all extensions",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Hostname of the Exasol DB to manage",
-            "name": "dbHost",
-            "in": "query",
-            "required": true
-          },
-          {
-            "type": "integer",
-            "description": "port number of the Exasol DB to manage",
-            "name": "dbPort",
-            "in": "query",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "username of the Exasol DB to manage",
-            "name": "dbUser",
-            "in": "query",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "password of the Exasol DB to manage",
-            "name": "dbPass",
-            "in": "query",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/restAPI.ExtensionsResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "type": "string"
-            }
-          }
-        }
-      }
-    },
-    "/installations": {
-      "get": {
-        "description": "Get a list of all installations. Installation means, that an extension is installed in the database (e.g. JAR files added to BucketFS, Adapter Script created).",
-        "produces": [
-          "application/json"
-        ],
-        "summary": "Get all installations",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Hostname of the Exasol DB to manage",
-            "name": "dbHost",
-            "in": "query",
-            "required": true
-          },
-          {
-            "type": "integer",
-            "description": "port number of the Exasol DB to manage",
-            "name": "dbPort",
-            "in": "query",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "username of the Exasol DB to manage",
-            "name": "dbUser",
-            "in": "query",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "password of the Exasol DB to manage",
-            "name": "dbPass",
-            "in": "query",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/restAPI.InstallationsResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "type": "string"
-            }
-          }
-        }
-      }
-    }
-  },
-  "definitions": {
-    "restAPI.ExtensionsResponse": {
-      "type": "object",
-      "properties": {
-        "extensions": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/restAPI.ExtensionsResponseExtension"
-          }
-        }
-      }
-    },
-    "restAPI.ExtensionsResponseExtension": {
-      "type": "object",
-      "properties": {
-        "description": {
-          "type": "string"
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a REST API for managing extensions in an Exasol database.",
+        "title": "Exasol extension manager REST API",
+        "contact": {
+            "name": "Exasol Integration team",
+            "email": "opensource@exasol.com"
         },
-        "installableVersions": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "license": {
+            "name": "MIT",
+            "url": "https://github.com/exasol/extension-manager/blob/main/LICENSE"
         },
-        "name": {
-          "type": "string"
-        }
-      }
+        "version": "0.1.0"
     },
-    "restAPI.InstallationsResponse": {
-      "type": "object",
-      "properties": {
-        "installations": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/restAPI.InstallationsResponseInstallation"
-          }
+    "basePath": "/",
+    "paths": {
+        "/extensions": {
+            "get": {
+                "description": "Get a list of all available extensions.",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get all extensions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Hostname of the Exasol DB to manage",
+                        "name": "dbHost",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "port number of the Exasol DB to manage",
+                        "name": "dbPort",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "username of the Exasol DB to manage",
+                        "name": "dbUser",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "password of the Exasol DB to manage",
+                        "name": "dbPass",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/restAPI.ExtensionsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/installations": {
+            "get": {
+                "description": "Get a list of all installations. Installation means, that an extension is installed in the database (e.g. JAR files added to BucketFS, Adapter Script created).",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get all installations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Hostname of the Exasol DB to manage",
+                        "name": "dbHost",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "port number of the Exasol DB to manage",
+                        "name": "dbPort",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "username of the Exasol DB to manage",
+                        "name": "dbUser",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "password of the Exasol DB to manage",
+                        "name": "dbPass",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/restAPI.InstallationsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
-      }
     },
-    "restAPI.InstallationsResponseInstallation": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
+    "definitions": {
+        "restAPI.ExtensionsResponse": {
+            "type": "object",
+            "properties": {
+                "extensions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/restAPI.ExtensionsResponseExtension"
+                    }
+                }
+            }
+        },
+        "restAPI.ExtensionsResponseExtension": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "installableVersions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "restAPI.InstallationsResponse": {
+            "type": "object",
+            "properties": {
+                "installations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/restAPI.InstallationsResponseInstallation"
+                    }
+                }
+            }
+        },
+        "restAPI.InstallationsResponseInstallation": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
         }
-      }
     }
-  }
 }

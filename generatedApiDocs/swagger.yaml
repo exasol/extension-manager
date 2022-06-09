@@ -45,28 +45,28 @@ paths:
     get:
       description: Get a list of all available extensions.
       parameters:
-        - description: Hostname of the Exasol DB to manage
-          in: query
-          name: dbHost
-          required: true
-          type: string
-        - description: port number of the Exasol DB to manage
-          in: query
-          name: dbPort
-          required: true
-          type: integer
-        - description: username of the Exasol DB to manage
-          in: query
-          name: dbUser
-          required: true
-          type: string
-        - description: password of the Exasol DB to manage
-          in: query
-          name: dbPass
-          required: true
-          type: string
+      - description: Hostname of the Exasol DB to manage
+        in: query
+        name: dbHost
+        required: true
+        type: string
+      - description: port number of the Exasol DB to manage
+        in: query
+        name: dbPort
+        required: true
+        type: integer
+      - description: username of the Exasol DB to manage
+        in: query
+        name: dbUser
+        required: true
+        type: string
+      - description: password of the Exasol DB to manage
+        in: query
+        name: dbPass
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
@@ -83,28 +83,28 @@ paths:
         is installed in the database (e.g. JAR files added to BucketFS, Adapter Script
         created).
       parameters:
-        - description: Hostname of the Exasol DB to manage
-          in: query
-          name: dbHost
-          required: true
-          type: string
-        - description: port number of the Exasol DB to manage
-          in: query
-          name: dbPort
-          required: true
-          type: integer
-        - description: username of the Exasol DB to manage
-          in: query
-          name: dbUser
-          required: true
-          type: string
-        - description: password of the Exasol DB to manage
-          in: query
-          name: dbPass
-          required: true
-          type: string
+      - description: Hostname of the Exasol DB to manage
+        in: query
+        name: dbHost
+        required: true
+        type: string
+      - description: port number of the Exasol DB to manage
+        in: query
+        name: dbPort
+        required: true
+        type: integer
+      - description: username of the Exasol DB to manage
+        in: query
+        name: dbUser
+        required: true
+        type: string
+      - description: password of the Exasol DB to manage
+        in: query
+        name: dbPass
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
