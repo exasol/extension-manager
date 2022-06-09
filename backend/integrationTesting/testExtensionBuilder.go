@@ -116,7 +116,7 @@ func (extension BuiltExtension) WriteToFile(fileName string) {
 }
 
 var buildLock sync.Mutex
-var wasNpmInstallCalled = false
+var isNpmInstallCalled = false
 
 func runBuild(workDir string) []byte {
 	buildLock.Lock()
@@ -129,7 +129,7 @@ func runBuild(workDir string) []byte {
 	err := buildCommand.Run()
 	if err != nil {
 		fmt.Println(stderr.String())
-		panic(fmt.Sprintf("Failed to build extensionForTesting. Cause: %v", err.Error()))
+		panic(fmt.Sprintf("failed to build extensionForTesting. Cause: %v", err.Error()))
 	}
 	builtExtension, err := ioutil.ReadFile(path.Join(workDir, "dist.js"))
 	if err != nil {
@@ -140,7 +140,7 @@ func runBuild(workDir string) []byte {
 }
 
 func runNpmInstall(workDir string) {
-	if !wasNpmInstallCalled { // running it once is enough
+	if !isNpmInstallCalled { // running it once is enough
 		var stderr bytes.Buffer
 		installCommand := exec.Command("npm", "install")
 		installCommand.Dir = workDir
@@ -149,6 +149,6 @@ func runNpmInstall(workDir string) {
 			fmt.Println(stderr.String())
 			panic(fmt.Sprintf("Failed to install node modules (run 'npm ci') for extensionForTesting. Cause: %v", err.Error()))
 		}
-		wasNpmInstallCalled = true
+		isNpmInstallCalled = true
 	}
 }
