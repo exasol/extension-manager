@@ -15,7 +15,9 @@ Code name:
 
 ## Refactoring
 
-* #2: Moved API to dedicated repo: [exasol/extension-manager-interface](https://github.com/exasol/extension-manager-interface/)
+* #2: Moved API to dedicated
+  repo: [exasol/extension-manager-interface](https://github.com/exasol/extension-manager-interface/)
+* #23: Moved go code from backend/ folder to project root
 
 ## Documentation
 

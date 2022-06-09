@@ -1,9 +1,9 @@
 package restAPI
 
 import (
-	"backend/extensionAPI"
-	"backend/extensionController"
 	"database/sql"
+	"extension-manager/extensionAPI"
+	"extension-manager/extensionController"
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"

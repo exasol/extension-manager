@@ -1,7 +1,7 @@
 package extensionController
 
 import (
-	"backend/integrationTesting"
+	"extension-manager/integrationTesting"
 	"os"
 	"path"
 	"testing"
