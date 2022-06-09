@@ -57,7 +57,7 @@ func (controller *extensionControllerImpl) GetAllExtensions(dbConnectionWithNoAu
 func (controller *extensionControllerImpl) checkRequiredFiles(jsExtension *extensionAPI.JsExtension, bfsFiles []BfsFile) bool {
 	for _, requiredFile := range jsExtension.BucketFsUploads {
 		if !controller.existsFileInBfs(bfsFiles, requiredFile) {
-			fmt.Printf("ignoring extension %v since the required file %v does not exist or has a wrong file size.", jsExtension.Name, requiredFile.Name)
+			fmt.Printf("ignoring extension %v since the required file %v does not exist or has a wrong file size.\n", jsExtension.Name, requiredFile.Name)
 			return false
 		}
 	}
@@ -81,7 +81,7 @@ func (controller *extensionControllerImpl) getAllJsExtensions() ([]*extensionAPI
 		if err == nil {
 			extensions = append(extensions, extension)
 		} else {
-			fmt.Printf("error: Failed to load extension form file %v. This extension will be ignored. Cause: %v", extensionPath, err.Error())
+			fmt.Printf("error: Failed to load extension form file %v. This extension will be ignored. Cause: %v\n", extensionPath, err.Error())
 		}
 	}
 	return extensions, nil

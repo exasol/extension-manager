@@ -12,6 +12,10 @@ Code name:
 * #13: Added extension discovery
 * #17: Added check for preconditions of extensions
 
+## Refactoring
+
+* #2: Move API to dedicated repo: [exasol/extension-manager-interface](https://github.com/exasol/extension-manager-interface/)
+
 ## Documentation
 
 * #4: Added design

@@ -2,7 +2,6 @@ package extensionController
 
 import (
 	"backend/integrationTesting"
-	"io"
 	"os"
 	"path"
 	"testing"
@@ -21,40 +20,29 @@ func TestExtensionControllerSuite(t *testing.T) {
 
 func (suite *ExtensionControllerSuite) SetupSuite() {
 	suite.IntegrationTestSuite.SetupSuite()
+}
+
+func (suite *ExtensionControllerSuite) TearDownSuite() {
+	suite.IntegrationTestSuite.TearDownSuite()
+}
+
+func (suite *ExtensionControllerSuite) SetupTest() {
 	tempExtensionRepo, err := os.MkdirTemp(os.TempDir(), "ExtensionControllerSuite")
 	if err != nil {
 		panic(err)
 	}
-	extensionPath := integrationTesting.GetExtensionForTesting("../")
-	suite.copyToExtensionRepo(extensionPath, tempExtensionRepo)
 	suite.tempExtensionRepo = tempExtensionRepo
 }
 
-func (suite *ExtensionControllerSuite) TearDownSuite() {
+func (suite *ExtensionControllerSuite) AfterTest(suiteName, testName string) {
 	err := os.RemoveAll(suite.tempExtensionRepo)
-	if err != nil {
-		panic(err)
-	}
-	suite.IntegrationTestSuite.TearDownSuite()
-}
-
-func (suite *ExtensionControllerSuite) copyToExtensionRepo(extensionPath string, tempExtensionRepo string) {
-	extensionFile, err := os.Open(extensionPath)
-	if err != nil {
-		panic(err)
-	}
-	targetPath := path.Join(tempExtensionRepo, "myExtension.js")
-	targetFile, err := os.Create(targetPath)
-	if err != nil {
-		panic(err)
-	}
-	_, err = io.Copy(targetFile, extensionFile)
 	if err != nil {
 		panic(err)
 	}
 }
 
 func (suite *ExtensionControllerSuite) TestGetAllExtensions() {
+	suite.writeDefaultExtension()
 	suite.NoError(suite.Exasol.UploadStringContent("123", "my-extension.1.2.3.jar")) // create file with 3B size
 	defer func() { suite.NoError(suite.Exasol.DeleteFile("my-extension.1.2.3.jar")) }()
 	controller := Create(suite.tempExtensionRepo)
@@ -66,7 +54,18 @@ func (suite *ExtensionControllerSuite) TestGetAllExtensions() {
 	suite.Assert().Equal("MyDemoExtension", extensions[0].Name)
 }
 
+func (suite *ExtensionControllerSuite) writeDefaultExtension() {
+	integrationTesting.CreateTestExtensionBuilder().
+		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "my-extension.1.2.3.jar", FileSize: 3}).
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, "myExtension.js"))
+}
+
 func (suite *ExtensionControllerSuite) TestGetAllExtensionsWithMissingJar() {
+	integrationTesting.CreateTestExtensionBuilder().
+		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "missing-jar.jar", FileSize: 3}).
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, "myExtension.js"))
 	controller := Create(suite.tempExtensionRepo)
 	dbConnectionWithNoAutocommit, err := suite.Exasol.CreateConnectionWithConfig(false)
 	suite.NoError(err)
@@ -77,6 +76,7 @@ func (suite *ExtensionControllerSuite) TestGetAllExtensionsWithMissingJar() {
 }
 
 func (suite *ExtensionControllerSuite) TestGetAllInstallations() {
+	suite.writeDefaultExtension()
 	controller := Create(suite.tempExtensionRepo)
 	luaScriptFixture := integrationTesting.CreateLuaScriptFixture(suite.Connection)
 	defer luaScriptFixture.Close()
