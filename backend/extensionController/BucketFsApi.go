@@ -14,7 +14,7 @@ type BucketFsAPI interface {
 	ListFiles(bucket string) ([]BfsFile, error)
 }
 
-// CreateBucketFsAPI create an instance of BucketFsAPI
+// CreateBucketFsAPI creates an instance of BucketFsAPI
 func CreateBucketFsAPI(db *sql.DB) BucketFsAPI {
 	bucketFsAPI := bucketFsAPIImpl{db: db}
 	return &bucketFsAPI

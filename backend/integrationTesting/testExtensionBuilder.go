@@ -41,7 +41,7 @@ func (builder *TestExtensionBuilder) WithBucketFsUpload(upload BucketFsUploadPar
 	return builder
 }
 
-//go:embed extensionForTesting/extensionForTestingTempalte.ts
+//go:embed extensionForTesting/extensionForTestingTemplate.ts
 var template string
 
 //go:embed extensionForTesting/package.json
@@ -147,7 +147,7 @@ func runNpmInstall(workDir string) {
 		err := installCommand.Run()
 		if err != nil {
 			fmt.Println(stderr.String())
-			panic(fmt.Sprintf("Failed to install node modules (run 'npm ci') for extensionForTesting. Cause: %v", err.Error()))
+			log.Fatalf("Failed to install node modules (run 'npm install') for extensionForTesting. Cause: %v", err.Error())
 		}
 		isNpmInstallCalled = true
 	}
