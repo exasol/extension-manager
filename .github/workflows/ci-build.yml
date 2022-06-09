@@ -40,18 +40,19 @@ jobs:
           cd backend
           go get -t ./...
 
-      - name: golangci-lint
-        run: |
-          cd backend
-          ../ci/install_and_run_golangci-lint.sh
-          
       - name: Check generated code
         run: |
+          go install github.com/swaggo/swag/cmd/swag@latest
           cd backend 
           go generate
           if [[ `git status --porcelain` ]]; then
             exit 1
           fi
+          
+      - name: golangci-lint
+        run: |
+          cd backend
+          ../ci/install_and_run_golangci-lint.sh
 
       - name: Unit tests
         run: |
