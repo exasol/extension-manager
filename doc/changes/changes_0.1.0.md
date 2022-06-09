@@ -14,7 +14,7 @@ Code name:
 
 ## Refactoring
 
-* #2: Move API to dedicated repo: [exasol/extension-manager-interface](https://github.com/exasol/extension-manager-interface/)
+* #2: Moved API to dedicated repo: [exasol/extension-manager-interface](https://github.com/exasol/extension-manager-interface/)
 
 ## Documentation
 

@@ -70,7 +70,7 @@ def run(ctx):
 	}
 	statement, err := transaction.Prepare("SELECT INTERNAL.LS(?)")
 	if err != nil {
-		return nil, fmt.Errorf("failed to create prepard statement for running list files UDF. Cause: %w", err)
+		return nil, fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
 	}
 	result, err := statement.Query(directory)
 	if err != nil {

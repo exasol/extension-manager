@@ -25,7 +25,7 @@ type Extension struct {
 type ExtInstallation struct {
 }
 
-// Create am instance of ExtensionController
+// Create an instance of ExtensionController
 func Create(pathToExtensionFolder string) ExtensionController {
 	return &extensionControllerImpl{pathToExtensionFolder: pathToExtensionFolder}
 }
