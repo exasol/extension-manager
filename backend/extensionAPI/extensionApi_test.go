@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"io/ioutil"
+	"os"
 	"path"
 	"testing"
 )
@@ -19,7 +20,14 @@ func TestExtensionApiSuite(t *testing.T) {
 }
 
 func (suite *ExtensionApiSuite) SetupSuite() {
-	suite.validExtensionFile = integrationTesting.GetExtensionForTesting("../")
+	suite.validExtensionFile = integrationTesting.CreateTestExtensionBuilder().Build().WriteToTmpFile()
+}
+
+func (suite *ExtensionApiSuite) TearDownSuite() {
+	err := os.Remove(suite.validExtensionFile)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (suite *ExtensionApiSuite) Test_GetExtensionFromFile() {

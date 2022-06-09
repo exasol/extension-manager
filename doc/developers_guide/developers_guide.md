@@ -21,3 +21,17 @@ To run test locally use:
 ```shell
 go test -p 1 ./...
 ```
+
+To run only unit tests use:
+
+```shell
+go test -short ./...
+```
+
+### Linter
+
+To install golangci-lint on your machine, follow [these instruction](https://golangci-lint.run/usage/install/#local-installation). Then run
+
+```shell
+golangci-lint run
+```

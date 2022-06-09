@@ -84,12 +84,12 @@ func (restApi *restAPIImpl) handleGetExtensions(c *gin.Context) {
 }
 
 func (restApi *restAPIImpl) getExtensions(c *gin.Context) (*ExtensionsResponse, error) {
-	dbConnection, err := restApi.openDBConnection(c)
+	dbConnectionWithNoAutocommit, err := restApi.openDBConnection(c)
 	if err != nil {
 		return nil, err
 	}
-	defer closeDbConnection(dbConnection)
-	extensions, err := restApi.Controller.GetAllExtensions()
+	defer closeDbConnection(dbConnectionWithNoAutocommit)
+	extensions, err := restApi.Controller.GetAllExtensions(dbConnectionWithNoAutocommit)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +156,7 @@ func closeDbConnection(database *sql.DB) {
 }
 
 func (restApi *restAPIImpl) openDBConnection(c *gin.Context) (*sql.DB, error) {
-	database, err := sql.Open("exasol", exasol.NewConfig(c.GetString("dbUser"), c.GetString("dbPass")).Port(c.GetInt("dbPort")).Host(c.GetString("dbHost")).String())
+	database, err := sql.Open("exasol", exasol.NewConfig(c.GetString("dbUser"), c.GetString("dbPass")).Port(c.GetInt("dbPort")).Host(c.GetString("dbHost")).Autocommit(false).String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to open a database connection. Cause: %v", err.Error())
 	}

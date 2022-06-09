@@ -7,7 +7,7 @@ import {
     ParameterValues,
     registerExtension,
     SqlClient
-} from "../../../interface/src/api";
+} from "@exasol/extension-manager-interface";
 
 
 function createExtension(): ExasolExtension {
@@ -15,14 +15,7 @@ function createExtension(): ExasolExtension {
         name: "MyDemoExtension",
         description: "An extension for testing.",
         installableVersions: ["0.1.0"],
-        bucketFsUploads: [{
-            name: "My Extension JAR",
-            downloadUrl: "https://my.download.de/demo.jar",
-            licenseUrl: "https://my.download.de/LICENSE",
-            bucketFsFilename: "my-extension.1.2.3.jar", // do we need this?,  maybe we can autogenerate it my extension-id + version  + artifactid
-            licenseAgreementRequired: false
-        }
-        ],
+        bucketFsUploads: $UPLOADS$,
         instanceParameters: [
             {
                 id: "direction",
@@ -35,7 +28,7 @@ function createExtension(): ExasolExtension {
             },
             {
                 id: "",
-                name: "",
+                name: "Export file name",
                 type: "string",
                 regex: /\d+/,
                 condition: {
@@ -43,7 +36,7 @@ function createExtension(): ExasolExtension {
                         {
                             parameter: "direction",
                             operator: Operators.EQ,
-                            value: "Import"
+                            value: "Export"
                         },
                         {
                             parameter: "amount",

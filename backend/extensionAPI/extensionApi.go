@@ -9,7 +9,7 @@ import (
 )
 
 // GetExtensionFromFile loads an extension from a .js file.
-func GetExtensionFromFile(fileName string) (*Extension, error) {
+func GetExtensionFromFile(fileName string) (*JsExtension, error) {
 	vm := goja.New()
 	vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
 	registry := new(require.Registry)
@@ -25,7 +25,7 @@ func GetExtensionFromFile(fileName string) (*Extension, error) {
 	return &extensionJs.Extension, nil
 }
 
-func loadExtension(vm *goja.Runtime, fileName string) (*InstalledExtension, error) {
+func loadExtension(vm *goja.Runtime, fileName string) (*installedExtension, error) {
 	const extensionVariable = "installedExtension"
 	err := vm.Set(extensionVariable, nil)
 	if err != nil {
@@ -39,7 +39,7 @@ func loadExtension(vm *goja.Runtime, fileName string) (*InstalledExtension, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to run extension file %v. Cause %v", fileName, err.Error())
 	}
-	var extension InstalledExtension
+	var extension installedExtension
 	err = vm.ExportTo(vm.Get(extensionVariable), &extension)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read installedExtension variable. Cause: %v", err.Error())
@@ -47,20 +47,29 @@ func loadExtension(vm *goja.Runtime, fileName string) (*InstalledExtension, erro
 	return &extension, nil
 }
 
-type InstalledExtension struct {
-	Extension  Extension `json:"extension"`
-	APIVersion string    `json:"apiVersion"`
+type installedExtension struct {
+	Extension  JsExtension `json:"extension"`
+	APIVersion string      `json:"apiVersion"`
 }
 
-type Extension struct {
-	Name                string                                                                            `json:"name"`
-	Description         string                                                                            `json:"description"`
-	InstallableVersions []string                                                                          `json:"installableVersions"`
-	Install             func(client SimpleSQLClient)                                                      `json:"install"`
-	FindInstallations   func(sqlClient SimpleSQLClient, exaAllScripts *ExaAllScriptTable) []*Installation `json:"findInstallations"`
+type JsExtension struct {
+	Name                string                                                                                 `json:"name"`
+	Description         string                                                                                 `json:"description"`
+	BucketFsUploads     []BucketFsUpload                                                                       `json:"bucketFsUploads"`
+	InstallableVersions []string                                                                               `json:"installableVersions"`
+	Install             func(client SimpleSQLClient)                                                           `json:"install"`
+	FindInstallations   func(sqlClient SimpleSQLClient, exaAllScripts *ExaAllScriptTable) []*JsExtInstallation `json:"findInstallations"`
 }
 
-type Installation struct {
+type BucketFsUpload struct {
+	Name             string `json:"name"`
+	DownloadURL      string `json:"downloadUrl"`
+	LicenseURL       string `json:"licenseUrl"`
+	FileSize         int    `json:"fileSize"`
+	BucketFsFilename string `json:"bucketFsFilename"`
+}
+
+type JsExtInstallation struct {
 	Name string `json:"name"`
 }
 

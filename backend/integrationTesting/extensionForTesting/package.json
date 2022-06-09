@@ -1,7 +1,10 @@
 {
   "scripts": {
-    "build": "tsc --build && esbuild dist/backend/integrationTesting/extensionForTesting/extensionForTesting.js --bundle --outfile=dist.js --target=es5",
+    "build": "tsc --build && esbuild dist/extensionForTesting.js --bundle --outfile=dist.js --target=es6",
     "clean": "tsc --build --clean"
+  },
+  "dependencies": {
+    "@exasol/extension-manager-interface": "0.1.1"
   },
   "devDependencies": {
     "typescript": "4.6.3",
