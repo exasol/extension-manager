@@ -10,8 +10,10 @@ import (
 // ExtensionController is the core part of the extension-manager that provides the extension handling functionality.
 type ExtensionController interface {
 	// GetAllExtensions reports all extension definitions
-	GetAllExtensions(dbConnectionWithNoAutocommit *sql.DB) ([]*Extension, error)
+	// dbConnection is a connection to the Exasol DB with autocommit turned off
+	GetAllExtensions(dbConnection *sql.DB) ([]*Extension, error)
 	// GetAllInstallations searches for installations of any extensions
+	// dbConnection is a connection to the Exasol DB with autocommit turned off
 	GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.JsExtInstallation, error)
 }
 
@@ -46,7 +48,7 @@ func (controller *extensionControllerImpl) GetAllExtensions(dbConnectionWithNoAu
 		if err != nil {
 			return nil, fmt.Errorf("failed to search for required files in BucketFS. Cause: %w", err)
 		}
-		if controller.checkRequiredFiles(jsExtension, bfsFiles) {
+		if controller.requiredFilesAvailable(jsExtension, bfsFiles) {
 			extension := Extension{Name: jsExtension.Name, Description: jsExtension.Description, InstallableVersions: jsExtension.InstallableVersions}
 			extensions = append(extensions, &extension)
 		}
@@ -54,7 +56,7 @@ func (controller *extensionControllerImpl) GetAllExtensions(dbConnectionWithNoAu
 	return extensions, nil
 }
 
-func (controller *extensionControllerImpl) checkRequiredFiles(jsExtension *extensionAPI.JsExtension, bfsFiles []BfsFile) bool {
+func (controller *extensionControllerImpl) requiredFilesAvailable(jsExtension *extensionAPI.JsExtension, bfsFiles []BfsFile) bool {
 	for _, requiredFile := range jsExtension.BucketFsUploads {
 		if !controller.existsFileInBfs(bfsFiles, requiredFile) {
 			fmt.Printf("ignoring extension %v since the required file %v does not exist or has a wrong file size.\n", jsExtension.Name, requiredFile.Name)

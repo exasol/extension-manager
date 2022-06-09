@@ -25,7 +25,7 @@ func (suite *IntegrationTestSuite) SetupSuite() {
 		log.Fatalf("failed to create test setup abstraction. Cause: %v", err)
 	}
 	suite.Exasol = exasol
-	suite.Connection, err = exasol.CreateConnection()
+	suite.Connection, err = suite.Exasol.CreateConnectionWithConfig(false)
 	suite.NoError(err)
 }
 

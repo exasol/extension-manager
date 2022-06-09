@@ -84,7 +84,7 @@ func (restApi *restAPIImpl) handleGetExtensions(c *gin.Context) {
 }
 
 func (restApi *restAPIImpl) getExtensions(c *gin.Context) (*ExtensionsResponse, error) {
-	dbConnectionWithNoAutocommit, err := restApi.openDBConnection(c, false)
+	dbConnectionWithNoAutocommit, err := restApi.openDBConnection(c)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (restApi *restAPIImpl) handleGetInstallations(c *gin.Context) {
 }
 
 func (restApi *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResponse, error) {
-	dbConnection, err := restApi.openDBConnection(c, true)
+	dbConnection, err := restApi.openDBConnection(c)
 	if err != nil {
 		return nil, err
 	}
@@ -155,8 +155,8 @@ func closeDbConnection(database *sql.DB) {
 	}
 }
 
-func (restApi *restAPIImpl) openDBConnection(c *gin.Context, autocommit bool) (*sql.DB, error) {
-	database, err := sql.Open("exasol", exasol.NewConfig(c.GetString("dbUser"), c.GetString("dbPass")).Port(c.GetInt("dbPort")).Host(c.GetString("dbHost")).Autocommit(autocommit).String())
+func (restApi *restAPIImpl) openDBConnection(c *gin.Context) (*sql.DB, error) {
+	database, err := sql.Open("exasol", exasol.NewConfig(c.GetString("dbUser"), c.GetString("dbPass")).Port(c.GetInt("dbPort")).Host(c.GetString("dbHost")).Autocommit(false).String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to open a database connection. Cause: %v", err.Error())
 	}

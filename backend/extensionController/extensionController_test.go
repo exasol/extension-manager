@@ -46,10 +46,7 @@ func (suite *ExtensionControllerSuite) TestGetAllExtensions() {
 	suite.NoError(suite.Exasol.UploadStringContent("123", "my-extension.1.2.3.jar")) // create file with 3B size
 	defer func() { suite.NoError(suite.Exasol.DeleteFile("my-extension.1.2.3.jar")) }()
 	controller := Create(suite.tempExtensionRepo)
-	dbConnectionWithNoAutocommit, err := suite.Exasol.CreateConnectionWithConfig(false)
-	suite.NoError(err)
-	defer func() { suite.NoError(dbConnectionWithNoAutocommit.Close()) }()
-	extensions, err := controller.GetAllExtensions(dbConnectionWithNoAutocommit)
+	extensions, err := controller.GetAllExtensions(suite.Connection)
 	suite.NoError(err)
 	suite.Assert().Equal("MyDemoExtension", extensions[0].Name)
 }

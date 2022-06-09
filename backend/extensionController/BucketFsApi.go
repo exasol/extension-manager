@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
+	"time"
 )
 
 // BucketFsAPI allows access to BucketFS. Currently, it's implemented by running UDFs via SQL that read the data. In the future that implementation might be replaced by direct access.
@@ -49,16 +50,23 @@ type BfsFile struct {
 	Size int
 }
 
-func (bfsApi bucketFsAPIImpl) listDirInUDF(directory string) ([]BfsFile, error) {
+func (bfsApi bucketFsAPIImpl) listDirInUDF(directory string) (files []BfsFile, retErr error) {
 	transaction, err := bfsApi.db.Begin()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a transaction. Cause: %w", err)
 	}
-	_, err = transaction.Exec("CREATE SCHEMA INTERNAL")
+	defer func() {
+		err = transaction.Rollback()
+		if err != nil {
+			retErr = fmt.Errorf("failed to rollback transaction. Cause: %w", err)
+		}
+	}()
+	schemaName := fmt.Sprintf("INTERNAL_%v", time.Now().Unix())
+	_, err = transaction.Exec("CREATE SCHEMA " + schemaName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a schema for bucket_fs_list script. Cause: %w", err)
 	}
-	_, err = transaction.Exec(`CREATE OR REPLACE PYTHON3 SCALAR SCRIPT INTERNAL."LS" ("my_path" VARCHAR(100)) EMITS ("FILES" VARCHAR(250), "SIZE" DECIMAL(18,0)) AS
+	_, err = transaction.Exec(`CREATE OR REPLACE PYTHON3 SCALAR SCRIPT ` + schemaName + `."LS" ("my_path" VARCHAR(100)) EMITS ("FILES" VARCHAR(250), "SIZE" DECIMAL(18,0)) AS
 import os
 def run(ctx):
     for line in os.listdir(ctx.my_path):
@@ -68,7 +76,7 @@ def run(ctx):
 	if err != nil {
 		return nil, fmt.Errorf("failed to create script for listing bucket. Cause: %w", err)
 	}
-	statement, err := transaction.Prepare("SELECT INTERNAL.LS(?)")
+	statement, err := transaction.Prepare("SELECT " + schemaName + ".LS(?)")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
 	}
@@ -76,7 +84,6 @@ def run(ctx):
 	if err != nil {
 		return nil, fmt.Errorf("failed to list files in BucketFS using UDF. Cause: %w", err)
 	}
-	var files []BfsFile
 	for result.Next() {
 		var file BfsFile
 		err = result.Scan(&file.Name, &file.Size)
@@ -84,10 +91,6 @@ def run(ctx):
 			return nil, fmt.Errorf("failed reading result of BucketFS list UDF. Cause: %w", err)
 		}
 		files = append(files, file)
-	}
-	err = transaction.Rollback()
-	if err != nil {
-		return nil, fmt.Errorf("failed to rollback transaction. Cause: %w", err)
 	}
 	return files, nil
 }
