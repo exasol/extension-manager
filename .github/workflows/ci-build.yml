@@ -44,6 +44,14 @@ jobs:
         run: |
           cd backend
           ../ci/install_and_run_golangci-lint.sh
+          
+      - name: Check generated code
+        run: |
+          cd backend 
+          go generate
+          if [[ `git status --porcelain` ]]; then
+            exit 1
+          fi
 
       - name: Unit tests
         run: |
