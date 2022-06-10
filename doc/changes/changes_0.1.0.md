@@ -11,6 +11,7 @@ Code name:
 * #10: Added REST API
 * #13: Added extension discovery
 * #17: Added check for preconditions of extensions
+* #20: Added swagger doc for REST API
 
 ## Refactoring
 
