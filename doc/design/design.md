@@ -112,7 +112,7 @@ class BaseParameter{
 }
 
 class StringParameter{
-  rege: RegEx
+  regex: RegEx
   type = string
 }
 
@@ -136,7 +136,7 @@ We decided to attach the parameter definitions to a specific version of the exte
 
 That implies that when doing updates, the extension-manager must check if parameter definitions changed. If there were breaking changes the update can't be performed automatically.
 The only option would be to add update scripts that define how to convert the parameters from one version to another.
-However, that currently out of scope.
+However, that is currently out of scope.
 
 ### Conditional Parameters
 
