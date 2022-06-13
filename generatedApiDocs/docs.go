@@ -173,7 +173,14 @@ const docTemplate = `{
         "restAPI.InstallationsResponseInstallation": {
             "type": "object",
             "properties": {
+                "instanceParameters": {
+                    "type": "array",
+                    "items": {}
+                },
                 "name": {
+                    "type": "string"
+                },
+                "version": {
                     "type": "string"
                 }
             }

@@ -27,7 +27,12 @@ definitions:
     type: object
   restAPI.InstallationsResponseInstallation:
     properties:
+      instanceParameters:
+        items: {}
+        type: array
       name:
+        type: string
+      version:
         type: string
     type: object
 info:
