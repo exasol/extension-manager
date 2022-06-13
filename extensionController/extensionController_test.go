@@ -54,6 +54,10 @@ func (suite *ExtensionControllerSuite) TestGetAllExtensions() {
 func (suite *ExtensionControllerSuite) writeDefaultExtension() {
 	integrationTesting.CreateTestExtensionBuilder().
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "my-extension.1.2.3.jar", FileSize: 3}).
+		WithFindInstallationsFunc(`
+		return exaAllScripts.rows.map(row => {
+			return {name: row.name, version: "0.1.0", instanceParameters: []}
+		});`).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, "myExtension.js"))
 }
