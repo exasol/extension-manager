@@ -1,7 +1,7 @@
 package extensionAPI
 
 import (
-	"backend/integrationTesting"
+	"extension-manager/integrationTesting"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"io/ioutil"

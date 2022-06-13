@@ -1,8 +1,8 @@
 package main
 
 import (
-	"backend/extensionController"
-	"backend/restAPI"
+	"extension-manager/extensionController"
+	"extension-manager/restAPI"
 )
 
 func main() {

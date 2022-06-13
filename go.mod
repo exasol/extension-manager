@@ -1,4 +1,4 @@
-module backend
+module extension-manager
 
 go 1.17
 

@@ -1,4 +1,4 @@
-name: Backend CI Build
+name: CI Build
 
 on:
   push:
@@ -37,31 +37,28 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd backend
           go get -t ./...
 
       - name: Check generated code
         run: |
           go install github.com/swaggo/swag/cmd/swag@latest
-          cd backend 
           go generate
           if [[ `git status --porcelain` ]]; then
+            echo "Project files did change:\n"
+            git --no-pager diff
             exit 1
           fi
           
       - name: golangci-lint
         run: |
-          cd backend
-          ../ci/install_and_run_golangci-lint.sh
+          ./ci/install_and_run_golangci-lint.sh
 
       - name: Unit tests
         run: |
-          cd backend
           go test -v -short ./...
 
       - name: Integration tests
         run: |
-          cd backend
           # -p 1 tells go not to run the tests in parallel. See the developers_guide.
           go test -v -p 1 -coverprofile=coverage.out ./...
 

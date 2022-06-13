@@ -1,9 +1,9 @@
 package extensionController
 
 import (
-	"backend"
-	"backend/extensionAPI"
 	"database/sql"
+	"extension-manager"
+	"extension-manager/extensionAPI"
 	"fmt"
 )
 
