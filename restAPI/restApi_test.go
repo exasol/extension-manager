@@ -54,7 +54,7 @@ func (mock *MockExtensionController) GetAllExtensions(dbConnectionWithNoAutocomm
 }
 
 func (suite *RestAPISuite) TestGetInstallations() {
-	suite.controller.On("GetAllInstallations", mock.Anything).Return([]*extensionAPI.JsExtInstallation{{"test", "0.1.0", []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)
+	suite.controller.On("GetAllInstallations", mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)
 	responseString := suite.makeGetRequest("/installations")
 	suite.assertJSON.Assertf(responseString, `{"installations":[{"name":"test","version":"0.1.0","instanceParameters":[{"id":"param1","name":"My param","type":"string"}]}]}`)
 }
