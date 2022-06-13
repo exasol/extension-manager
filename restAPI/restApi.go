@@ -167,7 +167,7 @@ func (restApi *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResp
 	}
 	convertedInstallations := make([]InstallationsResponseInstallation, 0, len(installations))
 	for _, installation := range installations {
-		convertedInstallations = append(convertedInstallations, InstallationsResponseInstallation{installation.Name})
+		convertedInstallations = append(convertedInstallations, InstallationsResponseInstallation{installation.Name, installation.Version, installation.InstanceParameters})
 	}
 	response := InstallationsResponse{
 		Installations: convertedInstallations,
@@ -205,5 +205,7 @@ type InstallationsResponse struct {
 }
 
 type InstallationsResponseInstallation struct {
-	Name string `json:"name"`
+	Name               string        `json:"name"`
+	Version            string        `json:"version"`
+	InstanceParameters []interface{} `json:"instanceParameters"`
 }

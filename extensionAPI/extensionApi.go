@@ -70,7 +70,10 @@ type BucketFsUpload struct {
 }
 
 type JsExtInstallation struct {
-	Name string `json:"name"`
+	Name    string `json:"name"`
+	Version string `json:"version"`
+	// InstanceParameters is deserialized to a structure of []interface{} and maps.
+	InstanceParameters []interface{} `json:"instanceParameters"`
 }
 
 type SimpleSQLClient interface {
