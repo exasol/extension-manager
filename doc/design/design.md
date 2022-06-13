@@ -97,6 +97,47 @@ Alternative Lua: We could also use Lua. We decided for JS since:
 The compiled JavaScript code is evaluated in the backend using a nested JavaScript interpreter.
 By that it's isolated and for example can't access resources like disk or network.
 
+### Different Parameter Types
+
+Each adapter can define parameter definitions. The UI then shows a form with this parameters to the users and passes the values to the createInstance endpoint.
+We modeled the parameter definitions using the following class hierarchy.
+
+```plantuml
+class BaseParameter{
+  id: string
+  name: string
+  required: bool
+  type: string
+  ...
+}
+
+class StringParameter{
+  regex: RegEx
+  type = string
+}
+
+class SelectParameter{
+  options: array
+  type = select
+}
+
+StringParameter <|-- BaseParameter
+SelectParameter <|-- BaseParameter
+```
+### Parameter Validation
+
+The parameters are validated in the frontend and in the backend. The validation in the frontend is required for a fast user experience. 
+The one in the backend for security. Since we're lazy we decided to use the same code for both validations. 
+For that reason we write the validation in TypeScript and use it as a lib in the frontend and in a JS VM in the GO backend.
+
+### Parameters, Versions and Updates
+
+We decided to attach the parameter definitions to a specific version of the extension. That is required since parameters can change over time.
+
+That implies that when doing updates, the extension-manager must check if parameter definitions changed. If there were breaking changes the update can't be performed automatically.
+The only option would be to add update scripts that define how to convert the parameters from one version to another.
+However, that is currently out of scope.
+
 ### Conditional Parameters
 
 We need to have conditional parameters. For example for the s3-document-files-virtual-schema we need to provide a select

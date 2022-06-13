@@ -20,11 +20,18 @@ func TestExtensionApiSuite(t *testing.T) {
 }
 
 func (suite *ExtensionApiSuite) SetupSuite() {
-	suite.validExtensionFile = integrationTesting.CreateTestExtensionBuilder().Build().WriteToTmpFile()
+	suite.validExtensionFile = integrationTesting.CreateTestExtensionBuilder().WithFindInstallationsFunc(`
+		return exaAllScripts.rows.map(row => {
+			return {name: row.name, version: "0.1.0", instanceParameters: []}
+		});`).Build().WriteToTmpFile()
 }
 
 func (suite *ExtensionApiSuite) TearDownSuite() {
-	err := os.Remove(suite.validExtensionFile)
+	deleteFileAndCheckError(suite.validExtensionFile)
+}
+
+func deleteFileAndCheckError(file string) {
+	err := os.Remove(file)
 	if err != nil {
 		panic(err)
 	}
@@ -54,13 +61,37 @@ func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_Install() {
 	mockSQLClient.AssertCalled(suite.T(), "RunQuery", "CREATE ADAPTER SCRIPT ...")
 }
 
-func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_FindInstallations() {
+func (suite *ExtensionApiSuite) Test_FindInstallationsCanReadAllScriptsTable() {
+	extensionFile := integrationTesting.CreateTestExtensionBuilder().WithFindInstallationsFunc(`
+		return exaAllScripts.rows.map(row => {
+			return {name: row.name, version: "0.1.0", instanceParameters: []}
+		});`).Build().WriteToTmpFile()
+	defer deleteFileAndCheckError(extensionFile)
 	mockSqlClient := MockSimpleSQLClient{}
-	extension, err := GetExtensionFromFile(suite.validExtensionFile)
+	extension, err := GetExtensionFromFile(extensionFile)
 	suite.NoError(err)
 	exaAllScripts := ExaAllScriptTable{Rows: []ExaAllScriptRow{{Name: "test"}}}
 	result := extension.FindInstallations(&mockSqlClient, &exaAllScripts)
 	suite.Assert().Equal("test", result[0].Name)
+	suite.NoError(err)
+}
+
+func (suite *ExtensionApiSuite) Test_FindInstallationsReturningParameters() {
+	extensionFile := integrationTesting.CreateTestExtensionBuilder().WithFindInstallationsFunc(integrationTesting.
+		MockFindInstallationsFunction("test", "0.1.0", `[{
+		id: "param1",
+		name: "My param",
+		type: "string"
+	}]`)).Build().WriteToTmpFile()
+	defer deleteFileAndCheckError(extensionFile)
+	mockSqlClient := MockSimpleSQLClient{}
+	extension, err := GetExtensionFromFile(extensionFile)
+	suite.NoError(err)
+	exaAllScripts := ExaAllScriptTable{Rows: []ExaAllScriptRow{{Name: "test"}}}
+	result := extension.FindInstallations(&mockSqlClient, &exaAllScripts)
+	suite.Assert().Equal("test", result[0].Name)
+	suite.Assert().Equal("0.1.0", result[0].Version)
+	suite.Assert().Equal([]interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}, result[0].InstanceParameters)
 	suite.NoError(err)
 }
 

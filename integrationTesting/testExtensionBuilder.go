@@ -17,11 +17,13 @@ import (
 
 func CreateTestExtensionBuilder() *TestExtensionBuilder {
 	builder := TestExtensionBuilder{}
+	builder.findInstallationsFunc = "return []"
 	return &builder
 }
 
 type TestExtensionBuilder struct {
-	bucketFsUploads []BucketFsUploadParams
+	bucketFsUploads       []BucketFsUploadParams
+	findInstallationsFunc string
 }
 
 type BucketFsUploadParams struct {
@@ -33,8 +35,21 @@ type BucketFsUploadParams struct {
 	FileSize                 int    `json:"fileSize"`
 }
 
-func (builder *TestExtensionBuilder) WithInstallFunc() {
+func (builder *TestExtensionBuilder) WithFindInstallationsFunc(jsFunctionCode string) *TestExtensionBuilder {
+	builder.findInstallationsFunc = jsFunctionCode
+	return builder
+}
 
+// MockFindInstallationsFunction creates a JS findInstallations function that returns one installation with given JSON array of parameter definitions.
+func MockFindInstallationsFunction(extensionName string, version string, parametersJSON string) string {
+	template := `return [{
+                name: "$NAME$",
+                version: "$VERSION$",
+                instanceParameters: $PARAMS$
+            }]`
+	filledTemplate := strings.Replace(template, "$NAME$", extensionName, 1)
+	filledTemplate = strings.Replace(filledTemplate, "$VERSION$", version, 1)
+	return strings.Replace(filledTemplate, "$PARAMS$", parametersJSON, 1)
 }
 
 func (builder *TestExtensionBuilder) WithBucketFsUpload(upload BucketFsUploadParams) *TestExtensionBuilder {
@@ -57,6 +72,7 @@ func (builder TestExtensionBuilder) Build() *BuiltExtension {
 		panic(err)
 	}
 	extensionTs := strings.Replace(template, "$UPLOADS$", string(bfsUploadsJson), 1)
+	extensionTs = strings.Replace(extensionTs, "$FIND_INSTALLATIONS$", builder.findInstallationsFunc, 1)
 	workDir := path.Join(os.TempDir(), "extension-manager-test-extension-build-dir")
 	if _, err := os.Stat(workDir); errors.Is(err, os.ErrNotExist) {
 		err := os.Mkdir(workDir, os.ModePerm)

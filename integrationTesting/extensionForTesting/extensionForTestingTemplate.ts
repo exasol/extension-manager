@@ -3,12 +3,11 @@ import {
     ExasolExtension,
     Installation,
     Instance,
-    Operators,
+    Operators, Parameter,
     ParameterValues,
     registerExtension,
     SqlClient
 } from "@exasol/extension-manager-interface";
-
 
 function createExtension(): ExasolExtension {
     return {
@@ -16,41 +15,6 @@ function createExtension(): ExasolExtension {
         description: "An extension for testing.",
         installableVersions: ["0.1.0"],
         bucketFsUploads: $UPLOADS$,
-        instanceParameters: [
-            {
-                id: "direction",
-                name: "Direction",
-                type: "select",
-                options: {
-                    import: "Import",
-                    export: "Export"
-                }
-            },
-            {
-                id: "",
-                name: "Export file name",
-                type: "string",
-                regex: /\d+/,
-                condition: {
-                    and: [
-                        {
-                            parameter: "direction",
-                            operator: Operators.EQ,
-                            value: "Export"
-                        },
-                        {
-                            parameter: "amount",
-                            operator: Operators.LESS,
-                            value: 2
-                        },
-                    ]
-                }
-            },
-            {
-                id: "",
-                name: "",
-                type: "string"
-            }],
         install(sqlClient) {
             sqlClient.runQuery("CREATE ADAPTER SCRIPT ...")
         },
@@ -58,11 +22,7 @@ function createExtension(): ExasolExtension {
             return undefined;
         },
         findInstallations(_sqlClient: SqlClient, exaAllScripts: ExaAllScripts): Installation[] {
-            let result = exaAllScripts.rows.map(row => {
-                return {name: row.name, version: "0.1.0"}
-            });
-            console.log(JSON.stringify(result))
-            return result;
+            $FIND_INSTALLATIONS$
         },
         findInstances(_installation: Installation, _sql: SqlClient): Instance[] {
             return [];
