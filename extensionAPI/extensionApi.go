@@ -29,11 +29,10 @@ func GetExtensionFromFile(fileName string) (*JsExtension, error) {
 }
 
 func loadExtension(vm *goja.Runtime, fileName string) (*installedExtension, error) {
-	const globalVariableName = "global"
-	const extensionVariableName = "installedExtension"
-	err := vm.Set(globalVariableName, make(map[string]interface{}))
+	globalJsObj := vm.NewObject()
+	err := vm.Set("global", globalJsObj)
 	if err != nil {
-		return nil, fmt.Errorf("failed to set %s to a new map. Cause: %v", globalVariableName, err.Error())
+		return nil, fmt.Errorf("failed to set global to a new object. Cause: %v", err.Error())
 	}
 	bytes, err := ioutil.ReadFile(fileName)
 	if err != nil {
@@ -43,13 +42,11 @@ func loadExtension(vm *goja.Runtime, fileName string) (*installedExtension, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to run extension file %v. Cause %v", fileName, err.Error())
 	}
-	global := vm.Get(globalVariableName)
-	if global == nil {
-		return nil, fmt.Errorf("global variable %s is not defined", globalVariableName)
-	}
-	extensionVariable := global.ToObject(vm).Get(extensionVariableName)
+
+	const extensionVariableName = "installedExtension"
+	extensionVariable := globalJsObj.Get(extensionVariableName)
 	if extensionVariable == nil {
-		return nil, fmt.Errorf("extension did not set %s.%s", globalVariableName, extensionVariableName)
+		return nil, fmt.Errorf("extension did not set global.%s", extensionVariableName)
 	}
 	var extension installedExtension
 	err = vm.ExportTo(extensionVariable, &extension)
