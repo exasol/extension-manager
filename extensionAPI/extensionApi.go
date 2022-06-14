@@ -2,11 +2,14 @@ package extensionAPI
 
 import (
 	"fmt"
+	"io/ioutil"
+
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/console"
 	"github.com/dop251/goja_nodejs/require"
-	"io/ioutil"
 )
+
+const supportedApiVersion = "0.1.4"
 
 // GetExtensionFromFile loads an extension from a .js file.
 func GetExtensionFromFile(fileName string) (*JsExtension, error) {
@@ -19,17 +22,18 @@ func GetExtensionFromFile(fileName string) (*JsExtension, error) {
 	if err != nil {
 		return nil, err
 	}
-	if extensionJs.APIVersion != "0.1.0" {
-		return nil, fmt.Errorf("incompatible extension API version %v. Please update the extension to use a supported version of the extension API", extensionJs.APIVersion)
+	if extensionJs.APIVersion != supportedApiVersion {
+		return nil, fmt.Errorf("incompatible extension API version %q. Please update the extension to use supported version %q", extensionJs.APIVersion, supportedApiVersion)
 	}
 	return &extensionJs.Extension, nil
 }
 
 func loadExtension(vm *goja.Runtime, fileName string) (*installedExtension, error) {
-	const extensionVariable = "installedExtension"
-	err := vm.Set(extensionVariable, nil)
+	const globalVariableName = "global"
+	const extensionVariableName = "installedExtension"
+	err := vm.Set(globalVariableName, make(map[string]interface{}))
 	if err != nil {
-		return nil, fmt.Errorf("failed to set installedExtension = null. Cause: %v", err.Error())
+		return nil, fmt.Errorf("failed to set %s to a new map. Cause: %v", globalVariableName, err.Error())
 	}
 	bytes, err := ioutil.ReadFile(fileName)
 	if err != nil {
@@ -39,8 +43,16 @@ func loadExtension(vm *goja.Runtime, fileName string) (*installedExtension, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to run extension file %v. Cause %v", fileName, err.Error())
 	}
+	global := vm.Get(globalVariableName)
+	if global == nil {
+		return nil, fmt.Errorf("global variable %s is not defined", globalVariableName)
+	}
+	extensionVariable := global.ToObject(vm).Get(extensionVariableName)
+	if extensionVariable == nil {
+		return nil, fmt.Errorf("extension did not set %s.%s", globalVariableName, extensionVariableName)
+	}
 	var extension installedExtension
-	err = vm.ExportTo(vm.Get(extensionVariable), &extension)
+	err = vm.ExportTo(extensionVariable, &extension)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read installedExtension variable. Cause: %v", err.Error())
 	}

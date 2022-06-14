@@ -2,12 +2,13 @@ package extensionAPI
 
 import (
 	"extension-manager/integrationTesting"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/suite"
 	"io/ioutil"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 )
 
 type ExtensionApiSuite struct {
@@ -97,14 +98,21 @@ func (suite *ExtensionApiSuite) Test_FindInstallationsReturningParameters() {
 
 func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_withOutdatedApiVersion() {
 	extensionFile := suite.writeExtension(`(function(){
-	installedExtension = {
+	global.installedExtension = {
 		extension: {},
 		apiVersion: "0.0.0"
 	}
 	})()`)
 	_, err := GetExtensionFromFile(extensionFile)
 	suite.Error(err)
-	suite.Assert().Contains(err.Error(), "incompatible extension API version 0.0.0. Please update the extension to use a supported version of the extension API")
+	suite.Assert().Contains(err.Error(), `incompatible extension API version "0.0.0". Please update the extension to use supported version "`+supportedApiVersion+`"`)
+}
+
+func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_withSettingVariable() {
+	extensionFile := suite.writeExtension(`(function(){ })()`)
+	_, err := GetExtensionFromFile(extensionFile)
+	suite.Error(err)
+	suite.Assert().Contains(err.Error(), "extension did not set global.installedExtension")
 }
 
 func (suite *ExtensionApiSuite) writeExtension(extensionJs string) string {
