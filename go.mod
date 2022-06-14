@@ -1,4 +1,4 @@
-module extension-manager
+module github.com/exasol/extension-manager
 
 go 1.17
 
