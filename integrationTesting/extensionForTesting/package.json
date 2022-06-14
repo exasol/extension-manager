@@ -4,7 +4,7 @@
     "clean": "tsc --build --clean"
   },
   "dependencies": {
-    "@exasol/extension-manager-interface": "0.1.4"
+    "@exasol/extension-manager-interface": "0.1.5"
   },
   "devDependencies": {
     "esbuild": "0.14.37",
