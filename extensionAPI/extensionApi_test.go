@@ -116,6 +116,15 @@ func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_withoutSettingGlobalVa
 	suite.Assert().Contains(err.Error(), "extension did not set global.installedExtension")
 }
 
+func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_invalidJavaScript() {
+	extensionFile := suite.writeExtension(`invalid javascript`)
+	_, err := GetExtensionFromFile(extensionFile)
+	suite.Error(err)
+	suite.Assert().Contains(err.Error(), "failed to run extension file")
+	suite.Assert().Contains(err.Error(), "SyntaxError")
+	suite.Assert().Contains(err.Error(), "Unexpected identifier")
+}
+
 func (suite *ExtensionApiSuite) writeExtension(extensionJs string) string {
 	extensionFile := path.Join(suite.T().TempDir(), "extension.js")
 	suite.NoError(ioutil.WriteFile(extensionFile, []byte(extensionJs), 0600))
