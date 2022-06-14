@@ -2,15 +2,16 @@ package restAPI
 
 import (
 	"database/sql"
-	"extension-manager/extensionAPI"
-	"extension-manager/extensionController"
-	"github.com/kinbiko/jsonassert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/suite"
 	"io/ioutil"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/exasol/extension-manager/extensionAPI"
+	"github.com/exasol/extension-manager/extensionController"
+	"github.com/kinbiko/jsonassert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 )
 
 type RestAPISuite struct {

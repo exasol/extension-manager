@@ -1,8 +1,9 @@
 package main
 
 import (
-	"extension-manager/extensionController"
-	"extension-manager/restAPI"
+	"github.com/exasol/extension-manager/restAPI"
+
+	"github.com/exasol/extension-manager/extensionController"
 )
 
 func main() {

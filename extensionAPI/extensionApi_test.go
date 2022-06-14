@@ -1,11 +1,12 @@
 package extensionAPI
 
 import (
-	"extension-manager/integrationTesting"
 	"io/ioutil"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/exasol/extension-manager/integrationTesting"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"

@@ -1,10 +1,11 @@
 package extensionController
 
 import (
-	"extension-manager/integrationTesting"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/exasol/extension-manager/integrationTesting"
 
 	"github.com/stretchr/testify/suite"
 )
