@@ -161,10 +161,11 @@ func runNpmInstall(workDir string) {
 		var stderr bytes.Buffer
 		installCommand := exec.Command("npm", "install")
 		installCommand.Dir = workDir
-		err := installCommand.Run()
+		output, err := installCommand.CombinedOutput()
+
 		if err != nil {
 			fmt.Println(stderr.String())
-			log.Fatalf("Failed to install node modules (run 'npm install') for extensionForTesting. Cause: %v", err.Error())
+			log.Fatalf("Failed to install node modules (run 'npm install') for extensionForTesting. Cause: %v, Output:\n%s", err.Error(), output)
 		}
 		isNpmInstallCalled = true
 	}
