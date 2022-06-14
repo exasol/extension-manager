@@ -125,6 +125,12 @@ func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_invalidJavaScript() {
 	suite.Assert().Contains(err.Error(), "Unexpected identifier")
 }
 
+func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_invalidFileName() {
+	_, err := GetExtensionFromFile("no-such-file")
+	suite.Error(err)
+	suite.Assert().Contains(err.Error(), "failed to open extension file no-such-file")
+}
+
 func (suite *ExtensionApiSuite) writeExtension(extensionJs string) string {
 	extensionFile := path.Join(suite.T().TempDir(), "extension.js")
 	suite.NoError(ioutil.WriteFile(extensionFile, []byte(extensionJs), 0600))
