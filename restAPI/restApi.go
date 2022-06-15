@@ -201,11 +201,46 @@ func closeDbConnection(database *sql.DB) {
 }
 
 func (restApi *restAPIImpl) openDBConnection(c *gin.Context) (*sql.DB, error) {
-	database, err := sql.Open("exasol", exasol.NewConfig(c.GetString("dbUser"), c.GetString("dbPass")).Port(c.GetInt("dbPort")).Host(c.GetString("dbHost")).Autocommit(false).String())
+	config, err := getDbConfig(c)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open a database connection. Cause: %v", err.Error())
+		return nil, fmt.Errorf("failed to get db config: %w", err)
+	}
+	config.Autocommit(false).ValidateServerCertificate(false)
+	database, err := sql.Open("exasol", config.String())
+	if err != nil {
+		return nil, fmt.Errorf("failed to open a database connection. Cause: %w", err)
+	}
+	_, err = database.Exec("select 1")
+	if err != nil {
+		return nil, fmt.Errorf("database connection test failed. Cause: %v", err.Error())
 	}
 	return database, nil
+}
+
+func getDbConfig(c *gin.Context) (*exasol.DSNConfigBuilder, error) {
+	query := c.Request.URL.Query()
+	host := query.Get("dbHost")
+	if host == "" {
+		return nil, fmt.Errorf("missing parameter dbHost")
+	}
+	portString := query.Get("dbPort")
+	if portString == "" {
+		return nil, fmt.Errorf("missing parameter dbPort")
+	}
+	port, err := strconv.Atoi(portString)
+	if err != nil {
+		return nil, fmt.Errorf("invalid value %q for parameter dbPort", portString)
+	}
+	user := query.Get("dbUser")
+	if user == "" {
+		return nil, fmt.Errorf("missing parameter dbUser")
+	}
+	password := query.Get("dbPass")
+	if password == "" {
+		return nil, fmt.Errorf("missing parameter dbPass")
+	}
+	config := exasol.NewConfig(user, password).Port(port).Host(host)
+	return config, nil
 }
 
 type InstallationsResponse struct {
