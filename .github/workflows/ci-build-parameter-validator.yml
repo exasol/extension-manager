@@ -22,6 +22,7 @@ jobs:
         with:
           node-version: 16
           cache: 'npm'
+          cache-dependency-path: extension-parameter-validator/package-lock.json
       - name: Install dependencies
         run: |
           cd extension-parameter-validator/
