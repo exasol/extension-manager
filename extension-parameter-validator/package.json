@@ -1,0 +1,21 @@
+{
+  "name": "@exasol/extension-manager-parameter-validator",
+  "version": "0.1.0",
+  "license": "MIT",
+  "main": "dist/extensionParameterValidator.js",
+  "types": "dist/api.d.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "tsc --build --clean",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@exasol/extension-manager-interface": "0.1.6"
+  },
+  "devDependencies": {
+    "typescript": "4.6.3",
+    "@types/jest": "^28.1.1",
+    "jest": "^28.1.1",
+    "ts-jest": "^28.0.5"
+  }
+}

@@ -13,6 +13,7 @@ Code name:
 * #17: Added check for preconditions of extensions
 * #20: Added swagger doc for REST API
 * #14: Added parameters to installations response
+* #31: Added parameter validator
 
 ## Refactoring
 
