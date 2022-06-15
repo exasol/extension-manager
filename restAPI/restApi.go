@@ -210,10 +210,6 @@ func (restApi *restAPIImpl) openDBConnection(c *gin.Context) (*sql.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open a database connection. Cause: %w", err)
 	}
-	_, err = database.Exec("select 1")
-	if err != nil {
-		return nil, fmt.Errorf("database connection test failed. Cause: %v", err.Error())
-	}
 	return database, nil
 }
 
