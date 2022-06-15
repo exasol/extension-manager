@@ -3,6 +3,7 @@ package extensionAPI
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/console"
@@ -25,6 +26,7 @@ func GetExtensionFromFile(fileName string) (*JsExtension, error) {
 	if extensionJs.APIVersion != SupportedApiVersion {
 		return nil, fmt.Errorf("incompatible extension API version %q. Please update the extension to use supported version %q", extensionJs.APIVersion, SupportedApiVersion)
 	}
+	log.Printf("Extension %q loaded from file %q", extensionJs.Extension.Name, fileName)
 	return &extensionJs.Extension, nil
 }
 

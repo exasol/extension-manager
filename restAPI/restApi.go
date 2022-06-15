@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
+	"strconv"
 	"sync"
 
 	cont "github.com/exasol/extension-manager/extensionController"
@@ -58,11 +60,14 @@ func (restApi *restAPIImpl) Serve() {
 	router.GET("/extensions", restApi.handleGetExtensions)
 	router.GET("/installations", restApi.handleGetInstallations)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	const port = "8080"
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + port,
 		Handler: router,
 	}
 	restApi.server = srv
+	log.Printf("Starting server on port %s...\n", port)
 	err := restApi.server.ListenAndServe() // blocking
 	if err != nil && !restApi.isStopped() {
 		panic(fmt.Sprintf("failed to start rest API server. Cause: %v", err.Error()))
