@@ -186,7 +186,7 @@ func (restApi *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResp
 func (restApi *restAPIImpl) sendResponse(c *gin.Context, response interface{}, err error) {
 	if err != nil {
 		c.String(500, "Internal error.")
-		fmt.Println(err.Error())
+		log.Printf("request failed: %s\n", err.Error())
 		return
 	}
 	c.JSON(200, response)
