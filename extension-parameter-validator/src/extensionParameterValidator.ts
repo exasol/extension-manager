@@ -7,9 +7,9 @@ function validationError(errorMessage: string): ValidationResult {
 }
 
 export function validateParameter(definition: Parameter, value: string): ValidationResult {
-    if (value === undefined || value === null || value == "") {
+    if (value === undefined || value === null || value === "") {
         if (definition.required) {
-            return validationError("This is a required filed.")
+            return validationError("This is a required field.")
         } else {
             return SUCCESS_RESULT;
         }

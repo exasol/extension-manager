@@ -27,7 +27,7 @@ func validateParameter(definition interface{}, value string) (*ValidationResult,
 	}
 	_, err = vm.RunString(dependencyValidatorJs)
 	if err != nil {
-		return nil, fmt.Errorf("faield to load validateParameter script. Cause: %w", err)
+		return nil, fmt.Errorf("failed to load validateParameter script. Cause: %w", err)
 	}
 	function := globalJsObj.Get("validateParameter")
 	err = vm.ExportTo(function, &validateParameterJs)
