@@ -19,7 +19,7 @@ describe("extensionParameterValidator", () => {
     describe("validateParameters", () => {
         it("detects a missing parameter", () => {
             let result = validateParameters([{id: "param1", type: "string", name: "Parameter 1", required: true}], {});
-            expect(result).toEqual({success: false, message: "This is a required filed."})
+            expect(result).toEqual({success: false, message: "Parameter 1: This is a required filed."})
         })
 
         it("accepts a valid parameter", () => {
