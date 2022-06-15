@@ -86,10 +86,12 @@ def run(ctx):
 	}
 	for result.Next() {
 		var file BfsFile
-		err = result.Scan(&file.Name, &file.Size)
+		var fileSize float64
+		err = result.Scan(&file.Name, &fileSize)
 		if err != nil {
 			return nil, fmt.Errorf("failed reading result of BucketFS list UDF. Cause: %w", err)
 		}
+		file.Size = int(fileSize)
 		files = append(files, file)
 	}
 	return files, nil
