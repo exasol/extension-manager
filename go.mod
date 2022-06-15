@@ -1,4 +1,4 @@
-module extension-manager
+module github.com/exasol/extension-manager
 
 go 1.17
 
@@ -10,10 +10,10 @@ require (
 )
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/exasol/exasol-driver-go v0.4.2
 	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220607114909-397987f03514
 	github.com/kinbiko/jsonassert v1.1.0
-	github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2
 	github.com/swaggo/gin-swagger v1.4.3
 	github.com/swaggo/swag v1.8.2
 )

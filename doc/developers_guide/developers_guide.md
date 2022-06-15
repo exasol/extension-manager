@@ -35,3 +35,17 @@ To install golangci-lint on your machine, follow [these instruction](https://gol
 ```shell
 golangci-lint run
 ```
+### Generate API Documentation
+
+We generate Swagger API documentation and check it in at [generatedApiDocs/](../../generatedApiDocs/). To update the documentation first install the `swag` command:
+
+```shell
+go install github.com/swaggo/swag/cmd/swag@v1.8.2
+```
+
+Make sure to use the same version as specified in [.github/workflows/ci-build.yml](../../.github/workflows/ci-build.yml).
+
+After making changes to the API follow these steps:
+
+1. Run `go generate`
+2. Commit changes in the [generatedApiDocs/](../../generatedApiDocs/) directory

@@ -35,13 +35,16 @@ jobs:
             ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
             ${{ runner.os }}-go-
 
+      - name: Enable testcontainer reuse
+        run: echo 'testcontainers.reuse.enable=true' > "$HOME/.testcontainers.properties"
+
       - name: Install dependencies
         run: |
           go get -t ./...
 
       - name: Check generated code
         run: |
-          go install github.com/swaggo/swag/cmd/swag@latest
+          go install github.com/swaggo/swag/cmd/swag@v1.8.2
           go generate
           if [[ `git status --porcelain` ]]; then
             echo "Project files did change:\n"
@@ -52,6 +55,10 @@ jobs:
       - name: golangci-lint
         run: |
           ./ci/install_and_run_golangci-lint.sh
+
+      - name: Build
+        run: |
+          go build
 
       - name: Unit tests
         run: |
@@ -67,3 +74,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v3
+        with:
+          name: extension-manager binary
+          path: extension-manager
+          if-no-files-found: error
+          retention-days: 5

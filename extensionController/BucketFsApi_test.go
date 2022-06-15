@@ -1,9 +1,10 @@
 package extensionController
 
 import (
-	"extension-manager/integrationTesting"
-	"github.com/stretchr/testify/suite"
 	"testing"
+
+	"github.com/exasol/extension-manager/integrationTesting"
+	"github.com/stretchr/testify/suite"
 )
 
 type BucketFsAPISuite struct {

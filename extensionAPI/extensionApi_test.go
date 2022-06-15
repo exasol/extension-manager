@@ -1,13 +1,15 @@
 package extensionAPI
 
 import (
-	"extension-manager/integrationTesting"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/suite"
 	"io/ioutil"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/exasol/extension-manager/integrationTesting"
+
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 )
 
 type ExtensionApiSuite struct {
@@ -97,14 +99,36 @@ func (suite *ExtensionApiSuite) Test_FindInstallationsReturningParameters() {
 
 func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_withOutdatedApiVersion() {
 	extensionFile := suite.writeExtension(`(function(){
-	installedExtension = {
+	global.installedExtension = {
 		extension: {},
 		apiVersion: "0.0.0"
 	}
 	})()`)
 	_, err := GetExtensionFromFile(extensionFile)
 	suite.Error(err)
-	suite.Assert().Contains(err.Error(), "incompatible extension API version 0.0.0. Please update the extension to use a supported version of the extension API")
+	suite.Assert().Contains(err.Error(), `incompatible extension API version "0.0.0". Please update the extension to use supported version "`+SupportedApiVersion+`"`)
+}
+
+func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_withoutSettingGlobalVariable() {
+	extensionFile := suite.writeExtension(`(function(){ })()`)
+	_, err := GetExtensionFromFile(extensionFile)
+	suite.Error(err)
+	suite.Assert().Contains(err.Error(), "extension did not set global.installedExtension")
+}
+
+func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_invalidJavaScript() {
+	extensionFile := suite.writeExtension(`invalid javascript`)
+	_, err := GetExtensionFromFile(extensionFile)
+	suite.Error(err)
+	suite.Assert().Contains(err.Error(), "failed to run extension file")
+	suite.Assert().Contains(err.Error(), "SyntaxError")
+	suite.Assert().Contains(err.Error(), "Unexpected identifier")
+}
+
+func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_invalidFileName() {
+	_, err := GetExtensionFromFile("no-such-file")
+	suite.Error(err)
+	suite.Assert().Contains(err.Error(), "failed to open extension file no-such-file")
 }
 
 func (suite *ExtensionApiSuite) writeExtension(extensionJs string) string {

@@ -2,9 +2,10 @@ package extensionController
 
 import (
 	"database/sql"
-	"extension-manager"
-	"extension-manager/extensionAPI"
 	"fmt"
+
+	"github.com/exasol/extension-manager/backend"
+	"github.com/exasol/extension-manager/extensionAPI"
 )
 
 // ExtensionController is the core part of the extension-manager that provides the extension handling functionality.
