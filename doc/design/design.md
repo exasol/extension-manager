@@ -68,7 +68,7 @@ extensionManager -> mysql: loaded at runtime
 
 We have one extension definition per extension (integration project).
 
-All extension definitions implement the same public interface defined in `extension-manager-interface`:
+All extension definitions implement the same public interface defined in [`extension-manager-interface`](https://github.com/exasol/extension-manager-interface/):
 
 ```plantuml
 @startuml
@@ -153,7 +153,7 @@ The parameters are validated in the frontend and in the backend:
 
 Since we're lazy we decided to use the same code for both validations.
 
-For that reason we write the validation in TypeScript library `extension-parameter-validator` and use it in the frontend and in a JavaScript VM in the Go backend.
+For that reason we write the validation in TypeScript library [`extension-parameter-validator`](https://github.com/exasol/extension-parameter-validator) and use it in the frontend and in a JavaScript VM in the Go backend.
 
 #### Parameters, Versions and Updates
 
@@ -165,7 +165,7 @@ The only option would be to add update scripts that define how to convert the pa
 
 #### Conditional Parameters
 
-We need to have conditional parameters. A example for this is when a virtual schema for another database supports multiple connection protocols or libraries (e.g. ODBC and JDBC) that require different configuration options. Depending on the selected protocol we want to show or hide some parameters.
+We need to have conditional parameters. An example for this is when a virtual schema for another database supports multiple connection protocols or libraries (e.g. ODBC and JDBC) that require different configuration options. Depending on the selected protocol we want to show or hide some parameters.
 
 To solve this, we considered the following options:
 
@@ -369,13 +369,14 @@ Installation "1" o-- "*" Instance
 
 ## Installation and Metadata
 
-Extensions don't store their own metadata. Instead they read information about existing adapter scripts, connection definitions and virtual schemas from Exasol's metadata tables.
+Extensions don't store their own metadata. Instead they read information about existing adapter scripts, connection definitions and virtual schemas from the Exasol database itself. In most cases this is implemented by querying Exasols metadata tables.
+Holwever, for example for reading back the credentials,that are stored in a connection, we use a temporary UDF that reads back the secret value.
 
 ### Installation Process of a Document Virtual Schema
 
 This is an example process how a document virtual schema is installed.
 
-* Check if the `extension-manager-interface` implemented by the extension is supported.
+* Check if the version of the `extension-manager-interface` implemented by the extension is supported.
 * Check if required files exist in BucketFs with the expected version and file size.
   * If not all files are available, the installation fails.
 * Check if an `ADAPTER SCRIPT` exists for the required VS Jar.
