@@ -165,49 +165,60 @@ The only option would be to add update scripts that define how to convert the pa
 
 #### Conditional Parameters
 
-We need to have conditional parameters. An example for this is when a virtual schema for another database supports multiple connection protocols or libraries (e.g. ODBC and JDBC) that require different configuration options. Depending on the selected protocol we want to show or hide some parameters.
+We need to have conditional parameters. An example use case for this is when a virtual schema for another database supports multiple connection protocols or libraries (e.g. ODBC and JDBC) that require different configuration options. Depending on the selected protocol we want to show or hide some parameters.
 
-To solve this, we considered the following options:
+We decided to represent the condition as a JSON structure.
 
-* Condition as JS code in a string
+Example:
 
-  Example: `condition: "parameters.source === \"s3\""`
-* Condition as JS callback.
+```js
+extension = {
+  // ...
+  condition: {
+    parameter: "connectorType",
+    operator: Operators.EQ,
+    value: "jdbc"
+  }
+  // ...
+}
+```
+
+While this requires interpretation of the JSON structure, it allows us to transfer the parameter definition to the frontend as simple JSON in contrast to the alternative options considered.
+
+##### Alternative Options
+
+We considered the following options:
+
+* Condition as JavaScript code in a string
+
+  Example: `condition: "parameters.connectorType === \"jdbc\""`
+
+* Condition as JavaScript callback
 
   Example:
    ```js
   extension = {
-    condition: (parameterValues) => parameterValues.source === "s3"
-  }
-  ```
-* Condition represented using structured JSON.
-
-  Example:
-  ```js
-  extension = {
-    condition: {
-     parameter: "source",
-     operator: Operators.EQ,
-     value: "s3"
-    }
+    condition: (parameterValues) => parameterValues.connectorType === "jdbc"
   }
   ```
 
-We decided for the third option since it does not require evaluating source code from an HTTP request in the client. That allows us to transfer the parameter definition as simple JSON (in contrast to a JavaScript lib / file).
+While both options don't need any interpretation logic they would require executing the JavaScript snippet in the frontend with `eval()` which could be interpreted as a security issue.
+
+The additional effort for interpreting the JSON structure occurs only once as we implement the interpretation in a separate library `extension-parameter-validator` written in TypeScript which is used by both the frontend and the backend.
 
 #### Validation
 
 We implement input validation in two stages:
 
 * In the client: Simple validation of each field
-  * required fields
-  * for text: regex
-  * for numbers: min, max
+  * Required fields also with conditions
+  * For text: regular expressions
+  * For numbers: min, max
 * In the backend:
-  * Everything validated in the client (validate again to prevent attacks)
+  * Everything validated in the frontend (validate again to prevent attacks)
   * Validation of the whole input: Here we can validate more complex constraints that for example involve multiple fields
 
-For the validation done by the client we define the constraints declarative in the extension:
+For the validation done by the frontend we define the constraints declarative in the extension:
 
 ```ts
 param = {
@@ -218,16 +229,14 @@ param = {
 }
 ```
 
-For the more complex validation we define it via a JavaScript callback function. That gives the extension definition the maximum flexibility.
-
-The validation code is executed in the JavaScript VM in the backend.
+In case complex validation involving multiple parameters is required, we we define it via a JavaScript callback function that is executed only in the backend, not the frontend. That gives the extension definition the maximum flexibility while simplifying the validation in the frontend.
 
 ```ts
 extension = {
   //...
   validate(parameterValues) {
-    if (parameterValues["source"] === "s3" && !isValidBucketName(parameterValues["bucket"])) {
-      return "Invalid bucket name.";
+    if (parameterValues["connectorType"] === "jdbc" && !isValidJdbcParameter(parameterValues["additionalJdbcParameter"])) {
+      return "Invalid value for additionalJdbcParameter.";
     }
   }
 }
@@ -369,8 +378,9 @@ Installation "1" o-- "*" Instance
 
 ## Installation and Metadata
 
-Extensions don't store their own metadata. Instead they read information about existing adapter scripts, connection definitions and virtual schemas from the Exasol database itself. In most cases this is implemented by querying Exasols metadata tables.
-Holwever, for example for reading back the credentials,that are stored in a connection, we use a temporary UDF that reads back the secret value.
+Extensions don't store their own metadata. Instead they read information about existing adapter scripts, connection definitions and virtual schemas from the Exasol database itself. In most cases this is implemented by querying Exasol's metadata tables.
+
+However, for example for reading back the credentials stored in a connection, we use a temporary UDF that reads back the secret value.
 
 ### Installation Process of a Document Virtual Schema
 
