@@ -202,9 +202,9 @@ We considered the following options:
   }
   ```
 
-While both options don't need any interpretation logic they would require executing the JavaScript snippet in the frontend with `eval()` which could be interpreted as a security issue.
+While both options don't need any interpretation logic they would require executing the JavaScript snippet in the frontend with `eval()` which poses a security risk.
 
-The additional effort for interpreting the JSON structure occurs only once as we implement the interpretation in a separate library `extension-parameter-validator` written in TypeScript which is used by both the frontend and the backend.
+We need to invest the additional effort for interpreting the JSON structure only once, as we implement the interpretation in a separate library `extension-parameter-validator` written in TypeScript which is used by both the frontend and the backend.
 
 #### Validation
 
@@ -216,7 +216,7 @@ We implement input validation in two stages:
   * For numbers: min, max
 * In the backend:
   * Everything validated in the frontend (validate again to prevent attacks)
-  * Validation of the whole input: Here we can validate more complex constraints that for example involve multiple fields
+  * Validation of the whole input: Here we can validate more complex constraints (for example multiple interdependent fields)
 
 For the validation done by the frontend we define the constraints declarative in the extension:
 
@@ -458,9 +458,9 @@ Tests for extensions are:
 
 ### Document Virtual Schemas Only Support a Single Version
 
-Document virtual schemas like `s3-document-files-virtual-schema` require a `SET SCRIPT` that must have a specific name. As this script references a specific virtual schema Jar, it's not possible to install multiple version of the same virtual schema in the same database `SCHEMA`.
+Document virtual schemas like `s3-document-files-virtual-schema` require a `SET SCRIPT` that must have a specific name. As this script references a specific virtual schema JAR archive, it is not possible to install multiple version of the same virtual schema in the same database `SCHEMA`.
 
-This means that in order to test a new version of a virtual schema we have to create a new `SCHEMA` with the required database objects.
+This means that in order to test a new version of a virtual schema, we have to create a new `SCHEMA` with the required database objects.
 
 ## Possible Future Changes
 
@@ -472,7 +472,7 @@ The extension manager is also useful for customer using Exasol on premise.
 
 ### Automatic Installation of Required Files
 
-Currently the extension manager expects that requires files like virtual schema JARs or JDBC drivers are already available in BucketFS. A future version might download and install these files automatically or update them to the latest version.
+Currently the extension manager expects that required files like virtual schema JARs or JDBC drivers are already available in BucketFS. A future version might download and install these files automatically or update them to the latest version.
 
 ### Automatic Updates of Installed Extensions
 
@@ -480,7 +480,7 @@ When new versions of a virtual schema become available that potentially fix secu
 
 ### Install Older Versions
 
-If an older version of the VS Jar is available on BucketFS we could allow the user to choose the version they want to use.
+If an older version of the VS JAR is available on BucketFS we could allow the user to choose the version they want to use.
 
 Currently the extension manager will always use the Jar matching the extension's version.
 
