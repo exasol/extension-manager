@@ -3,6 +3,7 @@ package extensionController
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/exasol/extension-manager/backend"
 	"github.com/exasol/extension-manager/extensionAPI"
@@ -60,10 +61,11 @@ func (controller *extensionControllerImpl) GetAllExtensions(dbConnectionWithNoAu
 func (controller *extensionControllerImpl) requiredFilesAvailable(jsExtension *extensionAPI.JsExtension, bfsFiles []BfsFile) bool {
 	for _, requiredFile := range jsExtension.BucketFsUploads {
 		if !controller.existsFileInBfs(bfsFiles, requiredFile) {
-			fmt.Printf("ignoring extension %v since the required file %v does not exist or has a wrong file size.\n", jsExtension.Name, requiredFile.Name)
+			fmt.Printf("ignoring extension %q since the required file %q does not exist or has a wrong file size.\n", jsExtension.Name, requiredFile.Name)
 			return false
 		}
 	}
+	log.Printf("Required files found for extension %q\n", jsExtension.Name)
 	return true
 }
 

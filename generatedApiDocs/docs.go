@@ -6,6 +6,12 @@ import "github.com/swaggo/swag"
 
 const docTemplate = `{
     "schemes": {{ marshal .Schemes }},
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
     "swagger": "2.0",
     "info": {
         "description": "{{escape .Description}}",
@@ -30,6 +36,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "summary": "Get all extensions",
+                "operationId": "getExtensions",
                 "parameters": [
                     {
                         "type": "string",
@@ -83,6 +90,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "summary": "Get all installations",
+                "operationId": "getInstallations",
                 "parameters": [
                     {
                         "type": "string",

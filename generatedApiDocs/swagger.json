@@ -1,4 +1,10 @@
 {
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
     "swagger": "2.0",
     "info": {
         "description": "This is a REST API for managing extensions in an Exasol database.",
@@ -22,6 +28,7 @@
                     "application/json"
                 ],
                 "summary": "Get all extensions",
+                "operationId": "getExtensions",
                 "parameters": [
                     {
                         "type": "string",
@@ -75,6 +82,7 @@
                     "application/json"
                 ],
                 "summary": "Get all installations",
+                "operationId": "getInstallations",
                 "parameters": [
                     {
                         "type": "string",

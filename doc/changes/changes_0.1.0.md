@@ -14,11 +14,11 @@ Code name:
 * #20: Added swagger doc for REST API
 * #14: Added parameters to installations response
 * #31: Added parameter validator
+* #30: Add optional command line flag for the path to the extension directory
 
 ## Refactoring
 
-* #2: Moved API to dedicated
-  repo: [exasol/extension-manager-interface](https://github.com/exasol/extension-manager-interface/)
+* #2: Moved API to dedicated repo: [exasol/extension-manager-interface](https://github.com/exasol/extension-manager-interface/)
 * #23: Moved go code from backend/ folder to project root
 * #27: Changed extension registration to use the `global` object
 
