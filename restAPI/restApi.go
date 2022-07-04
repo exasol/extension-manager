@@ -39,6 +39,8 @@ type RestAPI interface {
 // @license.url   https://github.com/exasol/extension-manager/blob/main/LICENSE
 
 // @BasePath  /
+// @accept json
+// @produce json
 
 func Create(controller cont.ExtensionController) RestAPI {
 	return &restAPIImpl{Controller: controller}
@@ -105,12 +107,13 @@ func (restApi *restAPIImpl) Stop() {
 
 // @Summary      Get all extensions
 // @Description  Get a list of all available extensions.
+// @Id  getExtensions
 // @Produce      json
 // @Success      200  {object}  ExtensionsResponse
-// @Param 	     dbHost query string true "Hostname of the Exasol DB to manage"
-// @Param 	     dbPort query int true "port number of the Exasol DB to manage"
-// @Param 	     dbUser query string true "username of the Exasol DB to manage"
-// @Param 	     dbPass query string true "password of the Exasol DB to manage"
+// @Param        dbHost query string true "Hostname of the Exasol DB to manage"
+// @Param        dbPort query int true "port number of the Exasol DB to manage"
+// @Param        dbUser query string true "username of the Exasol DB to manage"
+// @Param        dbPass query string true "password of the Exasol DB to manage"
 // @Failure      500  {object}  string
 // @Router       /extensions [get]
 func (restApi *restAPIImpl) handleGetExtensions(c *gin.Context) {
@@ -150,12 +153,13 @@ type ExtensionsResponseExtension struct {
 
 // @Summary      Get all installations
 // @Description  Get a list of all installations. Installation means, that an extension is installed in the database (e.g. JAR files added to BucketFS, Adapter Script created).
+// @Id           getInstallations
 // @Produce      json
 // @Success      200  {object}  InstallationsResponse
-// @Param 	     dbHost query string true "Hostname of the Exasol DB to manage"
-// @Param 	     dbPort query int true "port number of the Exasol DB to manage"
-// @Param 	     dbUser query string true "username of the Exasol DB to manage"
-// @Param 	     dbPass query string true "password of the Exasol DB to manage"
+// @Param        dbHost query string true "Hostname of the Exasol DB to manage"
+// @Param        dbPort query int true "port number of the Exasol DB to manage"
+// @Param        dbUser query string true "username of the Exasol DB to manage"
+// @Param        dbPass query string true "password of the Exasol DB to manage"
 // @Failure      500  {object}  string
 // @Router       /installations [get]
 func (restApi *restAPIImpl) handleGetInstallations(c *gin.Context) {

@@ -40,7 +40,7 @@ golangci-lint run
 We generate Swagger API documentation and check it in at [generatedApiDocs/](../../generatedApiDocs/). To update the documentation first install the `swag` command:
 
 ```shell
-go install github.com/swaggo/swag/cmd/swag@v1.8.2
+go install github.com/swaggo/swag/cmd/swag@v1.8.3
 ```
 
 Make sure to use the same version as specified in [.github/workflows/ci-build.yml](../../.github/workflows/ci-build.yml).
