@@ -15,10 +15,18 @@ func TestExaAllScriptsTableSuite(t *testing.T) {
 	suite.Run(t, new(ExaAllScriptsTableSuite))
 }
 
-func (suite *ExaAllScriptsTableSuite) TestReadScript() {
+func (suite *ExaAllScriptsTableSuite) TestReadMetadata() {
 	luaScriptFixture := integrationTesting.CreateLuaScriptFixture(suite.Connection)
 	defer luaScriptFixture.Close()
-	result, err := ReadExaAllScriptTable(suite.Connection)
+	result, err := ReadMetadataTables(suite.Connection)
 	suite.NoError(err)
-	suite.Assert().Equal(ExaAllScriptTable{Rows: []ExaAllScriptRow{{Name: "TEST.MY_SCRIPT", Text: "CREATE LUA SET SCRIPT \"MY_SCRIPT\" (\"a\" DOUBLE) RETURNS DOUBLE AS\nfunction run(ctx)\n  return 1\nend\n"}}}, *result)
+	suite.Assert().Equal(
+		ExaAllScriptTable{Rows: []ExaAllScriptRow{{
+			Schema:     "TEST",
+			Name:       "MY_SCRIPT",
+			Type:       "UDF",
+			InputType:  "SET",
+			ResultType: "RETURNS",
+			Text:       "CREATE LUA SET SCRIPT \"MY_SCRIPT\" (\"a\" DOUBLE) RETURNS DOUBLE AS\nfunction run(ctx) return 1 end",
+			Comment:    "my comment"}}}, result.AllScripts)
 }

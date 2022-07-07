@@ -5,21 +5,30 @@ import (
 	"fmt"
 )
 
-func ReadExaAllScriptTable(connection *sql.DB) (*ExaAllScriptTable, error) {
-	result, err := connection.Query("SELECT SCRIPT_SCHEMA, SCRIPT_NAME, SCRIPT_TEXT FROM SYS.EXA_ALL_SCRIPTS")
+type ExaMetadata struct {
+	AllScripts ExaAllScriptTable `json:"allScripts"`
+}
+
+func ReadMetadataTables(connection *sql.DB) (*ExaMetadata, error) {
+	allScripts, err := readExaAllScriptTable(connection)
+	if err != nil {
+		return nil, err
+	}
+	return &ExaMetadata{AllScripts: *allScripts}, nil
+}
+
+func readExaAllScriptTable(connection *sql.DB) (*ExaAllScriptTable, error) {
+	result, err := connection.Query("SELECT SCRIPT_SCHEMA, SCRIPT_NAME, SCRIPT_TYPE, SCRIPT_INPUT_TYPE, SCRIPT_RESULT_TYPE, SCRIPT_TEXT, SCRIPT_COMMENT FROM SYS.EXA_ALL_SCRIPTS")
 	if err != nil {
 		return nil, fmt.Errorf("failed to read SYS.EXA_ALL_SCRIPTS. Cause: %v", err.Error())
 	}
 	var rows []ExaAllScriptRow
 	for result.Next() {
 		var row ExaAllScriptRow
-		var schema string
-		var name string
-		err := result.Scan(&schema, &name, &row.Text)
+		err := result.Scan(&row.Schema, &row.Name, &row.Type, &row.InputType, &row.ResultType, &row.Text, &row.Comment)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read row of SYS.EXA_ALL_SCRIPTS. Cause: %w", err)
 		}
-		row.Name = schema + "." + name
 		rows = append(rows, row)
 	}
 	return &ExaAllScriptTable{Rows: rows}, nil
@@ -30,6 +39,11 @@ type ExaAllScriptTable struct {
 }
 
 type ExaAllScriptRow struct {
-	Name string `json:"name"`
-	Text string `json:"text"`
+	Schema     string `json:"schema"`
+	Name       string `json:"name"`
+	Type       string `json:"type"`
+	InputType  string `json:"inputType"`
+	ResultType string `json:"resultType"`
+	Text       string `json:"text"`
+	Comment    string `json:"comment"`
 }

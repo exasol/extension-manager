@@ -93,9 +93,9 @@ func (controller *extensionControllerImpl) getAllJsExtensions() ([]*extensionAPI
 }
 
 func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
-	allScriptTable, err := extensionAPI.ReadExaAllScriptTable(dbConnection)
+	metadata, err := extensionAPI.ReadMetadataTables(dbConnection)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read EXA_ALL_SCRIPT table. Cause: %w", err)
+		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
 	sqlClient := backend.ExasolSqlClient{Connection: dbConnection}
 	extensions, err := controller.getAllJsExtensions()
@@ -104,7 +104,7 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 	}
 	var allInstallations []*extensionAPI.JsExtInstallation
 	for _, extension := range extensions {
-		installations := extension.FindInstallations(sqlClient, allScriptTable)
+		installations := extension.FindInstallations(sqlClient, metadata)
 		allInstallations = append(allInstallations, installations...)
 	}
 	return allInstallations, nil

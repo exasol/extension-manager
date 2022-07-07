@@ -35,4 +35,4 @@ pom.xml.versionsBackup
 *.flattened-pom.xml
 vendor/
 *.kate-swp
-extension-manager
+/extension-manager

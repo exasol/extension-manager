@@ -49,6 +49,7 @@ func (suite *ExtensionControllerSuite) TestGetAllExtensions() {
 	controller := Create(suite.tempExtensionRepo)
 	extensions, err := controller.GetAllExtensions(suite.Connection)
 	suite.NoError(err)
+	suite.Assert().Equal(1, len(extensions))
 	suite.Assert().Equal("MyDemoExtension", extensions[0].Name)
 }
 
@@ -56,8 +57,8 @@ func (suite *ExtensionControllerSuite) writeDefaultExtension() {
 	integrationTesting.CreateTestExtensionBuilder().
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "my-extension.1.2.3.jar", FileSize: 3}).
 		WithFindInstallationsFunc(`
-		return exaAllScripts.rows.map(row => {
-			return {name: row.name, version: "0.1.0", instanceParameters: []}
+		return metadata.allScripts.rows.map(row => {
+			return {name: row.schema + "." + row.name, version: "0.1.0", instanceParameters: []}
 		});`).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, "myExtension.js"))
@@ -84,5 +85,6 @@ func (suite *ExtensionControllerSuite) TestGetAllInstallations() {
 	defer luaScriptFixture.Close()
 	installations, err := controller.GetAllInstallations(suite.Connection)
 	suite.NoError(err)
+	suite.Assert().Equal(1, len(installations))
 	suite.Assert().Equal("TEST.MY_SCRIPT", installations[0].Name)
 }
