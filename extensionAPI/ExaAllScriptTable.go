@@ -25,10 +25,16 @@ func readExaAllScriptTable(connection *sql.DB) (*ExaAllScriptTable, error) {
 	var rows []ExaAllScriptRow
 	for result.Next() {
 		var row ExaAllScriptRow
-		err := result.Scan(&row.Schema, &row.Name, &row.Type, &row.InputType, &row.ResultType, &row.Text, &row.Comment)
+		var inputType sql.NullString
+		var resultType sql.NullString
+		var comment sql.NullString
+		err := result.Scan(&row.Schema, &row.Name, &row.Type, &inputType, &resultType, &row.Text, &comment)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read row of SYS.EXA_ALL_SCRIPTS. Cause: %w", err)
 		}
+		row.InputType = inputType.String
+		row.ResultType = resultType.String
+		row.Comment = comment.String
 		rows = append(rows, row)
 	}
 	return &ExaAllScriptTable{Rows: rows}, nil
