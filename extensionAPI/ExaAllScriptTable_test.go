@@ -31,7 +31,7 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataWithAllColumnsDefined() {
 			Comment:    "my comment"}}}, result.AllScripts)
 }
 
-func (suite *ExaAllScriptsTableSuite) TestReadMetadataWithMissingValues() {
+func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaAdapterScript() {
 	luaScriptFixture := integrationTesting.CreateJavaAdapterScriptFixture(suite.Connection)
 	defer luaScriptFixture.Close()
 	result, err := ReadMetadataTables(suite.Connection)
@@ -44,5 +44,21 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataWithMissingValues() {
 			InputType:  "",
 			ResultType: "",
 			Text:       "CREATE JAVA  ADAPTER SCRIPT \"VS_ADAPTER\" AS\n%scriptclass com.exasol.adapter.RequestDispatcher;\n%jar /buckets/bfsdefault/default/vs.jar;",
+			Comment:    ""}}}, result.AllScripts)
+}
+
+func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaSetScript() {
+	luaScriptFixture := integrationTesting.CreateJavaSetScriptFixture(suite.Connection)
+	defer luaScriptFixture.Close()
+	result, err := ReadMetadataTables(suite.Connection)
+	suite.NoError(err)
+	suite.Assert().Equal(
+		ExaAllScriptTable{Rows: []ExaAllScriptRow{{
+			Schema:     "TEST",
+			Name:       "IMPORT_FROM_S3_DOCUMENT_FILES",
+			Type:       "UDF",
+			InputType:  "SET",
+			ResultType: "EMITS",
+			Text:       "CREATE JAVA SET SCRIPT \"IMPORT_FROM_S3_DOCUMENT_FILES\" (\"DATA_LOADER\" VARCHAR(2000000) UTF8, \"SCHEMA_MAPPING_REQUEST\" VARCHAR(2000000) UTF8, \"CONNECTION_NAME\" VARCHAR(500) UTF8) EMITS (...) AS\n%scriptclass com.exasol.adapter.document.UdfEntryPoint;\n%jar /buckets/bfsdefault/default/vs.jar;",
 			Comment:    ""}}}, result.AllScripts)
 }
