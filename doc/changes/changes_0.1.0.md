@@ -15,6 +15,7 @@ Code name:
 * #14: Added parameters to installations response
 * #31: Added parameter validator
 * #30: Add optional command line flag for the path to the extension directory
+* #37: Added support for more metadata tables, use a specific schema for extensions
 
 ## Refactoring
 
