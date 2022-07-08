@@ -60,4 +60,6 @@ After making changes to the API follow these steps:
 
 ### Using a Local Extension Interface
 
-To use a local, non-published version of the extension interface, edit [integrationTesting/extensionForTesting/package.json](../../integrationTesting/extensionForTesting/package.json) and replace the version of `"@exasol/extension-manager-interface"` with the path to your local clone of [extension-manager-interface](https://github.com/exasol/extension-manager-interface).
+To use a local, non-published version of the extension interface in integration tests, edit [integrationTesting/extensionForTesting/package.json](../../integrationTesting/extensionForTesting/package.json) and replace the version of `"@exasol/extension-manager-interface"` with the path to your local clone of [extension-manager-interface](https://github.com/exasol/extension-manager-interface).
+
+Make sure to not commit the modified `package.json`.
