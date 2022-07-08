@@ -48,6 +48,10 @@ func execSQL(db *sql.DB, sql string) {
 	}
 }
 
+func (fixture ScriptFixture) GetSchemaName() string {
+	return "TEST"
+}
+
 func (fixture ScriptFixture) Close() {
 	execSQL(fixture.db, "DROP SCHEMA IF EXISTS TEST CASCADE")
 }

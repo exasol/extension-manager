@@ -16,9 +16,9 @@ func TestExaAllScriptsTableSuite(t *testing.T) {
 }
 
 func (suite *ExaAllScriptsTableSuite) TestReadMetadataWithAllColumnsDefined() {
-	luaScriptFixture := integrationTesting.CreateLuaScriptFixture(suite.Connection)
-	defer luaScriptFixture.Close()
-	result, err := ReadMetadataTables(suite.Connection)
+	fixture := integrationTesting.CreateLuaScriptFixture(suite.Connection)
+	defer fixture.Close()
+	result, err := ReadMetadataTables(suite.Connection, fixture.GetSchemaName())
 	suite.NoError(err)
 	suite.Assert().Equal(
 		ExaAllScriptTable{Rows: []ExaAllScriptRow{{
@@ -32,9 +32,9 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataWithAllColumnsDefined() {
 }
 
 func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaAdapterScript() {
-	luaScriptFixture := integrationTesting.CreateJavaAdapterScriptFixture(suite.Connection)
-	defer luaScriptFixture.Close()
-	result, err := ReadMetadataTables(suite.Connection)
+	fixture := integrationTesting.CreateJavaAdapterScriptFixture(suite.Connection)
+	defer fixture.Close()
+	result, err := ReadMetadataTables(suite.Connection, fixture.GetSchemaName())
 	suite.NoError(err)
 	suite.Assert().Equal(
 		ExaAllScriptTable{Rows: []ExaAllScriptRow{{
@@ -48,9 +48,9 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaAdapterScript() {
 }
 
 func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaSetScript() {
-	luaScriptFixture := integrationTesting.CreateJavaSetScriptFixture(suite.Connection)
-	defer luaScriptFixture.Close()
-	result, err := ReadMetadataTables(suite.Connection)
+	fixture := integrationTesting.CreateJavaSetScriptFixture(suite.Connection)
+	defer fixture.Close()
+	result, err := ReadMetadataTables(suite.Connection, fixture.GetSchemaName())
 	suite.NoError(err)
 	suite.Assert().Equal(
 		ExaAllScriptTable{Rows: []ExaAllScriptRow{{
