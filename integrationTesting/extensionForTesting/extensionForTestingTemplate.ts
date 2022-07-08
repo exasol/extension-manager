@@ -1,10 +1,7 @@
 import {
-    ExaAllScripts,
-    ExasolExtension,
+    ExaMetadata, ExasolExtension,
     Installation,
-    Instance,
-    Operators, Parameter,
-    ParameterValues,
+    Instance, ParameterValues,
     registerExtension,
     SqlClient
 } from "@exasol/extension-manager-interface";
@@ -21,7 +18,7 @@ function createExtension(): ExasolExtension {
         addInstance(_installation: Installation, _params: ParameterValues, _sql: SqlClient): Instance {
             return undefined;
         },
-        findInstallations(_sqlClient: SqlClient, exaAllScripts: ExaAllScripts): Installation[] {
+        findInstallations(_sqlClient: SqlClient, metadata: ExaMetadata): Installation[] {
             $FIND_INSTALLATIONS$
         },
         findInstances(_installation: Installation, _sql: SqlClient): Instance[] {

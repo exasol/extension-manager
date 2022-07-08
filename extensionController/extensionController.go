@@ -14,6 +14,7 @@ type ExtensionController interface {
 	// GetAllExtensions reports all extension definitions
 	// dbConnection is a connection to the Exasol DB with autocommit turned off
 	GetAllExtensions(dbConnection *sql.DB) ([]*Extension, error)
+
 	// GetAllInstallations searches for installations of any extensions
 	// dbConnection is a connection to the Exasol DB with autocommit turned off
 	GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.JsExtInstallation, error)
@@ -30,12 +31,13 @@ type ExtInstallation struct {
 }
 
 // Create an instance of ExtensionController
-func Create(pathToExtensionFolder string) ExtensionController {
-	return &extensionControllerImpl{pathToExtensionFolder: pathToExtensionFolder}
+func Create(pathToExtensionFolder string, extensionSchemaName string) ExtensionController {
+	return &extensionControllerImpl{pathToExtensionFolder: pathToExtensionFolder, extensionSchemaName: extensionSchemaName}
 }
 
 type extensionControllerImpl struct {
 	pathToExtensionFolder string
+	extensionSchemaName   string
 }
 
 func (controller *extensionControllerImpl) GetAllExtensions(dbConnectionWithNoAutocommit *sql.DB) ([]*Extension, error) {
@@ -93,9 +95,9 @@ func (controller *extensionControllerImpl) getAllJsExtensions() ([]*extensionAPI
 }
 
 func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
-	allScriptTable, err := extensionAPI.ReadExaAllScriptTable(dbConnection)
+	metadata, err := extensionAPI.ReadMetadataTables(dbConnection, controller.extensionSchemaName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read EXA_ALL_SCRIPT table. Cause: %w", err)
+		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
 	sqlClient := backend.ExasolSqlClient{Connection: dbConnection}
 	extensions, err := controller.getAllJsExtensions()
@@ -104,7 +106,7 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 	}
 	var allInstallations []*extensionAPI.JsExtInstallation
 	for _, extension := range extensions {
-		installations := extension.FindInstallations(sqlClient, allScriptTable)
+		installations := extension.FindInstallations(sqlClient, metadata)
 		allInstallations = append(allInstallations, installations...)
 	}
 	return allInstallations, nil
