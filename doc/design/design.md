@@ -35,9 +35,6 @@ backend --> customerCluster: manages
 @enduml
 ```
 
-### Do we Need a Backend?
-
-One option would be to implement everything in the JS client. However, we discarded that option, since it does not allow us to upgrade the installed adapters automatically. An automated job can't run in a browser.
 
 ### Extensions
 
