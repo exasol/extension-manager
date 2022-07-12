@@ -1,38 +1,51 @@
-<head><link href="oft_spec.css" rel="stylesheet"></head>
-
 # System Requirement Specification &mdash; Extension Manager
 
 ## Introduction
 
-The Extension Manager (EM) is a REST service that manages extensions (e.g. virtual schemas) in an Exasol database.
+The Extension Manager (EM) is a REST service that manages extensions
+(e.g. virtual schemas) in an Exasol database.
 
 ## About This Document
 
 ### Target Audience
 
-The target audience are software developers, requirement engineers, software designers. See section ["Stakeholders"](#stakeholders) for more details.
+The target audience are software developers, requirement engineers, software
+designers. See section ["Stakeholders"](#stakeholders) for more details.
 
 ### Goal
 
-The EM main goal is to simplify installing, configuring and updating extensions for database administrators.
+The EM main goal is to simplify installing, configuring and updating
+extensions for database administrators.
 
 ## Stakeholders
 
 ### Database Administrators
 
-Database Administrators (DBA) use EM through it's REST API or a user interface for managing extensions in their Exasol databases.
+Database Administrators (DBA) use EM through it's REST API or a user interface
+for managing extensions in their Exasol databases.
 
 ## Terms and Abbreviations
 
-The following list gives you an overview of terms and abbreviations commonly used in OFT documents.
+The following list gives you an overview of terms and abbreviations commonly
+used in the requirements specification.
 
 * **EM**: Extension Manager
-* **UDF** / **User defined function**: Extension point in the Exasol database that allows users to write their own SQL functions, see the [documentation](https://docs.exasol.com/db/latest/database_concepts/udf_scripts.htm) for details
-* **Virtual Schema**: Projection of an external data source that can be access like an Exasol database schema.
-* **Virtual Schema adapter**: Plug-in for Exasol based on the Virtual Schema API that translates between Exasol and the data source.
-* **Extension**: A user managed extension of the Exasol database (e.g. a Virtual Schema, bulk loaders and other in-database integrations) that consists of multiple parts like files in BucketFS, adapter scripts, connections etc.
-* **DBA**: [Database Administrator](#database-administrators)
-* **DBO**: A Database Object like tables, views, scripts, connections, virtual schemas etc.
+* **UDF** / **User defined function**: Extension point in the Exasol database
+  that allows users to write their own SQL functions, see
+  [UDF documentation](https://docs.exasol.com/db/latest/database_concepts/udf_scripts.htm)
+  for details
+* **Virtual Schema**: Projection of an external data source that can be
+  accessed like an Exasol database schema.
+* **Virtual Schema adapter**: Plug-in based on the Virtual Schema
+  API that translates between Exasol and the original data source.
+* **Extension**: A user managed extension of the Exasol database (e.g. a
+  Virtual Schema, bulk loaders and other in-database integration).
+  An extension might consist of multiple parts e.g. files in BucketFS, adapter
+  scripts, connections.
+* **DBA**: [Database Administrator](#database-administrators) (role)
+* **DBO**: A Database Object, e.g. a table, view, script, connection, virtual
+  schema.
+
 
 ## Features
 
@@ -41,21 +54,38 @@ Features are the highest level requirements in this document that describe the m
 ### Install Extensions
 `feat~install-extension~1`
 
-EM installs extensions. An extension consists of artifacts and database objects.
+EM allows the user to install extensions.
+An extension consists of artifacts and database objects.
+
+Needs: req
+
 
 #### Install Required Artifacts
-`feat~install-extension-artifacts~1`
+`req~install-extension-artifacts~1`
 
-EM installs all artifacts required by an extension from GitHub (Jar files, 3rd party libraries, JDBC drivers etc.).
+EM installs all artifacts required by an extension from GitHub (Jar files, 3rd
+party libraries, JDBC drivers etc.).
 
 Note:
 
-In the initial version this feature is omitted to simplify implementation. We assume that all required artifacts are available in BucketFS.
+In the initial version the developers assume that all required artifacts are
+available in BucketFS to simplify implementation.
+
+Covers:
+
+* `feat~install-extension~1`
+
+Needs impl, utest, itest
 
 #### Install Database Objects
-`feat~install-extension-database-objects~1`
+`req~install-extension-database-objects~1`
 
-EM installs corresponding database objects for an extension (UDFs, LUA Scripts, credentials, configuration tables etc.).
+EM installs corresponding database objects for an extension (UDFs, LUA
+Scripts, credentials, configuration tables etc.).
+
+Covers:
+
+* `feat~install-extension~1`
 
 Needs: req
 
@@ -91,6 +121,14 @@ Needs: req
 
 ## Non-functional Requirements
 
+### UI Languages
+`feat~ui-languages~1`
+
+The current SaaS implementation only supports English as language in the user
+interface. To avoid complexity EM currently only supports English language in
+the user interface, too.  This avoids additional efforts for UI translation
+until this is required.
+
 ## Constraints
 
 ### EM Uses a Dedicated Schema
@@ -116,3 +154,44 @@ Needs: dsn
 ### Downgrade to an Older Version
 
 EM does not need to support downgrading an installed extension to an older version.
+
+## Potential Future Enhancements
+
+The following features are out of scope for now, but the architecture of the
+extension manager must be prepared to support them.
+
+### On Premise Support
+
+The extension manager is also useful for customer using Exasol on premise.
+
+### Automatic Installation of Required Files
+
+Currently the extension manager expects that required files like virtual
+schema JARs or JDBC drivers are already available in BucketFS. A future
+version might download and install these files automatically or update them to
+the latest version.
+
+### Automatic Updates of Installed Extensions
+
+When new versions of a virtual schema become available that potentially fix
+security issues, it would be helpful to automatically install the new version
+and update the virtual schemas during a maintenance window.
+
+### Install Older Versions
+
+If an older version of the VS JAR is available on BucketFS we could allow the
+user to choose the version they want to use.
+
+Currently the extension manager will always use the Jar matching the extension's version.
+
+### Use Custom Adapter Scripts
+
+In case the user wants to use an existing `ADAPTER SCRIPT` or explicitly wants
+to create a new one, the extension manager allows them to choose between these
+options.
+
+### Usage via a Automation Tools
+
+Currently the extension manager is only meant to be used by the SaaS UI. In
+the future we might allow using the extension manager also via automation
+tools like Terraform that automatically configure virtual schemas.
