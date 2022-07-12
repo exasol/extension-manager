@@ -36,10 +36,10 @@ Code name:
 * Added `github.com/gin-gonic/gin:v1.8.1`
 * Added `github.com/swaggo/swag:v1.8.3`
 * Added `github.com/stretchr/testify:v1.8.0`
-* Added `github.com/dop251/goja:v0.0.0-20220516123900-4418d4575a41`
+* Added `github.com/dop251/goja:v0.0.0-20220705101429-189bfeb9f530`
 * Added `github.com/swaggo/files:v0.0.0-20220610200504-28940afbdbfe`
-* Added `github.com/dop251/goja_nodejs:v0.0.0-20211022123610-8dd9abb0616d`
-* Added `github.com/swaggo/gin-swagger:v1.5.0`
+* Added `github.com/dop251/goja_nodejs:v0.0.0-20220706223936-8bb8eec2f26a`
+* Added `github.com/swaggo/gin-swagger:v1.5.1`
 * Added `github.com/exasol/exasol-driver-go:v0.4.2`
 * Added `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.0.0-20220607114909-397987f03514`
 

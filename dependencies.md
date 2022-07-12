@@ -22,14 +22,14 @@
 | github.com/DATA-DOG/go-sqlmock | [Unknown][9] |
 | github.com/kinbiko/jsonassert  | [MIT][10]    |
 
-[0]: https://github.com/dop251/goja/blob/4418d4575a41/LICENSE
-[1]: https://github.com/dop251/goja_nodejs/blob/8dd9abb0616d/LICENSE
+[0]: https://github.com/dop251/goja/blob/189bfeb9f530/LICENSE
+[1]: https://github.com/dop251/goja_nodejs/blob/8bb8eec2f26a/LICENSE
 [2]: https://github.com/exasol/exasol-driver-go/blob/v0.4.2/LICENSE
 [3]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/397987f03514/go-client/LICENSE
 [4]: https://github.com/gin-gonic/gin/blob/v1.8.1/LICENSE
 [5]: https://github.com/stretchr/testify/blob/v1.8.0/LICENSE
 [6]: https://github.com/swaggo/files/blob/28940afbdbfe/LICENSE
-[7]: https://github.com/swaggo/gin-swagger/blob/v1.5.0/LICENSE
+[7]: https://github.com/swaggo/gin-swagger/blob/v1.5.1/LICENSE
 [8]: https://github.com/swaggo/swag/blob/v1.8.3/license
 [9]: Unknown
 [10]: https://github.com/kinbiko/jsonassert/blob/v1.1.0/LICENSE
