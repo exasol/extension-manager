@@ -139,8 +139,12 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 	}
 	var allInstallations []*extensionAPI.JsExtInstallation
 	for _, extension := range extensions {
-		installations := extension.FindInstallations(sqlClient, metadata)
-		allInstallations = append(allInstallations, installations...)
+		installations, err := extension.FindInstallations(sqlClient, metadata)
+		if err != nil {
+			return nil, fmt.Errorf("failed to find installations: %v", err)
+		} else {
+			allInstallations = append(allInstallations, installations...)
+		}
 	}
 	return allInstallations, nil
 }

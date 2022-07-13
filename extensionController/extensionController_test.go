@@ -56,7 +56,7 @@ func (suite *ExtensionControllerSuite) TestGetAllExtensions() {
 	suite.NoError(err)
 	suite.Assert().Equal(1, len(extensions))
 	suite.Assert().Equal("MyDemoExtension", extensions[0].Name, "name")
-	suite.Assert().Equal(EXTENSION_FILENAME, extensions[0].Id, "id")
+	suite.Assert().Equal(DEFAULT_EXTENSION_ID, extensions[0].Id, "id")
 }
 
 func (suite *ExtensionControllerSuite) writeDefaultExtension() {
@@ -90,12 +90,12 @@ func (suite *ExtensionControllerSuite) TestGetAllExtensionsThrowingJSError() {
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: jarName, FileSize: 3}).
 		WithFindInstallationsFunc("throw Error(`mock error from js`)").
 		Build().
-		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_FILENAME))
+		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
 	suite.NoError(suite.Exasol.UploadStringContent("123", jarName)) // create file with 3B size
 	defer func() { suite.NoError(suite.Exasol.DeleteFile(jarName)) }()
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
 	extensions, err := controller.GetAllInstallations(suite.Connection)
-	suite.ErrorContains(err, `failed to find installations from extension "my-extension.js": failed to find installations for extension "my-extension.js": Error: mock error from js at`)
+	suite.ErrorContains(err, `failed to find installations: failed to find installations for extension "testing-extension.js": Error: mock error from js at`)
 	suite.Nil(extensions)
 }
 
