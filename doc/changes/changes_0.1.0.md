@@ -24,6 +24,10 @@ Code name:
 * #23: Moved go code from backend/ folder to project root
 * #27: Changed extension registration to use the `global` object
 
+## Bugfixes
+
+* #42: Added error handling for exceptions in JavaScript code
+
 ## Documentation
 
 * #4: Added design
