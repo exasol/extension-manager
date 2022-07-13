@@ -55,12 +55,12 @@ func (mock *MockSimpleSQLClient) RunQuery(query string) {
 
 func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_Install() {
 	mockSQLClient := MockSimpleSQLClient{}
-	mockSQLClient.On("RunQuery", "CREATE ADAPTER SCRIPT ...").Return()
+	mockSQLClient.On("RunQuery", "select 1").Return()
 	extension, err := GetExtensionFromFile(suite.validExtensionFile)
 	suite.NoError(err)
 	extension.Install(&mockSQLClient, "extVersion")
 	suite.NoError(err)
-	mockSQLClient.AssertCalled(suite.T(), "RunQuery", "CREATE ADAPTER SCRIPT ...")
+	mockSQLClient.AssertCalled(suite.T(), "RunQuery", "select 1")
 }
 
 func createMockMetadata() ExaMetadata {
