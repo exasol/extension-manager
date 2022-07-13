@@ -27,7 +27,7 @@ func GetExtensionFromFile(fileName string) (*JsExtension, error) {
 		return nil, fmt.Errorf("incompatible extension API version %q. Please update the extension to use supported version %q", extensionJs.APIVersion, SupportedApiVersion)
 	}
 	log.Printf("Extension %q loaded from file %q", extensionJs.Extension.Name, fileName)
-	return &extensionJs.Extension, nil
+	return wrapExtension(&extensionJs.Extension), nil
 }
 
 func loadExtension(vm *goja.Runtime, fileName string) (*installedExtension, error) {
@@ -59,10 +59,11 @@ func loadExtension(vm *goja.Runtime, fileName string) (*installedExtension, erro
 }
 
 type installedExtension struct {
-	Extension  JsExtension `json:"extension"`
-	APIVersion string      `json:"apiVersion"`
+	Extension  RawJsExtension `json:"extension"`
+	APIVersion string         `json:"apiVersion"`
 }
 
+type RawJsExtension struct {
 	Id                  string
 	Name                string                                                                      `json:"name"`
 	Description         string                                                                      `json:"description"`

@@ -10,7 +10,10 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-const EXTENSION_SCHEMA = "test"
+const (
+	EXTENSION_SCHEMA   = "test"
+	EXTENSION_FILENAME = "my-extension.js"
+)
 
 type ExtensionControllerSuite struct {
 	integrationTesting.IntegrationTestSuite
@@ -52,7 +55,8 @@ func (suite *ExtensionControllerSuite) TestGetAllExtensions() {
 	extensions, err := controller.GetAllExtensions(suite.Connection)
 	suite.NoError(err)
 	suite.Assert().Equal(1, len(extensions))
-	suite.Assert().Equal("MyDemoExtension", extensions[0].Name)
+	suite.Assert().Equal("MyDemoExtension", extensions[0].Name, "name")
+	suite.Assert().Equal(EXTENSION_FILENAME, extensions[0].Id, "id")
 }
 
 func (suite *ExtensionControllerSuite) writeDefaultExtension() {
@@ -63,14 +67,14 @@ func (suite *ExtensionControllerSuite) writeDefaultExtension() {
 			return {name: row.schema + "." + row.name, version: "0.1.0", instanceParameters: []}
 		});`).
 		Build().
-		WriteToFile(path.Join(suite.tempExtensionRepo, "myExtension.js"))
+		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_FILENAME))
 }
 
 func (suite *ExtensionControllerSuite) TestGetAllExtensionsWithMissingJar() {
 	integrationTesting.CreateTestExtensionBuilder().
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "missing-jar.jar", FileSize: 3}).
 		Build().
-		WriteToFile(path.Join(suite.tempExtensionRepo, "myExtension.js"))
+		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_FILENAME))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
 	dbConnectionWithNoAutocommit, err := suite.Exasol.CreateConnectionWithConfig(false)
 	suite.NoError(err)
@@ -78,6 +82,21 @@ func (suite *ExtensionControllerSuite) TestGetAllExtensionsWithMissingJar() {
 	extensions, err := controller.GetAllExtensions(dbConnectionWithNoAutocommit)
 	suite.NoError(err)
 	suite.Assert().Empty(extensions)
+}
+
+func (suite *ExtensionControllerSuite) TestGetAllExtensionsThrowingJSError() {
+	const jarName = "my-failing-extension-1.2.3.jar"
+	integrationTesting.CreateTestExtensionBuilder().
+		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: jarName, FileSize: 3}).
+		WithFindInstallationsFunc("throw Error(`mock error from js`)").
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_FILENAME))
+	suite.NoError(suite.Exasol.UploadStringContent("123", jarName)) // create file with 3B size
+	defer func() { suite.NoError(suite.Exasol.DeleteFile(jarName)) }()
+	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
+	extensions, err := controller.GetAllInstallations(suite.Connection)
+	suite.ErrorContains(err, `failed to find installations from extension "my-extension.js": failed to find installations for extension "my-extension.js": Error: mock error from js at`)
+	suite.Nil(extensions)
 }
 
 func (suite *ExtensionControllerSuite) TestGetAllInstallations() {
