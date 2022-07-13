@@ -63,6 +63,7 @@ type installedExtension struct {
 	APIVersion string      `json:"apiVersion"`
 }
 
+type JsExtension struct {
 	Id                  string
 	Name                string                                                                      `json:"name"`
 	Description         string                                                                      `json:"description"`
