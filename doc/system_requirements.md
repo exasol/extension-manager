@@ -46,7 +46,6 @@ used in the requirements specification.
 * **DBO**: A Database Object, e.g. a table, view, script, connection, virtual
   schema.
 
-
 ## Features
 
 Features are the highest level requirements in this document that describe the main functionality of EM.
@@ -55,51 +54,29 @@ Features are the highest level requirements in this document that describe the m
 `feat~install-extension~1`
 
 EM allows the user to install extensions.
-An extension consists of artifacts and database objects.
-
-Needs: req
-
-
-#### Install Required Artifacts
-`req~install-extension-artifacts~1`
-
-EM installs all artifacts required by an extension from GitHub (Jar files, 3rd
-party libraries, JDBC drivers etc.).
-
-Note:
-
-In the initial version the developers assume that all required artifacts are
-available in BucketFS to simplify implementation.
-
-Covers:
-
-* `feat~install-extension~1`
-
-Needs impl, utest, itest
-
-#### Install Database Objects
-`req~install-extension-database-objects~1`
-
-EM installs corresponding database objects for an extension (UDFs, LUA
-Scripts, credentials, configuration tables etc.).
-
-Covers:
-
-* `feat~install-extension~1`
 
 Needs: req
 
 ### Configure an Extension
 `feat~configure-extension~1`
 
-EM configures an extension (e.g. setup a Virtual Schema source system).
+EM allows the user to configure an extension, e.g. in order to set up a
+Virtual Schema source system.
+
+Needs: req
+
+### Updating an Extension
+`feat~update-extension~1`
+
+EM allows users to install a new version of an extension that was already
+installed in an older version.
 
 Needs: req
 
 ### Uninstall an Extension
 `feat~uninstall-extension~1`
 
-EM uninstalls an extension including it's artifacts, configuration and database objects.
+EM allows the user to uninstall an extension.
 
 Needs: req
 
@@ -117,17 +94,175 @@ EM lists installed extensions.
 
 Needs: req
 
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 ## Functional Requirements
+
+### Extensions
+`req~extension~1`
+
+An extension might consist of JDBC driver, artifacts, configuration and
+database objects. Dependening on the nature of the extension not all artifacts
+might be required.
+
+((config into extension definion
+user types credentials into EM gui))
+
+((see github project extension-manager-interface
+for parameter conditions))
+
+Covers:
+* [`feat~install-extension~1`](#install-extensions)
+* [`feat~configure-extension~1`](#configure-an-extension)
+* [`feat~uninstall-extension~1`](#uninstall-an-extension)
+
+Needs: dsn
+
+### Installation
+
+#### Install Required Artifacts
+`req~install-extension-artifacts~1`
+
+EM installs all artifacts required by an extension from GitHub (Jar files, 3rd
+party libraries, JDBC drivers etc.).
+
+Covers:
+
+* [`feat~install-extension~1`](#install-extensions)
+
+Needs: dsn
+
+#### Install Database Objects
+`req~install-extension-database-objects~1`
+
+<!--
+
+See https://github.com/exasol/s3-document-files-virtual-schema/blob/main/doc/user_guide/user_guide.md
+
+1. CREATE SCHEMA ADAPTER;
+2. create adapter script
+   - in database schema "ADAPTER"
+   - name ADAPTER.S3_FILES_ADAPTER
+   - reference to jar in bucketfs
+3. create UDF function = "set script"
+   - in database schema "ADAPTER"
+   - name ADAPTER.IMPORT_FROM_S3_DOCUMENT_FILES
+   - columns
+     - DATA_LOADER
+     - SCHEMA_MAPPING_REQUEST
+     - CONNECTION_NAME
+   - reference to jar file in bucketfs
+4. create connection
+   - parameters depending on VS variant
+   - incl. credentials
+5. create virtual schema
+   - ADAPTER.S3_FILES_ADAPTER WITH
+   - reference to connection
+   - MAPPING in bucket fs
+
+-->
+
+EM installs corresponding database objects for an extension (UDFs, LUA
+Scripts, credentials, configuration tables etc.).
+
+(( is UDF really a Database object?
+Are there lua scripts, indeed?
+lua is inline in extension definition either adapter script or set set
+))
+
+Covers:
+
+* [`feat~install-extension~1`](#install-extensions)
+
+Needs: dsn
+
+### Update extension
+`req~update-extension~1`
+
+When updating an extension that is already installed in an older version, EM
+checks if any parameter definition has changed. If there were breaking
+changes, EM cannot perform the update automatically and aborts the
+installation with an appropriate error message.
+
+(( how to define "breaking" changes? ))
+
+Rationale: The only option would be to add update scripts that define how to
+convert the parameters from one version to another. However, that is currently
+out of scope.
+
+
+Covers:
+* [`feat~update-extension~1`](#updating-an-extension)
+
+Needs: dsn
+
+### Uninstalling extensions
+`req~uninstall-extension~1`
+
+Covers:
+* [`feat~uninstall-extension~1`](#uninstall-an-extension)
+
+Needs: dsn
+
+### Define Configuration Parameters
+`req~define-configuration-parameters~1`
+
+EM allows extensions to define a set of parameters. Each extension might have
+different parameters.
+
+Covers:
+* [`feat~configure-extension~1`](#configure-an-extension)
+
+Needs: dsn
+
+#### Parameter Types
+`req~parameter-types~1`
+
+EM supports the following types for configuration parameters
+* strings
+* select a single option from a given list of available values
+* mandatory parameters
+* optional parameters
+* conditional parameters, i.e. parameters depending on other parameter's values
+
+Rationale: EM's UI can then present all relevant parameters to the user and
+allow the user to assign a value to each parameter, e.g.  enter credentials,
+select values from option lists.
+
+Covers
+* [`feat~configure-extension~1`](#configure-an-extension)
+
+Needs: dsn
+
+#### Validation of parameter values
+`req~validate-parameter-values~1`
+
+EM validates parameter values selected oder entered by the user.
+
+Rationale:
+* improve user experience
+* detect errors as soon as possible
+* ensure security
+
+Covers:
+* [`feat~configure-extension~1`](#configure-an-extension)
+
+Needs: dsn
 
 ## Non-functional Requirements
 
 ### UI Languages
-`feat~ui-languages~1`
+`req~ui-languages~1`
 
 The current SaaS implementation only supports English as language in the user
 interface. To avoid complexity EM currently only supports English language in
 the user interface, too.  This avoids additional efforts for UI translation
 until this is required.
+
+Covers:
+* [`feat~configure-extension~1`](#configure-an-extension)
+* [`feat~install-extension~1`](#install-extensions)
+* [`feat~uninstall-extension~1`](#uninstall-an-extension)
 
 ## Constraints
 
@@ -140,14 +275,14 @@ Rationale:
 
 This makes it clear to DBAs that objects in this schema are managed and should not be modified by hand.
 
-Needs: dsn
+Needs: impl, utest, itest
 
 ### EM works with Exasol SaaS
 `const~works-with-saas~1`
 
 EM works in an Exasol SaaS environment.
 
-Needs: dsn
+Needs: impl, utest, itest
 
 ## Out-of-Scope
 
