@@ -56,24 +56,54 @@ func (mock *MockExtensionController) InstallExtension(dbConnection *sql.DB, exte
 
 func (mock *MockExtensionController) GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
 	args := mock.Called(dbConnection)
-	return args.Get(0).([]*extensionAPI.JsExtInstallation), args.Error(1)
+	if installations, ok := args.Get(0).([]*extensionAPI.JsExtInstallation); ok {
+		return installations, args.Error(1)
+	}
+	return nil, args.Error(1)
 }
 
 func (mock *MockExtensionController) GetAllExtensions(dbConnectionWithNoAutocommit *sql.DB) ([]*extensionController.Extension, error) {
 	args := mock.Called(dbConnectionWithNoAutocommit)
-	return args.Get(0).([]*extensionController.Extension), args.Error(1)
+	if extensions, ok := args.Get(0).([]*extensionController.Extension); ok {
+		return extensions, args.Error(1)
+	} else {
+		return nil, args.Error(1)
+	}
 }
 
-func (suite *RestAPISuite) TestGetInstallations() {
+func (suite *RestAPISuite) TestStopWithoutStartFails() {
+	controller := &MockExtensionController{}
+	restAPI := Create(controller)
+	suite.Panics(restAPI.Stop)
+}
+
+func (suite *RestAPISuite) TestDbConnectionFails() {
+	responseString := suite.makeRequest("GET", "/extensions?dbHost=host;invalid&dbPort=8563&dbUser=user&dbPass=password", "", 500)
+	suite.Equal("Internal error.", responseString)
+}
+
+func (suite *RestAPISuite) TestGetInstallationsSuccessfully() {
 	suite.controller.On("GetAllInstallations", mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)
 	responseString := suite.makeGetRequest("/installations?dbHost=host&dbPort=8563&dbUser=user&dbPass=password")
 	suite.assertJSON.Assertf(responseString, `{"installations":[{"name":"test","version":"0.1.0","instanceParameters":[{"id":"param1","name":"My param","type":"string"}]}]}`)
 }
 
-func (suite *RestAPISuite) TestGetExtensions() {
+func (suite *RestAPISuite) TestGetInstallationsFailed() {
+	suite.controller.On("GetAllInstallations", mock.Anything).Return(nil, fmt.Errorf("mock error"))
+	responseString := suite.makeRequest("GET", "/installations?dbHost=host&dbPort=8563&dbUser=user&dbPass=password", "", 500)
+	suite.Equal("Internal error.", responseString)
+}
+
+func (suite *RestAPISuite) TestGetAllExtensionsSuccessfully() {
 	suite.controller.On("GetAllExtensions", mock.Anything).Return([]*extensionController.Extension{{Id: "ext-id", Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
 	responseString := suite.makeGetRequest("/extensions?dbHost=host&dbPort=8563&dbUser=user&dbPass=password")
 	suite.assertJSON.Assertf(responseString, `{"extensions":[{"id": "ext-id", "name":"my-extension","description":"a cool extension","installableVersions":["0.1.0"]}]}`)
+}
+
+func (suite *RestAPISuite) TestGetAllExtensionsFails() {
+	suite.controller.On("GetAllExtensions", mock.Anything).Return(nil, fmt.Errorf("mock error"))
+	responseString := suite.makeRequest("GET", "/extensions?dbHost=host&dbPort=8563&dbUser=user&dbPass=password", "", 500)
+	suite.Equal("Internal error.", responseString)
 }
 
 func (suite *RestAPISuite) TestRequestsFailForMissingParameters() {
@@ -112,10 +142,15 @@ func (suite *RestAPISuite) TestRequestsFailForMissingParameters() {
 	}
 }
 
-func (suite *RestAPISuite) TestInstallExtensions() {
+func (suite *RestAPISuite) TestInstallExtensionsSuccessfully() {
 	suite.controller.On("InstallExtension", mock.Anything, "ext-id", "ver").Return(nil)
 	responseString := suite.makePutRequest("/installations?extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563&dbUser=user&dbPass=password")
 	suite.Equal("", responseString)
+}
+func (suite *RestAPISuite) TestInstallExtensionsFailed() {
+	suite.controller.On("InstallExtension", mock.Anything, "ext-id", "ver").Return(fmt.Errorf("mock error"))
+	responseString := suite.makeRequest("PUT", "/installations?extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563&dbUser=user&dbPass=password", "", 500)
+	suite.Equal("Internal error.", responseString)
 }
 
 func (suite *RestAPISuite) makeGetRequest(path string) string {

@@ -10,7 +10,10 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-const EXTENSION_SCHEMA = "test"
+const (
+	EXTENSION_SCHEMA     = "test"
+	DEFAULT_EXTENSION_ID = "testing-extension.js"
+)
 
 type ExtensionControllerSuite struct {
 	integrationTesting.IntegrationTestSuite
@@ -63,14 +66,14 @@ func (suite *ExtensionControllerSuite) writeDefaultExtension() {
 			return {name: row.schema + "." + row.name, version: "0.1.0", instanceParameters: []}
 		});`).
 		Build().
-		WriteToFile(path.Join(suite.tempExtensionRepo, "myExtension.js"))
+		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
 }
 
 func (suite *ExtensionControllerSuite) TestGetAllExtensionsWithMissingJar() {
 	integrationTesting.CreateTestExtensionBuilder().
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "missing-jar.jar", FileSize: 3}).
 		Build().
-		WriteToFile(path.Join(suite.tempExtensionRepo, "myExtension.js"))
+		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
 	dbConnectionWithNoAutocommit, err := suite.Exasol.CreateConnectionWithConfig(false)
 	suite.NoError(err)
@@ -89,4 +92,17 @@ func (suite *ExtensionControllerSuite) TestGetAllInstallations() {
 	suite.NoError(err)
 	suite.Assert().Equal(1, len(installations))
 	suite.Assert().Equal(fixture.GetSchemaName()+".MY_SCRIPT", installations[0].Name)
+}
+
+func (suite *ExtensionControllerSuite) TestInstallFailsForUnknownExtensionId() {
+	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
+	err := controller.InstallExtension(suite.Connection, "unknown-extension-id", "ver")
+	suite.ErrorContains(err, "failed to load extension with id \"unknown-extension-id\": failed to load extension from file")
+}
+
+func (suite *ExtensionControllerSuite) TestInstallSucceeds() {
+	suite.writeDefaultExtension()
+	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
+	err := controller.InstallExtension(suite.Connection, DEFAULT_EXTENSION_ID, "ver")
+	suite.NoError(err)
 }

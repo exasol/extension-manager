@@ -13,7 +13,7 @@ function createExtension(): ExasolExtension {
         installableVersions: ["0.1.0"],
         bucketFsUploads: $UPLOADS$,
         install(sqlClient) {
-            sqlClient.runQuery("CREATE ADAPTER SCRIPT ...")
+            sqlClient.runQuery("select 1")
         },
         addInstance(_installation: Installation, _params: ParameterValues, _sql: SqlClient): Instance {
             return undefined;

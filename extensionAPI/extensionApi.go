@@ -26,7 +26,7 @@ func GetExtensionFromFile(fileName string) (*JsExtension, error) {
 	if extensionJs.APIVersion != SupportedApiVersion {
 		return nil, fmt.Errorf("incompatible extension API version %q. Please update the extension to use supported version %q", extensionJs.APIVersion, SupportedApiVersion)
 	}
-	log.Printf("Extension %q loaded from file %q", extensionJs.Extension.Name, fileName)
+	log.Printf("Extension %q with id %q loaded from file %q", extensionJs.Extension.Name, extensionJs.Extension.Id, fileName)
 	return &extensionJs.Extension, nil
 }
 
