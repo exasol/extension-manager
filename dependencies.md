@@ -31,5 +31,5 @@
 [6]: https://github.com/swaggo/files/blob/28940afbdbfe/LICENSE
 [7]: https://github.com/swaggo/gin-swagger/blob/v1.5.1/LICENSE
 [8]: https://github.com/swaggo/swag/blob/v1.8.3/license
-[9]: Unknown
+[9]: https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE
 [10]: https://github.com/kinbiko/jsonassert/blob/v1.1.0/LICENSE
