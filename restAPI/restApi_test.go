@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -20,6 +21,7 @@ type RestAPISuite struct {
 	assertJSON *jsonassert.Asserter
 	controller *MockExtensionController
 	restAPI    RestAPI
+	baseUrl    string
 }
 
 func TestRestApiSuite(t *testing.T) {
@@ -37,6 +39,7 @@ func (suite *RestAPISuite) SetupSuite() {
 func (suite *RestAPISuite) SetupTest() {
 	suite.controller = &MockExtensionController{}
 	suite.restAPI = Create(suite.controller)
+	suite.baseUrl = "http://localhost:8080"
 	go suite.restAPI.Serve()
 	time.Sleep(10 * time.Millisecond) // give the server some time to become ready
 }
@@ -46,7 +49,8 @@ func (suite *RestAPISuite) TearDownTest() {
 }
 
 func (mock *MockExtensionController) InstallExtension(dbConnection *sql.DB, extensionId string, extensionVersion string) error {
-	args := mock.Called(dbConnection)
+	args := mock.Called(dbConnection, extensionId, extensionVersion)
+	fmt.Printf("arg0 %v %t", args.Get(0), args.Get(0))
 	return args.Error(0)
 }
 
@@ -74,34 +78,60 @@ func (suite *RestAPISuite) TestGetExtensions() {
 
 func (suite *RestAPISuite) TestRequestsFailForMissingParameters() {
 	var tests = []struct {
+		method        string
 		url           string
 		parameters    string
 		expectedError string
 	}{
-		{"/extensions", "dbPort=8563&dbUser=user&dbPass=password", "missing dbHost"},
-		{"/extensions", "dbHost=host&dbUser=user&dbPass=password", "missing dbPort"},
-		{"/extensions", "dbHost=host&dbPort=invalidPort&dbUser=user&dbPass=password", "invalid dbPort"},
-		{"/extensions", "dbHost=host&dbPort=8563&dbPass=password", "missing dbUser"},
-		{"/extensions", "dbHost=host&dbPort=8563&dbUser=user", "missing dbPass"},
-		{"/installations", "dbPort=8563&dbUser=user&dbPass=password", "missing dbHost"},
-		{"/installations", "dbHost=host&dbUser=user&dbPass=password", "missing dbPort"},
-		{"/installations", "dbHost=host&dbPort=invalidPort&dbUser=user&dbPass=password", "invalid dbPort"},
-		{"/installations", "dbHost=host&dbPort=8563&dbPass=password", "missing dbUser"},
-		{"/installations", "dbHost=host&dbPort=8563&dbUser=user", "missing dbPass"},
+		{"GET", "/extensions", "dbPort=8563&dbUser=user&dbPass=password", "missing dbHost"},
+		{"GET", "/extensions", "dbHost=host&dbUser=user&dbPass=password", "missing dbPort"},
+		{"GET", "/extensions", "dbHost=host&dbPort=invalidPort&dbUser=user&dbPass=password", "invalid dbPort"},
+		{"GET", "/extensions", "dbHost=host&dbPort=8563&dbPass=password", "missing dbUser"},
+		{"GET", "/extensions", "dbHost=host&dbPort=8563&dbUser=user", "missing dbPass"},
+
+		{"GET", "/installations", "dbPort=8563&dbUser=user&dbPass=password", "missing dbHost"},
+		{"GET", "/installations", "dbHost=host&dbUser=user&dbPass=password", "missing dbPort"},
+		{"GET", "/installations", "dbHost=host&dbPort=invalidPort&dbUser=user&dbPass=password", "invalid dbPort"},
+		{"GET", "/installations", "dbHost=host&dbPort=8563&dbPass=password", "missing dbUser"},
+		{"GET", "/installations", "dbHost=host&dbPort=8563&dbUser=user", "missing dbPass"},
+
+		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbPort=8563&dbUser=user&dbPass=password", "missing dbHost"},
+		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbHost=host&dbUser=user&dbPass=password", "missing dbPort"},
+		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=invalidPort&dbUser=user&dbPass=password", "invalid dbPort"},
+		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563&dbPass=password", "missing dbUser"},
+		{"PUT", "/installations", "extensionId=ext-id&dbHost=host&dbPort=8563&dbUser=user&dbPass=password", "missing extensionVersion"},
+		{"PUT", "/installations", "extensionVersion=ver&dbHost=host&dbPort=8563&dbUser=user&dbPass=password", "missing extensionId"},
 	}
 	suite.controller.On("GetAllExtensions", mock.Anything).Return([]*extensionController.Extension{{Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
 	suite.controller.On("GetAllInstallations", mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)
+	suite.controller.On("InstallExtension", mock.Anything, "ext-id", "ver").Return(nil)
 	for _, test := range tests {
-		completeUrl := fmt.Sprintf("%s?%s", test.url, test.parameters)
-		responseString := suite.makeGetRequest(completeUrl)
-		suite.Equal("Internal error.", responseString, fmt.Sprintf("Expected request %s to fail", completeUrl))
+		completePath := fmt.Sprintf("%s?%s", test.url, test.parameters)
+		responseString := suite.makeRequest(test.method, completePath, "", 500)
+		suite.Equal("Internal error.", responseString, fmt.Sprintf("Expected request %s to fail", completePath))
 	}
 }
 
+func (suite *RestAPISuite) TestInstallExtensions() {
+	suite.controller.On("InstallExtension", mock.Anything, "ext-id", "ver").Return(nil)
+	responseString := suite.makePutRequest("/installations?extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563&dbUser=user&dbPass=password")
+	suite.Equal("", responseString)
+}
+
 func (suite *RestAPISuite) makeGetRequest(path string) string {
-	const apiHost = "http://localhost:8080"
-	response, err := http.Get(apiHost + path)
+	return suite.makeRequest("GET", path, "", 200)
+}
+
+func (suite *RestAPISuite) makePutRequest(path string) string {
+	return suite.makeRequest("PUT", path, "", 200)
+}
+
+func (suite *RestAPISuite) makeRequest(method string, path string, body string, expectedStatusCode int) string {
+	request, err := http.NewRequest(method, suite.baseUrl+path, strings.NewReader(body))
 	suite.NoError(err)
+	response, err := http.DefaultClient.Do(request)
+	suite.NoError(err)
+	suite.Equal(expectedStatusCode, response.StatusCode)
 	defer func() { suite.NoError(response.Body.Close()) }()
 	bytes, err := ioutil.ReadAll(response.Body)
 	suite.NoError(err)
