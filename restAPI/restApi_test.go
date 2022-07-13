@@ -45,6 +45,11 @@ func (suite *RestAPISuite) TearDownTest() {
 	suite.restAPI.Stop()
 }
 
+func (mock *MockExtensionController) InstallExtension(dbConnection *sql.DB, extensionId string, extensionVersion string) error {
+	args := mock.Called(dbConnection)
+	return args.Error(0)
+}
+
 func (mock *MockExtensionController) GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
 	args := mock.Called(dbConnection)
 	return args.Get(0).([]*extensionAPI.JsExtInstallation), args.Error(1)
@@ -62,9 +67,9 @@ func (suite *RestAPISuite) TestGetInstallations() {
 }
 
 func (suite *RestAPISuite) TestGetExtensions() {
-	suite.controller.On("GetAllExtensions", mock.Anything).Return([]*extensionController.Extension{{Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
+	suite.controller.On("GetAllExtensions", mock.Anything).Return([]*extensionController.Extension{{Id: "ext-id", Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
 	responseString := suite.makeGetRequest("/extensions?dbHost=host&dbPort=8563&dbUser=user&dbPass=password")
-	suite.assertJSON.Assertf(responseString, `{"extensions":[{"name":"my-extension","description":"a cool extension","installableVersions":["0.1.0"]}]}`)
+	suite.assertJSON.Assertf(responseString, `{"extensions":[{"id": "ext-id", "name":"my-extension","description":"a cool extension","installableVersions":["0.1.0"]}]}`)
 }
 
 func (suite *RestAPISuite) TestRequestsFailForMissingParameters() {

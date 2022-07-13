@@ -63,12 +63,12 @@ type installedExtension struct {
 	APIVersion string      `json:"apiVersion"`
 }
 
-type JsExtension struct {
+	Id                  string
 	Name                string                                                                      `json:"name"`
 	Description         string                                                                      `json:"description"`
 	BucketFsUploads     []BucketFsUpload                                                            `json:"bucketFsUploads"`
 	InstallableVersions []string                                                                    `json:"installableVersions"`
-	Install             func(sqlClient SimpleSQLClient)                                             `json:"install"`
+	Install             func(sqlClient SimpleSQLClient, version string)                             `json:"install"`
 	FindInstallations   func(sqlClient SimpleSQLClient, metadata *ExaMetadata) []*JsExtInstallation `json:"findInstallations"`
 }
 
