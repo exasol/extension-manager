@@ -206,27 +206,32 @@ func (restApi *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResp
 // @Failure      500 {object} string
 // @Router       /extensions [put]
 func (restApi *restAPIImpl) handlePutExtension(c *gin.Context) {
-	err := restApi.installExtension(c)
-	restApi.sendResponse(c, nil, err)
+	result, err := restApi.installExtension(c)
+	restApi.sendResponse(c, result, err)
 }
 
-func (restApi *restAPIImpl) installExtension(c *gin.Context) error {
+func (restApi *restAPIImpl) installExtension(c *gin.Context) (string, error) {
 	dbConnection, err := restApi.openDBConnection(c)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer closeDbConnection(dbConnection)
 	query := c.Request.URL.Query()
 	extensionId := query.Get("extensionId")
 	if extensionId == "" {
-		return fmt.Errorf("missing parameter extensionId")
+		return "", fmt.Errorf("missing parameter extensionId")
 	}
-	extensionVersion := query.Get("extensionId")
+	extensionVersion := query.Get("extensionVersion")
 	if extensionVersion == "" {
-		return fmt.Errorf("missing parameter extensionVersion")
+		return "", fmt.Errorf("missing parameter extensionVersion")
 	}
 
-	return restApi.Controller.InstallExtension(dbConnection, extensionId, extensionVersion)
+	err = restApi.Controller.InstallExtension(dbConnection, extensionId, extensionVersion)
+
+	if err != nil {
+		return "", fmt.Errorf("error installing extension: %v", err)
+	}
+	return "", nil
 }
 
 func (restApi *restAPIImpl) sendResponse(c *gin.Context, response interface{}, err error) {
@@ -235,7 +240,11 @@ func (restApi *restAPIImpl) sendResponse(c *gin.Context, response interface{}, e
 		log.Printf("request failed: %s\n", err.Error())
 		return
 	}
-	c.JSON(200, response)
+	if s, ok := response.(string); ok {
+		c.String(200, s)
+	} else {
+		c.JSON(200, response)
+	}
 }
 
 func closeDbConnection(database *sql.DB) {

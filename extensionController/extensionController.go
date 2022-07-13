@@ -123,7 +123,8 @@ func (controller *extensionControllerImpl) InstallExtension(dbConnection *sql.DB
 		return fmt.Errorf("failed to load extension with id %q: %v", extensionId, err)
 	}
 	sqlClient := backend.ExasolSqlClient{Connection: dbConnection}
-	return extension.Install(sqlClient, extensionVersion)
+	extension.Install(sqlClient, extensionVersion)
+	return nil
 }
 
 func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
@@ -138,12 +139,8 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 	}
 	var allInstallations []*extensionAPI.JsExtInstallation
 	for _, extension := range extensions {
-		installations, err := extension.FindInstallations(sqlClient, metadata)
-		if err != nil {
-			return nil, fmt.Errorf("failed to find installations from extension %q: %v", extension.Id, err)
-		} else {
-			allInstallations = append(allInstallations, installations...)
-		}
+		installations := extension.FindInstallations(sqlClient, metadata)
+		allInstallations = append(allInstallations, installations...)
 	}
 	return allInstallations, nil
 }
