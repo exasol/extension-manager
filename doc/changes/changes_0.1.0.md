@@ -45,7 +45,7 @@ Code name:
 * Added `github.com/dop251/goja_nodejs:v0.0.0-20220712185256-8cad205bf387`
 * Added `github.com/swaggo/gin-swagger:v1.5.1`
 * Added `github.com/exasol/exasol-driver-go:v0.4.3`
-* Added `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.2.1`
+* Added `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.2.2`
 
 ### Test Dependency Updates
 
