@@ -5,7 +5,7 @@ import (
 )
 
 type JsExtension struct {
-	extension           *RawJsExtension
+	extension           *rawJsExtension
 	Id                  string
 	Name                string
 	Description         string
@@ -13,8 +13,14 @@ type JsExtension struct {
 	BucketFsUploads     []BucketFsUpload
 }
 
-func wrapExtension(ext *RawJsExtension) *JsExtension {
-	return &JsExtension{extension: ext, Id: ext.Id, Name: ext.Name, Description: ext.Description, InstallableVersions: ext.InstallableVersions, BucketFsUploads: ext.BucketFsUploads}
+func wrapExtension(ext *rawJsExtension) *JsExtension {
+	return &JsExtension{
+		extension:           ext,
+		Id:                  ext.Id,
+		Name:                ext.Name,
+		Description:         ext.Description,
+		InstallableVersions: ext.InstallableVersions,
+		BucketFsUploads:     ext.BucketFsUploads}
 }
 
 func (e *JsExtension) Install(sqlClient SimpleSQLClient, version string) (errorResult error) {

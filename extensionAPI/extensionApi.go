@@ -59,11 +59,11 @@ func loadExtension(vm *goja.Runtime, fileName string) (*installedExtension, erro
 }
 
 type installedExtension struct {
-	Extension  RawJsExtension `json:"extension"`
+	Extension  rawJsExtension `json:"extension"`
 	APIVersion string         `json:"apiVersion"`
 }
 
-type RawJsExtension struct {
+type rawJsExtension struct {
 	Id                  string
 	Name                string                                                                      `json:"name"`
 	Description         string                                                                      `json:"description"`

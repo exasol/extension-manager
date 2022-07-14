@@ -8,7 +8,7 @@ import (
 
 type JsExtensionSuite struct {
 	suite.Suite
-	rawExtension *RawJsExtension
+	rawExtension *rawJsExtension
 	extension    *JsExtension
 }
 
@@ -17,7 +17,7 @@ func TestJsExtensionSuite(t *testing.T) {
 }
 
 func (suite *JsExtensionSuite) SetupSuite() {
-	suite.rawExtension = &RawJsExtension{Id: "id", Name: "name", Description: "desc", InstallableVersions: []string{"v1", "v2"}, BucketFsUploads: []BucketFsUpload{{Name: "uploadName"}}}
+	suite.rawExtension = &rawJsExtension{Id: "id", Name: "name", Description: "desc", InstallableVersions: []string{"v1", "v2"}, BucketFsUploads: []BucketFsUpload{{Name: "uploadName"}}}
 	suite.extension = wrapExtension(suite.rawExtension)
 }
 
