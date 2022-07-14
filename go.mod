@@ -4,15 +4,15 @@ go 1.17
 
 require (
 	github.com/dop251/goja v0.0.0-20220705101429-189bfeb9f530
-	github.com/dop251/goja_nodejs v0.0.0-20220706223936-8bb8eec2f26a
+	github.com/dop251/goja_nodejs v0.0.0-20220712185256-8cad205bf387
 	github.com/gin-gonic/gin v1.8.1
 	github.com/stretchr/testify v1.8.0
 )
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/exasol/exasol-driver-go v0.4.2
-	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220607114909-397987f03514
+	github.com/exasol/exasol-driver-go v0.4.3
+	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.2.1
 	github.com/kinbiko/jsonassert v1.1.0
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe
 	github.com/swaggo/gin-swagger v1.5.1

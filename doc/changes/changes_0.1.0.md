@@ -42,10 +42,10 @@ Code name:
 * Added `github.com/stretchr/testify:v1.8.0`
 * Added `github.com/dop251/goja:v0.0.0-20220705101429-189bfeb9f530`
 * Added `github.com/swaggo/files:v0.0.0-20220610200504-28940afbdbfe`
-* Added `github.com/dop251/goja_nodejs:v0.0.0-20220706223936-8bb8eec2f26a`
+* Added `github.com/dop251/goja_nodejs:v0.0.0-20220712185256-8cad205bf387`
 * Added `github.com/swaggo/gin-swagger:v1.5.1`
-* Added `github.com/exasol/exasol-driver-go:v0.4.2`
-* Added `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.0.0-20220607114909-397987f03514`
+* Added `github.com/exasol/exasol-driver-go:v0.4.3`
+* Added `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.2.1`
 
 ### Test Dependency Updates
 
