@@ -1,4 +1,4 @@
-# System Requirement Specification &mdash; Extension Manager
+ System Requirement Specification &mdash; Extension Manager
 
 ## Introduction
 
@@ -50,6 +50,20 @@ used in the requirements specification.
 
 Features are the highest level requirements in this document that describe the main functionality of EM.
 
+### List Extensions
+`feat~list-extensions~1`
+
+EM lists extensions.
+
+Needs: dsn
+
+<!--
+list only valid, complete extensions
+based on extension definitions
+
+-->
+
+
 ### Install Extensions
 `feat~install-extension~1`
 
@@ -80,21 +94,6 @@ EM allows the user to uninstall an extension.
 
 Needs: req
 
-### Upgrade to Latest Version
-`feat~upgrade-extension~1`
-
-EM upgrades an extension to it's latest version.
-
-Needs: req
-
-### List Installed Extensions
-`feat~list-extension~1`
-
-EM lists installed extensions.
-
-Needs: req
-
-
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 ## Functional Requirements
 
@@ -105,16 +104,13 @@ An extension might consist of JDBC driver, artifacts, configuration and
 database objects. Dependening on the nature of the extension not all artifacts
 might be required.
 
-((config into extension definion
-user types credentials into EM gui))
-
 ((see github project extension-manager-interface
 for parameter conditions))
 
 Covers:
-* [`feat~install-extension~1`](#install-extensions)
-* [`feat~configure-extension~1`](#configure-an-extension)
-* [`feat~uninstall-extension~1`](#uninstall-an-extension)
+* [`feat~install-extension~1`](#configure-an-extension)
+* [`feat~configure-extension~1`](#updating-an-extension)
+* [`feat~uninstall-extension~1`](#extensions)
 
 Needs: dsn
 
@@ -128,7 +124,7 @@ party libraries, JDBC drivers etc.).
 
 Covers:
 
-* [`feat~install-extension~1`](#install-extensions)
+* [`feat~install-extension~1`](#configure-an-extension)
 
 Needs: dsn
 
@@ -172,7 +168,7 @@ lua is inline in extension definition either adapter script or set set
 
 Covers:
 
-* [`feat~install-extension~1`](#install-extensions)
+* [`feat~install-extension~1`](#configure-an-extension)
 
 Needs: dsn
 
@@ -192,7 +188,7 @@ out of scope.
 
 
 Covers:
-* [`feat~update-extension~1`](#updating-an-extension)
+* [`feat~update-extension~1`](#uninstall-an-extension)
 
 Needs: dsn
 
@@ -200,7 +196,7 @@ Needs: dsn
 `req~uninstall-extension~1`
 
 Covers:
-* [`feat~uninstall-extension~1`](#uninstall-an-extension)
+* [`feat~uninstall-extension~1`](#extensions)
 
 Needs: dsn
 
@@ -211,7 +207,7 @@ EM allows extensions to define a set of parameters. Each extension might have
 different parameters.
 
 Covers:
-* [`feat~configure-extension~1`](#configure-an-extension)
+* [`feat~configure-extension~1`](#updating-an-extension)
 
 Needs: dsn
 
@@ -230,7 +226,7 @@ allow the user to assign a value to each parameter, e.g.  enter credentials,
 select values from option lists.
 
 Covers
-* [`feat~configure-extension~1`](#configure-an-extension)
+* [`feat~configure-extension~1`](#updating-an-extension)
 
 Needs: dsn
 
@@ -245,7 +241,7 @@ Rationale:
 * ensure security
 
 Covers:
-* [`feat~configure-extension~1`](#configure-an-extension)
+* [`feat~configure-extension~1`](#updating-an-extension)
 
 Needs: dsn
 
@@ -260,9 +256,9 @@ the user interface, too.  This avoids additional efforts for UI translation
 until this is required.
 
 Covers:
-* [`feat~configure-extension~1`](#configure-an-extension)
-* [`feat~install-extension~1`](#install-extensions)
-* [`feat~uninstall-extension~1`](#uninstall-an-extension)
+* [`feat~configure-extension~1`](#updating-an-extension)
+* [`feat~install-extension~1`](#configure-an-extension)
+* [`feat~uninstall-extension~1`](#extensions)
 
 ## Constraints
 

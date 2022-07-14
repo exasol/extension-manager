@@ -1,4 +1,4 @@
-# Design
+Design -- Extension Manager
 
 <!--
 INFO: This file contains embedded plantuml diagrams. For displaying them you need to enable editor support.
@@ -119,8 +119,10 @@ statement. A separate artifact in BucketFS then is not required.
 
 Covers:
 
-* [`req~extension~1`](system_requirements.md#extensions)
-* [`req~install-extension-artifacts~1`](system_requirements.md#install-required-artifacts)
+* [`req~extension~1`](system_requirements.md#install-required-artifacts)
+* [`req~install-extension-artifacts~1`](system_requirements.md#install-database-objects)
+
+Needs: impl, utest, itest
 
 ### Extension Definitions
 `dsn~extension-definition~1`
@@ -151,7 +153,7 @@ ExasolExtension <-- "mysql-virtual-schema (repo).MySqlExtensionDefinition"
 
 Covers:
 
-* [`req~extension~1`](system_requirements.md#extensions)
+* [`req~extension~1`](system_requirements.md#install-required-artifacts)
 
 Needs: impl, utest, itest
 
@@ -162,9 +164,9 @@ The extension definitions are placed in a storage that is accessible from the
 extension-manager backend. Access from inside the database is not required.
 
 Covers:
-* [`req~install-extension-artifacts~1`](system_requirements.md#install-required-artifacts)
-* [`req~define-configuration-parameters~1`](system_requirements.md#define-configuration-parameters)
-* [`req~uninstall-extension~1`](system_requirements.md#uninstalling-extensions)
+* [`req~install-extension-artifacts~1`](system_requirements.md#install-database-objects)
+* [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
+* [`req~uninstall-extension~1`](system_requirements.md#define-configuration-parameters)
 
 Needs: impl, utest, itest
 
@@ -186,8 +188,8 @@ unmaintained and untested code, since the old version would not be tested with
 newer DB versions.
 
 Covers:
-* [`req~install-extension-artifacts~1`](system_requirements.md#install-required-artifacts)
-* [`req~uninstall-extension~1`](system_requirements.md#uninstalling-extensions)
+* [`req~install-extension-artifacts~1`](system_requirements.md#install-database-objects)
+* [`req~uninstall-extension~1`](system_requirements.md#define-configuration-parameters)
 
 Needs: impl, utest, itest
 
@@ -198,7 +200,7 @@ The extension definition also includes parameters for configuring the
 extension.
 
 Covers:
-* [`req~define-configuration-parameters~1`](system_requirements.md#define-configuration-parameters)
+* [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
 
 Needs: impl, utest, itest
 
@@ -233,8 +235,8 @@ transfer the parameter definition to the frontend as simple JSON in contrast
 to the alternative options considered.
 
 Covers:
-* [`req~define-configuration-parameters~1`](system_requirements.md#define-configuration-parameters)
-* [`req~parameter-types~1`](system_requirements.md#parameter-types)
+* [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
+* [`req~parameter-types~1`](system_requirements.md#validation-of-parameter-values)
 
 Needs: impl, utest, itest
 
@@ -273,7 +275,7 @@ SelectParameter <|-- BaseParameter
 ```
 
 Covers:
-* [`req~parameter-types~1`](system_requirements.md#parameter-types)
+* [`req~parameter-types~1`](system_requirements.md#validation-of-parameter-values)
 
 Needs: impl, utest, itest
 
@@ -285,7 +287,7 @@ Conditions fo conditional parameters are represented by JSON structures, see
 against alternative options to represent conditional parameters.
 
 Covers:
-* [`req~parameter-types~1`](system_requirements.md#parameter-types)
+* [`req~parameter-types~1`](system_requirements.md#validation-of-parameter-values)
 
 Needs: impl, utest, itest
 
@@ -297,8 +299,8 @@ Each parameter definition is attached to a specific version of the extension.
 Rationale: Parameters can change over time, see [Updates](#updates).
 
 Covers:
-* [`req~define-configuration-parameters~1`](system_requirements.md#define-configuration-parameters)
-* [`req~update-extension~1`](system_requirements.md#update-extension)
+* [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
+* [`req~update-extension~1`](system_requirements.md#uninstalling-extensions)
 
 Needs: impl, utest, itest
 
@@ -312,7 +314,9 @@ Parameter validation for both stages (front and and backend) is configured in
 Decision](#typescript-library-for-parameter-validation).
 
 Covers:
-* [`req~validate-parameter-values~1`](system_requirements.md#validation-of-parameter-values)
+* [`req~validate-parameter-values~1`](system_requirements.md#ui-languages)
+
+Needs: impl, utest, itest
 
 #### Simple Parameter Validation Rules
 `dsn~parameter-validation-rules-simple~1`
@@ -329,7 +333,7 @@ param = {
 ```
 
 Covers:
-* [`req~validate-parameter-values~1`](system_requirements.md#validation-of-parameter-values)
+* [`req~validate-parameter-values~1`](system_requirements.md#ui-languages)
 
 Needs: impl, utest, itest
 
@@ -357,12 +361,27 @@ See design decision [against a callback for the client side
 validation](#callback-for-client-side-validation).
 
 Covers:
-* [`req~validate-parameter-values~1`](system_requirements.md#validation-of-parameter-values)
+* [`req~validate-parameter-values~1`](system_requirements.md#ui-languages)
 
 Needs: impl, utest, itest
 
 
 ## Runtime
+
+### Listing Extensions
+`dsn~list-extensions~1`
+
+EM builds the list of extensions based on the extension definitions.  EM shows
+only extensions for which all components are available, e.g. required
+artifacts in BucketFS.  The list also shows details about each  extension:
+* status: available or installed
+* version
+
+Covers:
+* [`feat~list-extensions~1`](system_requirements.md#install-extensions)
+
+Needs: impl, utest, itest
+
 
 ### Deploy Extension Definitions
 `dsn~extension-definitions-deployment~1`
@@ -438,9 +457,9 @@ jarV1InRepo --> jarV1InBucketFS
 ```
 
 Covers:
-* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
-* [`req~define-configuration-parameters~1`](system_requirements.md#define-configuration-parameters)
-* [`req~uninstall-extension~1`](system_requirements.md#uninstalling-extensions)
+* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+* [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
+* [`req~uninstall-extension~1`](system_requirements.md#define-configuration-parameters)
 
 Needs: impl, utest, itest
 
@@ -461,7 +480,7 @@ EM validates parameters in two stages:
     constraints (for example multiple interdependent fields)
 
 Covers:
-* [`req~validate-parameter-values~1`](system_requirements.md#validation-of-parameter-values)
+* [`req~validate-parameter-values~1`](system_requirements.md#ui-languages)
 
 Needs: impl, utest, itest
 
@@ -521,7 +540,7 @@ Installation "1" o-- "*" Instance
 ```
 
 Covers:
-* `req~install-extension-database-objects~1`
+* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
 
 
 #### Installation Metadata
@@ -542,7 +561,7 @@ EM uses a temporary UDF that reads back the secret value.
 
 Covers:
 
-* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
+* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
 
 Needs: impl, utest, itest
 
@@ -598,7 +617,7 @@ database Database {
 
 Covers:
 
-* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
+* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
 
 Needs: impl, utest, itest
 
@@ -606,8 +625,8 @@ Needs: impl, utest, itest
 `dsn~update-extension~1`
 
 Covers:
-* [`req~update-extension~1`](system_requirements.md#update-extension)
-* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
+* [`req~update-extension~1`](system_requirements.md#uninstalling-extensions)
+* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
 
 Needs: impl, utest, itest
 
