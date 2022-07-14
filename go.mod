@@ -12,7 +12,7 @@ require (
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/exasol/exasol-driver-go v0.4.3
-	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.2.1
+	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.2.2
 	github.com/kinbiko/jsonassert v1.1.0
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe
 	github.com/swaggo/gin-swagger v1.5.1
