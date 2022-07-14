@@ -27,22 +27,22 @@ func GetExtensionFromFile(fileName string) (*JsExtension, error) {
 		return nil, fmt.Errorf("incompatible extension API version %q. Please update the extension to use supported version %q", extensionJs.APIVersion, SupportedApiVersion)
 	}
 	log.Printf("Extension %q with id %q loaded from file %q", extensionJs.Extension.Name, extensionJs.Extension.Id, fileName)
-	return &extensionJs.Extension, nil
+	return wrapExtension(&extensionJs.Extension), nil
 }
 
 func loadExtension(vm *goja.Runtime, fileName string) (*installedExtension, error) {
 	globalJsObj := vm.NewObject()
 	err := vm.Set("global", globalJsObj)
 	if err != nil {
-		return nil, fmt.Errorf("failed to set global to a new object. Cause: %v", err.Error())
+		return nil, fmt.Errorf("failed to set global to a new object. Cause: %w", err)
 	}
 	bytes, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open extension file %v. Cause: %v", fileName, err.Error())
+		return nil, fmt.Errorf("failed to open extension file %v. Cause: %w", fileName, err)
 	}
 	_, err = vm.RunScript(fileName, string(bytes))
 	if err != nil {
-		return nil, fmt.Errorf("failed to run extension file %v. Cause %v", fileName, err.Error())
+		return nil, fmt.Errorf("failed to run extension file %v. Cause %w", fileName, err)
 	}
 
 	const extensionVariableName = "installedExtension"
@@ -53,17 +53,17 @@ func loadExtension(vm *goja.Runtime, fileName string) (*installedExtension, erro
 	var extension installedExtension
 	err = vm.ExportTo(extensionVariable, &extension)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read installedExtension variable. Cause: %v", err.Error())
+		return nil, fmt.Errorf("failed to read installedExtension variable. Cause: %w", err)
 	}
 	return &extension, nil
 }
 
 type installedExtension struct {
-	Extension  JsExtension `json:"extension"`
-	APIVersion string      `json:"apiVersion"`
+	Extension  rawJsExtension `json:"extension"`
+	APIVersion string         `json:"apiVersion"`
 }
 
-type JsExtension struct {
+type rawJsExtension struct {
 	Id                  string
 	Name                string                                                                      `json:"name"`
 	Description         string                                                                      `json:"description"`

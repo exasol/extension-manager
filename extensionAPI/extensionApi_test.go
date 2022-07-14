@@ -58,7 +58,7 @@ func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_Install() {
 	mockSQLClient.On("RunQuery", "select 1").Return()
 	extension, err := GetExtensionFromFile(suite.validExtensionFile)
 	suite.NoError(err)
-	extension.Install(&mockSQLClient, "extVersion")
+	err = extension.Install(&mockSQLClient, "extVersion")
 	suite.NoError(err)
 	mockSQLClient.AssertCalled(suite.T(), "RunQuery", "select 1")
 }
@@ -78,7 +78,7 @@ func (suite *ExtensionApiSuite) Test_FindInstallationsCanReadAllScriptsTable() {
 	extension, err := GetExtensionFromFile(extensionFile)
 	suite.NoError(err)
 	exaMetadata := createMockMetadata()
-	result := extension.FindInstallations(&mockSqlClient, &exaMetadata)
+	result, err := extension.FindInstallations(&mockSqlClient, &exaMetadata)
 	suite.Assert().Equal("test", result[0].Name)
 	suite.NoError(err)
 }
@@ -95,7 +95,7 @@ func (suite *ExtensionApiSuite) Test_FindInstallationsReturningParameters() {
 	extension, err := GetExtensionFromFile(extensionFile)
 	suite.NoError(err)
 	exaMetadata := createMockMetadata()
-	result := extension.FindInstallations(&mockSqlClient, &exaMetadata)
+	result, err := extension.FindInstallations(&mockSqlClient, &exaMetadata)
 	suite.Assert().Equal("test", result[0].Name)
 	suite.Assert().Equal("0.1.0", result[0].Version)
 	suite.Assert().Equal([]interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}, result[0].InstanceParameters)
@@ -110,30 +110,26 @@ func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_withOutdatedApiVersion
 	}
 	})()`)
 	_, err := GetExtensionFromFile(extensionFile)
-	suite.Error(err)
-	suite.Assert().Contains(err.Error(), `incompatible extension API version "0.0.0". Please update the extension to use supported version "`+SupportedApiVersion+`"`)
+	suite.ErrorContains(err, `incompatible extension API version "0.0.0". Please update the extension to use supported version "`+SupportedApiVersion+`"`)
 }
 
 func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_withoutSettingGlobalVariable() {
 	extensionFile := suite.writeExtension(`(function(){ })()`)
 	_, err := GetExtensionFromFile(extensionFile)
-	suite.Error(err)
-	suite.Assert().Contains(err.Error(), "extension did not set global.installedExtension")
+	suite.EqualError(err, "extension did not set global.installedExtension")
 }
 
 func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_invalidJavaScript() {
 	extensionFile := suite.writeExtension(`invalid javascript`)
 	_, err := GetExtensionFromFile(extensionFile)
-	suite.Error(err)
-	suite.Assert().Contains(err.Error(), "failed to run extension file")
-	suite.Assert().Contains(err.Error(), "SyntaxError")
-	suite.Assert().Contains(err.Error(), "Unexpected identifier")
+	suite.ErrorContains(err, "failed to run extension file")
+	suite.ErrorContains(err, "SyntaxError")
+	suite.ErrorContains(err, "Unexpected identifier")
 }
 
 func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_invalidFileName() {
 	_, err := GetExtensionFromFile("no-such-file")
-	suite.Error(err)
-	suite.Assert().Contains(err.Error(), "failed to open extension file no-such-file")
+	suite.ErrorContains(err, "failed to open extension file no-such-file")
 }
 
 func (suite *ExtensionApiSuite) writeExtension(extensionJs string) string {

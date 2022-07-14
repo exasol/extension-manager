@@ -96,7 +96,7 @@ func (controller *extensionControllerImpl) getAllJsExtensions() ([]*extensionAPI
 		if err == nil {
 			extensions = append(extensions, extension)
 		} else {
-			log.Printf("error: Failed to load extension. This extension will be ignored. Cause: %v\n", err.Error())
+			log.Printf("error: Failed to load extension. This extension will be ignored. Cause: %v\n", err)
 		}
 	}
 	return extensions, nil
@@ -110,7 +110,7 @@ func (controller *extensionControllerImpl) getJsExtensionById(id string) (*exten
 func (controller *extensionControllerImpl) getJsExtension(extensionPath string) (*extensionAPI.JsExtension, error) {
 	extension, err := extensionAPI.GetExtensionFromFile(extensionPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load extension from file %q: %v", extensionPath, err.Error())
+		return nil, fmt.Errorf("failed to load extension from file %q: %w", extensionPath, err)
 	}
 	_, fileName := path.Split(extensionPath)
 	extension.Id = fileName
@@ -120,11 +120,10 @@ func (controller *extensionControllerImpl) getJsExtension(extensionPath string) 
 func (controller *extensionControllerImpl) InstallExtension(dbConnection *sql.DB, extensionId string, extensionVersion string) error {
 	extension, err := controller.getJsExtensionById(extensionId)
 	if err != nil {
-		return fmt.Errorf("failed to load extension with id %q: %v", extensionId, err)
+		return fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
 	}
 	sqlClient := backend.ExasolSqlClient{Connection: dbConnection}
-	extension.Install(sqlClient, extensionVersion)
-	return nil
+	return extension.Install(sqlClient, extensionVersion)
 }
 
 func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
@@ -139,8 +138,12 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 	}
 	var allInstallations []*extensionAPI.JsExtInstallation
 	for _, extension := range extensions {
-		installations := extension.FindInstallations(sqlClient, metadata)
-		allInstallations = append(allInstallations, installations...)
+		installations, err := extension.FindInstallations(sqlClient, metadata)
+		if err != nil {
+			return nil, fmt.Errorf("failed to find installations: %v", err)
+		} else {
+			allInstallations = append(allInstallations, installations...)
+		}
 	}
 	return allInstallations, nil
 }

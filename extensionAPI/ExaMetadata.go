@@ -23,7 +23,7 @@ SELECT SCRIPT_SCHEMA, SCRIPT_NAME, SCRIPT_TYPE, SCRIPT_INPUT_TYPE, SCRIPT_RESULT
 FROM SYS.EXA_ALL_SCRIPTS
 WHERE SCRIPT_SCHEMA=?`, schemaName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read SYS.EXA_ALL_SCRIPTS. Cause: %v", err.Error())
+		return nil, fmt.Errorf("failed to read SYS.EXA_ALL_SCRIPTS. Cause: %w", err)
 	}
 	var rows []ExaAllScriptRow
 	for result.Next() {

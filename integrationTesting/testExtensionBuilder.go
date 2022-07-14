@@ -146,7 +146,7 @@ func runBuild(workDir string) []byte {
 	err := buildCommand.Run()
 	if err != nil {
 		fmt.Println(stderr.String())
-		panic(fmt.Sprintf("failed to build extensionForTesting. Cause: %v", err.Error()))
+		panic(fmt.Sprintf("failed to build extensionForTesting. Cause: %v", err))
 	}
 	builtExtension, err := ioutil.ReadFile(path.Join(workDir, "dist.js"))
 	if err != nil {
@@ -165,7 +165,7 @@ func runNpmInstall(workDir string) {
 
 		if err != nil {
 			fmt.Println(stderr.String())
-			log.Fatalf("Failed to install node modules (run 'npm install') for extensionForTesting. Cause: %v, Output:\n%s", err.Error(), output)
+			log.Fatalf("Failed to install node modules (run 'npm install') for extensionForTesting. Cause: %v, Output:\n%s", err, output)
 		}
 		isNpmInstallCalled = true
 	}
