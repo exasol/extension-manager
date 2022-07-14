@@ -12,6 +12,6 @@ type ExasolSqlClient struct {
 func (client ExasolSqlClient) RunQuery(query string) {
 	_, err := client.Connection.Exec(query)
 	if err != nil {
-		panic(fmt.Sprintf("sql error in extension: %v", err.Error()))
+		panic(fmt.Sprintf("sql error in extension: %v", err))
 	}
 }

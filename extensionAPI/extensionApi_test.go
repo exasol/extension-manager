@@ -110,8 +110,7 @@ func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_withOutdatedApiVersion
 	}
 	})()`)
 	_, err := GetExtensionFromFile(extensionFile)
-	suite.Error(err)
-	suite.Assert().Contains(err.Error(), `incompatible extension API version "0.0.0". Please update the extension to use supported version "`+SupportedApiVersion+`"`)
+	suite.ErrorContains(err, `incompatible extension API version "0.0.0". Please update the extension to use supported version "`+SupportedApiVersion+`"`)
 }
 
 func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_withoutSettingGlobalVariable() {

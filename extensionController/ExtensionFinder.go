@@ -17,7 +17,7 @@ func FindJSFilesInDir(pathToExtensionFolder string) []string {
 		return nil
 	})
 	if err != nil {
-		panic(fmt.Sprintf("failed to load extensions from extension folder %v. Cause %v", pathToExtensionFolder, err.Error()))
+		panic(fmt.Sprintf("failed to load extensions from extension folder %v. Cause %v", pathToExtensionFolder, err))
 	}
 	return files
 }

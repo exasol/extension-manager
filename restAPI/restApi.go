@@ -73,7 +73,7 @@ func (restApi *restAPIImpl) Serve() {
 	log.Printf("Starting server on port %s...\n", port)
 	err := restApi.server.ListenAndServe() // blocking
 	if err != nil && !restApi.isStopped() {
-		panic(fmt.Sprintf("failed to start rest API server. Cause: %v", err.Error()))
+		panic(fmt.Sprintf("failed to start rest API server. Cause: %v", err))
 	}
 }
 
@@ -101,7 +101,7 @@ func (restApi *restAPIImpl) Stop() {
 	restApi.setStopped(true)
 	err := restApi.server.Shutdown(context.Background())
 	if err != nil {
-		panic(fmt.Sprintf("failed to shutdown rest API server. Cause: %v", err.Error()))
+		panic(fmt.Sprintf("failed to shutdown rest API server. Cause: %v", err))
 	}
 	restApi.server = nil
 }
@@ -237,7 +237,7 @@ func (restApi *restAPIImpl) installExtension(c *gin.Context) (string, error) {
 func (restApi *restAPIImpl) sendResponse(c *gin.Context, response interface{}, err error) {
 	if err != nil {
 		c.String(500, "Internal error.")
-		log.Printf("request failed: %s\n", err.Error())
+		log.Printf("request failed: %v\n", err)
 		return
 	}
 	if s, ok := response.(string); ok {
@@ -251,7 +251,7 @@ func closeDbConnection(database *sql.DB) {
 	err := database.Close()
 	if err != nil {
 		// Strange but not critical. So we just log it and go on.
-		fmt.Printf("failed to close db connection. Cause %v", err.Error())
+		fmt.Printf("failed to close db connection. Cause %v", err)
 	}
 }
 
