@@ -123,8 +123,7 @@ func (controller *extensionControllerImpl) InstallExtension(dbConnection *sql.DB
 		return fmt.Errorf("failed to load extension with id %q: %v", extensionId, err)
 	}
 	sqlClient := backend.ExasolSqlClient{Connection: dbConnection}
-	extension.Install(sqlClient, extensionVersion)
-	return nil
+	return extension.Install(sqlClient, extensionVersion)
 }
 
 func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {

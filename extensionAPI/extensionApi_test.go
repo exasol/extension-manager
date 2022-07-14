@@ -58,7 +58,7 @@ func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_Install() {
 	mockSQLClient.On("RunQuery", "select 1").Return()
 	extension, err := GetExtensionFromFile(suite.validExtensionFile)
 	suite.NoError(err)
-	extension.Install(&mockSQLClient, "extVersion")
+	err = extension.Install(&mockSQLClient, "extVersion")
 	suite.NoError(err)
 	mockSQLClient.AssertCalled(suite.T(), "RunQuery", "select 1")
 }
