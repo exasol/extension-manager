@@ -27,7 +27,6 @@ func (e *JsExtension) Install(sqlClient SimpleSQLClient, version string) (errorR
 	defer func() {
 		if err := recover(); err != nil {
 			errorResult = fmt.Errorf("failed to install extension %q: %v", e.Id, err)
-			return
 		}
 	}()
 	e.extension.Install(sqlClient, version)
@@ -38,9 +37,7 @@ func (e *JsExtension) FindInstallations(sqlClient SimpleSQLClient, metadata *Exa
 	defer func() {
 		if err := recover(); err != nil {
 			errorResult = fmt.Errorf("failed to find installations for extension %q: %v", e.Id, err)
-			return
 		}
 	}()
-	installations = e.extension.FindInstallations(sqlClient, metadata)
-	return
+	return e.extension.FindInstallations(sqlClient, metadata), nil
 }
