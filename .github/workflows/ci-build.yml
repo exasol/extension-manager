@@ -44,7 +44,7 @@ jobs:
 
       - name: Check generated code
         run: |
-          go install github.com/swaggo/swag/cmd/swag@v1.8.2
+          go install github.com/swaggo/swag/cmd/swag@v1.8.3
           go generate
           if [[ `git status --porcelain` ]]; then
             echo "Project files did change:\n"
