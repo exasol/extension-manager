@@ -242,7 +242,7 @@ Needs: impl, utest, itest
 #### Conditional Parameters
 `dsn~conditional-parameters~1`
 
-Conditions fo conditional parameters are represented by JSON structures, see [design decision](#alternative-options-to-represent-conditional-parameters) against alternative options to represent conditional parameters.
+Conditions for conditional parameters are represented by JSON structures, see [design decision](#alternative-options-to-represent-conditional-parameters) against alternative options to represent conditional parameters.
 
 Covers:
 * [`req~parameter-types~1`](system_requirements.md#validation-of-parameter-values)
