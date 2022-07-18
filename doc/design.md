@@ -583,7 +583,7 @@ Rationale: By this a single implementation can be used for both validation stage
 
 ### Callback For Client Side Validation
 
-The developers decided against a callback for the client side [validation of parameters](parameter-validation-rules). The main reason was that it would require to load code into the client at runtime. That would require to run `eval()` on code retrieved from a request. Even so the security risk of that seems acceptable, the developers decided against it since it would look suspicious.
+The developers decided against a callback for the client side [validation of parameters](#parameter-validation-rules). The main reason was that it would require to load code into the client at runtime. That would require to run `eval()` on code retrieved from a request. Even so the security risk of that seems acceptable, the developers decided against it since it would look suspicious.
 
 ### Alternative Options to Represent Conditional Parameters
 
