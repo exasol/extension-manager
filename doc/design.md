@@ -297,10 +297,7 @@ Needs: impl, utest, itest
 #### Complex Parameter Validation Rules
 `dsn~parameter-validation-rules-complex~1`
 
-More complex validations involving multiple parameters can be defined via a
-JavaScript callback function that is executed only in the backend, not the
-frontend. That gives the extension definition the maximum flexibility while
-simplifying the validation in the frontend.
+More complex validations involving multiple parameters can be defined via a JavaScript callback function that is executed only in the backend, not the frontend. That gives the extension definition the maximum flexibility while simplifying the validation in the frontend.
 
 ```ts
 extension = {
