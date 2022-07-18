@@ -58,7 +58,7 @@ The extension manager has an extension mechanism.
 
 The extensions are integration projects maintained by Exasol. For now, it's not possible to install third party extensions, since it would be a security risk.
 
-The extension manager itself has no dependencies to the Virtual Schema projects.  They are loaded at runtime.
+The extension manager itself has no dependencies to the Virtual Schema projects. They are loaded at runtime.
 
 ```plantuml
 @startuml
@@ -96,7 +96,7 @@ Note: In the following cases a separate artifact in BucketFS is not required, as
 * VIRTUAL SCHEMA mapping, json content
 * Lua scripts
 
-When creating the required database objects EM will read all required arguments, configurations and credentials from the [extension definition](#extension-definitions).  The extension definition can also define [parameters](#parameters-for-extension-configuration). EM will evaluate the parameter definitions and then ask the user to enter a value for each of the parameters. See also an example of the [installation process](#installation-process).
+When creating the required database objects EM will read all required arguments, configurations and credentials from the [extension definition](#extension-definitions). The extension definition can also define [parameters](#parameters-for-extension-configuration). EM will evaluate the parameter definitions and then ask the user to enter a value for each of the parameters. See also an example of the [installation process](#installation-process).
 
 Covers:
 
@@ -108,7 +108,7 @@ Needs: impl, utest, itest
 ### Extension Definitions
 `dsn~extension-definition~1`
 
-Each extension might be implemented in any programming language and typically are based on a so-called [user defined function](system_requirements.md#terms-and-abbreviations).  In order to allow EM to manage multiple heterogenous extensions in a unique way, each extension is represented by small wrapper implementing a uniform interface.  This wrapper is called an "extension definition".
+Each extension might be implemented in an arbitrary programming language and typically are based on a so-called [user defined function](system_requirements.md#terms-and-abbreviations). In order to allow EM to manage multiple heterogenous extensions in a unique way, each extension is represented by small wrapper implementing a uniform interface. This wrapper is called an "extension definition".
 
 The interface is defined in [`extension-manager-interface`](https://github.com/exasol/extension-manager-interface/):
 
@@ -161,15 +161,14 @@ Needs: impl, utest, itest
 ### Parameters for Extension Configuration
 `dsn~configuration-parameters~1`
 
-The extension definition also includes parameters for configuring the
-extension.
+The extension definition also includes parameters for configuring the extension.
 
 Covers:
 * [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
 
 Needs: impl, utest, itest
 
-#### Parameter definition format
+#### Parameter Definition Format
 `dsn~parameter-definitions~1`
 
 EM extension interface uses a flexible JSON structure to describe the parameters including [conditional parameters](#conditional-parameters).
@@ -190,9 +189,7 @@ extension = {
 }
 ```
 
-While this requires interpretation of the JSON structure, it allows to
-transfer the parameter definition to the frontend as simple JSON in contrast
-to the alternative options considered.
+While this requires interpretation of the JSON structure, it allows to transfer the parameter definition to the frontend as simple JSON in contrast to the alternative options considered.
 
 Covers:
 * [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
@@ -203,9 +200,7 @@ Needs: impl, utest, itest
 #### Parameter Types
 `dsn~parameter-types~1`
 
-Each extension can define parameter definitions. The UI then shows a form with
-these parameters to the users and passes the values to the `createInstance`
-endpoint.
+Each extension can define parameter definitions. The UI then shows a form with these parameters to the users and passes the values to the `createInstance` endpoint.
 
 The following class hierarchy is used to model parameter definitions:
 
