@@ -267,7 +267,7 @@ Needs: impl, utest, itest
 #### Reuse Parameter Validation Rules
 `dsn~reuse-parameter-validation-rules~1`
 
-Parameter validation for both stages (front and and backend) is configured in [extension definition](#extension-definitions), see related [Design Decision](#typescript-library-for-parameter-validation).
+Parameter validation for both stages (frontend and backend) is configured in [extension definition](#extension-definitions), see related [Design Decision](#typescript-library-for-parameter-validation).
 
 Covers:
 * [`req~validate-parameter-values~1`](system_requirements.md#ui-languages)
