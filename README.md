@@ -15,7 +15,7 @@ This API is documented via Swagger. In order to view it, checkout this repo, run
 
 * [Changelog](doc/changes/changelog.md)
 * [Software Design (online, main branch)](https://exasol.github.io/extension-manager/design.html)
-* [Software Design (local)](doc/design/design.md)
+* [Software Design (local)](doc/design.md)
 * [Developers Guide](doc/developers_guide.md)
 * [Dependencies](dependencies.md)
 
