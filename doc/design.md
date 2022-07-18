@@ -419,8 +419,7 @@ EM validates parameters in two stages:
   * For numbers: min, max
 * In the backend:
   * Everything validated in the frontend (validate again to prevent attacks)
-  * Validation of the whole input: Here EM can validate more complex
-    constraints (for example multiple interdependent fields)
+  * Validation of the whole input: Here EM can validate more complex constraints (for example multiple interdependent fields)
 
 Covers:
 * [`req~validate-parameter-values~1`](system_requirements.md#ui-languages)
