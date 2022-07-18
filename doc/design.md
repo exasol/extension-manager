@@ -6,18 +6,6 @@ IntelliJ: https://youtrack.jetbrains.com/api/files/74-1236265?sign=MTY1MDg0NDgwM
 Visual Studio Code: https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml (see https://github.com/qjebbs/vscode-plantuml/issues/449 for fixing Markdown preview)
 -->
 
-<!--
-  `req~extension~1`
-  `req~install-extension-artifacts~1`
-  `req~install-extension-database-objects~1`
-  `req~update-extension~1`
-  `req~uninstall-extension~1`
-  `req~define-configuration-parameters~1`
-  `req~parameter-types~1`
-  `req~validate-parameter-values~1`
-  `req~ui-languages~1`
--->
-
 ## Acknowledgments
 
 This document's section structure is derived from the "[arc42](https://arc42.org/)" architectural template by Dr. Gernot Starke, Dr. Peter Hruschka.
@@ -30,16 +18,13 @@ This section introduces technical system constraints.
 
 ### Requirement Overview
 
-Please refer to the [System Requirement Specification](system_requirements.md)
-for user-level requirements.
+Please refer to the [System Requirement Specification](system_requirements.md) for user-level requirements.
 
 ## Building Blocks
 
 ### Overall Architecture
 
-The extension installer is split into a backend (running in the Exasol SaaS
-backend, see [design decisions](#does-em-need-a-backend)) and a client
-(running in the SaaS UI).
+The extension installer is split into a backend (running in the Exasol SaaS backend, see [design decisions](#does-em-need-a-backend)) and a client (running in the SaaS UI).
 
 ```plantuml
 @startuml
@@ -71,12 +56,9 @@ backend --> customerCluster: manages
 
 The extension manager has an extension mechanism.
 
-The extensions are integration projects maintained by Exasol. For now, it's
-not possible to install third party extensions, since it would be a security
-risk.
+The extensions are integration projects maintained by Exasol. For now, it's not possible to install third party extensions, since it would be a security risk.
 
-The extension manager itself has no dependencies to the Virtual Schema
-projects.  They are loaded at runtime.
+The extension manager itself has no dependencies to the Virtual Schema projects.  They are loaded at runtime.
 
 ```plantuml
 @startuml
@@ -94,28 +76,27 @@ extensionManager -> mysql: loaded at runtime
 @enduml
 ```
 
-#### Components Of an Extension
+#### Components of an Extension
 `dsn~extension-components~1`
 
-An extension might consist of JDBC driver, artifacts, configuration and
-database objects. Dependening on it's nature a specific extension might not
-require all artifacts.
+An extension might consist of JDBC driver, artifacts, configuration and database objects. Dependening on it's nature a specific extension might not require all artifacts.
 
-In the initial version when managing extensions EM requires the following
-components to be available in BucketFS and does not actively manage them:
+In the initial version when managing extensions EM requires the following components to be available in BucketFS and does not actively manage them:
 * JDBC driver
 * artifacts in BucketFS, e.g. jar files
 * 3rd party libraries
 
-Instead for managing extensions EM only considers the [extension
-definition](#extension-definitions) and the following database objects:
+Instead, for managing extensions EM only considers the following database objects:
 * ADAPTER SCRIPT
 * SET SCRIPT
 * CONNECTION
 * VIRTUAL SCHEMA including mapping
 
-Note: For VIRTUAL SCHEMA mapping the json content can be inlined into the SQL
-statement. A separate artifact in BucketFS then is not required.
+Note: In the following cases a separate artifact in BucketFS is not required, as extension definition can inline these contents into the SQL statements of either adapter script or set script:
+* VIRTUAL SCHEMA mapping, json content
+* Lua scripts
+
+When creating the required database objects EM will read all required arguments, configurations and credentials from the [extension definition](#extension-definitions).  The extension definition can also define [parameters](#parameters-for-extension-configuration). EM will evaluate the parameter definitions and then ask the user to enter a value for each of the parameters. See also an example of the [installation process](#installation-process).
 
 Covers:
 
@@ -127,18 +108,9 @@ Needs: impl, utest, itest
 ### Extension Definitions
 `dsn~extension-definition~1`
 
-Each extension might be implemented in any programming language and typically
-are based on a so-called [user defined
-function](system_requirements.md#terms-and-abbreviations).  In order to allow
-EM to manage multiple heterogenous extensions in a unique way, each extension
-is represented by small wrapper implementing a uniform interface.  This
-wrapper is called an "extension definition".
+Each extension might be implemented in any programming language and typically are based on a so-called [user defined function](system_requirements.md#terms-and-abbreviations).  In order to allow EM to manage multiple heterogenous extensions in a unique way, each extension is represented by small wrapper implementing a uniform interface.  This wrapper is called an "extension definition".
 
-((what is meant by "integration project", here?  EM uses a common extension
-definition per extension (integration project).  ))
-
-The interface is defined in
-[`extension-manager-interface`](https://github.com/exasol/extension-manager-interface/):
+The interface is defined in [`extension-manager-interface`](https://github.com/exasol/extension-manager-interface/):
 
 ```plantuml
 @startuml
@@ -160,8 +132,7 @@ Needs: impl, utest, itest
 #### Storage for extension definitions
 `dsn~extension-definitions-storage~1`
 
-The extension definitions are placed in a storage that is accessible from the
-extension-manager backend. Access from inside the database is not required.
+The extension definitions are placed in a storage that is accessible from the extension-manager backend. Access from inside the database is not required.
 
 Covers:
 * [`req~install-extension-artifacts~1`](system_requirements.md#install-database-objects)
@@ -175,17 +146,11 @@ Needs: impl, utest, itest
 
 Note that only the latest version of the extension definition is deployed.
 
-That does not mean that it's impossible to install older versions of an
-extension. Just the extension definition (the plugin for the extension
-manager) is always the latest version.
+That does not mean that it's impossible to install older versions of an extension. Just the extension definition (the plugin for the extension manager) is always the latest version.
 
-That means that the extension definition must be able to uninstall and update
-all old versions of its extension. That makes testing harder but is the only
-way to have the upgrade path tested.
+That means that the extension definition must be able to uninstall and update all old versions of its extension. That makes testing harder but is the only way to have the upgrade path tested.
 
-The alternative to also version the extension definition would lead to
-unmaintained and untested code, since the old version would not be tested with
-newer DB versions.
+The alternative to also version the extension definition would lead to unmaintained and untested code, since the old version would not be tested with newer DB versions.
 
 Covers:
 * [`req~install-extension-artifacts~1`](system_requirements.md#install-database-objects)
@@ -207,14 +172,9 @@ Needs: impl, utest, itest
 #### Parameter definition format
 `dsn~parameter-definitions~1`
 
-EM extension interface uses a flexible JSON structure to describe the
-parameters including [conditional parameters](#conditional-parameters).
+EM extension interface uses a flexible JSON structure to describe the parameters including [conditional parameters](#conditional-parameters).
 
-Rationale: Individual extensions might have different parameters. For example
-a virtual schema for another database might support multiple connection
-protocols or libraries (e.g. ODBC and JDBC) that require different
-configuration options. Depending on the selected protocol EM can then show
-only the parameters for the selected protocol but hide unrelated parameters.
+Rationale: Individual extensions might have different parameters. For example a virtual schema for another database might support multiple connection protocols or libraries (e.g. ODBC and JDBC) that require different configuration options. Depending on the selected protocol EM can then show only the parameters for the selected protocol but hide unrelated parameters.
 
 Example:
 
@@ -282,9 +242,7 @@ Needs: impl, utest, itest
 #### Conditional Parameters
 `dsn~conditional-parameters~1`
 
-Conditions fo conditional parameters are represented by JSON structures, see
-[design decision](#alternative-options-to-represent-conditional-parameters)
-against alternative options to represent conditional parameters.
+Conditions fo conditional parameters are represented by JSON structures, see [design decision](#alternative-options-to-represent-conditional-parameters) against alternative options to represent conditional parameters.
 
 Covers:
 * [`req~parameter-types~1`](system_requirements.md#validation-of-parameter-values)
@@ -309,9 +267,7 @@ Needs: impl, utest, itest
 #### Reuse Parameter Validation Rules
 `dsn~reuse-parameter-validation-rules~1`
 
-Parameter validation for both stages (front and and backend) is configured in
-[extension definition](#extension-definitions), see related [Design
-Decision](#typescript-library-for-parameter-validation).
+Parameter validation for both stages (front and and backend) is configured in [extension definition](#extension-definitions), see related [Design Decision](#typescript-library-for-parameter-validation).
 
 Covers:
 * [`req~validate-parameter-values~1`](system_requirements.md#ui-languages)
@@ -357,8 +313,7 @@ extension = {
 }
 ```
 
-See design decision [against a callback for the client side
-validation](#callback-for-client-side-validation).
+See design decision [against a callback for the client side validation](#callback-for-client-side-validation).
 
 Covers:
 * [`req~validate-parameter-values~1`](system_requirements.md#ui-languages)
@@ -371,9 +326,7 @@ Needs: impl, utest, itest
 ### Listing Extensions
 `dsn~list-extensions~1`
 
-EM builds the list of extensions based on the extension definitions.  EM shows
-only extensions for which all components are available, e.g. required
-artifacts in BucketFS.  The list also shows details about each  extension:
+EM builds the list of extensions based on the extension definitions.  EM shows only extensions for which all components are available, e.g. required artifacts in BucketFS.  The list also shows details about each  extension:
 * status: available or installed
 * version
 
@@ -386,13 +339,7 @@ Needs: impl, utest, itest
 ### Deploy Extension Definitions
 `dsn~extension-definitions-deployment~1`
 
-<!--
-  decided to not move this section to administrators guide (aguide)
-  rather than design.md
--->
-
-During the build of each virtual-schema project the extension definitions
-(written in TypeScript) are compiled to a single JavaScript file:
+During the build of each virtual-schema project the extension definitions (written in TypeScript) are compiled to a single JavaScript file:
 
 ```plantuml
 @startuml
@@ -420,8 +367,7 @@ postgres-extension-def-2.0.2.js
 postgres-extension-def-2.0.2.js.sha256
 ```
 
-A crawler collects the JARs and extension definitions and copies them to
-BucketFS at scheduled interval.
+A crawler collects the JARs and extension definitions and copies them to BucketFS at scheduled interval.
 
 This crawler is at the moment not part of this project.
 
@@ -489,13 +435,7 @@ Needs: impl, utest, itest
 #### Installation Scope
 `dsn~installation-scope~1`
 
-<!--
-  decided to not move this section to administrators guide (aguide)
-  rather than design.md
--->
-
-The installation of an extension is scoped to an *Exasol database* (new term
-in SaaS context).
+The installation of an extension is scoped to an *Exasol database* (new term in SaaS context).
 
 ```plantuml
 @startuml
@@ -546,42 +486,26 @@ Covers:
 #### Installation Metadata
 `dsn~installation~metadata~1`
 
-<!--
-  decided to not move this section to administrators guide (aguide)
-  rather than design.md
--->
+Extensions don't store their own metadata. Instead they read information about existing adapter scripts, connection definitions and virtual schemas from the Exasol database itself. In most cases this is implemented by querying Exasol's metadata tables.
 
-Extensions don't store their own metadata. Instead they read information about
-existing adapter scripts, connection definitions and virtual schemas from the
-Exasol database itself. In most cases this is implemented by querying Exasol's
-metadata tables.
-
-However, for example for reading back the credentials stored in a connection,
-EM uses a temporary UDF that reads back the secret value.
+However, for example for reading back the credentials stored in a connection, EM uses a temporary UDF that reads back the secret value.
 
 Covers:
-
 * [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
 
 Needs: impl, utest, itest
 
-#### Installation Process of a Document Virtual Schema
+#### Installation Process
 `dsn~installation~process~1`
 
-<!--
-  decided to not move this section to administrators guide (aguide)
-  rather than design.md
--->
+The following list describes the installation process using the extension for a **virtual schema** as example.
 
-This is an example process how a document virtual schema is installed.
-
-* Check if the version of the `extension-manager-interface` implemented by the
-  extension is supported.
+* Check if the version of the `extension-manager-interface` implemented by the extension is supported.
 * Check if required files exist in BucketFs with the expected version and file size.
-  * If not all files are available, the installation fails.
+  * If not all files are available, then EM aborts the installation.
 * Check if an `ADAPTER SCRIPT` exists for the required VS Jar.
   * Use the existing script and the schema it is located in.
-  * If no script exists: create a new schema and create a new script.
+  * If no script exists: create a new schema and create a new adapter script.
 * Check if a `SET SCRIPT` with name `IMPORT_FROM_<vs-name>` exists using the expected file.
   * Create one if necessary
   * Fail if it exists with the wrong file version and another virtual schema is installed.
@@ -616,7 +540,6 @@ database Database {
 ```
 
 Covers:
-
 * [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
 
 Needs: impl, utest, itest
@@ -636,48 +559,31 @@ Needs: impl, utest, itest
 
 ### JDBC driver
 
-Most virtual schemas (including for example the postgres virtual schema)
-require an additional third-party JDBC driver. That driver for now must be
-copied manually into the BucketFS of all SaaS offerings, see [Components Of an
-Extention](#components-of-an-extension).
+Most virtual schemas (including for example the postgres virtual schema) require an additional third-party JDBC driver. That driver for now must be copied manually into the BucketFS of all SaaS offerings, see [Components of an Extension](#components-of-an-extension).
 
 ### JAR Files
 
-Most virtual schemas (including for example the postgres virtual schema) are
-implemented as a jar file in BucketFS.  The jar file for now must be copied
-manually into the BucketFS of all SaaS offerings, see [Components Of an
-Extention](#components-of-an-extension).
+Most virtual schemas (including for example the postgres virtual schema) are implemented as a jar file in BucketFS.  The jar file for now must be copied manually into the BucketFS of all SaaS offerings, see [Components of an Extension](#components-of-an-extension).
 
 ### Does EM need a Backend?
 
-One option would have been to implement everything in the JavaScript
-client. However, the developers discarded that option, since it does not allow
-us to upgrade the installed adapters automatically. An automated job can't run
-in a browser.
+One option would have been to implement everything in the JavaScript client. However, the developers discarded that option, since it does not allow us to upgrade the installed adapters automatically. An automated job can't run in a browser.
 
 #### Execution of JavaScript at Runtime
 
-The compiled JavaScript code is evaluated in the backend using a nested
-JavaScript interpreter.
+The compiled JavaScript code is evaluated in the backend using a nested JavaScript interpreter.
 
 By that it is isolated and can't access resources like disk or network.
 
 ### TypeScript Library for Parameter Validation
 
-The developers decided to implement parameter validation as a TypeScript
-library [`extension-parameter-validator`](https://github.com/exasol/extension-parameter-validator).
+The developers decided to implement parameter validation as a TypeScript library [`extension-parameter-validator`](https://github.com/exasol/extension-parameter-validator).
 
-Rationale: By this a single implementation can be used for both validation
-stages: frontend and backend. The Go backend will use a JavaScript VM.
+Rationale: By this a single implementation can be used for both validation stages: frontend and backend. The Go backend will use a JavaScript VM.
 
 ### Callback For Client Side Validation
 
-The developers decided against a callback for the client side [validation of
-parameters](parameter-validation-rules). The main reason was that it would
-require to load code into the client at runtime. That would require to run
-`eval()` on code retrieved from a request. Even so the security risk of that
-seems acceptable, the developers decided against it since it would look
-suspicious.
+The developers decided against a callback for the client side [validation of parameters](parameter-validation-rules). The main reason was that it would require to load code into the client at runtime. That would require to run `eval()` on code retrieved from a request. Even so the security risk of that seems acceptable, the developers decided against it since it would look suspicious.
 
 ### Alternative Options to Represent Conditional Parameters
 
@@ -695,14 +601,9 @@ The developers considered the following options:
   }
   ```
 
-While both options don't need any interpretation logic they would require
-executing the JavaScript snippet in the frontend with `eval()` which poses a
-security risk.
+While both options don't need any interpretation logic they would require executing the JavaScript snippet in the frontend with `eval()` which poses a security risk.
 
-Interpretation of the JSON structure was implemented in a separate library
-`extension-parameter-validator` written in TypeScript which is used by both
-the frontend and the backend. By this additional implementation effort need to
-be invested only once.
+Interpretation of the JSON structure was implemented in a separate library `extension-parameter-validator` written in TypeScript which is used by both the frontend and the backend. By this additional implementation effort need to be invested only once.
 
 ### Programming language
 
@@ -710,34 +611,24 @@ The developers decided to implement extension definitions in TypeScript.
 
 #### Alternative JSON
 
-The developers decided for a programming language like JS since some
-extensions have more complex installation mechanisms. Expressing this by just
-providing SQL scripts with placeholders quickly reaches its limit.
+The developers decided for a programming language like JS since some extensions have more complex installation mechanisms. Expressing this by just providing SQL scripts with placeholders quickly reaches its limit.
 
-Especially the function for reading back parameter values can get a bit more
-complex.
+Especially the function for reading back parameter values can get a bit more complex.
 
 #### Alternative Lua
 
 We could also use Lua. The developers decided for JS since:
 
 * JS it more popular --> more developers know it
-* JS is used in the frontend. If at some point we change our decision and want
-  to run the installation in the client, we don't need to update the
-  installers.
+* JS is used in the frontend. If at some point we change our decision and want to run the installation in the client, we don't need to update the installers.
 
 #### Alternative JavaScript
 
-JavaScript does not provide type checking of the interface, hence not all
-potential incompatibilities with the Extension API can be found at compile
-time.
+JavaScript does not provide type checking of the interface, hence not all potential incompatibilities with the Extension API can be found at compile time.
 
-TypeScript is compiled to JavaScript, so no additional tooling is required at
-runtime.
+TypeScript is compiled to JavaScript, so no additional tooling is required at runtime.
 
-TypeScript adds a bit of complexity at build time for transpiling TypeScript
-to JavaScript, but the developers decided to accept this additional effort.
-
+TypeScript adds a bit of complexity at build time for transpiling TypeScript to JavaScript, but the developers decided to accept this additional effort.
 
 ## Quality Scenarios
 
