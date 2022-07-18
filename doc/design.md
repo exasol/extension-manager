@@ -323,7 +323,7 @@ Needs: impl, utest, itest
 ### Listing Extensions
 `dsn~list-extensions~1`
 
-EM builds the list of extensions based on the extension definitions.  EM shows only extensions for which all components are available, e.g. required artifacts in BucketFS.  The list also shows details about each  extension:
+EM builds the list of extensions based on the extension definitions. EM shows only extensions for which all components are available, e.g. required artifacts in BucketFS. The list also shows details about each  extension:
 * status: available or installed
 * version
 
