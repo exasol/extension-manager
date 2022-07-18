@@ -1,4 +1,4 @@
- System Requirement Specification &mdash; Extension Manager
+# System Requirement Specification &mdash; Extension Manager
 
 ## Introduction
 
@@ -25,11 +25,11 @@ Database Administrators (DBA) use EM through it's REST API or a user interface f
 The following list gives you an overview of terms and abbreviations commonly used in the requirements specification.
 
 * **EM**: Extension Manager
-* **UDF** / **User defined function**: Extension point in the Exasol database that allows users to write their own SQL functions, see [UDF documentation](https://docs.exasol.com/db/latest/database_concepts/udf_scripts.htm) for details
+* **UDF** / **User defined function**: Extension point in the Exasol database that allows users to write their own SQL functions, see [UDF documentation](https://docs.exasol.com/db/latest/database_concepts/udf_scripts.htm) for details.
 * **Virtual Schema**: Projection of an external data source that can be accessed like an Exasol database schema.
 * **Virtual Schema adapter**: Plug-in based on the Virtual Schema API that translates between Exasol and the original data source.
 * **Extension**: A user managed extension of the Exasol database (e.g. a Virtual Schema, bulk loaders and other in-database integration). An extension might consist of multiple parts e.g. files in BucketFS, adapter scripts, connections.
-* **DBA**: [Database Administrator](#database-administrators) (role)
+* **DBA**: [Database Administrator](#database-administrators) (role).
 * **DBO**: A Database Object, e.g. a table, view, script, connection, virtual schema.
 
 ## Features
@@ -46,28 +46,28 @@ Needs: dsn
 ### Install Extensions
 `feat~install-extension~1`
 
-EM allows the user to install extensions.
+EM allows the DBA to install extensions.
 
 Needs: req
 
 ### Configure an Extension
 `feat~configure-extension~1`
 
-EM allows the user to configure an extension, e.g. in order to set up a Virtual Schema source system.
+EM allows the DBA to configure an extension, e.g. in order to set up a Virtual Schema source system.
 
 Needs: req
 
 ### Updating an Extension
 `feat~update-extension~1`
 
-EM allows users to install a new version of an extension that was already installed in an older version.
+EM allows DBA to install a new version of an extension that was already installed in an older version.
 
 Needs: req
 
 ### Uninstall an Extension
 `feat~uninstall-extension~1`
 
-EM allows the user to uninstall an extension.
+EM allows the DBA to uninstall an extension.
 
 Needs: req
 
@@ -163,7 +163,7 @@ Needs: dsn
 #### Validation of parameter values
 `req~validate-parameter-values~1`
 
-EM validates parameter values selected oder entered by the user.
+EM validates parameter values selected or entered by the DBA.
 
 Rationale:
 * improve user experience
