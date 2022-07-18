@@ -1,4 +1,4 @@
-Design -- Extension Manager
+# Design -- Extension Manager
 
 <!--
 INFO: This file contains embedded plantuml diagrams. For displaying them you need to enable editor support.
