@@ -81,6 +81,72 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "put": {
+                "description": "This installs an extension",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Install an extension",
+                "operationId": "installExtension",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Hostname of the Exasol DB to manage",
+                        "name": "dbHost",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "port number of the Exasol DB to manage",
+                        "name": "dbPort",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "username of the Exasol DB to manage",
+                        "name": "dbUser",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "password of the Exasol DB to manage",
+                        "name": "dbPass",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "id of the extension to install",
+                        "name": "extensionId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "version of the extension to install",
+                        "name": "extensionVersion",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
         "/installations": {
@@ -140,6 +206,7 @@ const docTemplate = `{
     },
     "definitions": {
         "restAPI.ExtensionsResponse": {
+            "description": "Response containing all available extensions",
             "type": "object",
             "properties": {
                 "extensions": {
@@ -151,18 +218,26 @@ const docTemplate = `{
             }
         },
         "restAPI.ExtensionsResponseExtension": {
+            "description": "Extension information",
             "type": "object",
             "properties": {
                 "description": {
+                    "description": "The description of the extension to be displayed to the user.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID of the extension. Don't store this as it may change in the future.",
                     "type": "string"
                 },
                 "installableVersions": {
+                    "description": "A list of versions of this extension available for installation.",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "name": {
+                    "description": "The name of the extension to be displayed to the user.",
                     "type": "string"
                 }
             }
@@ -203,7 +278,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Exasol extension manager REST API",
-	Description:      "This is a REST API for managing extensions in an Exasol database.",
+	Description:      "Extension information",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

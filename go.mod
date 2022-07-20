@@ -3,19 +3,19 @@ module github.com/exasol/extension-manager
 go 1.17
 
 require (
-	github.com/dop251/goja v0.0.0-20220516123900-4418d4575a41
-	github.com/dop251/goja_nodejs v0.0.0-20211022123610-8dd9abb0616d
+	github.com/dop251/goja v0.0.0-20220705101429-189bfeb9f530
+	github.com/dop251/goja_nodejs v0.0.0-20220712185256-8cad205bf387
 	github.com/gin-gonic/gin v1.8.1
 	github.com/stretchr/testify v1.8.0
 )
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/exasol/exasol-driver-go v0.4.2
-	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.0.0-20220607114909-397987f03514
+	github.com/exasol/exasol-driver-go v0.4.3
+	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.2.2
 	github.com/kinbiko/jsonassert v1.1.0
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe
-	github.com/swaggo/gin-swagger v1.5.0
+	github.com/swaggo/gin-swagger v1.5.1
 	github.com/swaggo/swag v1.8.3
 )
 
@@ -48,9 +48,9 @@ require (
 	github.com/stretchr/objx v0.4.0 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
-	golang.org/x/net v0.0.0-20220630215102-69896b714898 // indirect
+	golang.org/x/net v0.0.0-20220708220712-1185a9018129 // indirect
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
-	golang.org/x/sys v0.0.0-20220704084225-05e143d24a9e // indirect
+	golang.org/x/sys v0.0.0-20220712014510-0a85c31ab51e // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.11 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect

@@ -44,7 +44,7 @@ EMITS(...) AS
 func execSQL(db *sql.DB, sql string) {
 	_, err := db.Exec(sql)
 	if err != nil {
-		panic(fmt.Sprintf("error executing SQL %q: %v", sql, err.Error()))
+		panic(fmt.Sprintf("error executing SQL %q: %v", sql, err))
 	}
 }
 
