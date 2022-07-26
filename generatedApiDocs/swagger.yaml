@@ -94,52 +94,6 @@ paths:
           schema:
             type: string
       summary: Get all extensions
-    put:
-      description: This installs an extension
-      operationId: installExtension
-      parameters:
-      - description: Hostname of the Exasol DB to manage
-        in: query
-        name: dbHost
-        required: true
-        type: string
-      - description: port number of the Exasol DB to manage
-        in: query
-        name: dbPort
-        required: true
-        type: integer
-      - description: username of the Exasol DB to manage
-        in: query
-        name: dbUser
-        required: true
-        type: string
-      - description: password of the Exasol DB to manage
-        in: query
-        name: dbPass
-        required: true
-        type: string
-      - description: id of the extension to install
-        in: query
-        name: extensionId
-        required: true
-        type: string
-      - description: version of the extension to install
-        in: query
-        name: extensionVersion
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: Install an extension
   /installations:
     get:
       description: Get a list of all installations. Installation means, that an extension
@@ -179,6 +133,58 @@ paths:
           schema:
             type: string
       summary: Get all installations
+    put:
+      description: This installs an extension
+      operationId: installExtension
+      parameters:
+      - description: Hostname of the Exasol DB to manage
+        in: query
+        name: dbHost
+        required: true
+        type: string
+      - description: port number of the Exasol DB to manage
+        in: query
+        name: dbPort
+        required: true
+        type: integer
+      - description: username of the Exasol DB to manage
+        in: query
+        name: dbUser
+        required: true
+        type: string
+      - description: password of the Exasol DB to manage
+        in: query
+        name: dbPass
+        required: true
+        type: string
+      - description: id of the extension to install
+        in: query
+        name: extensionId
+        required: true
+        type: string
+      - description: version of the extension to install
+        in: query
+        name: extensionVersion
+        required: true
+        type: string
+      - default: ""
+        description: dummy body
+        in: body
+        name: dummy
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Install an extension
 produces:
 - application/json
 swagger: "2.0"

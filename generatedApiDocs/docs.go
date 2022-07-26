@@ -81,6 +81,60 @@ const docTemplate = `{
                         }
                     }
                 }
+            }
+        },
+        "/installations": {
+            "get": {
+                "description": "Get a list of all installations. Installation means, that an extension is installed in the database (e.g. JAR files added to BucketFS, Adapter Script created).",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get all installations",
+                "operationId": "getInstallations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Hostname of the Exasol DB to manage",
+                        "name": "dbHost",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "port number of the Exasol DB to manage",
+                        "name": "dbPort",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "username of the Exasol DB to manage",
+                        "name": "dbUser",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "password of the Exasol DB to manage",
+                        "name": "dbPass",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/restAPI.InstallationsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             },
             "put": {
                 "description": "This installs an extension",
@@ -131,67 +185,22 @@ const docTemplate = `{
                         "name": "extensionVersion",
                         "in": "query",
                         "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object"
-                        }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
+                    {
+                        "default": "",
+                        "description": "dummy body",
+                        "name": "dummy",
+                        "in": "body",
                         "schema": {
                             "type": "string"
                         }
                     }
-                }
-            }
-        },
-        "/installations": {
-            "get": {
-                "description": "Get a list of all installations. Installation means, that an extension is installed in the database (e.g. JAR files added to BucketFS, Adapter Script created).",
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Get all installations",
-                "operationId": "getInstallations",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Hostname of the Exasol DB to manage",
-                        "name": "dbHost",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "port number of the Exasol DB to manage",
-                        "name": "dbPort",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "username of the Exasol DB to manage",
-                        "name": "dbUser",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "password of the Exasol DB to manage",
-                        "name": "dbPass",
-                        "in": "query",
-                        "required": true
-                    }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/restAPI.InstallationsResponse"
+                            "type": "string"
                         }
                     },
                     "500": {

@@ -61,7 +61,7 @@ func (restApi *restAPIImpl) Serve() {
 	router := gin.Default()
 	router.GET("/extensions", restApi.handleGetExtensions)
 	router.GET("/installations", restApi.handleGetInstallations)
-	router.PUT("/installations", restApi.handlePutExtension)
+	router.PUT("/installations", restApi.handlePutInstallation)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	const port = "8080"
@@ -196,16 +196,17 @@ func (restApi *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResp
 // @Description  This installs an extension
 // @Id           installExtension
 // @Produce      json
-// @Success      200 {object} interface{}
+// @Success      200 {object} string
 // @Param        dbHost query string true "Hostname of the Exasol DB to manage"
 // @Param        dbPort query int true "port number of the Exasol DB to manage"
 // @Param        dbUser query string true "username of the Exasol DB to manage"
 // @Param        dbPass query string true "password of the Exasol DB to manage"
 // @Param        extensionId query string true "id of the extension to install"
 // @Param        extensionVersion query string true "version of the extension to install"
+// @Param        dummy body string false "dummy body" default()
 // @Failure      500 {object} string
-// @Router       /extensions [put]
-func (restApi *restAPIImpl) handlePutExtension(c *gin.Context) {
+// @Router       /installations [put]
+func (restApi *restAPIImpl) handlePutInstallation(c *gin.Context) {
 	result, err := restApi.installExtension(c)
 	restApi.sendResponse(c, result, err)
 }
