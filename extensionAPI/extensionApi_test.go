@@ -58,7 +58,8 @@ func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_Install() {
 	mockSQLClient.On("RunQuery", "select 1").Return()
 	extension, err := GetExtensionFromFile(suite.validExtensionFile)
 	suite.NoError(err)
-	err = extension.Install(&mockSQLClient, "extVersion")
+	var client SimpleSQLClient = &mockSQLClient
+	err = extension.Install(createMockContextWithSqlClient(client), "extVersion")
 	suite.NoError(err)
 	mockSQLClient.AssertCalled(suite.T(), "RunQuery", "select 1")
 }
@@ -74,11 +75,10 @@ func (suite *ExtensionApiSuite) Test_FindInstallationsCanReadAllScriptsTable() {
 			return {name: row.name, version: "0.1.0", instanceParameters: []}
 		});`).Build().WriteToTmpFile()
 	defer deleteFileAndCheckError(extensionFile)
-	mockSqlClient := MockSimpleSQLClient{}
 	extension, err := GetExtensionFromFile(extensionFile)
 	suite.NoError(err)
 	exaMetadata := createMockMetadata()
-	result, err := extension.FindInstallations(&mockSqlClient, &exaMetadata)
+	result, err := extension.FindInstallations(createMockContext(), &exaMetadata)
 	suite.Assert().Equal("test", result[0].Name)
 	suite.NoError(err)
 }
@@ -91,11 +91,10 @@ func (suite *ExtensionApiSuite) Test_FindInstallationsReturningParameters() {
 		type: "string"
 	}]`)).Build().WriteToTmpFile()
 	defer deleteFileAndCheckError(extensionFile)
-	mockSqlClient := MockSimpleSQLClient{}
 	extension, err := GetExtensionFromFile(extensionFile)
 	suite.NoError(err)
 	exaMetadata := createMockMetadata()
-	result, err := extension.FindInstallations(&mockSqlClient, &exaMetadata)
+	result, err := extension.FindInstallations(createMockContext(), &exaMetadata)
 	suite.Assert().Equal("test", result[0].Name)
 	suite.Assert().Equal("0.1.0", result[0].Version)
 	suite.Assert().Equal([]interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}, result[0].InstanceParameters)

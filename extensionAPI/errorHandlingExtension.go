@@ -23,21 +23,21 @@ func wrapExtension(ext *rawJsExtension) *JsExtension {
 		BucketFsUploads:     ext.BucketFsUploads}
 }
 
-func (e *JsExtension) Install(sqlClient SimpleSQLClient, version string) (errorResult error) {
+func (e *JsExtension) Install(context *ExtensionContext, version string) (errorResult error) {
 	defer func() {
 		if err := recover(); err != nil {
 			errorResult = fmt.Errorf("failed to install extension %q: %v", e.Id, err)
 		}
 	}()
-	e.extension.Install(sqlClient, version)
+	e.extension.Install(context, version)
 	return nil
 }
 
-func (e *JsExtension) FindInstallations(sqlClient SimpleSQLClient, metadata *ExaMetadata) (installations []*JsExtInstallation, errorResult error) {
+func (e *JsExtension) FindInstallations(context *ExtensionContext, metadata *ExaMetadata) (installations []*JsExtInstallation, errorResult error) {
 	defer func() {
 		if err := recover(); err != nil {
 			errorResult = fmt.Errorf("failed to find installations for extension %q: %v", e.Id, err)
 		}
 	}()
-	return e.extension.FindInstallations(sqlClient, metadata), nil
+	return e.extension.FindInstallations(context, metadata), nil
 }

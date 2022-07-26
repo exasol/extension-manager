@@ -1,9 +1,8 @@
 import {
-    ExaMetadata, ExasolExtension,
+    Context, ExaMetadata, ExasolExtension,
     Installation,
     Instance, ParameterValues,
-    registerExtension,
-    SqlClient
+    registerExtension
 } from "@exasol/extension-manager-interface";
 
 function createExtension(): ExasolExtension {
@@ -12,25 +11,25 @@ function createExtension(): ExasolExtension {
         description: "An extension for testing.",
         installableVersions: ["0.1.0"],
         bucketFsUploads: $UPLOADS$,
-        install(sqlClient) {
-            sqlClient.runQuery("select 1")
+        install(context: Context) {
+            context.sqlClient.runQuery("select 1")
         },
-        addInstance(_installation: Installation, _params: ParameterValues, _sql: SqlClient): Instance {
+        addInstance(_context: Context, _installation: Installation, _params: ParameterValues): Instance {
             return undefined;
         },
-        findInstallations(_sqlClient: SqlClient, metadata: ExaMetadata): Installation[] {
+        findInstallations(_context: Context, metadata: ExaMetadata): Installation[] {
             $FIND_INSTALLATIONS$
         },
-        findInstances(_installation: Installation, _sql: SqlClient): Instance[] {
+        findInstances(_context: Context, _installation: Installation): Instance[] {
             return [];
         },
-        uninstall(_installation: Installation, _sql: SqlClient): void {
+        uninstall(_context: Context, _installation: Installation): void {
             //empty on purpose
         },
-        deleteInstance(_instance: Instance): void {
+        deleteInstance(_context: Context, _instance: Instance): void {
             //empty on purpose
         },
-        readInstanceParameters(_installation: Installation, _instance: Instance, _sqlClient: SqlClient): ParameterValues {
+        readInstanceParameters(_context: Context, _installation: Installation, _instance: Instance): ParameterValues {
             return undefined;
         }
     }

@@ -114,6 +114,7 @@ func (controller *extensionControllerImpl) getJsExtension(extensionPath string) 
 	}
 	_, fileName := path.Split(extensionPath)
 	extension.Id = fileName
+	log.Printf("Extension %q with id %q loaded from file %q", extension.Name, extension.Id, extensionPath)
 	return extension, nil
 }
 
@@ -122,8 +123,7 @@ func (controller *extensionControllerImpl) InstallExtension(dbConnection *sql.DB
 	if err != nil {
 		return fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
 	}
-	sqlClient := backend.ExasolSqlClient{Connection: dbConnection}
-	return extension.Install(sqlClient, extensionVersion)
+	return extension.Install(controller.createContext(dbConnection), extensionVersion)
 }
 
 func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
@@ -131,14 +131,13 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
-	sqlClient := backend.ExasolSqlClient{Connection: dbConnection}
 	extensions, err := controller.getAllJsExtensions()
 	if err != nil {
 		return nil, err
 	}
 	var allInstallations []*extensionAPI.JsExtInstallation
 	for _, extension := range extensions {
-		installations, err := extension.FindInstallations(sqlClient, metadata)
+		installations, err := extension.FindInstallations(controller.createContext(dbConnection), metadata)
 		if err != nil {
 			return nil, fmt.Errorf("failed to find installations: %v", err)
 		} else {
@@ -146,4 +145,12 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 		}
 	}
 	return allInstallations, nil
+}
+
+func (controller *extensionControllerImpl) createContext(dbConnection *sql.DB) *extensionAPI.ExtensionContext {
+	var client extensionAPI.SimpleSQLClient = &backend.ExasolSqlClient{Connection: dbConnection}
+	return &extensionAPI.ExtensionContext{
+		ExtensionSchemaName: controller.extensionSchemaName,
+		SqlClient:           client,
+	}
 }
