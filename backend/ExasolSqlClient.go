@@ -3,6 +3,7 @@ package backend
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 type ExasolSqlClient struct {
@@ -10,8 +11,10 @@ type ExasolSqlClient struct {
 }
 
 func (client ExasolSqlClient) RunQuery(query string) {
+	log.Printf("Executing statement %q", query)
 	_, err := client.Connection.Exec(query)
 	if err != nil {
-		panic(fmt.Sprintf("sql error in extension: %v", err))
+		// Panic to signal a failed query to the JavaScript extension code.
+		panic(fmt.Sprintf("error executing statement %q: %v", query, err))
 	}
 }
