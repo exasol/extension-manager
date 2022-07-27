@@ -6,6 +6,7 @@ definitions:
     description: Response containing all available extensions
     properties:
       extensions:
+        description: All available extensions.
         items:
           $ref: '#/definitions/restAPI.ExtensionsResponseExtension'
         type: array
@@ -67,17 +68,17 @@ paths:
         name: dbHost
         required: true
         type: string
-      - description: port number of the Exasol DB to manage
+      - description: Port number of the Exasol DB to manage
         in: query
         name: dbPort
         required: true
         type: integer
-      - description: username of the Exasol DB to manage
+      - description: Username of the Exasol DB to manage
         in: query
         name: dbUser
         required: true
         type: string
-      - description: password of the Exasol DB to manage
+      - description: Password of the Exasol DB to manage
         in: query
         name: dbPass
         required: true
@@ -106,17 +107,17 @@ paths:
         name: dbHost
         required: true
         type: string
-      - description: port number of the Exasol DB to manage
+      - description: Port number of the Exasol DB to manage
         in: query
         name: dbPort
         required: true
         type: integer
-      - description: username of the Exasol DB to manage
+      - description: Username of the Exasol DB to manage
         in: query
         name: dbUser
         required: true
         type: string
-      - description: password of the Exasol DB to manage
+      - description: Password of the Exasol DB to manage
         in: query
         name: dbPass
         required: true
@@ -132,9 +133,9 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: Get all installations
+      summary: Get all installations.
     put:
-      description: This installs an extension
+      description: This installs an extension in a given version.
       operationId: installExtension
       parameters:
       - description: Hostname of the Exasol DB to manage
@@ -142,27 +143,27 @@ paths:
         name: dbHost
         required: true
         type: string
-      - description: port number of the Exasol DB to manage
+      - description: Port number of the Exasol DB to manage
         in: query
         name: dbPort
         required: true
         type: integer
-      - description: username of the Exasol DB to manage
+      - description: Username of the Exasol DB to manage
         in: query
         name: dbUser
         required: true
         type: string
-      - description: password of the Exasol DB to manage
+      - description: Password of the Exasol DB to manage
         in: query
         name: dbPass
         required: true
         type: string
-      - description: id of the extension to install
+      - description: ID of the extension to install
         in: query
         name: extensionId
         required: true
         type: string
-      - description: version of the extension to install
+      - description: Version of the extension to install
         in: query
         name: extensionVersion
         required: true
@@ -184,7 +185,7 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: Install an extension
+      summary: Install an extension.
 produces:
 - application/json
 swagger: "2.0"

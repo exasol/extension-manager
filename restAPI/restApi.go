@@ -42,6 +42,7 @@ type RestAPI interface {
 // @accept json
 // @produce json
 
+// Create creates a new RestAPI.
 func Create(controller cont.ExtensionController, serverAddress string) RestAPI {
 	return &restAPIImpl{controller: controller, serverAddress: serverAddress}
 }
@@ -112,9 +113,9 @@ func (restApi *restAPIImpl) Stop() {
 // @Produce      json
 // @Success      200 {object} ExtensionsResponse
 // @Param        dbHost query string true "Hostname of the Exasol DB to manage"
-// @Param        dbPort query int true "port number of the Exasol DB to manage"
-// @Param        dbUser query string true "username of the Exasol DB to manage"
-// @Param        dbPass query string true "password of the Exasol DB to manage"
+// @Param        dbPort query int true "Port number of the Exasol DB to manage"
+// @Param        dbUser query string true "Username of the Exasol DB to manage"
+// @Param        dbPass query string true "Password of the Exasol DB to manage"
 // @Failure      500 {object} string
 // @Router       /extensions [get]
 func (restApi *restAPIImpl) handleGetExtensions(c *gin.Context) {
@@ -145,7 +146,7 @@ func (restApi *restAPIImpl) getExtensions(c *gin.Context) (*ExtensionsResponse, 
 
 // @Description Response containing all available extensions
 type ExtensionsResponse struct {
-	Extensions []ExtensionsResponseExtension `json:"extensions"`
+	Extensions []ExtensionsResponseExtension `json:"extensions"` // All available extensions.
 }
 
 // @Description Extension information
@@ -156,15 +157,15 @@ type ExtensionsResponseExtension struct {
 	InstallableVersions []string `json:"installableVersions"` // A list of versions of this extension available for installation.
 }
 
-// @Summary      Get all installations
+// @Summary      Get all installations.
 // @Description  Get a list of all installations. Installation means, that an extension is installed in the database (e.g. JAR files added to BucketFS, Adapter Script created).
 // @Id           getInstallations
 // @Produce      json
 // @Success      200 {object} InstallationsResponse
 // @Param        dbHost query string true "Hostname of the Exasol DB to manage"
-// @Param        dbPort query int true "port number of the Exasol DB to manage"
-// @Param        dbUser query string true "username of the Exasol DB to manage"
-// @Param        dbPass query string true "password of the Exasol DB to manage"
+// @Param        dbPort query int true "Port number of the Exasol DB to manage"
+// @Param        dbUser query string true "Username of the Exasol DB to manage"
+// @Param        dbPass query string true "Password of the Exasol DB to manage"
 // @Failure      500 {object} string
 // @Router       /installations [get]
 func (restApi *restAPIImpl) handleGetInstallations(c *gin.Context) {
@@ -192,17 +193,17 @@ func (restApi *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResp
 	return &response, nil
 }
 
-// @Summary      Install an extension
-// @Description  This installs an extension
+// @Summary      Install an extension.
+// @Description  This installs an extension in a given version.
 // @Id           installExtension
 // @Produce      json
 // @Success      200 {object} string
 // @Param        dbHost query string true "Hostname of the Exasol DB to manage"
-// @Param        dbPort query int true "port number of the Exasol DB to manage"
-// @Param        dbUser query string true "username of the Exasol DB to manage"
-// @Param        dbPass query string true "password of the Exasol DB to manage"
-// @Param        extensionId query string true "id of the extension to install"
-// @Param        extensionVersion query string true "version of the extension to install"
+// @Param        dbPort query int true "Port number of the Exasol DB to manage"
+// @Param        dbUser query string true "Username of the Exasol DB to manage"
+// @Param        dbPass query string true "Password of the Exasol DB to manage"
+// @Param        extensionId query string true "ID of the extension to install"
+// @Param        extensionVersion query string true "Version of the extension to install"
 // @Param        dummy body string false "dummy body" default()
 // @Failure      500 {object} string
 // @Router       /installations [put]
