@@ -36,3 +36,5 @@ pom.xml.versionsBackup
 vendor/
 *.kate-swp
 /extension-manager
+/doc/tracing-report.md
+/doc/tracing-report.html
