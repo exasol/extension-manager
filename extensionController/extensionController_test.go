@@ -163,7 +163,7 @@ func (suite *ExtensionControllerSuite) getAllSchemaNames() []string {
 	var schemaNames []string
 	for rows.Next() {
 		var schemaName string
-		rows.Scan(&schemaName)
+		suite.NoError(rows.Scan(&schemaName))
 		schemaNames = append(schemaNames, schemaName)
 	}
 	return schemaNames
