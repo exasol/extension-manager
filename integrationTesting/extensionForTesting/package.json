@@ -4,10 +4,10 @@
     "clean": "tsc --build --clean"
   },
   "dependencies": {
-    "@exasol/extension-manager-interface": "/Users/chp/git/extension-manager-interface"
+    "@exasol/extension-manager-interface": "0.1.8"
   },
   "devDependencies": {
-    "esbuild": "0.14.37",
-    "typescript": "4.6.3"
+    "esbuild": "0.14.50",
+    "typescript": "4.7.4"
   }
 }
