@@ -1,0 +1,28 @@
+@startuml
+storage "prostgres-virtual-schema release 2.0.2" {
+  file installerInRepo as "postgres-extension-def-2.0.2.js"
+  file jarV2InRepo as "postgresql-vs-2.0.2.jar"
+}
+
+storage "prostgres-virtual-schema release 1.0.0" {
+  file "postgres-extension-def-1.0.0.js"
+  file jarV1InRepo as "postgresql-vs-1.0.0.jar"
+}
+
+node "Exasol SaaS backend" {
+  storage Installers {
+    file installerInBucketFS as "postgres-extension-def-2.0.2.js"
+  }
+}
+
+node "Exasol cluster (per customer)" {
+  storage BucketFS {
+    file jarV2InBucketFs as "postgresql-vs-2.0.2.jar"
+    file jarV1InBucketFS as "postgresql-vs-1.0.0.jar"
+  }
+}
+
+installerInRepo --> installerInBucketFS
+jarV2InRepo --> jarV2InBucketFs
+jarV1InRepo --> jarV1InBucketFS
+@enduml
