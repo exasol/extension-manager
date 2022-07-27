@@ -6,7 +6,6 @@ import (
 	"log"
 	"path"
 
-	"github.com/exasol/extension-manager/backend"
 	"github.com/exasol/extension-manager/extensionAPI"
 )
 
@@ -112,8 +111,6 @@ func (controller *extensionControllerImpl) getJsExtension(extensionPath string) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to load extension from file %q: %w", extensionPath, err)
 	}
-	_, fileName := path.Split(extensionPath)
-	extension.Id = fileName
 	return extension, nil
 }
 
@@ -122,8 +119,11 @@ func (controller *extensionControllerImpl) InstallExtension(dbConnection *sql.DB
 	if err != nil {
 		return fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
 	}
-	sqlClient := backend.ExasolSqlClient{Connection: dbConnection}
-	return extension.Install(sqlClient, extensionVersion)
+	err = controller.ensureSchemaExists(dbConnection)
+	if err != nil {
+		return err
+	}
+	return extension.Install(controller.createContext(dbConnection), extensionVersion)
 }
 
 func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
@@ -131,14 +131,14 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
-	sqlClient := backend.ExasolSqlClient{Connection: dbConnection}
 	extensions, err := controller.getAllJsExtensions()
 	if err != nil {
 		return nil, err
 	}
+	context := controller.createContext(dbConnection)
 	var allInstallations []*extensionAPI.JsExtInstallation
 	for _, extension := range extensions {
-		installations, err := extension.FindInstallations(sqlClient, metadata)
+		installations, err := extension.FindInstallations(context, metadata)
 		if err != nil {
 			return nil, fmt.Errorf("failed to find installations: %v", err)
 		} else {
@@ -146,4 +146,16 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 		}
 	}
 	return allInstallations, nil
+}
+
+func (controller *extensionControllerImpl) createContext(dbConnection *sql.DB) *extensionAPI.ExtensionContext {
+	return extensionAPI.CreateContext(controller.extensionSchemaName, dbConnection)
+}
+
+func (controller *extensionControllerImpl) ensureSchemaExists(db *sql.DB) error {
+	_, err := db.Exec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"`, controller.extensionSchemaName))
+	if err != nil {
+		return fmt.Errorf("failed to create schema: %w", err)
+	}
+	return nil
 }

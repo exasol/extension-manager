@@ -42,15 +42,17 @@ type RestAPI interface {
 // @accept json
 // @produce json
 
-func Create(controller cont.ExtensionController) RestAPI {
-	return &restAPIImpl{Controller: controller}
+// Create creates a new RestAPI.
+func Create(controller cont.ExtensionController, serverAddress string) RestAPI {
+	return &restAPIImpl{controller: controller, serverAddress: serverAddress}
 }
 
 type restAPIImpl struct {
-	Controller   cont.ExtensionController
-	server       *http.Server
-	stopped      *bool
-	stoppedMutex *sync.Mutex
+	controller    cont.ExtensionController
+	serverAddress string
+	server        *http.Server
+	stopped       *bool
+	stoppedMutex  *sync.Mutex
 }
 
 func (restApi *restAPIImpl) Serve() {
@@ -61,16 +63,15 @@ func (restApi *restAPIImpl) Serve() {
 	router := gin.Default()
 	router.GET("/extensions", restApi.handleGetExtensions)
 	router.GET("/installations", restApi.handleGetInstallations)
-	router.PUT("/installations", restApi.handlePutExtension)
+	router.PUT("/installations", restApi.handlePutInstallation)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	const port = "8080"
 	srv := &http.Server{
-		Addr:    ":" + port,
+		Addr:    restApi.serverAddress,
 		Handler: router,
 	}
 	restApi.server = srv
-	log.Printf("Starting server on port %s...\n", port)
+	log.Printf("Starting server on %s...\n", restApi.serverAddress)
 	err := restApi.server.ListenAndServe() // blocking
 	if err != nil && !restApi.isStopped() {
 		panic(fmt.Sprintf("failed to start rest API server. Cause: %v", err))
@@ -112,9 +113,9 @@ func (restApi *restAPIImpl) Stop() {
 // @Produce      json
 // @Success      200 {object} ExtensionsResponse
 // @Param        dbHost query string true "Hostname of the Exasol DB to manage"
-// @Param        dbPort query int true "port number of the Exasol DB to manage"
-// @Param        dbUser query string true "username of the Exasol DB to manage"
-// @Param        dbPass query string true "password of the Exasol DB to manage"
+// @Param        dbPort query int true "Port number of the Exasol DB to manage"
+// @Param        dbUser query string true "Username of the Exasol DB to manage"
+// @Param        dbPass query string true "Password of the Exasol DB to manage"
 // @Failure      500 {object} string
 // @Router       /extensions [get]
 func (restApi *restAPIImpl) handleGetExtensions(c *gin.Context) {
@@ -128,7 +129,7 @@ func (restApi *restAPIImpl) getExtensions(c *gin.Context) (*ExtensionsResponse, 
 		return nil, err
 	}
 	defer closeDbConnection(dbConnectionWithNoAutocommit)
-	extensions, err := restApi.Controller.GetAllExtensions(dbConnectionWithNoAutocommit)
+	extensions, err := restApi.controller.GetAllExtensions(dbConnectionWithNoAutocommit)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +146,7 @@ func (restApi *restAPIImpl) getExtensions(c *gin.Context) (*ExtensionsResponse, 
 
 // @Description Response containing all available extensions
 type ExtensionsResponse struct {
-	Extensions []ExtensionsResponseExtension `json:"extensions"`
+	Extensions []ExtensionsResponseExtension `json:"extensions"` // All available extensions.
 }
 
 // @Description Extension information
@@ -156,15 +157,15 @@ type ExtensionsResponseExtension struct {
 	InstallableVersions []string `json:"installableVersions"` // A list of versions of this extension available for installation.
 }
 
-// @Summary      Get all installations
+// @Summary      Get all installations.
 // @Description  Get a list of all installations. Installation means, that an extension is installed in the database (e.g. JAR files added to BucketFS, Adapter Script created).
 // @Id           getInstallations
 // @Produce      json
 // @Success      200 {object} InstallationsResponse
 // @Param        dbHost query string true "Hostname of the Exasol DB to manage"
-// @Param        dbPort query int true "port number of the Exasol DB to manage"
-// @Param        dbUser query string true "username of the Exasol DB to manage"
-// @Param        dbPass query string true "password of the Exasol DB to manage"
+// @Param        dbPort query int true "Port number of the Exasol DB to manage"
+// @Param        dbUser query string true "Username of the Exasol DB to manage"
+// @Param        dbPass query string true "Password of the Exasol DB to manage"
 // @Failure      500 {object} string
 // @Router       /installations [get]
 func (restApi *restAPIImpl) handleGetInstallations(c *gin.Context) {
@@ -178,7 +179,7 @@ func (restApi *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResp
 		return nil, err
 	}
 	defer closeDbConnection(dbConnection)
-	installations, err := restApi.Controller.GetAllInstallations(dbConnection)
+	installations, err := restApi.controller.GetAllInstallations(dbConnection)
 	if err != nil {
 		return nil, err
 	}
@@ -192,20 +193,21 @@ func (restApi *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResp
 	return &response, nil
 }
 
-// @Summary      Install an extension
-// @Description  This installs an extension
+// @Summary      Install an extension.
+// @Description  This installs an extension in a given version.
 // @Id           installExtension
 // @Produce      json
-// @Success      200 {object} interface{}
+// @Success      200 {object} string
 // @Param        dbHost query string true "Hostname of the Exasol DB to manage"
-// @Param        dbPort query int true "port number of the Exasol DB to manage"
-// @Param        dbUser query string true "username of the Exasol DB to manage"
-// @Param        dbPass query string true "password of the Exasol DB to manage"
-// @Param        extensionId query string true "id of the extension to install"
-// @Param        extensionVersion query string true "version of the extension to install"
+// @Param        dbPort query int true "Port number of the Exasol DB to manage"
+// @Param        dbUser query string true "Username of the Exasol DB to manage"
+// @Param        dbPass query string true "Password of the Exasol DB to manage"
+// @Param        extensionId query string true "ID of the extension to install"
+// @Param        extensionVersion query string true "Version of the extension to install"
+// @Param        dummy body string false "dummy body" default()
 // @Failure      500 {object} string
-// @Router       /extensions [put]
-func (restApi *restAPIImpl) handlePutExtension(c *gin.Context) {
+// @Router       /installations [put]
+func (restApi *restAPIImpl) handlePutInstallation(c *gin.Context) {
 	result, err := restApi.installExtension(c)
 	restApi.sendResponse(c, result, err)
 }
@@ -226,7 +228,7 @@ func (restApi *restAPIImpl) installExtension(c *gin.Context) (string, error) {
 		return "", fmt.Errorf("missing parameter extensionVersion")
 	}
 
-	err = restApi.Controller.InstallExtension(dbConnection, extensionId, extensionVersion)
+	err = restApi.controller.InstallExtension(dbConnection, extensionId, extensionVersion)
 
 	if err != nil {
 		return "", fmt.Errorf("error installing extension: %v", err)

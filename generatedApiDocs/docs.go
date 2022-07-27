@@ -47,21 +47,21 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "port number of the Exasol DB to manage",
+                        "description": "Port number of the Exasol DB to manage",
                         "name": "dbPort",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "username of the Exasol DB to manage",
+                        "description": "Username of the Exasol DB to manage",
                         "name": "dbUser",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "password of the Exasol DB to manage",
+                        "description": "Password of the Exasol DB to manage",
                         "name": "dbPass",
                         "in": "query",
                         "required": true
@@ -81,72 +81,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "put": {
-                "description": "This installs an extension",
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Install an extension",
-                "operationId": "installExtension",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Hostname of the Exasol DB to manage",
-                        "name": "dbHost",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "port number of the Exasol DB to manage",
-                        "name": "dbPort",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "username of the Exasol DB to manage",
-                        "name": "dbUser",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "password of the Exasol DB to manage",
-                        "name": "dbPass",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "id of the extension to install",
-                        "name": "extensionId",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "version of the extension to install",
-                        "name": "extensionVersion",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
             }
         },
         "/installations": {
@@ -155,7 +89,7 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Get all installations",
+                "summary": "Get all installations.",
                 "operationId": "getInstallations",
                 "parameters": [
                     {
@@ -167,21 +101,21 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "port number of the Exasol DB to manage",
+                        "description": "Port number of the Exasol DB to manage",
                         "name": "dbPort",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "username of the Exasol DB to manage",
+                        "description": "Username of the Exasol DB to manage",
                         "name": "dbUser",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "password of the Exasol DB to manage",
+                        "description": "Password of the Exasol DB to manage",
                         "name": "dbPass",
                         "in": "query",
                         "required": true
@@ -201,6 +135,81 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "put": {
+                "description": "This installs an extension in a given version.",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Install an extension.",
+                "operationId": "installExtension",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Hostname of the Exasol DB to manage",
+                        "name": "dbHost",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Port number of the Exasol DB to manage",
+                        "name": "dbPort",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Username of the Exasol DB to manage",
+                        "name": "dbUser",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password of the Exasol DB to manage",
+                        "name": "dbPass",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the extension to install",
+                        "name": "extensionId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Version of the extension to install",
+                        "name": "extensionVersion",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "default": "",
+                        "description": "dummy body",
+                        "name": "dummy",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         }
     },
@@ -210,6 +219,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "extensions": {
+                    "description": "All available extensions.",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/restAPI.ExtensionsResponseExtension"

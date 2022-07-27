@@ -1,6 +1,7 @@
 package extensionController
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"testing"
@@ -121,4 +122,49 @@ func (suite *ExtensionControllerSuite) TestInstallSucceeds() {
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
 	err := controller.InstallExtension(suite.Connection, DEFAULT_EXTENSION_ID, "ver")
 	suite.NoError(err)
+}
+
+func (suite *ExtensionControllerSuite) TestEnsureSchemaExistsCreatesSchemaIfItDoesNotExist() {
+	suite.writeDefaultExtension()
+	const schemaName = "my_testing_schema"
+	defer suite.dropSchema(schemaName)
+	controller := Create(suite.tempExtensionRepo, schemaName)
+	suite.Assert().NotContains(suite.getAllSchemaNames(), schemaName)
+	err := controller.InstallExtension(suite.Connection, DEFAULT_EXTENSION_ID, "ver")
+	suite.NoError(err)
+	suite.Assert().Contains(suite.getAllSchemaNames(), schemaName)
+}
+
+func (suite *ExtensionControllerSuite) TestEnsureSchemaDoesNotFailIfSchemaAlreadyExists() {
+	suite.writeDefaultExtension()
+	const schemaName = "my_testing_schema"
+	defer suite.dropSchema(schemaName)
+	controller := Create(suite.tempExtensionRepo, schemaName)
+	suite.createSchema(schemaName)
+	err := controller.InstallExtension(suite.Connection, DEFAULT_EXTENSION_ID, "ver")
+	suite.NoError(err)
+	suite.Assert().Contains(suite.getAllSchemaNames(), schemaName)
+}
+
+func (suite *ExtensionControllerSuite) createSchema(schemaName string) {
+	_, err := suite.Connection.Exec(fmt.Sprintf(`CREATE SCHEMA "%s"`, schemaName))
+	suite.NoError(err)
+}
+
+func (suite *ExtensionControllerSuite) dropSchema(schemaName string) {
+	_, err := suite.Connection.Exec(fmt.Sprintf(`DROP SCHEMA IF EXISTS "%s"`, schemaName))
+	suite.NoError(err)
+}
+
+func (suite *ExtensionControllerSuite) getAllSchemaNames() []string {
+	rows, err := suite.Connection.Query("SELECT SCHEMA_NAME FROM EXA_ALL_SCHEMAS ORDER BY SCHEMA_NAME")
+	suite.NoError(err)
+	defer rows.Close()
+	var schemaNames []string
+	for rows.Next() {
+		var schemaName string
+		suite.NoError(rows.Scan(&schemaName))
+		schemaNames = append(schemaNames, schemaName)
+	}
+	return schemaNames
 }

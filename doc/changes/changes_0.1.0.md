@@ -16,7 +16,8 @@ Code name:
 * #31: Added parameter validator
 * #30: Added optional command line flag for the path to the extension directory
 * #37: Added support for more metadata tables, use a specific schema for extensions
-* #41: Added step to create the `EXA_EXTENSION` before installing an extension
+* #41: Added step to create the `EXA_EXTENSION` schema before installing an extension
+* #45: Added endpoint for installing an extension
 
 ## Refactoring
 
