@@ -119,6 +119,10 @@ func (controller *extensionControllerImpl) InstallExtension(dbConnection *sql.DB
 	if err != nil {
 		return fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
 	}
+	err = controller.ensureSchemaExists(dbConnection)
+	if err != nil {
+		return err
+	}
 	return extension.Install(controller.createContext(dbConnection), extensionVersion)
 }
 
@@ -131,9 +135,10 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 	if err != nil {
 		return nil, err
 	}
+	context := controller.createContext(dbConnection)
 	var allInstallations []*extensionAPI.JsExtInstallation
 	for _, extension := range extensions {
-		installations, err := extension.FindInstallations(controller.createContext(dbConnection), metadata)
+		installations, err := extension.FindInstallations(context, metadata)
 		if err != nil {
 			return nil, fmt.Errorf("failed to find installations: %v", err)
 		} else {
@@ -145,4 +150,12 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 
 func (controller *extensionControllerImpl) createContext(dbConnection *sql.DB) *extensionAPI.ExtensionContext {
 	return extensionAPI.CreateContext(controller.extensionSchemaName, dbConnection)
+}
+
+func (controller *extensionControllerImpl) ensureSchemaExists(db *sql.DB) error {
+	_, err := db.Exec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"`, controller.extensionSchemaName))
+	if err != nil {
+		return fmt.Errorf("failed to create schema: %w", err)
+	}
+	return nil
 }
