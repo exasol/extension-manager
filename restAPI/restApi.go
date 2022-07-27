@@ -42,15 +42,16 @@ type RestAPI interface {
 // @accept json
 // @produce json
 
-func Create(controller cont.ExtensionController) RestAPI {
-	return &restAPIImpl{Controller: controller}
+func Create(controller cont.ExtensionController, serverAddress string) RestAPI {
+	return &restAPIImpl{controller: controller, serverAddress: serverAddress}
 }
 
 type restAPIImpl struct {
-	Controller   cont.ExtensionController
-	server       *http.Server
-	stopped      *bool
-	stoppedMutex *sync.Mutex
+	controller    cont.ExtensionController
+	serverAddress string
+	server        *http.Server
+	stopped       *bool
+	stoppedMutex  *sync.Mutex
 }
 
 func (restApi *restAPIImpl) Serve() {
@@ -64,13 +65,12 @@ func (restApi *restAPIImpl) Serve() {
 	router.PUT("/installations", restApi.handlePutInstallation)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	const port = "8080"
 	srv := &http.Server{
-		Addr:    ":" + port,
+		Addr:    restApi.serverAddress,
 		Handler: router,
 	}
 	restApi.server = srv
-	log.Printf("Starting server on port %s...\n", port)
+	log.Printf("Starting server on %s...\n", restApi.serverAddress)
 	err := restApi.server.ListenAndServe() // blocking
 	if err != nil && !restApi.isStopped() {
 		panic(fmt.Sprintf("failed to start rest API server. Cause: %v", err))
@@ -128,7 +128,7 @@ func (restApi *restAPIImpl) getExtensions(c *gin.Context) (*ExtensionsResponse, 
 		return nil, err
 	}
 	defer closeDbConnection(dbConnectionWithNoAutocommit)
-	extensions, err := restApi.Controller.GetAllExtensions(dbConnectionWithNoAutocommit)
+	extensions, err := restApi.controller.GetAllExtensions(dbConnectionWithNoAutocommit)
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +178,7 @@ func (restApi *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResp
 		return nil, err
 	}
 	defer closeDbConnection(dbConnection)
-	installations, err := restApi.Controller.GetAllInstallations(dbConnection)
+	installations, err := restApi.controller.GetAllInstallations(dbConnection)
 	if err != nil {
 		return nil, err
 	}
@@ -227,7 +227,7 @@ func (restApi *restAPIImpl) installExtension(c *gin.Context) (string, error) {
 		return "", fmt.Errorf("missing parameter extensionVersion")
 	}
 
-	err = restApi.Controller.InstallExtension(dbConnection, extensionId, extensionVersion)
+	err = restApi.controller.InstallExtension(dbConnection, extensionId, extensionVersion)
 
 	if err != nil {
 		return "", fmt.Errorf("error installing extension: %v", err)

@@ -38,7 +38,7 @@ func (suite *RestAPISuite) SetupSuite() {
 
 func (suite *RestAPISuite) SetupTest() {
 	suite.controller = &MockExtensionController{}
-	suite.restAPI = Create(suite.controller)
+	suite.restAPI = Create(suite.controller, "localhost:8080")
 	suite.baseUrl = "http://localhost:8080"
 	go suite.restAPI.Serve()
 	time.Sleep(10 * time.Millisecond) // give the server some time to become ready
@@ -73,7 +73,7 @@ func (mock *MockExtensionController) GetAllExtensions(dbConnectionWithNoAutocomm
 
 func (suite *RestAPISuite) TestStopWithoutStartFails() {
 	controller := &MockExtensionController{}
-	restAPI := Create(controller)
+	restAPI := Create(controller, "localhost:8080")
 	suite.Panics(restAPI.Stop)
 }
 
