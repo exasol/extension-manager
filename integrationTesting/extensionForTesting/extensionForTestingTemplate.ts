@@ -11,7 +11,7 @@ function createExtension(): ExasolExtension {
         description: "An extension for testing.",
         installableVersions: ["0.1.0"],
         bucketFsUploads: $UPLOADS$,
-        install(context: Context) {
+        install(context: Context, version: string) {
             $INSTALL$
         },
         addInstance(_context: Context, _installation: Installation, _params: ParameterValues): Instance {

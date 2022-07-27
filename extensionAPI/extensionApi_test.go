@@ -58,24 +58,22 @@ func (suite *ExtensionApiSuite) Test_Install() {
 	mockSQLClient.On("RunQuery", "select 1").Return()
 	extension, err := GetExtensionFromFile(suite.validExtensionFile)
 	suite.NoError(err)
-	var client SimpleSQLClient = &mockSQLClient
-	err = extension.Install(createMockContextWithSqlClient(client), "extVersion")
+	err = extension.Install(createMockContextWithSqlClient(&mockSQLClient), "extVersion")
 	suite.NoError(err)
 	mockSQLClient.AssertCalled(suite.T(), "RunQuery", "select 1")
 }
 
 func (suite *ExtensionApiSuite) Test_Install_ResolveBucketFsPath() {
 	extensionFile := integrationTesting.CreateTestExtensionBuilder().
-		WithInstallFunc("context.sqlClient.runQuery(`create script path ${context.bucketFs.resolvePath('my-adapter.jar')}`)").
+		WithInstallFunc("context.sqlClient.runQuery(`create script path ${context.bucketFs.resolvePath('my-adapter-'+version+'.jar')}`)").
 		Build().WriteToTmpFile()
 	mockSQLClient := MockSimpleSQLClient{}
-	mockSQLClient.On("RunQuery", "create script path /buckets/bfsdefault/default/my-adapter.jar").Return()
+	mockSQLClient.On("RunQuery", "create script path /buckets/bfsdefault/default/my-adapter-extensionVersion.jar").Return()
 	extension, err := GetExtensionFromFile(extensionFile)
 	suite.NoError(err)
-	var client SimpleSQLClient = &mockSQLClient
-	err = extension.Install(createMockContextWithSqlClient(client), "extVersion")
+	err = extension.Install(createMockContextWithSqlClient(&mockSQLClient), "extensionVersion")
 	suite.NoError(err)
-	mockSQLClient.AssertCalled(suite.T(), "RunQuery", "create script path /buckets/bfsdefault/default/my-adapter.jar")
+	mockSQLClient.AssertCalled(suite.T(), "RunQuery", "create script path /buckets/bfsdefault/default/my-adapter-extensionVersion.jar")
 }
 
 func createMockMetadata() ExaMetadata {
