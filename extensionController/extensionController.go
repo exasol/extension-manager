@@ -6,7 +6,6 @@ import (
 	"log"
 	"path"
 
-	"github.com/exasol/extension-manager/backend"
 	"github.com/exasol/extension-manager/extensionAPI"
 )
 
@@ -112,9 +111,6 @@ func (controller *extensionControllerImpl) getJsExtension(extensionPath string) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to load extension from file %q: %w", extensionPath, err)
 	}
-	_, fileName := path.Split(extensionPath)
-	extension.Id = fileName
-	log.Printf("Extension %q with id %q loaded from file %q", extension.Name, extension.Id, extensionPath)
 	return extension, nil
 }
 
@@ -148,9 +144,5 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 }
 
 func (controller *extensionControllerImpl) createContext(dbConnection *sql.DB) *extensionAPI.ExtensionContext {
-	var client extensionAPI.SimpleSQLClient = &backend.ExasolSqlClient{Connection: dbConnection}
-	return &extensionAPI.ExtensionContext{
-		ExtensionSchemaName: controller.extensionSchemaName,
-		SqlClient:           client,
-	}
+	return extensionAPI.CreateContext(controller.extensionSchemaName, dbConnection)
 }

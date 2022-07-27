@@ -6,22 +6,22 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type JsExtensionSuite struct {
+type ErrorHandlingExtensionSuite struct {
 	suite.Suite
 	rawExtension *rawJsExtension
 	extension    *JsExtension
 }
 
 func TestJsExtensionSuite(t *testing.T) {
-	suite.Run(t, new(JsExtensionSuite))
+	suite.Run(t, new(ErrorHandlingExtensionSuite))
 }
 
-func (suite *JsExtensionSuite) SetupSuite() {
+func (suite *ErrorHandlingExtensionSuite) SetupSuite() {
 	suite.rawExtension = &rawJsExtension{Id: "id", Name: "name", Description: "desc", InstallableVersions: []string{"v1", "v2"}, BucketFsUploads: []BucketFsUpload{{Name: "uploadName"}}}
 	suite.extension = wrapExtension(suite.rawExtension)
 }
 
-func (suite *JsExtensionSuite) TestProperties() {
+func (suite *ErrorHandlingExtensionSuite) TestProperties() {
 	suite.Assert().Equal(&JsExtension{
 		Id:                  "id",
 		Name:                "name",
@@ -33,15 +33,15 @@ func (suite *JsExtensionSuite) TestProperties() {
 }
 
 func createMockContextWithSqlClient(sqlClient SimpleSQLClient) *ExtensionContext {
-	return &ExtensionContext{ExtensionSchemaName: "ext_schema", SqlClient: sqlClient}
+	return CreateContextWithClient("extension_schema", sqlClient)
 }
 
 func createMockContext() *ExtensionContext {
 	var client SimpleSQLClient = &MockSimpleSQLClient{}
-	return createMockContextWithSqlClient(client)
+	return CreateContextWithClient("extension_schema", client)
 }
 
-func (suite *JsExtensionSuite) TestFindInstallationsSuccessful() {
+func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsSuccessful() {
 	expectedInstallations := []*JsExtInstallation{{Name: "instName"}}
 	suite.rawExtension.FindInstallations = func(context *ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation {
 		return expectedInstallations
@@ -51,7 +51,7 @@ func (suite *JsExtensionSuite) TestFindInstallationsSuccessful() {
 	suite.Equal(expectedInstallations, installations)
 }
 
-func (suite *JsExtensionSuite) TestFindInstallationsFailure() {
+func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsFailure() {
 	suite.rawExtension.FindInstallations = func(context *ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation {
 		panic("mock error")
 	}
@@ -60,14 +60,14 @@ func (suite *JsExtensionSuite) TestFindInstallationsFailure() {
 	suite.Nil(installations)
 }
 
-func (suite *JsExtensionSuite) TestInstallSuccessful() {
+func (suite *ErrorHandlingExtensionSuite) TestInstallSuccessful() {
 	suite.rawExtension.Install = func(context *ExtensionContext, version string) {
 	}
 	err := suite.extension.Install(createMockContext(), "version")
 	suite.NoError(err)
 }
 
-func (suite *JsExtensionSuite) TestInstallFailure() {
+func (suite *ErrorHandlingExtensionSuite) TestInstallFailure() {
 	suite.rawExtension.Install = func(context *ExtensionContext, version string) {
 		panic("mock error")
 	}

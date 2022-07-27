@@ -3,6 +3,8 @@ package extensionAPI
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
+	"path"
 
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/console"
@@ -12,20 +14,24 @@ import (
 const SupportedApiVersion = "0.1.8"
 
 // GetExtensionFromFile loads an extension from a .js file.
-func GetExtensionFromFile(fileName string) (*JsExtension, error) {
+func GetExtensionFromFile(extensionPath string) (*JsExtension, error) {
 	vm := goja.New()
 	vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
 	registry := new(require.Registry)
 	registry.Enable(vm)
 	console.Enable(vm)
-	extensionJs, err := loadExtension(vm, fileName)
+	extensionJs, err := loadExtension(vm, extensionPath)
 	if err != nil {
 		return nil, err
 	}
 	if extensionJs.APIVersion != SupportedApiVersion {
 		return nil, fmt.Errorf("incompatible extension API version %q. Please update the extension to use supported version %q", extensionJs.APIVersion, SupportedApiVersion)
 	}
-	return wrapExtension(&extensionJs.Extension), nil
+	wrappedExtension := wrapExtension(&extensionJs.Extension)
+	_, fileName := path.Split(extensionPath)
+	wrappedExtension.Id = fileName
+	log.Printf("Extension %q with id %q loaded from file %q", wrappedExtension.Name, wrappedExtension.Id, extensionPath)
+	return wrappedExtension, nil
 }
 
 func loadExtension(vm *goja.Runtime, fileName string) (*installedExtension, error) {
@@ -69,11 +75,6 @@ type rawJsExtension struct {
 	InstallableVersions []string                                                                    `json:"installableVersions"`
 	Install             func(context *ExtensionContext, version string)                             `json:"install"`
 	FindInstallations   func(context *ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation `json:"findInstallations"`
-}
-
-type ExtensionContext struct {
-	ExtensionSchemaName string          `json:"extensionSchemaName"`
-	SqlClient           SimpleSQLClient `json:"sqlClient"`
 }
 
 type BucketFsUpload struct {

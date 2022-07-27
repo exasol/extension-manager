@@ -12,7 +12,7 @@ function createExtension(): ExasolExtension {
         installableVersions: ["0.1.0"],
         bucketFsUploads: $UPLOADS$,
         install(context: Context) {
-            context.sqlClient.runQuery("select 1")
+            $INSTALL$
         },
         addInstance(_context: Context, _installation: Installation, _params: ParameterValues): Instance {
             return undefined;
