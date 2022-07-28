@@ -187,6 +187,9 @@ func (controller *extensionControllerImpl) CreateInstance(db *sql.DB, extensionI
 	if err != nil {
 		return "", err
 	}
+	if instance == nil {
+		return "", fmt.Errorf("extension did not return an instance")
+	}
 	return instance.Name, nil
 }
 
