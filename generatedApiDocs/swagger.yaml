@@ -2,6 +2,21 @@ basePath: /
 consumes:
 - application/json
 definitions:
+  restAPI.CreateInstanceRequest:
+    description: Request data for creating a new instance of an extension.
+    properties:
+      extensionId:
+        description: The ID of the extension
+        type: string
+      extensionVersion:
+        description: The version of the extension
+        type: string
+      parameterValues:
+        description: The parameters for the new instance
+        items:
+          $ref: '#/definitions/restAPI.ParameterValue'
+        type: array
+    type: object
   restAPI.ExtensionsResponse:
     description: Response containing all available extensions
     properties:
@@ -47,11 +62,21 @@ definitions:
       version:
         type: string
     type: object
+  restAPI.ParameterValue:
+    description: Parameter values for creating a new instance.
+    properties:
+      name:
+        description: The name of the parameter
+        type: string
+      value:
+        description: The value of the parameter
+        type: string
+    type: object
 info:
   contact:
     email: opensource@exasol.com
     name: Exasol Integration team
-  description: Extension information
+  description: Parameter values for creating a new instance.
   license:
     name: MIT
     url: https://github.com/exasol/extension-manager/blob/main/LICENSE
@@ -135,8 +160,8 @@ paths:
             type: string
       summary: Get all installations.
     put:
-      description: This installs an extension in a given version.
-      operationId: installExtension
+      description: This creates an instance of an extension, e.g. a virtual schema.
+      operationId: createInstance
       parameters:
       - description: Hostname of the Exasol DB to manage
         in: query
@@ -158,22 +183,12 @@ paths:
         name: dbPass
         required: true
         type: string
-      - description: ID of the extension to install
-        in: query
-        name: extensionId
-        required: true
-        type: string
-      - description: Version of the extension to install
-        in: query
-        name: extensionVersion
-        required: true
-        type: string
-      - default: ""
-        description: dummy body
+      - description: Request data for creating an instance
         in: body
-        name: dummy
+        name: createInstanceRequest
+        required: true
         schema:
-          type: string
+          $ref: '#/definitions/restAPI.CreateInstanceRequest'
       produces:
       - application/json
       responses:
@@ -185,7 +200,7 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: Install an extension.
+      summary: Create an instance of an extension.
 produces:
 - application/json
 swagger: "2.0"

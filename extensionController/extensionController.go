@@ -24,6 +24,10 @@ type ExtensionController interface {
 	// GetAllExtensions reports all extension definitions.
 	// dbConnection is a connection to the Exasol DB with autocommit turned off
 	GetAllExtensions(dbConnection *sql.DB) ([]*Extension, error)
+
+	// CreateInstance creates a new instance of an extension, e.g. a virtual schema.
+	// dbConnection is a connection to the Exasol DB with autocommit turned off
+	CreateInstance(db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) error
 }
 
 type Extension struct {
@@ -31,6 +35,11 @@ type Extension struct {
 	Name                string
 	Description         string
 	InstallableVersions []string
+}
+
+type ParameterValue struct {
+	Name  string
+	Value string
 }
 
 // ExtInstallation represents the installation of an Extension
@@ -146,6 +155,11 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 		}
 	}
 	return allInstallations, nil
+}
+
+func (controller *extensionControllerImpl) CreateInstance(db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) error {
+	// TODO
+	return nil
 }
 
 func (controller *extensionControllerImpl) createContext(dbConnection *sql.DB) *extensionAPI.ExtensionContext {

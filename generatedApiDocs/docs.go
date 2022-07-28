@@ -137,12 +137,12 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "This installs an extension in a given version.",
+                "description": "This creates an instance of an extension, e.g. a virtual schema.",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Install an extension.",
-                "operationId": "installExtension",
+                "summary": "Create an instance of an extension.",
+                "operationId": "createInstance",
                 "parameters": [
                     {
                         "type": "string",
@@ -173,26 +173,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "ID of the extension to install",
-                        "name": "extensionId",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Version of the extension to install",
-                        "name": "extensionVersion",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "default": "",
-                        "description": "dummy body",
-                        "name": "dummy",
+                        "description": "Request data for creating an instance",
+                        "name": "createInstanceRequest",
                         "in": "body",
+                        "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/restAPI.CreateInstanceRequest"
                         }
                     }
                 ],
@@ -214,6 +200,27 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "restAPI.CreateInstanceRequest": {
+            "description": "Request data for creating a new instance of an extension.",
+            "type": "object",
+            "properties": {
+                "extensionId": {
+                    "description": "The ID of the extension",
+                    "type": "string"
+                },
+                "extensionVersion": {
+                    "description": "The version of the extension",
+                    "type": "string"
+                },
+                "parameterValues": {
+                    "description": "The parameters for the new instance",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/restAPI.ParameterValue"
+                    }
+                }
+            }
+        },
         "restAPI.ExtensionsResponse": {
             "description": "Response containing all available extensions",
             "type": "object",
@@ -277,6 +284,20 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "restAPI.ParameterValue": {
+            "description": "Parameter values for creating a new instance.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "The name of the parameter",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "The value of the parameter",
+                    "type": "string"
+                }
+            }
         }
     }
 }`
@@ -288,7 +309,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Exasol extension manager REST API",
-	Description:      "Extension information",
+	Description:      "Parameter values for creating a new instance.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

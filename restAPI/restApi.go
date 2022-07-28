@@ -64,6 +64,7 @@ func (restApi *restAPIImpl) Serve() {
 	router.GET("/extensions", restApi.handleGetExtensions)
 	router.GET("/installations", restApi.handleGetInstallations)
 	router.PUT("/installations", restApi.handlePutInstallation)
+	router.PUT("/instances", restApi.handlePutInstance)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	srv := &http.Server{
@@ -234,6 +235,58 @@ func (restApi *restAPIImpl) installExtension(c *gin.Context) (string, error) {
 		return "", fmt.Errorf("error installing extension: %v", err)
 	}
 	return "", nil
+}
+
+// @Summary      Create an instance of an extension.
+// @Description  This creates an instance of an extension, e.g. a virtual schema.
+// @Id           createInstance
+// @Produce      json
+// @Success      200 {object} string
+// @Param        dbHost query string true "Hostname of the Exasol DB to manage"
+// @Param        dbPort query int true "Port number of the Exasol DB to manage"
+// @Param        dbUser query string true "Username of the Exasol DB to manage"
+// @Param        dbPass query string true "Password of the Exasol DB to manage"
+// @Param        createInstanceRequest body CreateInstanceRequest true "Request data for creating an instance"
+// @Failure      500 {object} string
+// @Router       /installations [put]
+func (restApi *restAPIImpl) handlePutInstance(c *gin.Context) {
+	result, err := restApi.createInstance(c)
+	restApi.sendResponse(c, result, err)
+}
+
+func (restApi *restAPIImpl) createInstance(c *gin.Context) (string, error) {
+	dbConnection, err := restApi.openDBConnection(c)
+	if err != nil {
+		return "", err
+	}
+	defer closeDbConnection(dbConnection)
+	var request CreateInstanceRequest
+	if err := c.BindJSON(&request); err != nil {
+		return "", fmt.Errorf("invalid request: %w", err)
+	}
+
+	var parameters []cont.ParameterValue
+	for _, p := range request.ParameterValues {
+		parameters = append(parameters, cont.ParameterValue{Name: p.Name, Value: p.Value})
+	}
+	err = restApi.controller.CreateInstance(dbConnection, request.ExtensionId, request.ExtensionVersion, parameters)
+	if err != nil {
+		return "", fmt.Errorf("error installing extension: %v", err)
+	}
+	return "", nil
+}
+
+// @Description Request data for creating a new instance of an extension.
+type CreateInstanceRequest struct {
+	ExtensionId      string           `json:"extensionId"`      // The ID of the extension
+	ExtensionVersion string           `json:"extensionVersion"` // The version of the extension
+	ParameterValues  []ParameterValue `json:"parameterValues"`  // The parameters for the new instance
+}
+
+// @Description Parameter values for creating a new instance.
+type ParameterValue struct {
+	Name  string `json:"name"`  // The name of the parameter
+	Value string `json:"value"` // The value of the parameter
 }
 
 func (restApi *restAPIImpl) sendResponse(c *gin.Context, response interface{}, err error) {

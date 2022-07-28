@@ -14,7 +14,7 @@ function createExtension(): ExasolExtension {
         install(context: Context, version: string) {
             $INSTALL$
         },
-        addInstance(_context: Context, _installation: Installation, _params: ParameterValues): Instance {
+        addInstance(_context: Context, version: string, params: ParameterValues): Instance {
             return undefined;
         },
         findInstallations(_context: Context, metadata: ExaMetadata): Installation[] {

@@ -50,7 +50,6 @@ func (suite *RestAPISuite) TearDownTest() {
 
 func (mock *MockExtensionController) InstallExtension(dbConnection *sql.DB, extensionId string, extensionVersion string) error {
 	args := mock.Called(dbConnection, extensionId, extensionVersion)
-	fmt.Printf("arg0 %v %t", args.Get(0), args.Get(0))
 	return args.Error(0)
 }
 
@@ -69,6 +68,11 @@ func (mock *MockExtensionController) GetAllExtensions(dbConnectionWithNoAutocomm
 	} else {
 		return nil, args.Error(1)
 	}
+}
+
+func (mock *MockExtensionController) CreateInstance(db *sql.DB, extensionId string, extensionVersion string, parameterValues []extensionController.ParameterValue) error {
+	args := mock.Called(db, extensionId, extensionVersion, parameterValues)
+	return args.Error(0)
 }
 
 func (suite *RestAPISuite) TestStopWithoutStartFails() {
@@ -131,10 +135,17 @@ func (suite *RestAPISuite) TestRequestsFailForMissingParameters() {
 		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563&dbPass=password", "missing dbUser"},
 		{"PUT", "/installations", "extensionId=ext-id&dbHost=host&dbPort=8563&dbUser=user&dbPass=password", "missing extensionVersion"},
 		{"PUT", "/installations", "extensionVersion=ver&dbHost=host&dbPort=8563&dbUser=user&dbPass=password", "missing extensionId"},
+
+		{"PUT", "/instances", "dbPort=8563&dbUser=user&dbPass=password", "missing dbHost"},
+		{"PUT", "/instances", "dbHost=host&dbUser=user&dbPass=password", "missing dbPort"},
+		{"PUT", "/instances", "dbHost=host&dbPort=invalidPort&dbUser=user&dbPass=password", "invalid dbPort"},
+		{"PUT", "/instances", "dbHost=host&dbPort=8563&dbPass=password", "missing dbUser"},
+		{"PUT", "/instances", "dbHost=host&dbPort=8563&dbUser=user", "missing dbPass"},
 	}
 	suite.controller.On("GetAllExtensions", mock.Anything).Return([]*extensionController.Extension{{Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
 	suite.controller.On("GetAllInstallations", mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)
 	suite.controller.On("InstallExtension", mock.Anything, "ext-id", "ver").Return(nil)
+	suite.controller.On("CreateInstance", mock.Anything, "ext-id", "ver", mock.Anything).Return(nil)
 	for _, test := range tests {
 		completePath := fmt.Sprintf("%s?%s", test.url, test.parameters)
 		responseString := suite.makeRequest(test.method, completePath, "", 500)
@@ -147,9 +158,24 @@ func (suite *RestAPISuite) TestInstallExtensionsSuccessfully() {
 	responseString := suite.makePutRequest("/installations?extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563&dbUser=user&dbPass=password")
 	suite.Equal("", responseString)
 }
+
 func (suite *RestAPISuite) TestInstallExtensionsFailed() {
 	suite.controller.On("InstallExtension", mock.Anything, "ext-id", "ver").Return(fmt.Errorf("mock error"))
 	responseString := suite.makeRequest("PUT", "/installations?extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563&dbUser=user&dbPass=password", "", 500)
+	suite.Equal("Internal error.", responseString)
+}
+
+func (suite *RestAPISuite) TestCreateInstanceSuccessfully() {
+	suite.controller.On("CreateInstance", mock.Anything, "ext-id", "ver", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return(nil)
+	responseString := suite.makeRequest("PUT", "/instances?dbHost=host&dbPort=8563&dbUser=user&dbPass=password",
+		`{"extensionId": "ext-id", "extensionVersion": "ver", "parameterValues": [{"name":"p1", "value":"v1"}]}`, 200)
+	suite.Equal("", responseString)
+}
+
+func (suite *RestAPISuite) TestCreateInstanceFailed() {
+	suite.controller.On("CreateInstance", mock.Anything, "ext-id", "ver", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return(fmt.Errorf("mock error"))
+	responseString := suite.makeRequest("PUT", "/instances?dbHost=host&dbPort=8563&dbUser=user&dbPass=password",
+		`{"extensionId": "ext-id", "extensionVersion": "ver", "parameterValues": [{"name":"p1", "value":"v1"}]}`, 500)
 	suite.Equal("Internal error.", responseString)
 }
 
