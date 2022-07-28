@@ -7,6 +7,7 @@ import (
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/console"
 	"github.com/dop251/goja_nodejs/require"
+	"github.com/exasol/extension-manager/extensionAPI"
 )
 
 // The dist.js file is built using go:generate in ../go-generate.go
@@ -42,6 +43,45 @@ func New() (*Validator, error) {
 		return nil, err
 	}
 	return &validator, nil
+}
+
+func (v *Validator) ValidateParameters(definitions []interface{}, params extensionAPI.ParameterValues) ([]ValidationResult, error) {
+	result := make([]ValidationResult, 0)
+	for _, def := range definitions {
+		id, name, err := extractFromDefinition(def)
+		if err != nil {
+			return nil, err
+		}
+		param := params.Find(id)
+		if param == nil {
+			result = append(result, ValidationResult{Success: false, Message: fmt.Sprintf("Parameter %q is missing", name)})
+		} else {
+			r, err := v.ValidateParameter(def, param.Value)
+			if err != nil {
+				return nil, fmt.Errorf("failed to validate parameter %v using definition %v", param, def)
+			}
+			if !r.Success {
+				result = append(result, ValidationResult{Success: false, Message: fmt.Sprintf("Failed to validate parameter %q: %s", name, r.Message)})
+			}
+		}
+	}
+	return result, nil
+}
+
+func extractFromDefinition(d interface{}) (id string, name string, err error) {
+	if def, ok := d.(map[string]interface{}); ok {
+		if id, ok := def["id"].(string); ok {
+			if name, ok := def["name"].(string); ok {
+				return id, name, nil
+			} else {
+				return "", "", fmt.Errorf("unexpected type of name in parameter definition: %t", def["name"])
+			}
+		} else {
+			return "", "", fmt.Errorf("unexpected type of id in parameter definition: %t", def["id"])
+		}
+	} else {
+		return "", "", fmt.Errorf("unexpected type of definition: %t", d)
+	}
 }
 
 // ValidateParameters uses the given parameter definition to validate a single value

@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "build": "tsc --build && esbuild dist/*.js --bundle --outfile=dist.js --target=es6",
+    "build": "npm run clean && npm run compile",
+    "compile": "tsc --build && esbuild dist/*.js --bundle --outfile=dist.js --target=es6",
     "clean": "tsc --build --clean"
   },
   "dependencies": {

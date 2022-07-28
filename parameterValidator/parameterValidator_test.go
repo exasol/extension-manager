@@ -3,18 +3,28 @@ package parameterValidator
 import (
 	"testing"
 
+	"github.com/exasol/extension-manager/extensionAPI"
 	"github.com/stretchr/testify/suite"
 )
 
 type ParameterValidatorSuite struct {
 	suite.Suite
+	validator *Validator
 }
 
 func TestParameterValidatorSuite(t *testing.T) {
 	suite.Run(t, new(ParameterValidatorSuite))
 }
 
-func (suite *ParameterValidatorSuite) TestValidate() {
+func (suite *ParameterValidatorSuite) SetupSuite() {
+	v, err := New()
+	if err != nil {
+		suite.Fail(err.Error())
+	}
+	suite.validator = v
+}
+
+func (suite *ParameterValidatorSuite) TestValidateParameter() {
 	var cases = []struct {
 		definition map[string]interface{}
 		expected   ValidationResult
@@ -25,13 +35,52 @@ func (suite *ParameterValidatorSuite) TestValidate() {
 			expected: ValidationResult{Success: false, Message: "The value has an invalid format."}},
 	}
 
-	validator, err := New()
-	if err != nil {
-		suite.Fail(err.Error())
-	}
 	for _, testCase := range cases {
-		result, err := validator.ValidateParameter(testCase.definition, "test")
+		result, err := suite.validator.ValidateParameter(testCase.definition, "test")
 		suite.NoError(err)
 		suite.Assert().Equal(testCase.expected, *result)
+	}
+}
+
+func (suite *ParameterValidatorSuite) TestValidateParameters() {
+	var tests = []struct {
+		name        string
+		definitions []interface{}
+		params      []extensionAPI.ParameterValue
+		expected    []ValidationResult
+	}{
+		{name: "success",
+			definitions: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}},
+			params:      []extensionAPI.ParameterValue{{Name: "param1", Value: "value"}},
+			expected:    []ValidationResult{}},
+		{name: "missing parameter",
+			definitions: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}},
+			params:      []extensionAPI.ParameterValue{},
+			expected:    []ValidationResult{{Success: false, Message: `Parameter "My param" is missing`}}},
+		{name: "empty required parameter",
+			definitions: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string", "required": true}},
+			params:      []extensionAPI.ParameterValue{{Name: "param1", Value: ""}},
+			expected:    []ValidationResult{{Success: false, Message: `Failed to validate parameter "My param": This is a required field.`}}},
+		{name: "empty non-required parameter",
+			definitions: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string", "required": false}},
+			params:      []extensionAPI.ParameterValue{{Name: "param1", Value: ""}},
+			expected:    []ValidationResult{}},
+		{name: "valid regex parameter",
+			definitions: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string", "regex": "^a+$"}},
+			params:      []extensionAPI.ParameterValue{{Name: "param1", Value: "aaa"}},
+			expected:    []ValidationResult{}},
+		{name: "invalid regex parameter",
+			definitions: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string", "regex": "^a+$"}},
+			params:      []extensionAPI.ParameterValue{{Name: "param1", Value: "ab"}},
+			expected:    []ValidationResult{{Success: false, Message: `Failed to validate parameter "My param": The value has an invalid format.`}}},
+	}
+
+	for _, t := range tests {
+		suite.Run(t.name, func() {
+			result, err := suite.validator.ValidateParameters(t.definitions, extensionAPI.ParameterValues{Values: t.params})
+			suite.NoError(err)
+			suite.Len(result, len(t.expected))
+			suite.Equal(t.expected, result)
+		})
 	}
 }
