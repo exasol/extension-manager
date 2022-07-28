@@ -241,14 +241,14 @@ func (restApi *restAPIImpl) installExtension(c *gin.Context) (string, error) {
 // @Description  This creates an instance of an extension, e.g. a virtual schema.
 // @Id           createInstance
 // @Produce      json
-// @Success      200 {object} string
+// @Success      200 {object} CreateInstanceResponse
 // @Param        dbHost query string true "Hostname of the Exasol DB to manage"
 // @Param        dbPort query int true "Port number of the Exasol DB to manage"
 // @Param        dbUser query string true "Username of the Exasol DB to manage"
 // @Param        dbPass query string true "Password of the Exasol DB to manage"
 // @Param        createInstanceRequest body CreateInstanceRequest true "Request data for creating an instance"
 // @Failure      500 {object} string
-// @Router       /installations [put]
+// @Router       /instances [put]
 func (restApi *restAPIImpl) handlePutInstance(c *gin.Context) {
 	result, err := restApi.createInstance(c)
 	restApi.sendResponse(c, result, err)

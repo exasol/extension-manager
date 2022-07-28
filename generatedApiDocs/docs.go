@@ -137,6 +137,83 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "description": "This installs an extension in a given version.",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Install an extension.",
+                "operationId": "installExtension",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Hostname of the Exasol DB to manage",
+                        "name": "dbHost",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Port number of the Exasol DB to manage",
+                        "name": "dbPort",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Username of the Exasol DB to manage",
+                        "name": "dbUser",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password of the Exasol DB to manage",
+                        "name": "dbPass",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the extension to install",
+                        "name": "extensionId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Version of the extension to install",
+                        "name": "extensionVersion",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "default": "",
+                        "description": "dummy body",
+                        "name": "dummy",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/instances": {
+            "put": {
                 "description": "This creates an instance of an extension, e.g. a virtual schema.",
                 "produces": [
                     "application/json"
@@ -186,7 +263,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/restAPI.CreateInstanceResponse"
                         }
                     },
                     "500": {
@@ -218,6 +295,16 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/restAPI.ParameterValue"
                     }
+                }
+            }
+        },
+        "restAPI.CreateInstanceResponse": {
+            "description": "Response data for creating a new instance of an extension.",
+            "type": "object",
+            "properties": {
+                "instanceName": {
+                    "description": "The name of the newly created instance",
+                    "type": "string"
                 }
             }
         },

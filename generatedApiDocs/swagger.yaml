@@ -17,6 +17,13 @@ definitions:
           $ref: '#/definitions/restAPI.ParameterValue'
         type: array
     type: object
+  restAPI.CreateInstanceResponse:
+    description: Response data for creating a new instance of an extension.
+    properties:
+      instanceName:
+        description: The name of the newly created instance
+        type: string
+    type: object
   restAPI.ExtensionsResponse:
     description: Response containing all available extensions
     properties:
@@ -160,6 +167,59 @@ paths:
             type: string
       summary: Get all installations.
     put:
+      description: This installs an extension in a given version.
+      operationId: installExtension
+      parameters:
+      - description: Hostname of the Exasol DB to manage
+        in: query
+        name: dbHost
+        required: true
+        type: string
+      - description: Port number of the Exasol DB to manage
+        in: query
+        name: dbPort
+        required: true
+        type: integer
+      - description: Username of the Exasol DB to manage
+        in: query
+        name: dbUser
+        required: true
+        type: string
+      - description: Password of the Exasol DB to manage
+        in: query
+        name: dbPass
+        required: true
+        type: string
+      - description: ID of the extension to install
+        in: query
+        name: extensionId
+        required: true
+        type: string
+      - description: Version of the extension to install
+        in: query
+        name: extensionVersion
+        required: true
+        type: string
+      - default: ""
+        description: dummy body
+        in: body
+        name: dummy
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Install an extension.
+  /instances:
+    put:
       description: This creates an instance of an extension, e.g. a virtual schema.
       operationId: createInstance
       parameters:
@@ -195,7 +255,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/restAPI.CreateInstanceResponse'
         "500":
           description: Internal Server Error
           schema:
