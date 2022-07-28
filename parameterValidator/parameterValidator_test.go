@@ -1,8 +1,9 @@
 package parameterValidator
 
 import (
-	"github.com/stretchr/testify/suite"
 	"testing"
+
+	"github.com/stretchr/testify/suite"
 )
 
 type ParameterValidatorSuite struct {
@@ -24,7 +25,7 @@ func (suite *ParameterValidatorSuite) TestValidate() {
 			expected: ValidationResult{Success: false, Message: "The value has an invalid format."}},
 	}
 	for _, testCase := range cases {
-		result, err := validateParameter(testCase.definition, "test")
+		result, err := ValidateParameters(testCase.definition, "test")
 		suite.NoError(err)
 		suite.Assert().Equal(testCase.expected, *result)
 	}

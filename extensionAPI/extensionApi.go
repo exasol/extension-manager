@@ -15,11 +15,7 @@ const SupportedApiVersion = "0.1.8"
 
 // GetExtensionFromFile loads an extension from a .js file.
 func GetExtensionFromFile(extensionPath string) (*JsExtension, error) {
-	vm := goja.New()
-	vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
-	registry := new(require.Registry)
-	registry.Enable(vm)
-	console.Enable(vm)
+	vm := newJavaScriptVm()
 	extensionJs, err := loadExtension(vm, extensionPath)
 	if err != nil {
 		return nil, err
@@ -32,6 +28,15 @@ func GetExtensionFromFile(extensionPath string) (*JsExtension, error) {
 	wrappedExtension.Id = fileName
 	log.Printf("Extension %q with id %q loaded from file %q", wrappedExtension.Name, wrappedExtension.Id, extensionPath)
 	return wrappedExtension, nil
+}
+
+func newJavaScriptVm() *goja.Runtime {
+	vm := goja.New()
+	vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
+	registry := new(require.Registry)
+	registry.Enable(vm)
+	console.Enable(vm)
+	return vm
 }
 
 func loadExtension(vm *goja.Runtime, fileName string) (*installedExtension, error) {
