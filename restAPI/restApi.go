@@ -254,26 +254,27 @@ func (restApi *restAPIImpl) handlePutInstance(c *gin.Context) {
 	restApi.sendResponse(c, result, err)
 }
 
-func (restApi *restAPIImpl) createInstance(c *gin.Context) (string, error) {
+func (restApi *restAPIImpl) createInstance(c *gin.Context) (CreateInstanceResponse, error) {
 	dbConnection, err := restApi.openDBConnection(c)
+	var response CreateInstanceResponse
 	if err != nil {
-		return "", err
+		return response, err
 	}
 	defer closeDbConnection(dbConnection)
 	var request CreateInstanceRequest
 	if err := c.BindJSON(&request); err != nil {
-		return "", fmt.Errorf("invalid request: %w", err)
+		return response, fmt.Errorf("invalid request: %w", err)
 	}
 
 	var parameters []cont.ParameterValue
 	for _, p := range request.ParameterValues {
 		parameters = append(parameters, cont.ParameterValue{Name: p.Name, Value: p.Value})
 	}
-	err = restApi.controller.CreateInstance(dbConnection, request.ExtensionId, request.ExtensionVersion, parameters)
+	response.InstanceName, err = restApi.controller.CreateInstance(dbConnection, request.ExtensionId, request.ExtensionVersion, parameters)
 	if err != nil {
-		return "", fmt.Errorf("error installing extension: %v", err)
+		return response, fmt.Errorf("error installing extension: %v", err)
 	}
-	return "", nil
+	return response, nil
 }
 
 // @Description Request data for creating a new instance of an extension.
@@ -287,6 +288,11 @@ type CreateInstanceRequest struct {
 type ParameterValue struct {
 	Name  string `json:"name"`  // The name of the parameter
 	Value string `json:"value"` // The value of the parameter
+}
+
+// @Description Response data for creating a new instance of an extension.
+type CreateInstanceResponse struct {
+	InstanceName string `json:"instanceName"` // The name of the newly created instance
 }
 
 func (restApi *restAPIImpl) sendResponse(c *gin.Context, response interface{}, err error) {

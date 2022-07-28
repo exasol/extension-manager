@@ -7,7 +7,7 @@
     ],
     "swagger": "2.0",
     "info": {
-        "description": "Parameter values for creating a new instance.",
+        "description": "Response data for creating a new instance of an extension.",
         "title": "Exasol extension manager REST API",
         "contact": {
             "name": "Exasol Integration team",

@@ -309,7 +309,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Exasol extension manager REST API",
-	Description:      "Parameter values for creating a new instance.",
+	Description:      "Response data for creating a new instance of an extension.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

@@ -76,7 +76,7 @@ info:
   contact:
     email: opensource@exasol.com
     name: Exasol Integration team
-  description: Parameter values for creating a new instance.
+  description: Response data for creating a new instance of an extension.
   license:
     name: MIT
     url: https://github.com/exasol/extension-manager/blob/main/LICENSE

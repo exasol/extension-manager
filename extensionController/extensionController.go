@@ -25,9 +25,9 @@ type ExtensionController interface {
 	// dbConnection is a connection to the Exasol DB with autocommit turned off
 	GetAllExtensions(dbConnection *sql.DB) ([]*Extension, error)
 
-	// CreateInstance creates a new instance of an extension, e.g. a virtual schema.
+	// CreateInstance creates a new instance of an extension, e.g. a virtual schema and returns it's name.
 	// dbConnection is a connection to the Exasol DB with autocommit turned off
-	CreateInstance(db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) error
+	CreateInstance(db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error)
 }
 
 type Extension struct {
@@ -157,9 +157,9 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 	return allInstallations, nil
 }
 
-func (controller *extensionControllerImpl) CreateInstance(db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) error {
+func (controller *extensionControllerImpl) CreateInstance(db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error) {
 	// TODO
-	return nil
+	return "my new instance", nil
 }
 
 func (controller *extensionControllerImpl) createContext(dbConnection *sql.DB) *extensionAPI.ExtensionContext {
