@@ -7,6 +7,7 @@ import (
 	"path"
 
 	"github.com/exasol/extension-manager/extensionAPI"
+	"github.com/exasol/extension-manager/parameterValidator"
 )
 
 // ExtensionController is the core part of the extension-manager that provides the extension handling functionality.
@@ -170,11 +171,65 @@ func (controller *extensionControllerImpl) CreateInstance(db *sql.DB, extensionI
 	for _, p := range parameterValues {
 		params.Values = append(params.Values, extensionAPI.ParameterValue{Name: p.Name, Value: p.Value})
 	}
+
+	context := controller.createContext(db)
+	installation, err := controller.findInstallationByVersion(db, context, extension, extensionVersion)
+	if err != nil {
+		return "", fmt.Errorf("failed to find installations: %w", err)
+	}
+
+	err = validateParameters(installation.InstanceParameters, params)
+	if err != nil {
+		return "", err
+	}
+
 	instance, err := extension.AddInstance(controller.createContext(db), extensionVersion, &params)
 	if err != nil {
 		return "", err
 	}
 	return instance.Name, nil
+}
+
+func validateParameters(parameterDefinitions []interface{}, params extensionAPI.ParameterValues) error {
+	validator, err := parameterValidator.New()
+	if err != nil {
+		return fmt.Errorf("failed to create parameter validator: %w", err)
+	}
+	result, err := validator.ValidateParameters(parameterDefinitions, params)
+	if err != nil {
+		return fmt.Errorf("failed to validate parameters: %w", err)
+	}
+	if len(result) > 0 {
+		message := ""
+		for i, r := range result {
+			if i > 0 {
+				message += ", "
+			}
+			message += r.Message
+		}
+		return fmt.Errorf("invalid parameters: %s", message)
+	}
+	return nil
+}
+
+func (controller *extensionControllerImpl) findInstallationByVersion(db *sql.DB, context *extensionAPI.ExtensionContext, extension *extensionAPI.JsExtension, version string) (*extensionAPI.JsExtInstallation, error) {
+	metadata, err := extensionAPI.ReadMetadataTables(db, controller.extensionSchemaName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
+	}
+
+	installations, err := extension.FindInstallations(context, metadata)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find installations. Cause: %w", err)
+	}
+	var availableVersions []string
+	for _, i := range installations {
+		if i.Version == version {
+			return i, nil
+		}
+		availableVersions = append(availableVersions, i.Version)
+	}
+	return nil, fmt.Errorf("version %q not found for extension %q, available versions: %q", version, extension.Id, availableVersions)
 }
 
 func (controller *extensionControllerImpl) createContext(dbConnection *sql.DB) *extensionAPI.ExtensionContext {

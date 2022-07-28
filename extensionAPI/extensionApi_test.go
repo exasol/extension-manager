@@ -76,10 +76,15 @@ func (suite *ExtensionApiSuite) Test_Install_ResolveBucketFsPath() {
 	mockSQLClient.AssertCalled(suite.T(), "RunQuery", "create script path /buckets/bfsdefault/default/my-adapter-extensionVersion.jar")
 }
 
-func (suite *ExtensionApiSuite) Test_AddInstance() {
+func (suite *ExtensionApiSuite) Test_AddInstance_validParameters() {
 	extensionFile := integrationTesting.CreateTestExtensionBuilder().
 		WithAddInstanceFunc("context.sqlClient.runQuery('create vs');\n" +
 			"return {name: `instance_${version}_${params.values[0].name}_${params.values[0].value}`};").
+		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
+				id: "p1",
+				name: "My param",
+				type: "string"
+			}]`)).
 		Build().WriteToTmpFile()
 	mockSQLClient := MockSimpleSQLClient{}
 	mockSQLClient.On("RunQuery", "create vs").Return()

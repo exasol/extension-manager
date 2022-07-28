@@ -106,6 +106,16 @@ type ParameterValues struct {
 	Values []ParameterValue `json:"values"`
 }
 
+// Find returns the parameter with the given ID or nil in case none exists.
+func (pv ParameterValues) Find(id string) *ParameterValue {
+	for _, v := range pv.Values {
+		if v.Name == id {
+			return &v
+		}
+	}
+	return nil
+}
+
 type ParameterValue struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
