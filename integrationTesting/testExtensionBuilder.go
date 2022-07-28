@@ -19,6 +19,7 @@ func CreateTestExtensionBuilder() *TestExtensionBuilder {
 	builder := TestExtensionBuilder{}
 	builder.findInstallationsFunc = "return []"
 	builder.installFunc = "context.sqlClient.runQuery('select 1')"
+	builder.addInstanceFunc = "return undefined"
 	return &builder
 }
 
@@ -26,6 +27,7 @@ type TestExtensionBuilder struct {
 	bucketFsUploads       []BucketFsUploadParams
 	findInstallationsFunc string
 	installFunc           string
+	addInstanceFunc       string
 }
 
 type BucketFsUploadParams struct {
@@ -44,6 +46,11 @@ func (builder *TestExtensionBuilder) WithFindInstallationsFunc(tsFunctionCode st
 
 func (builder *TestExtensionBuilder) WithInstallFunc(tsFunctionCode string) *TestExtensionBuilder {
 	builder.installFunc = tsFunctionCode
+	return builder
+}
+
+func (builder *TestExtensionBuilder) WithAddInstanceFunc(tsFunctionCode string) *TestExtensionBuilder {
+	builder.addInstanceFunc = tsFunctionCode
 	return builder
 }
 
@@ -81,6 +88,7 @@ func (builder TestExtensionBuilder) Build() *BuiltExtension {
 	extensionTs := strings.Replace(template, "$UPLOADS$", string(bfsUploadsJson), 1)
 	extensionTs = strings.Replace(extensionTs, "$FIND_INSTALLATIONS$", builder.findInstallationsFunc, 1)
 	extensionTs = strings.Replace(extensionTs, "$INSTALL$", builder.installFunc, 1)
+	extensionTs = strings.Replace(extensionTs, "$ADD_INSTANCE$", builder.addInstanceFunc, 1)
 	workDir := path.Join(os.TempDir(), "extension-manager-test-extension-build-dir")
 	if _, err := os.Stat(workDir); errors.Is(err, os.ErrNotExist) {
 		err := os.Mkdir(workDir, os.ModePerm)

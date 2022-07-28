@@ -158,8 +158,23 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 }
 
 func (controller *extensionControllerImpl) CreateInstance(db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error) {
-	// TODO
-	return "my new instance", nil
+	extension, err := controller.getJsExtensionById(extensionId)
+	if err != nil {
+		return "", fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
+	}
+	err = controller.ensureSchemaExists(db)
+	if err != nil {
+		return "", err
+	}
+	params := extensionAPI.ParameterValues{}
+	for _, p := range parameterValues {
+		params.Values = append(params.Values, extensionAPI.ParameterValue{Name: p.Name, Value: p.Value})
+	}
+	instance, err := extension.AddInstance(controller.createContext(db), extensionVersion, &params)
+	if err != nil {
+		return "", err
+	}
+	return instance.Name, nil
 }
 
 func (controller *extensionControllerImpl) createContext(dbConnection *sql.DB) *extensionAPI.ExtensionContext {

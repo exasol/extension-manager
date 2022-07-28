@@ -69,12 +69,13 @@ type installedExtension struct {
 
 type rawJsExtension struct {
 	Id                  string
-	Name                string                                                                      `json:"name"`
-	Description         string                                                                      `json:"description"`
-	BucketFsUploads     []BucketFsUpload                                                            `json:"bucketFsUploads"`
-	InstallableVersions []string                                                                    `json:"installableVersions"`
-	Install             func(context *ExtensionContext, version string)                             `json:"install"`
-	FindInstallations   func(context *ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation `json:"findInstallations"`
+	Name                string                                                                                  `json:"name"`
+	Description         string                                                                                  `json:"description"`
+	BucketFsUploads     []BucketFsUpload                                                                        `json:"bucketFsUploads"`
+	InstallableVersions []string                                                                                `json:"installableVersions"`
+	Install             func(context *ExtensionContext, version string)                                         `json:"install"`
+	FindInstallations   func(context *ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation             `json:"findInstallations"`
+	AddInstance         func(context *ExtensionContext, version string, params *ParameterValues) *JsExtInstance `json:"addInstance"`
 }
 
 type BucketFsUpload struct {
@@ -90,6 +91,19 @@ type JsExtInstallation struct {
 	Version string `json:"version"`
 	// InstanceParameters is deserialized to a structure of []interface{} and maps.
 	InstanceParameters []interface{} `json:"instanceParameters"`
+}
+
+type JsExtInstance struct {
+	Name string `json:"name"`
+}
+
+type ParameterValues struct {
+	Values []ParameterValue `json:"values"`
+}
+
+type ParameterValue struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 type SimpleSQLClient interface {

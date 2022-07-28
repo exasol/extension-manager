@@ -76,6 +76,22 @@ func (suite *ExtensionApiSuite) Test_Install_ResolveBucketFsPath() {
 	mockSQLClient.AssertCalled(suite.T(), "RunQuery", "create script path /buckets/bfsdefault/default/my-adapter-extensionVersion.jar")
 }
 
+func (suite *ExtensionApiSuite) Test_AddInstance() {
+	extensionFile := integrationTesting.CreateTestExtensionBuilder().
+		WithAddInstanceFunc("context.sqlClient.runQuery('create vs');\n" +
+			"return {name: `instance_${version}_${params.values[0].name}_${params.values[0].value}`};").
+		Build().WriteToTmpFile()
+	mockSQLClient := MockSimpleSQLClient{}
+	mockSQLClient.On("RunQuery", "create vs").Return()
+	extension, err := GetExtensionFromFile(extensionFile)
+	suite.NoError(err)
+	instance, err := extension.AddInstance(createMockContextWithSqlClient(&mockSQLClient), "extensionVersion", &ParameterValues{Values: []ParameterValue{{Name: "p1", Value: "v1"}}})
+	suite.NoError(err)
+	suite.NotNil(instance)
+	suite.Equal("instance_extensionVersion_p1_v1", instance.Name)
+	mockSQLClient.AssertCalled(suite.T(), "RunQuery", "create vs")
+}
+
 func createMockMetadata() ExaMetadata {
 	exaAllScripts := ExaAllScriptTable{Rows: []ExaAllScriptRow{{Name: "test"}}}
 	return ExaMetadata{AllScripts: exaAllScripts}
