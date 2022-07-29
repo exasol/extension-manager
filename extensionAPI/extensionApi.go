@@ -11,15 +11,11 @@ import (
 	"github.com/dop251/goja_nodejs/require"
 )
 
-const SupportedApiVersion = "0.1.8"
+const SupportedApiVersion = "0.1.9"
 
 // GetExtensionFromFile loads an extension from a .js file.
 func GetExtensionFromFile(extensionPath string) (*JsExtension, error) {
-	vm := goja.New()
-	vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
-	registry := new(require.Registry)
-	registry.Enable(vm)
-	console.Enable(vm)
+	vm := newJavaScriptVm()
 	extensionJs, err := loadExtension(vm, extensionPath)
 	if err != nil {
 		return nil, err
@@ -32,6 +28,15 @@ func GetExtensionFromFile(extensionPath string) (*JsExtension, error) {
 	wrappedExtension.Id = fileName
 	log.Printf("Extension %q with id %q loaded from file %q", wrappedExtension.Name, wrappedExtension.Id, extensionPath)
 	return wrappedExtension, nil
+}
+
+func newJavaScriptVm() *goja.Runtime {
+	vm := goja.New()
+	vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
+	registry := new(require.Registry)
+	registry.Enable(vm)
+	console.Enable(vm)
+	return vm
 }
 
 func loadExtension(vm *goja.Runtime, fileName string) (*installedExtension, error) {
@@ -69,12 +74,13 @@ type installedExtension struct {
 
 type rawJsExtension struct {
 	Id                  string
-	Name                string                                                                      `json:"name"`
-	Description         string                                                                      `json:"description"`
-	BucketFsUploads     []BucketFsUpload                                                            `json:"bucketFsUploads"`
-	InstallableVersions []string                                                                    `json:"installableVersions"`
-	Install             func(context *ExtensionContext, version string)                             `json:"install"`
-	FindInstallations   func(context *ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation `json:"findInstallations"`
+	Name                string                                                                                  `json:"name"`
+	Description         string                                                                                  `json:"description"`
+	BucketFsUploads     []BucketFsUpload                                                                        `json:"bucketFsUploads"`
+	InstallableVersions []string                                                                                `json:"installableVersions"`
+	Install             func(context *ExtensionContext, version string)                                         `json:"install"`
+	FindInstallations   func(context *ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation             `json:"findInstallations"`
+	AddInstance         func(context *ExtensionContext, version string, params *ParameterValues) *JsExtInstance `json:"addInstance"`
 }
 
 type BucketFsUpload struct {
@@ -90,6 +96,29 @@ type JsExtInstallation struct {
 	Version string `json:"version"`
 	// InstanceParameters is deserialized to a structure of []interface{} and maps.
 	InstanceParameters []interface{} `json:"instanceParameters"`
+}
+
+type JsExtInstance struct {
+	Name string `json:"name"`
+}
+
+type ParameterValues struct {
+	Values []ParameterValue `json:"values"`
+}
+
+// Find returns the parameter with the given ID or nil in case none exists.
+func (pv ParameterValues) Find(id string) *ParameterValue {
+	for _, v := range pv.Values {
+		if v.Name == id {
+			return &v
+		}
+	}
+	return nil
+}
+
+type ParameterValue struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 type SimpleSQLClient interface {

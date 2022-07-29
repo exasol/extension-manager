@@ -74,3 +74,21 @@ func (suite *ErrorHandlingExtensionSuite) TestInstallFailure() {
 	err := suite.extension.Install(createMockContext(), "version")
 	suite.EqualError(err, "failed to install extension \"id\": mock error")
 }
+
+func (suite *ErrorHandlingExtensionSuite) TestAddInstanceSuccessful() {
+	suite.rawExtension.AddInstance = func(context *ExtensionContext, version string, params *ParameterValues) *JsExtInstance {
+		return &JsExtInstance{Name: "newInstance"}
+	}
+	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{})
+	suite.NoError(err)
+	suite.Equal(&JsExtInstance{Name: "newInstance"}, instance)
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestAddInstanceFails() {
+	suite.rawExtension.AddInstance = func(context *ExtensionContext, version string, params *ParameterValues) *JsExtInstance {
+		panic("mock error")
+	}
+	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{})
+	suite.EqualError(err, "failed to add instance for extension \"id\": mock error")
+	suite.Nil(instance)
+}

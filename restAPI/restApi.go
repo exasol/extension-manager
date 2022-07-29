@@ -64,6 +64,7 @@ func (restApi *restAPIImpl) Serve() {
 	router.GET("/extensions", restApi.handleGetExtensions)
 	router.GET("/installations", restApi.handleGetInstallations)
 	router.PUT("/installations", restApi.handlePutInstallation)
+	router.PUT("/instances", restApi.handlePutInstance)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	srv := &http.Server{
@@ -236,10 +237,68 @@ func (restApi *restAPIImpl) installExtension(c *gin.Context) (string, error) {
 	return "", nil
 }
 
+// @Summary      Create an instance of an extension.
+// @Description  This creates an instance of an extension, e.g. a virtual schema.
+// @Id           createInstance
+// @Produce      json
+// @Success      200 {object} CreateInstanceResponse
+// @Param        dbHost query string true "Hostname of the Exasol DB to manage"
+// @Param        dbPort query int true "Port number of the Exasol DB to manage"
+// @Param        dbUser query string true "Username of the Exasol DB to manage"
+// @Param        dbPass query string true "Password of the Exasol DB to manage"
+// @Param        createInstanceRequest body CreateInstanceRequest true "Request data for creating an instance"
+// @Failure      500 {object} string
+// @Router       /instances [put]
+func (restApi *restAPIImpl) handlePutInstance(c *gin.Context) {
+	result, err := restApi.createInstance(c)
+	restApi.sendResponse(c, result, err)
+}
+
+func (restApi *restAPIImpl) createInstance(c *gin.Context) (CreateInstanceResponse, error) {
+	dbConnection, err := restApi.openDBConnection(c)
+	var response CreateInstanceResponse
+	if err != nil {
+		return response, err
+	}
+	defer closeDbConnection(dbConnection)
+	var request CreateInstanceRequest
+	if err := c.BindJSON(&request); err != nil {
+		return response, fmt.Errorf("invalid request: %w", err)
+	}
+
+	var parameters []cont.ParameterValue
+	for _, p := range request.ParameterValues {
+		parameters = append(parameters, cont.ParameterValue{Name: p.Name, Value: p.Value})
+	}
+	response.InstanceName, err = restApi.controller.CreateInstance(dbConnection, request.ExtensionId, request.ExtensionVersion, parameters)
+	if err != nil {
+		return response, fmt.Errorf("error installing extension: %v", err)
+	}
+	return response, nil
+}
+
+// @Description Request data for creating a new instance of an extension.
+type CreateInstanceRequest struct {
+	ExtensionId      string           `json:"extensionId"`      // The ID of the extension
+	ExtensionVersion string           `json:"extensionVersion"` // The version of the extension
+	ParameterValues  []ParameterValue `json:"parameterValues"`  // The parameters for the new instance
+}
+
+// @Description Parameter values for creating a new instance.
+type ParameterValue struct {
+	Name  string `json:"name"`  // The name of the parameter
+	Value string `json:"value"` // The value of the parameter
+}
+
+// @Description Response data for creating a new instance of an extension.
+type CreateInstanceResponse struct {
+	InstanceName string `json:"instanceName"` // The name of the newly created instance
+}
+
 func (restApi *restAPIImpl) sendResponse(c *gin.Context, response interface{}, err error) {
 	if err != nil {
-		c.String(500, "Internal error.")
-		log.Printf("request failed: %v\n", err)
+		c.String(500, fmt.Sprintf("Request failed: %s", err.Error()))
+		log.Printf("Request failed: %v\n", err)
 		return
 	}
 	if s, ok := response.(string); ok {
@@ -260,7 +319,7 @@ func closeDbConnection(database *sql.DB) {
 func (restApi *restAPIImpl) openDBConnection(c *gin.Context) (*sql.DB, error) {
 	config, err := getDbConfig(c)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get db config: %w", err)
+		return nil, err
 	}
 	config.Autocommit(false).ValidateServerCertificate(false)
 	database, err := sql.Open("exasol", config.String())

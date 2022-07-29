@@ -211,9 +211,103 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/instances": {
+            "put": {
+                "description": "This creates an instance of an extension, e.g. a virtual schema.",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create an instance of an extension.",
+                "operationId": "createInstance",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Hostname of the Exasol DB to manage",
+                        "name": "dbHost",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Port number of the Exasol DB to manage",
+                        "name": "dbPort",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Username of the Exasol DB to manage",
+                        "name": "dbUser",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password of the Exasol DB to manage",
+                        "name": "dbPass",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "Request data for creating an instance",
+                        "name": "createInstanceRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/restAPI.CreateInstanceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/restAPI.CreateInstanceResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "restAPI.CreateInstanceRequest": {
+            "description": "Request data for creating a new instance of an extension.",
+            "type": "object",
+            "properties": {
+                "extensionId": {
+                    "description": "The ID of the extension",
+                    "type": "string"
+                },
+                "extensionVersion": {
+                    "description": "The version of the extension",
+                    "type": "string"
+                },
+                "parameterValues": {
+                    "description": "The parameters for the new instance",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/restAPI.ParameterValue"
+                    }
+                }
+            }
+        },
+        "restAPI.CreateInstanceResponse": {
+            "description": "Response data for creating a new instance of an extension.",
+            "type": "object",
+            "properties": {
+                "instanceName": {
+                    "description": "The name of the newly created instance",
+                    "type": "string"
+                }
+            }
+        },
         "restAPI.ExtensionsResponse": {
             "description": "Response containing all available extensions",
             "type": "object",
@@ -277,6 +371,20 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "restAPI.ParameterValue": {
+            "description": "Parameter values for creating a new instance.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "The name of the parameter",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "The value of the parameter",
+                    "type": "string"
+                }
+            }
         }
     }
 }`
@@ -288,7 +396,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Exasol extension manager REST API",
-	Description:      "Extension information",
+	Description:      "Response data for creating a new instance of an extension.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

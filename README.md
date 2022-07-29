@@ -1,15 +1,27 @@
 # Exasol Extension Manager
 
 [![Build Status](https://github.com/exasol/extension-manager/actions/workflows/ci-build.yml/badge.svg)](https://github.com/exasol/extension-manager/actions/workflows/ci-build.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/exasol/extension-manager.svg)](https://pkg.go.dev/github.com/exasol/extension-manager)
 
-This project contains the Exasol extension manager. It's a tool for installing and managing extensions like Virtual
-Schemas.
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Aextension-manager&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=com.exasol%3Aextension-manager)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Aextension-manager&metric=coverage)](https://sonarcloud.io/summary/new_code?id=com.exasol%3Aextension-manager)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Aextension-manager&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=com.exasol%3Aextension-manager)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Aextension-manager&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=com.exasol%3Aextension-manager)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Aextension-manager&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=com.exasol%3Aextension-manager)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Aextension-manager&metric=bugs)](https://sonarcloud.io/summary/new_code?id=com.exasol%3Aextension-manager)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Aextension-manager&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=com.exasol%3Aextension-manager)
 
-## REST API doc
+This project contains the Exasol extension manager. It's a tool for installing and managing extensions like Virtual Schemas.
+
+## REST API Documentation
 
 The extension-manager exposes a REST API for the frontend.
 <!-- markdown-link-check-disable-next-line -->
-This API is documented via Swagger. In order to view it, checkout this repo, run `go run ./main/` and open http://localhost:8080/swagger/index.html.
+This API is documented via Swagger. In order to view it, checkout this repo, run `go run ./...` and open `http://localhost:8080/swagger/index.html`.
+
+You can find the API definition here:
+* [swagger.json](./generatedApiDocs/swagger.json)
+* [swagger.yaml](./generatedApiDocs/swagger.yaml)
 
 ## Additional Information
 

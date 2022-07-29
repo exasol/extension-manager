@@ -1,11 +1,14 @@
 {
   "compilerOptions": {
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "noEmitOnError": true,
     "removeComments": false,
     "sourceMap": true,
-    "target": "es5",
-    "outDir": "dist"
+    "target": "es6",
+    "outDir": "dist/",
+    "declaration": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
   },
   "include": [
     "extensionForTesting.ts"
