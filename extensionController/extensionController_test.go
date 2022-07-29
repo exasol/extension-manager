@@ -163,13 +163,14 @@ func (suite *ExtensionControllerSuite) TestAddInstance_invalidParameters() {
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
 		id: "p1",
 		name: "My param",
-		type: "string"
+		type: "string",
+		required: true
 	}]`)).WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
 	instanceName, err := controller.CreateInstance(suite.Connection, DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p2", Value: "val"}})
-	suite.EqualError(err, `invalid parameters: Parameter "My param" is missing`)
+	suite.EqualError(err, `invalid parameters: Failed to validate parameter "My param": This is a required field.`)
 	suite.Equal("", instanceName)
 }
 

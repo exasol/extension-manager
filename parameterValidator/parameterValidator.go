@@ -52,20 +52,25 @@ func (v *Validator) ValidateParameters(definitions []interface{}, params extensi
 		if err != nil {
 			return nil, err
 		}
-		param := params.Find(id)
-		if param == nil {
-			result = append(result, ValidationResult{Success: false, Message: fmt.Sprintf("Parameter %q is missing", name)})
-		} else {
-			r, err := v.ValidateParameter(def, param.Value)
-			if err != nil {
-				return nil, fmt.Errorf("failed to validate parameter %v using definition %v", param, def)
-			}
-			if !r.Success {
-				result = append(result, ValidationResult{Success: false, Message: fmt.Sprintf("Failed to validate parameter %q: %s", name, r.Message)})
-			}
+		paramValue := findParamValue(params, id)
+		r, err := v.ValidateParameter(def, paramValue)
+		if err != nil {
+			return nil, fmt.Errorf("failed to validate parameter value %q with id %qusing definition %v", paramValue, id, def)
+		}
+		if !r.Success {
+			result = append(result, ValidationResult{Success: false, Message: fmt.Sprintf("Failed to validate parameter %q: %s", name, r.Message)})
 		}
 	}
 	return result, nil
+}
+
+func findParamValue(params extensionAPI.ParameterValues, id string) string {
+	param := params.Find(id)
+	if param == nil {
+		return ""
+	} else {
+		return param.Value
+	}
 }
 
 func extractFromDefinition(d interface{}) (id string, name string, err error) {
