@@ -297,8 +297,8 @@ type CreateInstanceResponse struct {
 
 func (restApi *restAPIImpl) sendResponse(c *gin.Context, response interface{}, err error) {
 	if err != nil {
-		c.String(500, "Internal error.")
-		log.Printf("request failed: %v\n", err)
+		c.String(500, fmt.Sprintf("Request failed: %s", err.Error()))
+		log.Printf("Request failed: %v\n", err)
 		return
 	}
 	if s, ok := response.(string); ok {
@@ -319,7 +319,7 @@ func closeDbConnection(database *sql.DB) {
 func (restApi *restAPIImpl) openDBConnection(c *gin.Context) (*sql.DB, error) {
 	config, err := getDbConfig(c)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get db config: %w", err)
+		return nil, err
 	}
 	config.Autocommit(false).ValidateServerCertificate(false)
 	database, err := sql.Open("exasol", config.String())
