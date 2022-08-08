@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"path"
+	"strings"
 
 	"github.com/exasol/extension-manager/extensionAPI"
 	"github.com/exasol/extension-manager/parameterValidator"
@@ -202,14 +203,12 @@ func validateParameters(parameterDefinitions []interface{}, params extensionAPI.
 	if err != nil {
 		return fmt.Errorf("failed to validate parameters: %w", err)
 	}
-	if len(result) > 0 {
-		message := ""
-		for i, r := range result {
-			if i > 0 {
-				message += ", "
-			}
-			message += r.Message
-		}
+	message := ""
+	for _, r := range result {
+		message += r.Message + ", "
+	}
+	message = strings.TrimSuffix(message, ", ")
+	if message != "" {
 		return fmt.Errorf("invalid parameters: %s", message)
 	}
 	return nil

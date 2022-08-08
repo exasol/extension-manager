@@ -1,7 +1,6 @@
 package extensionAPI
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"testing"
@@ -166,6 +165,6 @@ func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_invalidFileName() {
 
 func (suite *ExtensionApiSuite) writeExtension(extensionJs string) string {
 	extensionFile := path.Join(suite.T().TempDir(), "extension.js")
-	suite.NoError(ioutil.WriteFile(extensionFile, []byte(extensionJs), 0600))
+	suite.NoError(os.WriteFile(extensionFile, []byte(extensionJs), 0600))
 	return extensionFile
 }

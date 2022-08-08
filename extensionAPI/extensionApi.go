@@ -2,8 +2,8 @@ package extensionAPI
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"path"
 
 	"github.com/dop251/goja"
@@ -45,7 +45,7 @@ func loadExtension(vm *goja.Runtime, fileName string) (*installedExtension, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to set global to a new object. Cause: %w", err)
 	}
-	bytes, err := ioutil.ReadFile(fileName)
+	bytes, err := os.ReadFile(fileName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open extension file %v. Cause: %w", fileName, err)
 	}
@@ -107,13 +107,13 @@ type ParameterValues struct {
 }
 
 // Find returns the parameter with the given ID or nil in case none exists.
-func (pv ParameterValues) Find(id string) *ParameterValue {
+func (pv ParameterValues) Find(id string) (value ParameterValue, found bool) {
 	for _, v := range pv.Values {
 		if v.Name == id {
-			return &v
+			return v, true
 		}
 	}
-	return nil
+	return ParameterValue{}, false
 }
 
 type ParameterValue struct {
