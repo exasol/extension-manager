@@ -201,7 +201,7 @@ func validateParameters(parameterDefinitions []interface{}, params extensionAPI.
 	}
 	result, err := validator.ValidateParameters(parameterDefinitions, params)
 	if err != nil {
-		return fmt.Errorf("failed to validate inputs: %w", err)
+		return fmt.Errorf("failed to validate parameters: %w", err)
 	}
 	message := ""
 	for _, r := range result {
