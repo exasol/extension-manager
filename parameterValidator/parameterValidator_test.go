@@ -60,7 +60,7 @@ func (suite *ParameterValidatorSuite) TestValidateParameters() {
 		{name: "empty required parameter",
 			definitions: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string", "required": true}},
 			params:      []extensionAPI.ParameterValue{{Name: "param1", Value: ""}},
-			expected:    []ValidationResult{{Success: false, Message: `Failed to validate parameter "My param": This is a required field.`}}},
+			expected:    []ValidationResult{{Success: false, Message: `Failed to validate input "My param": This is a required field.`}}},
 		{name: "empty non-required parameter",
 			definitions: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string", "required": false}},
 			params:      []extensionAPI.ParameterValue{{Name: "param1", Value: ""}},
@@ -76,7 +76,7 @@ func (suite *ParameterValidatorSuite) TestValidateParameters() {
 		{name: "invalid regex parameter",
 			definitions: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string", "regex": "^a+$"}},
 			params:      []extensionAPI.ParameterValue{{Name: "param1", Value: "ab"}},
-			expected:    []ValidationResult{{Success: false, Message: `Failed to validate parameter "My param": The value has an invalid format.`}}},
+			expected:    []ValidationResult{{Success: false, Message: `Failed to validate input "My param": The value has an invalid format.`}}},
 	}
 
 	for _, t := range tests {

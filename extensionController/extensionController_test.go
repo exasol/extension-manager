@@ -169,8 +169,8 @@ func (suite *ExtensionControllerSuite) TestAddInstance_invalidParameters() {
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instanceName, err := controller.CreateInstance(suite.Connection, DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p2", Value: "val"}})
-	suite.EqualError(err, `invalid parameters: Failed to validate parameter "My param": This is a required field.`)
+	instanceName, err := controller.CreateInstance(suite.Connection, DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{})
+	suite.EqualError(err, `invalid parameters: Failed to validate input "My param": This is a required field.`)
 	suite.Equal("", instanceName)
 }
 

@@ -112,7 +112,7 @@ func (controller *extensionControllerImpl) getAllJsExtensions() ([]*extensionAPI
 	return extensions, nil
 }
 
-func (controller *extensionControllerImpl) getJsExtensionById(id string) (*extensionAPI.JsExtension, error) {
+func (controller *extensionControllerImpl) getExtensionById(id string) (*extensionAPI.JsExtension, error) {
 	extensionPath := path.Join(controller.pathToExtensionFolder, id)
 	return controller.getJsExtension(extensionPath)
 }
@@ -126,7 +126,7 @@ func (controller *extensionControllerImpl) getJsExtension(extensionPath string) 
 }
 
 func (controller *extensionControllerImpl) InstallExtension(dbConnection *sql.DB, extensionId string, extensionVersion string) error {
-	extension, err := controller.getJsExtensionById(extensionId)
+	extension, err := controller.getExtensionById(extensionId)
 	if err != nil {
 		return fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
 	}
@@ -160,7 +160,7 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 }
 
 func (controller *extensionControllerImpl) CreateInstance(db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error) {
-	extension, err := controller.getJsExtensionById(extensionId)
+	extension, err := controller.getExtensionById(extensionId)
 	if err != nil {
 		return "", fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
 	}
@@ -201,7 +201,7 @@ func validateParameters(parameterDefinitions []interface{}, params extensionAPI.
 	}
 	result, err := validator.ValidateParameters(parameterDefinitions, params)
 	if err != nil {
-		return fmt.Errorf("failed to validate parameters: %w", err)
+		return fmt.Errorf("failed to validate inputs: %w", err)
 	}
 	message := ""
 	for _, r := range result {

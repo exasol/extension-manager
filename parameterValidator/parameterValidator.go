@@ -56,7 +56,7 @@ func (v *Validator) ValidateParameters(definitions []interface{}, params extensi
 			return nil, err
 		}
 		if !r.Success {
-			result = append(result, ValidationResult{Success: false, Message: fmt.Sprintf("Failed to validate parameter %q: %s", name, r.Message)})
+			result = append(result, ValidationResult{Success: false, Message: fmt.Sprintf("Failed to validate input %q: %s", name, r.Message)})
 		}
 	}
 	return result, nil
@@ -70,7 +70,7 @@ func (v *Validator) validateParameter(def interface{}, params extensionAPI.Param
 	paramValue := findParamValue(params, id)
 	result, err := v.ValidateParameter(def, paramValue)
 	if err != nil {
-		return "", nil, fmt.Errorf("failed to validate parameter value %q with id %q using definition %v", paramValue, id, def)
+		return "", nil, fmt.Errorf("failed to validate input value %q with id %q using definition %v", paramValue, id, def)
 	}
 	return name, result, nil
 }
@@ -111,7 +111,7 @@ func extractName(def map[string]interface{}, id string) (name string, err error)
 func (v *Validator) ValidateParameter(definition interface{}, value string) (validationResult *ValidationResult, errorResult error) {
 	defer func() {
 		if err := recover(); err != nil {
-			errorResult = fmt.Errorf("failed to validate parameter value %q using definition %v: %v", value, definition, err)
+			errorResult = fmt.Errorf("failed to validate input value %q using definition %v: %v", value, definition, err)
 		}
 	}()
 	result := v.validate(definition, value)
