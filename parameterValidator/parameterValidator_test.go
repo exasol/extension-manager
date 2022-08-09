@@ -77,6 +77,14 @@ func (suite *ParameterValidatorSuite) TestValidateParameters() {
 			definitions: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string", "regex": "^a+$"}},
 			params:      []extensionAPI.ParameterValue{{Name: "param1", Value: "ab"}},
 			expected:    []ValidationResult{{Success: false, Message: `Failed to validate parameter "My param": The value has an invalid format.`}}},
+		{name: "invalid boolean parameter",
+			definitions: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "boolean"}},
+			params:      []extensionAPI.ParameterValue{{Name: "param1", Value: "invalid"}},
+			expected:    []ValidationResult{{Success: false, Message: `Failed to validate parameter "My param": Boolean value must be 'true' or 'false'.`}}},
+		{name: "valid boolean parameter",
+			definitions: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "boolean"}},
+			params:      []extensionAPI.ParameterValue{{Name: "param1", Value: "true"}},
+			expected:    []ValidationResult{}},
 	}
 
 	for _, t := range tests {
