@@ -146,6 +146,49 @@ func (suite *ExtensionControllerSuite) TestEnsureSchemaDoesNotFailIfSchemaAlread
 	suite.Assert().Contains(suite.getAllSchemaNames(), schemaName)
 }
 
+func (suite *ExtensionControllerSuite) TestAddInstance_wrongVersion() {
+	integrationTesting.CreateTestExtensionBuilder().
+		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
+		WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
+	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
+	instanceName, err := controller.CreateInstance(suite.Connection, DEFAULT_EXTENSION_ID, "wrongVersion", []ParameterValue{})
+	suite.EqualError(err, `failed to find installations: version "wrongVersion" not found for extension "testing-extension.js", available versions: ["0.1.0"]`)
+	suite.Equal("", instanceName)
+}
+
+func (suite *ExtensionControllerSuite) TestAddInstance_invalidParameters() {
+	integrationTesting.CreateTestExtensionBuilder().
+		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
+		id: "p1",
+		name: "My param",
+		type: "string",
+		required: true
+	}]`)).WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
+	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
+	instanceName, err := controller.CreateInstance(suite.Connection, DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{})
+	suite.EqualError(err, `invalid parameters: Failed to validate parameter "My param": This is a required parameter.`)
+	suite.Equal("", instanceName)
+}
+
+func (suite *ExtensionControllerSuite) TestAddInstance_validParameters() {
+	integrationTesting.CreateTestExtensionBuilder().
+		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
+		id: "p1",
+		name: "My param",
+		type: "string"
+	}]`)).WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
+	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
+	instanceName, err := controller.CreateInstance(suite.Connection, DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p1", Value: "val"}})
+	suite.NoError(err)
+	suite.Equal("ext_0.1.0_p1_val", instanceName)
+}
+
 func (suite *ExtensionControllerSuite) createSchema(schemaName string) {
 	_, err := suite.Connection.Exec(fmt.Sprintf(`CREATE SCHEMA "%s"`, schemaName))
 	suite.NoError(err)

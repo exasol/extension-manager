@@ -41,3 +41,12 @@ func (e *JsExtension) FindInstallations(context *ExtensionContext, metadata *Exa
 	}()
 	return e.extension.FindInstallations(context, metadata), nil
 }
+
+func (e *JsExtension) AddInstance(context *ExtensionContext, version string, params *ParameterValues) (instance *JsExtInstance, errorResult error) {
+	defer func() {
+		if err := recover(); err != nil {
+			errorResult = fmt.Errorf("failed to add instance for extension %q: %v", e.Id, err)
+		}
+	}()
+	return e.extension.AddInstance(context, version, params), nil
+}
