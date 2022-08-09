@@ -96,3 +96,9 @@ func (suite *ParameterValidatorSuite) TestValidateParameters() {
 		})
 	}
 }
+
+func (suite *ParameterValidatorSuite) TestInvalidDefinitionIgnored() {
+	result, err := suite.validator.ValidateParameters([]interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}}, extensionAPI.ParameterValues{})
+	suite.NoError(err)
+	suite.Empty(result)
+}
