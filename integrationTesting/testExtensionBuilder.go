@@ -39,19 +39,19 @@ type BucketFsUploadParams struct {
 	FileSize                 int    `json:"fileSize"`
 }
 
-func (builder *TestExtensionBuilder) WithFindInstallationsFunc(tsFunctionCode string) *TestExtensionBuilder {
-	builder.findInstallationsFunc = tsFunctionCode
-	return builder
+func (b *TestExtensionBuilder) WithFindInstallationsFunc(tsFunctionCode string) *TestExtensionBuilder {
+	b.findInstallationsFunc = tsFunctionCode
+	return b
 }
 
-func (builder *TestExtensionBuilder) WithInstallFunc(tsFunctionCode string) *TestExtensionBuilder {
-	builder.installFunc = tsFunctionCode
-	return builder
+func (b *TestExtensionBuilder) WithInstallFunc(tsFunctionCode string) *TestExtensionBuilder {
+	b.installFunc = tsFunctionCode
+	return b
 }
 
-func (builder *TestExtensionBuilder) WithAddInstanceFunc(tsFunctionCode string) *TestExtensionBuilder {
-	builder.addInstanceFunc = tsFunctionCode
-	return builder
+func (b *TestExtensionBuilder) WithAddInstanceFunc(tsFunctionCode string) *TestExtensionBuilder {
+	b.addInstanceFunc = tsFunctionCode
+	return b
 }
 
 // MockFindInstallationsFunction creates a JS findInstallations function that returns one installation with given JSON array of parameter definitions.
@@ -66,9 +66,9 @@ func MockFindInstallationsFunction(extensionName string, version string, paramet
 	return strings.Replace(filledTemplate, "$PARAMS$", parametersJSON, 1)
 }
 
-func (builder *TestExtensionBuilder) WithBucketFsUpload(upload BucketFsUploadParams) *TestExtensionBuilder {
-	builder.bucketFsUploads = append(builder.bucketFsUploads, upload)
-	return builder
+func (b *TestExtensionBuilder) WithBucketFsUpload(upload BucketFsUploadParams) *TestExtensionBuilder {
+	b.bucketFsUploads = append(b.bucketFsUploads, upload)
+	return b
 }
 
 //go:embed extensionForTesting/extensionForTestingTemplate.ts
@@ -80,15 +80,15 @@ var packageJson []byte
 //go:embed extensionForTesting/tsconfig.json
 var tscConfig []byte
 
-func (builder TestExtensionBuilder) Build() *BuiltExtension {
-	bfsUploadsJson, err := json.Marshal(builder.bucketFsUploads)
+func (b TestExtensionBuilder) Build() *BuiltExtension {
+	bfsUploadsJson, err := json.Marshal(b.bucketFsUploads)
 	if err != nil {
 		panic(err)
 	}
 	extensionTs := strings.Replace(template, "$UPLOADS$", string(bfsUploadsJson), 1)
-	extensionTs = strings.Replace(extensionTs, "$FIND_INSTALLATIONS$", builder.findInstallationsFunc, 1)
-	extensionTs = strings.Replace(extensionTs, "$INSTALL$", builder.installFunc, 1)
-	extensionTs = strings.Replace(extensionTs, "$ADD_INSTANCE$", builder.addInstanceFunc, 1)
+	extensionTs = strings.Replace(extensionTs, "$FIND_INSTALLATIONS$", b.findInstallationsFunc, 1)
+	extensionTs = strings.Replace(extensionTs, "$INSTALL$", b.installFunc, 1)
+	extensionTs = strings.Replace(extensionTs, "$ADD_INSTANCE$", b.addInstanceFunc, 1)
 	workDir := path.Join(os.TempDir(), "extension-manager-test-extension-build-dir")
 	if _, err := os.Stat(workDir); errors.Is(err, os.ErrNotExist) {
 		err := os.Mkdir(workDir, os.ModePerm)
@@ -123,7 +123,7 @@ func (extension BuiltExtension) Bytes() []byte {
 	return extension.content
 }
 
-func (extension BuiltExtension) WriteToTmpFile() (fileName string) {
+func (e BuiltExtension) WriteToTmpFile() (fileName string) {
 	extensionFile, err := ioutil.TempFile(os.TempDir(), "extension-*.js")
 	if err != nil {
 		panic(err)
@@ -134,15 +134,15 @@ func (extension BuiltExtension) WriteToTmpFile() (fileName string) {
 			panic(err)
 		}
 	}()
-	_, err = extensionFile.Write(extension.content)
+	_, err = extensionFile.Write(e.content)
 	if err != nil {
 		panic(err)
 	}
 	return extensionFile.Name()
 }
 
-func (extension BuiltExtension) WriteToFile(fileName string) {
-	err := ioutil.WriteFile(fileName, extension.content, 0600)
+func (e BuiltExtension) WriteToFile(fileName string) {
+	err := ioutil.WriteFile(fileName, e.content, 0600)
 	if err != nil {
 		panic(err)
 	}
