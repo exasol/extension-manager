@@ -14,21 +14,21 @@ import (
 // ExtensionController is the core part of the extension-manager that provides the extension handling functionality.
 type ExtensionController interface {
 	// GetAllInstallations searches for installations of any extensions.
-	// dbConnection is a connection to the Exasol DB with autocommit turned off
-	GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.JsExtInstallation, error)
+	// db is a connection to the Exasol DB with autocommit turned off
+	GetAllInstallations(db *sql.DB) ([]*extensionAPI.JsExtInstallation, error)
 
 	// InstallExtension installs an extension.
-	// dbConnection is a connection to the Exasol DB with autocommit turned off
+	// db is a connection to the Exasol DB with autocommit turned off
 	// extensionId is the ID of the extension to install
 	// extensionVersion is the version of the extension to install
-	InstallExtension(dbConnection *sql.DB, extensionId string, extensionVersion string) error
+	InstallExtension(db *sql.DB, extensionId string, extensionVersion string) error
 
 	// GetAllExtensions reports all extension definitions.
-	// dbConnection is a connection to the Exasol DB with autocommit turned off
-	GetAllExtensions(dbConnection *sql.DB) ([]*Extension, error)
+	// db is a connection to the Exasol DB with autocommit turned off
+	GetAllExtensions(db *sql.DB) ([]*Extension, error)
 
 	// CreateInstance creates a new instance of an extension, e.g. a virtual schema and returns it's name.
-	// dbConnection is a connection to the Exasol DB with autocommit turned off
+	// db is a connection to the Exasol DB with autocommit turned off
 	CreateInstance(db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error)
 }
 
@@ -58,14 +58,14 @@ type extensionControllerImpl struct {
 	extensionSchemaName   string
 }
 
-func (controller *extensionControllerImpl) GetAllExtensions(dbConnectionWithNoAutocommit *sql.DB) ([]*Extension, error) {
+func (controller *extensionControllerImpl) GetAllExtensions(db *sql.DB) ([]*Extension, error) {
 	jsExtensions, err := controller.getAllJsExtensions()
 	if err != nil {
 		return nil, err
 	}
 	var extensions []*Extension
 	for _, jsExtension := range jsExtensions {
-		bfsAPI := CreateBucketFsAPI(dbConnectionWithNoAutocommit)
+		bfsAPI := CreateBucketFsAPI(db)
 		bfsFiles, err := bfsAPI.ListFiles("default")
 		if err != nil {
 			return nil, fmt.Errorf("failed to search for required files in BucketFS. Cause: %w", err)
@@ -125,20 +125,20 @@ func (controller *extensionControllerImpl) getJsExtension(extensionPath string) 
 	return extension, nil
 }
 
-func (controller *extensionControllerImpl) InstallExtension(dbConnection *sql.DB, extensionId string, extensionVersion string) error {
+func (controller *extensionControllerImpl) InstallExtension(db *sql.DB, extensionId string, extensionVersion string) error {
 	extension, err := controller.getExtensionById(extensionId)
 	if err != nil {
 		return fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
 	}
-	err = controller.ensureSchemaExists(dbConnection)
+	err = controller.ensureSchemaExists(db)
 	if err != nil {
 		return err
 	}
-	return extension.Install(controller.createContext(dbConnection), extensionVersion)
+	return extension.Install(controller.createContext(db), extensionVersion)
 }
 
-func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
-	metadata, err := extensionAPI.ReadMetadataTables(dbConnection, controller.extensionSchemaName)
+func (controller *extensionControllerImpl) GetAllInstallations(db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
+	metadata, err := extensionAPI.ReadMetadataTables(db, controller.extensionSchemaName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
@@ -146,7 +146,7 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 	if err != nil {
 		return nil, err
 	}
-	context := controller.createContext(dbConnection)
+	context := controller.createContext(db)
 	var allInstallations []*extensionAPI.JsExtInstallation
 	for _, extension := range extensions {
 		installations, err := extension.FindInstallations(context, metadata)
@@ -234,8 +234,8 @@ func (controller *extensionControllerImpl) findInstallationByVersion(db *sql.DB,
 	return nil, fmt.Errorf("version %q not found for extension %q, available versions: %q", version, extension.Id, availableVersions)
 }
 
-func (controller *extensionControllerImpl) createContext(dbConnection *sql.DB) *extensionAPI.ExtensionContext {
-	return extensionAPI.CreateContext(controller.extensionSchemaName, dbConnection)
+func (controller *extensionControllerImpl) createContext(db *sql.DB) *extensionAPI.ExtensionContext {
+	return extensionAPI.CreateContext(controller.extensionSchemaName, db)
 }
 
 func (controller *extensionControllerImpl) ensureSchemaExists(db *sql.DB) error {

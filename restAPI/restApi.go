@@ -125,12 +125,12 @@ func (restApi *restAPIImpl) handleGetExtensions(c *gin.Context) {
 }
 
 func (restApi *restAPIImpl) getExtensions(c *gin.Context) (*ExtensionsResponse, error) {
-	dbConnectionWithNoAutocommit, err := restApi.openDBConnection(c)
+	db, err := restApi.openDBConnection(c)
 	if err != nil {
 		return nil, err
 	}
-	defer closeDbConnection(dbConnectionWithNoAutocommit)
-	extensions, err := restApi.controller.GetAllExtensions(dbConnectionWithNoAutocommit)
+	defer closeDbConnection(db)
+	extensions, err := restApi.controller.GetAllExtensions(db)
 	if err != nil {
 		return nil, err
 	}
@@ -175,12 +175,12 @@ func (restApi *restAPIImpl) handleGetInstallations(c *gin.Context) {
 }
 
 func (restApi *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResponse, error) {
-	dbConnection, err := restApi.openDBConnection(c)
+	db, err := restApi.openDBConnection(c)
 	if err != nil {
 		return nil, err
 	}
-	defer closeDbConnection(dbConnection)
-	installations, err := restApi.controller.GetAllInstallations(dbConnection)
+	defer closeDbConnection(db)
+	installations, err := restApi.controller.GetAllInstallations(db)
 	if err != nil {
 		return nil, err
 	}
@@ -214,11 +214,11 @@ func (restApi *restAPIImpl) handlePutInstallation(c *gin.Context) {
 }
 
 func (restApi *restAPIImpl) installExtension(c *gin.Context) (string, error) {
-	dbConnection, err := restApi.openDBConnection(c)
+	db, err := restApi.openDBConnection(c)
 	if err != nil {
 		return "", err
 	}
-	defer closeDbConnection(dbConnection)
+	defer closeDbConnection(db)
 	query := c.Request.URL.Query()
 	extensionId := query.Get("extensionId")
 	if extensionId == "" {
@@ -229,7 +229,7 @@ func (restApi *restAPIImpl) installExtension(c *gin.Context) (string, error) {
 		return "", fmt.Errorf("missing parameter extensionVersion")
 	}
 
-	err = restApi.controller.InstallExtension(dbConnection, extensionId, extensionVersion)
+	err = restApi.controller.InstallExtension(db, extensionId, extensionVersion)
 
 	if err != nil {
 		return "", fmt.Errorf("error installing extension: %v", err)
@@ -255,12 +255,12 @@ func (restApi *restAPIImpl) handlePutInstance(c *gin.Context) {
 }
 
 func (restApi *restAPIImpl) createInstance(c *gin.Context) (CreateInstanceResponse, error) {
-	dbConnection, err := restApi.openDBConnection(c)
+	db, err := restApi.openDBConnection(c)
 	var response CreateInstanceResponse
 	if err != nil {
 		return response, err
 	}
-	defer closeDbConnection(dbConnection)
+	defer closeDbConnection(db)
 	var request CreateInstanceRequest
 	if err := c.BindJSON(&request); err != nil {
 		return response, fmt.Errorf("invalid request: %w", err)
@@ -270,7 +270,7 @@ func (restApi *restAPIImpl) createInstance(c *gin.Context) (CreateInstanceRespon
 	for _, p := range request.ParameterValues {
 		parameters = append(parameters, cont.ParameterValue{Name: p.Name, Value: p.Value})
 	}
-	response.InstanceName, err = restApi.controller.CreateInstance(dbConnection, request.ExtensionId, request.ExtensionVersion, parameters)
+	response.InstanceName, err = restApi.controller.CreateInstance(db, request.ExtensionId, request.ExtensionVersion, parameters)
 	if err != nil {
 		return response, fmt.Errorf("error installing extension: %v", err)
 	}
