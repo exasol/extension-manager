@@ -9,16 +9,16 @@ type ExaMetadata struct {
 	AllScripts ExaAllScriptTable `json:"allScripts"`
 }
 
-func ReadMetadataTables(db *sql.DB, schemaName string) (*ExaMetadata, error) {
-	allScripts, err := readExaAllScriptTable(db, schemaName)
+func ReadMetadataTables(tx *sql.Tx, schemaName string) (*ExaMetadata, error) {
+	allScripts, err := readExaAllScriptTable(tx, schemaName)
 	if err != nil {
 		return nil, err
 	}
 	return &ExaMetadata{AllScripts: *allScripts}, nil
 }
 
-func readExaAllScriptTable(db *sql.DB, schemaName string) (*ExaAllScriptTable, error) {
-	result, err := db.Query(`
+func readExaAllScriptTable(tx *sql.Tx, schemaName string) (*ExaAllScriptTable, error) {
+	result, err := tx.Query(`
 SELECT SCRIPT_SCHEMA, SCRIPT_NAME, SCRIPT_TYPE, SCRIPT_INPUT_TYPE, SCRIPT_RESULT_TYPE, SCRIPT_TEXT, SCRIPT_COMMENT
 FROM SYS.EXA_ALL_SCRIPTS
 WHERE SCRIPT_SCHEMA=?`, schemaName)

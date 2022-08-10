@@ -18,8 +18,7 @@ func TestExaAllScriptsTableSuite(t *testing.T) {
 func (suite *ExaAllScriptsTableSuite) TestReadMetadataWithAllColumnsDefined() {
 	fixture := integrationTesting.CreateLuaScriptFixture(suite.Connection)
 	defer fixture.Close()
-	result, err := ReadMetadataTables(suite.Connection, fixture.GetSchemaName())
-	suite.NoError(err)
+	result := suite.readMetaDataTables(fixture.GetSchemaName())
 	suite.Assert().Equal(
 		ExaAllScriptTable{Rows: []ExaAllScriptRow{{
 			Schema:     "TEST",
@@ -34,8 +33,7 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataWithAllColumnsDefined() {
 func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaAdapterScript() {
 	fixture := integrationTesting.CreateJavaAdapterScriptFixture(suite.Connection)
 	defer fixture.Close()
-	result, err := ReadMetadataTables(suite.Connection, fixture.GetSchemaName())
-	suite.NoError(err)
+	result := suite.readMetaDataTables(fixture.GetSchemaName())
 	suite.Assert().Equal(
 		ExaAllScriptTable{Rows: []ExaAllScriptRow{{
 			Schema:     "TEST",
@@ -50,8 +48,7 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaAdapterScript() {
 func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaSetScript() {
 	fixture := integrationTesting.CreateJavaSetScriptFixture(suite.Connection)
 	defer fixture.Close()
-	result, err := ReadMetadataTables(suite.Connection, fixture.GetSchemaName())
-	suite.NoError(err)
+	result := suite.readMetaDataTables(fixture.GetSchemaName())
 	suite.Assert().Equal(
 		ExaAllScriptTable{Rows: []ExaAllScriptRow{{
 			Schema:     "TEST",
@@ -61,4 +58,12 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaSetScript() {
 			ResultType: "EMITS",
 			Text:       "CREATE JAVA SET SCRIPT \"IMPORT_FROM_S3_DOCUMENT_FILES\" (\"DATA_LOADER\" VARCHAR(2000000) UTF8, \"SCHEMA_MAPPING_REQUEST\" VARCHAR(2000000) UTF8, \"CONNECTION_NAME\" VARCHAR(500) UTF8) EMITS (...) AS\n%scriptclass com.exasol.adapter.document.UdfEntryPoint;\n%jar /buckets/bfsdefault/default/vs.jar;",
 			Comment:    ""}}}, result.AllScripts)
+}
+
+func (suite *ExaAllScriptsTableSuite) readMetaDataTables(schemaName string) *ExaMetadata {
+	tx, err := suite.Connection.Begin()
+	suite.NoError(err)
+	metaData, err := ReadMetadataTables(tx, schemaName)
+	suite.NoError(err)
+	return metaData
 }
