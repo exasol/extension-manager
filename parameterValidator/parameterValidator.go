@@ -10,9 +10,9 @@ import (
 	"github.com/exasol/extension-manager/extensionAPI"
 )
 
-// The dist.js file is built using go:generate in ../go-generate.go
+// The parameterValidator.js file is built using go:generate in ../main.go
 //
-//go:embed dist.js
+//go:embed parameterValidator.js
 var dependencyValidatorJs string
 
 type ValidationResult struct {

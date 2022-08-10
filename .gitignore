@@ -38,3 +38,6 @@ vendor/
 /extension-manager
 /doc/tracing-report.md
 /doc/tracing-report.html
+
+/parameterValidator/node_modules/
+/parameterValidator/dist/
