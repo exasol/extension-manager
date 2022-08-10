@@ -59,17 +59,16 @@ type extensionControllerImpl struct {
 }
 
 func (controller *extensionControllerImpl) GetAllExtensions(db *sql.DB) ([]*Extension, error) {
-	jsExtensions, err := controller.getAllJsExtensions()
+	jsExtensions, err := controller.getAllExtensions()
+	if err != nil {
+		return nil, err
+	}
+	bfsFiles, err := controller.listBfsFiles(db)
 	if err != nil {
 		return nil, err
 	}
 	var extensions []*Extension
 	for _, jsExtension := range jsExtensions {
-		bfsAPI := CreateBucketFsAPI(db)
-		bfsFiles, err := bfsAPI.ListFiles("default")
-		if err != nil {
-			return nil, fmt.Errorf("failed to search for required files in BucketFS. Cause: %w", err)
-		}
 		if controller.requiredFilesAvailable(jsExtension, bfsFiles) {
 			extension := Extension{Id: jsExtension.Id, Name: jsExtension.Name, Description: jsExtension.Description, InstallableVersions: jsExtension.InstallableVersions}
 			extensions = append(extensions, &extension)
@@ -78,14 +77,23 @@ func (controller *extensionControllerImpl) GetAllExtensions(db *sql.DB) ([]*Exte
 	return extensions, nil
 }
 
-func (controller *extensionControllerImpl) requiredFilesAvailable(jsExtension *extensionAPI.JsExtension, bfsFiles []BfsFile) bool {
-	for _, requiredFile := range jsExtension.BucketFsUploads {
+func (*extensionControllerImpl) listBfsFiles(db *sql.DB) ([]BfsFile, error) {
+	bfsAPI := CreateBucketFsAPI(db)
+	bfsFiles, err := bfsAPI.ListFiles("default")
+	if err != nil {
+		return nil, fmt.Errorf("failed to search for required files in BucketFS. Cause: %w", err)
+	}
+	return bfsFiles, nil
+}
+
+func (controller *extensionControllerImpl) requiredFilesAvailable(extension *extensionAPI.JsExtension, bfsFiles []BfsFile) bool {
+	for _, requiredFile := range extension.BucketFsUploads {
 		if !controller.existsFileInBfs(bfsFiles, requiredFile) {
-			fmt.Printf("ignoring extension %q since the required file %q does not exist or has a wrong file size.\n", jsExtension.Name, requiredFile.Name)
+			log.Printf("Ignoring extension %q since the required file %q does not exist or has a wrong file size.\n", extension.Name, requiredFile.Name)
 			return false
 		}
 	}
-	log.Printf("Required files found for extension %q\n", jsExtension.Name)
+	log.Printf("Required files found for extension %q\n", extension.Name)
 	return true
 }
 
@@ -98,11 +106,11 @@ func (controller *extensionControllerImpl) existsFileInBfs(bfsFiles []BfsFile, r
 	return false
 }
 
-func (controller *extensionControllerImpl) getAllJsExtensions() ([]*extensionAPI.JsExtension, error) {
+func (controller *extensionControllerImpl) getAllExtensions() ([]*extensionAPI.JsExtension, error) {
 	var extensions []*extensionAPI.JsExtension
 	extensionPaths := FindJSFilesInDir(controller.pathToExtensionFolder)
-	for _, extensionPath := range extensionPaths {
-		extension, err := controller.getJsExtension(extensionPath)
+	for _, path := range extensionPaths {
+		extension, err := controller.loadExtensionFromFile(path)
 		if err == nil {
 			extensions = append(extensions, extension)
 		} else {
@@ -112,12 +120,12 @@ func (controller *extensionControllerImpl) getAllJsExtensions() ([]*extensionAPI
 	return extensions, nil
 }
 
-func (controller *extensionControllerImpl) getExtensionById(id string) (*extensionAPI.JsExtension, error) {
+func (controller *extensionControllerImpl) loadExtensionById(id string) (*extensionAPI.JsExtension, error) {
 	extensionPath := path.Join(controller.pathToExtensionFolder, id)
-	return controller.getJsExtension(extensionPath)
+	return controller.loadExtensionFromFile(extensionPath)
 }
 
-func (controller *extensionControllerImpl) getJsExtension(extensionPath string) (*extensionAPI.JsExtension, error) {
+func (controller *extensionControllerImpl) loadExtensionFromFile(extensionPath string) (*extensionAPI.JsExtension, error) {
 	extension, err := extensionAPI.GetExtensionFromFile(extensionPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load extension from file %q: %w", extensionPath, err)
@@ -126,7 +134,7 @@ func (controller *extensionControllerImpl) getJsExtension(extensionPath string) 
 }
 
 func (controller *extensionControllerImpl) InstallExtension(db *sql.DB, extensionId string, extensionVersion string) error {
-	extension, err := controller.getExtensionById(extensionId)
+	extension, err := controller.loadExtensionById(extensionId)
 	if err != nil {
 		return fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
 	}
@@ -142,7 +150,7 @@ func (controller *extensionControllerImpl) GetAllInstallations(db *sql.DB) ([]*e
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
-	extensions, err := controller.getAllJsExtensions()
+	extensions, err := controller.getAllExtensions()
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +168,7 @@ func (controller *extensionControllerImpl) GetAllInstallations(db *sql.DB) ([]*e
 }
 
 func (controller *extensionControllerImpl) CreateInstance(db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error) {
-	extension, err := controller.getExtensionById(extensionId)
+	extension, err := controller.loadExtensionById(extensionId)
 	if err != nil {
 		return "", fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
 	}
