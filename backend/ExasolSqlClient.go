@@ -7,11 +7,15 @@ import (
 )
 
 type ExasolSqlClient struct {
-	Connection *sql.DB
+	db *sql.DB
+}
+
+func NewSqlClient(db *sql.DB) *ExasolSqlClient {
+	return &ExasolSqlClient{db: db}
 }
 
 func (c ExasolSqlClient) RunQuery(query string) {
-	result, err := c.Connection.Exec(query)
+	result, err := c.db.Exec(query)
 	if err != nil {
 		// Panic to signal a failed query to the JavaScript extension code.
 		panic(fmt.Sprintf("error executing statement %q: %v", query, err))

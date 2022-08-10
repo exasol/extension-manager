@@ -17,7 +17,7 @@ func CreateContextWithClient(extensionSchemaName string, client SimpleSQLClient)
 }
 
 func CreateContext(extensionSchemaName string, dbConnection *sql.DB) *ExtensionContext {
-	var client SimpleSQLClient = &backend.ExasolSqlClient{Connection: dbConnection}
+	var client SimpleSQLClient = backend.NewSqlClient(dbConnection)
 	return CreateContextWithClient(extensionSchemaName, client)
 }
 
