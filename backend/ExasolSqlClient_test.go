@@ -29,13 +29,20 @@ func (suite *ExasolSqlClientTestSuite) SetupTest() {
 }
 
 func (suite *ExasolSqlClientTestSuite) TestRun_succeeds() {
-	client := NewSqlClient(suite.db)
+	client := NewSqlClient(suite.createMockTransaction())
 	suite.dbMock.ExpectExec("select 1").WillReturnResult(sqlmock.NewResult(1, 1))
 	client.RunQuery("select 1")
 }
 
 func (suite *ExasolSqlClientTestSuite) TestRun_fails() {
-	client := NewSqlClient(suite.db)
+	client := NewSqlClient(suite.createMockTransaction())
 	suite.dbMock.ExpectExec("invalid").WillReturnError(fmt.Errorf("expected"))
 	suite.Panics(func() { client.RunQuery("invalid") })
+}
+
+func (suite *ExasolSqlClientTestSuite) createMockTransaction() *sql.Tx {
+	suite.dbMock.ExpectBegin()
+	tx, err := suite.db.Begin()
+	suite.NoError(err)
+	return tx
 }

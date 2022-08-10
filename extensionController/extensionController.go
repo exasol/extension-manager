@@ -64,7 +64,7 @@ func (c *extensionControllerImpl) GetAllExtensions(ctx context.Context, db *sql.
 	if err != nil {
 		return nil, err
 	}
-	bfsFiles, err := listBfsFiles(db)
+	bfsFiles, err := listBfsFiles(ctx, db)
 	if err != nil {
 		return nil, err
 	}
@@ -78,8 +78,8 @@ func (c *extensionControllerImpl) GetAllExtensions(ctx context.Context, db *sql.
 	return extensions, nil
 }
 
-func listBfsFiles(db *sql.DB) ([]BfsFile, error) {
-	bfsAPI := CreateBucketFsAPI(db)
+func listBfsFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error) {
+	bfsAPI := CreateBucketFsAPI(ctx, db)
 	bfsFiles, err := bfsAPI.ListFiles("default")
 	if err != nil {
 		return nil, fmt.Errorf("failed to search for required files in BucketFS. Cause: %w", err)
@@ -135,19 +135,41 @@ func (c *extensionControllerImpl) loadExtensionFromFile(extensionPath string) (*
 }
 
 func (c *extensionControllerImpl) InstallExtension(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) error {
+	tx, err := beginTransaction(ctx, db)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	err = c.installExtensionWithTx(tx, extensionId, extensionVersion)
+	if err != nil {
+		tx.Commit()
+	}
+	return err
+}
+
+func (c *extensionControllerImpl) installExtensionWithTx(tx *sql.Tx, extensionId string, extensionVersion string) error {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
 		return fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
 	}
-	err = c.ensureSchemaExists(db)
+	err = c.ensureSchemaExists(tx)
 	if err != nil {
 		return err
 	}
-	return extension.Install(c.createExtensionContext(db), extensionVersion)
+	return extension.Install(c.createExtensionContext(tx), extensionVersion)
 }
 
 func (c *extensionControllerImpl) GetAllInstallations(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
-	metadata, err := extensionAPI.ReadMetadataTables(db, c.extensionSchemaName)
+	tx, err := beginTransaction(ctx, db)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+	return c.getAllInstallationsWithTx(tx)
+}
+
+func (c *extensionControllerImpl) getAllInstallationsWithTx(tx *sql.Tx) ([]*extensionAPI.JsExtInstallation, error) {
+	metadata, err := extensionAPI.ReadMetadataTables(tx, c.extensionSchemaName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
@@ -155,7 +177,7 @@ func (c *extensionControllerImpl) GetAllInstallations(ctx context.Context, db *s
 	if err != nil {
 		return nil, err
 	}
-	extensionContext := c.createExtensionContext(db)
+	extensionContext := c.createExtensionContext(tx)
 	var allInstallations []*extensionAPI.JsExtInstallation
 	for _, extension := range extensions {
 		installations, err := extension.FindInstallations(extensionContext, metadata)
@@ -169,11 +191,24 @@ func (c *extensionControllerImpl) GetAllInstallations(ctx context.Context, db *s
 }
 
 func (c *extensionControllerImpl) CreateInstance(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error) {
+	tx, err := beginTransaction(ctx, db)
+	if err != nil {
+		return "", err
+	}
+	defer tx.Rollback()
+	instanceName, err := c.createInstanceWithTx(tx, extensionId, extensionVersion, parameterValues)
+	if err != nil {
+		tx.Commit()
+	}
+	return instanceName, err
+}
+
+func (c *extensionControllerImpl) createInstanceWithTx(tx *sql.Tx, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error) {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
 		return "", fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
 	}
-	err = c.ensureSchemaExists(db)
+	err = c.ensureSchemaExists(tx)
 	if err != nil {
 		return "", err
 	}
@@ -182,8 +217,8 @@ func (c *extensionControllerImpl) CreateInstance(ctx context.Context, db *sql.DB
 		params.Values = append(params.Values, extensionAPI.ParameterValue{Name: p.Name, Value: p.Value})
 	}
 
-	extensionContext := c.createExtensionContext(db)
-	installation, err := c.findInstallationByVersion(db, extensionContext, extension, extensionVersion)
+	extensionContext := c.createExtensionContext(tx)
+	installation, err := c.findInstallationByVersion(tx, extensionContext, extension, extensionVersion)
 	if err != nil {
 		return "", fmt.Errorf("failed to find installations: %w", err)
 	}
@@ -223,8 +258,8 @@ func validateParameters(parameterDefinitions []interface{}, params extensionAPI.
 	return nil
 }
 
-func (c *extensionControllerImpl) findInstallationByVersion(db *sql.DB, context *extensionAPI.ExtensionContext, extension *extensionAPI.JsExtension, version string) (*extensionAPI.JsExtInstallation, error) {
-	metadata, err := extensionAPI.ReadMetadataTables(db, c.extensionSchemaName)
+func (c *extensionControllerImpl) findInstallationByVersion(tx *sql.Tx, context *extensionAPI.ExtensionContext, extension *extensionAPI.JsExtension, version string) (*extensionAPI.JsExtInstallation, error) {
+	metadata, err := extensionAPI.ReadMetadataTables(tx, c.extensionSchemaName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
@@ -243,12 +278,16 @@ func (c *extensionControllerImpl) findInstallationByVersion(db *sql.DB, context 
 	return nil, fmt.Errorf("version %q not found for extension %q, available versions: %q", version, extension.Id, availableVersions)
 }
 
-func (c *extensionControllerImpl) createExtensionContext(db *sql.DB) *extensionAPI.ExtensionContext {
-	return extensionAPI.CreateContext(c.extensionSchemaName, db)
+func beginTransaction(ctx context.Context, db *sql.DB) (*sql.Tx, error) {
+	return db.BeginTx(ctx, nil)
 }
 
-func (c *extensionControllerImpl) ensureSchemaExists(db *sql.DB) error {
-	_, err := db.Exec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"`, c.extensionSchemaName))
+func (c *extensionControllerImpl) createExtensionContext(tx *sql.Tx) *extensionAPI.ExtensionContext {
+	return extensionAPI.CreateContext(c.extensionSchemaName, tx)
+}
+
+func (c *extensionControllerImpl) ensureSchemaExists(tx *sql.Tx) error {
+	_, err := tx.Exec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"`, c.extensionSchemaName))
 	if err != nil {
 		return fmt.Errorf("failed to create schema: %w", err)
 	}
