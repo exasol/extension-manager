@@ -55,57 +55,57 @@ type restAPIImpl struct {
 	stoppedMutex  *sync.Mutex
 }
 
-func (r *restAPIImpl) Serve() {
-	if r.server != nil {
+func (api *restAPIImpl) Serve() {
+	if api.server != nil {
 		panic("server already running")
 	}
-	r.setStopped(false)
+	api.setStopped(false)
 	router := gin.Default()
-	router.GET("/extensions", r.handleGetExtensions)
-	router.GET("/installations", r.handleGetInstallations)
-	router.PUT("/installations", r.handlePutInstallation)
-	router.PUT("/instances", r.handlePutInstance)
+	router.GET("/extensions", api.handleGetExtensions)
+	router.GET("/installations", api.handleGetInstallations)
+	router.PUT("/installations", api.handlePutInstallation)
+	router.PUT("/instances", api.handlePutInstance)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	srv := &http.Server{
-		Addr:    r.serverAddress,
+		Addr:    api.serverAddress,
 		Handler: router,
 	}
-	r.server = srv
-	log.Printf("Starting server on %s...\n", r.serverAddress)
-	err := r.server.ListenAndServe() // blocking
-	if err != nil && !r.isStopped() {
+	api.server = srv
+	log.Printf("Starting server on %s...\n", api.serverAddress)
+	err := api.server.ListenAndServe() // blocking
+	if err != nil && !api.isStopped() {
 		panic(fmt.Sprintf("failed to start rest API server. Cause: %v", err))
 	}
 }
 
-func (r *restAPIImpl) setStopped(stopped bool) {
-	if r.stopped == nil {
+func (api *restAPIImpl) setStopped(stopped bool) {
+	if api.stopped == nil {
 		stopped := false
-		r.stopped = &stopped
-		r.stoppedMutex = &sync.Mutex{}
+		api.stopped = &stopped
+		api.stoppedMutex = &sync.Mutex{}
 	}
-	r.stoppedMutex.Lock()
-	defer r.stoppedMutex.Unlock()
-	*r.stopped = stopped
+	api.stoppedMutex.Lock()
+	defer api.stoppedMutex.Unlock()
+	*api.stopped = stopped
 }
 
-func (r *restAPIImpl) isStopped() bool {
-	r.stoppedMutex.Lock()
-	defer r.stoppedMutex.Unlock()
-	return *r.stopped
+func (api *restAPIImpl) isStopped() bool {
+	api.stoppedMutex.Lock()
+	defer api.stoppedMutex.Unlock()
+	return *api.stopped
 }
 
-func (r *restAPIImpl) Stop() {
-	if r.server == nil {
+func (api *restAPIImpl) Stop() {
+	if api.server == nil {
 		panic("cant stop server since it's not running")
 	}
-	r.setStopped(true)
-	err := r.server.Shutdown(context.Background())
+	api.setStopped(true)
+	err := api.server.Shutdown(context.Background())
 	if err != nil {
 		panic(fmt.Sprintf("failed to shutdown rest API server. Cause: %v", err))
 	}
-	r.server = nil
+	api.server = nil
 }
 
 // @Summary      Get all extensions
@@ -119,18 +119,18 @@ func (r *restAPIImpl) Stop() {
 // @Param        dbPass query string true "Password of the Exasol DB to manage"
 // @Failure      500 {object} string
 // @Router       /extensions [get]
-func (r *restAPIImpl) handleGetExtensions(c *gin.Context) {
-	response, err := r.getExtensions(c)
-	r.sendResponse(c, response, err)
+func (api *restAPIImpl) handleGetExtensions(c *gin.Context) {
+	response, err := api.getExtensions(c)
+	api.sendResponse(c, response, err)
 }
 
-func (r *restAPIImpl) getExtensions(c *gin.Context) (*ExtensionsResponse, error) {
-	db, err := r.openDBConnection(c)
+func (api *restAPIImpl) getExtensions(c *gin.Context) (*ExtensionsResponse, error) {
+	db, err := api.openDBConnection(c)
 	if err != nil {
 		return nil, err
 	}
 	defer closeDbConnection(db)
-	extensions, err := r.controller.GetAllExtensions(db)
+	extensions, err := api.controller.GetAllExtensions(db)
 	if err != nil {
 		return nil, err
 	}
@@ -169,18 +169,18 @@ type ExtensionsResponseExtension struct {
 // @Param        dbPass query string true "Password of the Exasol DB to manage"
 // @Failure      500 {object} string
 // @Router       /installations [get]
-func (r *restAPIImpl) handleGetInstallations(c *gin.Context) {
-	response, err := r.getInstallations(c)
-	r.sendResponse(c, response, err)
+func (api *restAPIImpl) handleGetInstallations(c *gin.Context) {
+	response, err := api.getInstallations(c)
+	api.sendResponse(c, response, err)
 }
 
-func (r *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResponse, error) {
-	db, err := r.openDBConnection(c)
+func (api *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResponse, error) {
+	db, err := api.openDBConnection(c)
 	if err != nil {
 		return nil, err
 	}
 	defer closeDbConnection(db)
-	installations, err := r.controller.GetAllInstallations(db)
+	installations, err := api.controller.GetAllInstallations(db)
 	if err != nil {
 		return nil, err
 	}
@@ -208,13 +208,13 @@ func (r *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResponse, 
 // @Param        dummy body string false "dummy body" default()
 // @Failure      500 {object} string
 // @Router       /installations [put]
-func (r *restAPIImpl) handlePutInstallation(c *gin.Context) {
-	result, err := r.installExtension(c)
-	r.sendResponse(c, result, err)
+func (api *restAPIImpl) handlePutInstallation(c *gin.Context) {
+	result, err := api.installExtension(c)
+	api.sendResponse(c, result, err)
 }
 
-func (r *restAPIImpl) installExtension(c *gin.Context) (string, error) {
-	db, err := r.openDBConnection(c)
+func (api *restAPIImpl) installExtension(c *gin.Context) (string, error) {
+	db, err := api.openDBConnection(c)
 	if err != nil {
 		return "", err
 	}
@@ -229,7 +229,7 @@ func (r *restAPIImpl) installExtension(c *gin.Context) (string, error) {
 		return "", fmt.Errorf("missing parameter extensionVersion")
 	}
 
-	err = r.controller.InstallExtension(db, extensionId, extensionVersion)
+	err = api.controller.InstallExtension(db, extensionId, extensionVersion)
 
 	if err != nil {
 		return "", fmt.Errorf("error installing extension: %v", err)
@@ -249,13 +249,13 @@ func (r *restAPIImpl) installExtension(c *gin.Context) (string, error) {
 // @Param        createInstanceRequest body CreateInstanceRequest true "Request data for creating an instance"
 // @Failure      500 {object} string
 // @Router       /instances [put]
-func (r *restAPIImpl) handlePutInstance(c *gin.Context) {
-	result, err := r.createInstance(c)
-	r.sendResponse(c, result, err)
+func (api *restAPIImpl) handlePutInstance(c *gin.Context) {
+	result, err := api.createInstance(c)
+	api.sendResponse(c, result, err)
 }
 
-func (r *restAPIImpl) createInstance(c *gin.Context) (CreateInstanceResponse, error) {
-	db, err := r.openDBConnection(c)
+func (api *restAPIImpl) createInstance(c *gin.Context) (CreateInstanceResponse, error) {
+	db, err := api.openDBConnection(c)
 	var response CreateInstanceResponse
 	if err != nil {
 		return response, err
@@ -270,7 +270,7 @@ func (r *restAPIImpl) createInstance(c *gin.Context) (CreateInstanceResponse, er
 	for _, p := range request.ParameterValues {
 		parameters = append(parameters, cont.ParameterValue{Name: p.Name, Value: p.Value})
 	}
-	response.InstanceName, err = r.controller.CreateInstance(db, request.ExtensionId, request.ExtensionVersion, parameters)
+	response.InstanceName, err = api.controller.CreateInstance(db, request.ExtensionId, request.ExtensionVersion, parameters)
 	if err != nil {
 		return response, fmt.Errorf("error installing extension: %v", err)
 	}
@@ -295,7 +295,7 @@ type CreateInstanceResponse struct {
 	InstanceName string `json:"instanceName"` // The name of the newly created instance
 }
 
-func (r *restAPIImpl) sendResponse(c *gin.Context, response interface{}, err error) {
+func (api *restAPIImpl) sendResponse(c *gin.Context, response interface{}, err error) {
 	if err != nil {
 		c.String(500, fmt.Sprintf("Request failed: %s", err.Error()))
 		log.Printf("Request failed: %v\n", err)
@@ -316,7 +316,7 @@ func closeDbConnection(db *sql.DB) {
 	}
 }
 
-func (r *restAPIImpl) openDBConnection(c *gin.Context) (*sql.DB, error) {
+func (api *restAPIImpl) openDBConnection(c *gin.Context) (*sql.DB, error) {
 	config, err := getDbConfig(c)
 	if err != nil {
 		return nil, err
