@@ -130,7 +130,7 @@ func (api *restAPIImpl) getExtensions(c *gin.Context) (*ExtensionsResponse, erro
 		return nil, err
 	}
 	defer closeDbConnection(db)
-	extensions, err := api.controller.GetAllExtensions(db)
+	extensions, err := api.controller.GetAllExtensions(c, db)
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +180,7 @@ func (api *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResponse
 		return nil, err
 	}
 	defer closeDbConnection(db)
-	installations, err := api.controller.GetAllInstallations(db)
+	installations, err := api.controller.GetAllInstallations(c, db)
 	if err != nil {
 		return nil, err
 	}
@@ -229,7 +229,7 @@ func (api *restAPIImpl) installExtension(c *gin.Context) (string, error) {
 		return "", fmt.Errorf("missing parameter extensionVersion")
 	}
 
-	err = api.controller.InstallExtension(db, extensionId, extensionVersion)
+	err = api.controller.InstallExtension(c, db, extensionId, extensionVersion)
 
 	if err != nil {
 		return "", fmt.Errorf("error installing extension: %v", err)
@@ -270,7 +270,7 @@ func (api *restAPIImpl) createInstance(c *gin.Context) (CreateInstanceResponse, 
 	for _, p := range request.ParameterValues {
 		parameters = append(parameters, cont.ParameterValue{Name: p.Name, Value: p.Value})
 	}
-	response.InstanceName, err = api.controller.CreateInstance(db, request.ExtensionId, request.ExtensionVersion, parameters)
+	response.InstanceName, err = api.controller.CreateInstance(c, db, request.ExtensionId, request.ExtensionVersion, parameters)
 	if err != nil {
 		return response, fmt.Errorf("error installing extension: %v", err)
 	}

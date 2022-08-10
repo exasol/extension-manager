@@ -1,6 +1,7 @@
 package extensionController
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path"
@@ -53,7 +54,7 @@ func (suite *ExtensionControllerSuite) TestGetAllExtensions() {
 	suite.NoError(suite.Exasol.UploadStringContent("123", "my-extension.1.2.3.jar")) // create file with 3B size
 	defer func() { suite.NoError(suite.Exasol.DeleteFile("my-extension.1.2.3.jar")) }()
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	extensions, err := controller.GetAllExtensions(suite.Connection)
+	extensions, err := controller.GetAllExtensions(mockContext(), suite.Connection)
 	suite.NoError(err)
 	suite.Assert().Equal(1, len(extensions))
 	suite.Assert().Equal("MyDemoExtension", extensions[0].Name, "name")
@@ -77,10 +78,10 @@ func (suite *ExtensionControllerSuite) TestGetAllExtensionsWithMissingJar() {
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	dbConnectionWithNoAutocommit, err := suite.Exasol.CreateConnectionWithConfig(false)
+	db, err := suite.Exasol.CreateConnectionWithConfig(false)
 	suite.NoError(err)
-	defer func() { suite.NoError(dbConnectionWithNoAutocommit.Close()) }()
-	extensions, err := controller.GetAllExtensions(dbConnectionWithNoAutocommit)
+	defer func() { suite.NoError(db.Close()) }()
+	extensions, err := controller.GetAllExtensions(mockContext(), db)
 	suite.NoError(err)
 	suite.Assert().Empty(extensions)
 }
@@ -95,7 +96,7 @@ func (suite *ExtensionControllerSuite) TestGetAllExtensionsThrowingJSError() {
 	suite.NoError(suite.Exasol.UploadStringContent("123", jarName)) // create file with 3B size
 	defer func() { suite.NoError(suite.Exasol.DeleteFile(jarName)) }()
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	extensions, err := controller.GetAllInstallations(suite.Connection)
+	extensions, err := controller.GetAllInstallations(mockContext(), suite.Connection)
 	suite.ErrorContains(err, `failed to find installations: failed to find installations for extension "testing-extension.js": Error: mock error from js at`)
 	suite.Nil(extensions)
 }
@@ -105,7 +106,7 @@ func (suite *ExtensionControllerSuite) TestGetAllInstallations() {
 	fixture := integrationTesting.CreateLuaScriptFixture(suite.Connection)
 	controller := Create(suite.tempExtensionRepo, fixture.GetSchemaName())
 	defer fixture.Close()
-	installations, err := controller.GetAllInstallations(suite.Connection)
+	installations, err := controller.GetAllInstallations(mockContext(), suite.Connection)
 	suite.NoError(err)
 	suite.Assert().Equal(1, len(installations))
 	suite.Assert().Equal(fixture.GetSchemaName()+".MY_SCRIPT", installations[0].Name)
@@ -113,14 +114,14 @@ func (suite *ExtensionControllerSuite) TestGetAllInstallations() {
 
 func (suite *ExtensionControllerSuite) TestInstallFailsForUnknownExtensionId() {
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	err := controller.InstallExtension(suite.Connection, "unknown-extension-id", "ver")
+	err := controller.InstallExtension(mockContext(), suite.Connection, "unknown-extension-id", "ver")
 	suite.ErrorContains(err, "failed to load extension with id \"unknown-extension-id\": failed to load extension from file")
 }
 
 func (suite *ExtensionControllerSuite) TestInstallSucceeds() {
 	suite.writeDefaultExtension()
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	err := controller.InstallExtension(suite.Connection, DEFAULT_EXTENSION_ID, "ver")
+	err := controller.InstallExtension(mockContext(), suite.Connection, DEFAULT_EXTENSION_ID, "ver")
 	suite.NoError(err)
 }
 
@@ -130,7 +131,7 @@ func (suite *ExtensionControllerSuite) TestEnsureSchemaExistsCreatesSchemaIfItDo
 	defer suite.dropSchema(schemaName)
 	controller := Create(suite.tempExtensionRepo, schemaName)
 	suite.Assert().NotContains(suite.getAllSchemaNames(), schemaName)
-	err := controller.InstallExtension(suite.Connection, DEFAULT_EXTENSION_ID, "ver")
+	err := controller.InstallExtension(mockContext(), suite.Connection, DEFAULT_EXTENSION_ID, "ver")
 	suite.NoError(err)
 	suite.Assert().Contains(suite.getAllSchemaNames(), schemaName)
 }
@@ -141,7 +142,7 @@ func (suite *ExtensionControllerSuite) TestEnsureSchemaDoesNotFailIfSchemaAlread
 	defer suite.dropSchema(schemaName)
 	controller := Create(suite.tempExtensionRepo, schemaName)
 	suite.createSchema(schemaName)
-	err := controller.InstallExtension(suite.Connection, DEFAULT_EXTENSION_ID, "ver")
+	err := controller.InstallExtension(mockContext(), suite.Connection, DEFAULT_EXTENSION_ID, "ver")
 	suite.NoError(err)
 	suite.Assert().Contains(suite.getAllSchemaNames(), schemaName)
 }
@@ -153,7 +154,7 @@ func (suite *ExtensionControllerSuite) TestAddInstance_wrongVersion() {
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instanceName, err := controller.CreateInstance(suite.Connection, DEFAULT_EXTENSION_ID, "wrongVersion", []ParameterValue{})
+	instanceName, err := controller.CreateInstance(mockContext(), suite.Connection, DEFAULT_EXTENSION_ID, "wrongVersion", []ParameterValue{})
 	suite.EqualError(err, `failed to find installations: version "wrongVersion" not found for extension "testing-extension.js", available versions: ["0.1.0"]`)
 	suite.Equal("", instanceName)
 }
@@ -169,7 +170,7 @@ func (suite *ExtensionControllerSuite) TestAddInstance_invalidParameters() {
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instanceName, err := controller.CreateInstance(suite.Connection, DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{})
+	instanceName, err := controller.CreateInstance(mockContext(), suite.Connection, DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{})
 	suite.EqualError(err, `invalid parameters: Failed to validate parameter "My param": This is a required parameter.`)
 	suite.Equal("", instanceName)
 }
@@ -184,7 +185,7 @@ func (suite *ExtensionControllerSuite) TestAddInstance_validParameters() {
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instanceName, err := controller.CreateInstance(suite.Connection, DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p1", Value: "val"}})
+	instanceName, err := controller.CreateInstance(mockContext(), suite.Connection, DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p1", Value: "val"}})
 	suite.NoError(err)
 	suite.Equal("ext_0.1.0_p1_val", instanceName)
 }
@@ -210,4 +211,8 @@ func (suite *ExtensionControllerSuite) getAllSchemaNames() []string {
 		schemaNames = append(schemaNames, schemaName)
 	}
 	return schemaNames
+}
+
+func mockContext() context.Context {
+	return context.Background()
 }

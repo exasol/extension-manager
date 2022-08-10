@@ -1,6 +1,7 @@
 package extensionController
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -15,21 +16,21 @@ import (
 type ExtensionController interface {
 	// GetAllInstallations searches for installations of any extensions.
 	// db is a connection to the Exasol DB with autocommit turned off
-	GetAllInstallations(db *sql.DB) ([]*extensionAPI.JsExtInstallation, error)
+	GetAllInstallations(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error)
 
 	// InstallExtension installs an extension.
 	// db is a connection to the Exasol DB with autocommit turned off
 	// extensionId is the ID of the extension to install
 	// extensionVersion is the version of the extension to install
-	InstallExtension(db *sql.DB, extensionId string, extensionVersion string) error
+	InstallExtension(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) error
 
 	// GetAllExtensions reports all extension definitions.
 	// db is a connection to the Exasol DB with autocommit turned off
-	GetAllExtensions(db *sql.DB) ([]*Extension, error)
+	GetAllExtensions(ctx context.Context, db *sql.DB) ([]*Extension, error)
 
 	// CreateInstance creates a new instance of an extension, e.g. a virtual schema and returns it's name.
 	// db is a connection to the Exasol DB with autocommit turned off
-	CreateInstance(db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error)
+	CreateInstance(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error)
 }
 
 type Extension struct {
@@ -58,7 +59,7 @@ type extensionControllerImpl struct {
 	extensionSchemaName   string
 }
 
-func (c *extensionControllerImpl) GetAllExtensions(db *sql.DB) ([]*Extension, error) {
+func (c *extensionControllerImpl) GetAllExtensions(ctx context.Context, db *sql.DB) ([]*Extension, error) {
 	jsExtensions, err := c.getAllExtensions()
 	if err != nil {
 		return nil, err
@@ -133,7 +134,7 @@ func (c *extensionControllerImpl) loadExtensionFromFile(extensionPath string) (*
 	return extension, nil
 }
 
-func (c *extensionControllerImpl) InstallExtension(db *sql.DB, extensionId string, extensionVersion string) error {
+func (c *extensionControllerImpl) InstallExtension(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) error {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
 		return fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
@@ -142,10 +143,10 @@ func (c *extensionControllerImpl) InstallExtension(db *sql.DB, extensionId strin
 	if err != nil {
 		return err
 	}
-	return extension.Install(c.createContext(db), extensionVersion)
+	return extension.Install(c.createExtensionContext(db), extensionVersion)
 }
 
-func (c *extensionControllerImpl) GetAllInstallations(db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
+func (c *extensionControllerImpl) GetAllInstallations(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
 	metadata, err := extensionAPI.ReadMetadataTables(db, c.extensionSchemaName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
@@ -154,10 +155,10 @@ func (c *extensionControllerImpl) GetAllInstallations(db *sql.DB) ([]*extensionA
 	if err != nil {
 		return nil, err
 	}
-	context := c.createContext(db)
+	extensionContext := c.createExtensionContext(db)
 	var allInstallations []*extensionAPI.JsExtInstallation
 	for _, extension := range extensions {
-		installations, err := extension.FindInstallations(context, metadata)
+		installations, err := extension.FindInstallations(extensionContext, metadata)
 		if err != nil {
 			return nil, fmt.Errorf("failed to find installations: %v", err)
 		} else {
@@ -167,7 +168,7 @@ func (c *extensionControllerImpl) GetAllInstallations(db *sql.DB) ([]*extensionA
 	return allInstallations, nil
 }
 
-func (c *extensionControllerImpl) CreateInstance(db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error) {
+func (c *extensionControllerImpl) CreateInstance(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error) {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
 		return "", fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
@@ -181,8 +182,8 @@ func (c *extensionControllerImpl) CreateInstance(db *sql.DB, extensionId string,
 		params.Values = append(params.Values, extensionAPI.ParameterValue{Name: p.Name, Value: p.Value})
 	}
 
-	context := c.createContext(db)
-	installation, err := c.findInstallationByVersion(db, context, extension, extensionVersion)
+	extensionContext := c.createExtensionContext(db)
+	installation, err := c.findInstallationByVersion(db, extensionContext, extension, extensionVersion)
 	if err != nil {
 		return "", fmt.Errorf("failed to find installations: %w", err)
 	}
@@ -192,7 +193,7 @@ func (c *extensionControllerImpl) CreateInstance(db *sql.DB, extensionId string,
 		return "", err
 	}
 
-	instance, err := extension.AddInstance(c.createContext(db), extensionVersion, &params)
+	instance, err := extension.AddInstance(extensionContext, extensionVersion, &params)
 	if err != nil {
 		return "", err
 	}
@@ -242,7 +243,7 @@ func (c *extensionControllerImpl) findInstallationByVersion(db *sql.DB, context 
 	return nil, fmt.Errorf("version %q not found for extension %q, available versions: %q", version, extension.Id, availableVersions)
 }
 
-func (c *extensionControllerImpl) createContext(db *sql.DB) *extensionAPI.ExtensionContext {
+func (c *extensionControllerImpl) createExtensionContext(db *sql.DB) *extensionAPI.ExtensionContext {
 	return extensionAPI.CreateContext(c.extensionSchemaName, db)
 }
 
