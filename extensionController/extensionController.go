@@ -14,21 +14,21 @@ import (
 // ExtensionController is the core part of the extension-manager that provides the extension handling functionality.
 type ExtensionController interface {
 	// GetAllInstallations searches for installations of any extensions.
-	// dbConnection is a connection to the Exasol DB with autocommit turned off
-	GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.JsExtInstallation, error)
+	// db is a connection to the Exasol DB with autocommit turned off
+	GetAllInstallations(db *sql.DB) ([]*extensionAPI.JsExtInstallation, error)
 
 	// InstallExtension installs an extension.
-	// dbConnection is a connection to the Exasol DB with autocommit turned off
+	// db is a connection to the Exasol DB with autocommit turned off
 	// extensionId is the ID of the extension to install
 	// extensionVersion is the version of the extension to install
-	InstallExtension(dbConnection *sql.DB, extensionId string, extensionVersion string) error
+	InstallExtension(db *sql.DB, extensionId string, extensionVersion string) error
 
 	// GetAllExtensions reports all extension definitions.
-	// dbConnection is a connection to the Exasol DB with autocommit turned off
-	GetAllExtensions(dbConnection *sql.DB) ([]*Extension, error)
+	// db is a connection to the Exasol DB with autocommit turned off
+	GetAllExtensions(db *sql.DB) ([]*Extension, error)
 
 	// CreateInstance creates a new instance of an extension, e.g. a virtual schema and returns it's name.
-	// dbConnection is a connection to the Exasol DB with autocommit turned off
+	// db is a connection to the Exasol DB with autocommit turned off
 	CreateInstance(db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error)
 }
 
@@ -58,19 +58,18 @@ type extensionControllerImpl struct {
 	extensionSchemaName   string
 }
 
-func (controller *extensionControllerImpl) GetAllExtensions(dbConnectionWithNoAutocommit *sql.DB) ([]*Extension, error) {
-	jsExtensions, err := controller.getAllJsExtensions()
+func (c *extensionControllerImpl) GetAllExtensions(db *sql.DB) ([]*Extension, error) {
+	jsExtensions, err := c.getAllExtensions()
+	if err != nil {
+		return nil, err
+	}
+	bfsFiles, err := listBfsFiles(db)
 	if err != nil {
 		return nil, err
 	}
 	var extensions []*Extension
 	for _, jsExtension := range jsExtensions {
-		bfsAPI := CreateBucketFsAPI(dbConnectionWithNoAutocommit)
-		bfsFiles, err := bfsAPI.ListFiles("default")
-		if err != nil {
-			return nil, fmt.Errorf("failed to search for required files in BucketFS. Cause: %w", err)
-		}
-		if controller.requiredFilesAvailable(jsExtension, bfsFiles) {
+		if c.requiredFilesAvailable(jsExtension, bfsFiles) {
 			extension := Extension{Id: jsExtension.Id, Name: jsExtension.Name, Description: jsExtension.Description, InstallableVersions: jsExtension.InstallableVersions}
 			extensions = append(extensions, &extension)
 		}
@@ -78,18 +77,27 @@ func (controller *extensionControllerImpl) GetAllExtensions(dbConnectionWithNoAu
 	return extensions, nil
 }
 
-func (controller *extensionControllerImpl) requiredFilesAvailable(jsExtension *extensionAPI.JsExtension, bfsFiles []BfsFile) bool {
-	for _, requiredFile := range jsExtension.BucketFsUploads {
-		if !controller.existsFileInBfs(bfsFiles, requiredFile) {
-			fmt.Printf("ignoring extension %q since the required file %q does not exist or has a wrong file size.\n", jsExtension.Name, requiredFile.Name)
+func listBfsFiles(db *sql.DB) ([]BfsFile, error) {
+	bfsAPI := CreateBucketFsAPI(db)
+	bfsFiles, err := bfsAPI.ListFiles("default")
+	if err != nil {
+		return nil, fmt.Errorf("failed to search for required files in BucketFS. Cause: %w", err)
+	}
+	return bfsFiles, nil
+}
+
+func (c *extensionControllerImpl) requiredFilesAvailable(extension *extensionAPI.JsExtension, bfsFiles []BfsFile) bool {
+	for _, requiredFile := range extension.BucketFsUploads {
+		if !existsFileInBfs(bfsFiles, requiredFile) {
+			log.Printf("Ignoring extension %q since the required file %q does not exist or has a wrong file size.\n", extension.Name, requiredFile.Name)
 			return false
 		}
 	}
-	log.Printf("Required files found for extension %q\n", jsExtension.Name)
+	log.Printf("Required files found for extension %q\n", extension.Name)
 	return true
 }
 
-func (controller *extensionControllerImpl) existsFileInBfs(bfsFiles []BfsFile, requiredFile extensionAPI.BucketFsUpload) bool {
+func existsFileInBfs(bfsFiles []BfsFile, requiredFile extensionAPI.BucketFsUpload) bool {
 	for _, existingFile := range bfsFiles {
 		if requiredFile.BucketFsFilename == existingFile.Name && requiredFile.FileSize == existingFile.Size {
 			return true
@@ -98,11 +106,11 @@ func (controller *extensionControllerImpl) existsFileInBfs(bfsFiles []BfsFile, r
 	return false
 }
 
-func (controller *extensionControllerImpl) getAllJsExtensions() ([]*extensionAPI.JsExtension, error) {
+func (c *extensionControllerImpl) getAllExtensions() ([]*extensionAPI.JsExtension, error) {
 	var extensions []*extensionAPI.JsExtension
-	extensionPaths := FindJSFilesInDir(controller.pathToExtensionFolder)
-	for _, extensionPath := range extensionPaths {
-		extension, err := controller.getJsExtension(extensionPath)
+	extensionPaths := FindJSFilesInDir(c.pathToExtensionFolder)
+	for _, path := range extensionPaths {
+		extension, err := c.loadExtensionFromFile(path)
 		if err == nil {
 			extensions = append(extensions, extension)
 		} else {
@@ -112,12 +120,12 @@ func (controller *extensionControllerImpl) getAllJsExtensions() ([]*extensionAPI
 	return extensions, nil
 }
 
-func (controller *extensionControllerImpl) getExtensionById(id string) (*extensionAPI.JsExtension, error) {
-	extensionPath := path.Join(controller.pathToExtensionFolder, id)
-	return controller.getJsExtension(extensionPath)
+func (c *extensionControllerImpl) loadExtensionById(id string) (*extensionAPI.JsExtension, error) {
+	extensionPath := path.Join(c.pathToExtensionFolder, id)
+	return c.loadExtensionFromFile(extensionPath)
 }
 
-func (controller *extensionControllerImpl) getJsExtension(extensionPath string) (*extensionAPI.JsExtension, error) {
+func (c *extensionControllerImpl) loadExtensionFromFile(extensionPath string) (*extensionAPI.JsExtension, error) {
 	extension, err := extensionAPI.GetExtensionFromFile(extensionPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load extension from file %q: %w", extensionPath, err)
@@ -125,28 +133,28 @@ func (controller *extensionControllerImpl) getJsExtension(extensionPath string) 
 	return extension, nil
 }
 
-func (controller *extensionControllerImpl) InstallExtension(dbConnection *sql.DB, extensionId string, extensionVersion string) error {
-	extension, err := controller.getExtensionById(extensionId)
+func (c *extensionControllerImpl) InstallExtension(db *sql.DB, extensionId string, extensionVersion string) error {
+	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
 		return fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
 	}
-	err = controller.ensureSchemaExists(dbConnection)
+	err = c.ensureSchemaExists(db)
 	if err != nil {
 		return err
 	}
-	return extension.Install(controller.createContext(dbConnection), extensionVersion)
+	return extension.Install(c.createContext(db), extensionVersion)
 }
 
-func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
-	metadata, err := extensionAPI.ReadMetadataTables(dbConnection, controller.extensionSchemaName)
+func (c *extensionControllerImpl) GetAllInstallations(db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
+	metadata, err := extensionAPI.ReadMetadataTables(db, c.extensionSchemaName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
-	extensions, err := controller.getAllJsExtensions()
+	extensions, err := c.getAllExtensions()
 	if err != nil {
 		return nil, err
 	}
-	context := controller.createContext(dbConnection)
+	context := c.createContext(db)
 	var allInstallations []*extensionAPI.JsExtInstallation
 	for _, extension := range extensions {
 		installations, err := extension.FindInstallations(context, metadata)
@@ -159,12 +167,12 @@ func (controller *extensionControllerImpl) GetAllInstallations(dbConnection *sql
 	return allInstallations, nil
 }
 
-func (controller *extensionControllerImpl) CreateInstance(db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error) {
-	extension, err := controller.getExtensionById(extensionId)
+func (c *extensionControllerImpl) CreateInstance(db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error) {
+	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
 		return "", fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
 	}
-	err = controller.ensureSchemaExists(db)
+	err = c.ensureSchemaExists(db)
 	if err != nil {
 		return "", err
 	}
@@ -173,8 +181,8 @@ func (controller *extensionControllerImpl) CreateInstance(db *sql.DB, extensionI
 		params.Values = append(params.Values, extensionAPI.ParameterValue{Name: p.Name, Value: p.Value})
 	}
 
-	context := controller.createContext(db)
-	installation, err := controller.findInstallationByVersion(db, context, extension, extensionVersion)
+	context := c.createContext(db)
+	installation, err := c.findInstallationByVersion(db, context, extension, extensionVersion)
 	if err != nil {
 		return "", fmt.Errorf("failed to find installations: %w", err)
 	}
@@ -184,7 +192,7 @@ func (controller *extensionControllerImpl) CreateInstance(db *sql.DB, extensionI
 		return "", err
 	}
 
-	instance, err := extension.AddInstance(controller.createContext(db), extensionVersion, &params)
+	instance, err := extension.AddInstance(c.createContext(db), extensionVersion, &params)
 	if err != nil {
 		return "", err
 	}
@@ -214,8 +222,8 @@ func validateParameters(parameterDefinitions []interface{}, params extensionAPI.
 	return nil
 }
 
-func (controller *extensionControllerImpl) findInstallationByVersion(db *sql.DB, context *extensionAPI.ExtensionContext, extension *extensionAPI.JsExtension, version string) (*extensionAPI.JsExtInstallation, error) {
-	metadata, err := extensionAPI.ReadMetadataTables(db, controller.extensionSchemaName)
+func (c *extensionControllerImpl) findInstallationByVersion(db *sql.DB, context *extensionAPI.ExtensionContext, extension *extensionAPI.JsExtension, version string) (*extensionAPI.JsExtInstallation, error) {
+	metadata, err := extensionAPI.ReadMetadataTables(db, c.extensionSchemaName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
@@ -234,12 +242,12 @@ func (controller *extensionControllerImpl) findInstallationByVersion(db *sql.DB,
 	return nil, fmt.Errorf("version %q not found for extension %q, available versions: %q", version, extension.Id, availableVersions)
 }
 
-func (controller *extensionControllerImpl) createContext(dbConnection *sql.DB) *extensionAPI.ExtensionContext {
-	return extensionAPI.CreateContext(controller.extensionSchemaName, dbConnection)
+func (c *extensionControllerImpl) createContext(db *sql.DB) *extensionAPI.ExtensionContext {
+	return extensionAPI.CreateContext(c.extensionSchemaName, db)
 }
 
-func (controller *extensionControllerImpl) ensureSchemaExists(db *sql.DB) error {
-	_, err := db.Exec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"`, controller.extensionSchemaName))
+func (c *extensionControllerImpl) ensureSchemaExists(db *sql.DB) error {
+	_, err := db.Exec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"`, c.extensionSchemaName))
 	if err != nil {
 		return fmt.Errorf("failed to create schema: %w", err)
 	}

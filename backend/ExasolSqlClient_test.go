@@ -29,13 +29,13 @@ func (suite *ExasolSqlClientTestSuite) SetupTest() {
 }
 
 func (suite *ExasolSqlClientTestSuite) TestRun_succeeds() {
-	client := ExasolSqlClient{Connection: suite.db}
+	client := NewSqlClient(suite.db)
 	suite.dbMock.ExpectExec("select 1").WillReturnResult(sqlmock.NewResult(1, 1))
 	client.RunQuery("select 1")
 }
 
 func (suite *ExasolSqlClientTestSuite) TestRun_fails() {
-	client := ExasolSqlClient{Connection: suite.db}
+	client := NewSqlClient(suite.db)
 	suite.dbMock.ExpectExec("invalid").WillReturnError(fmt.Errorf("expected"))
 	suite.Panics(func() { client.RunQuery("invalid") })
 }
