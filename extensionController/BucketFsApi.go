@@ -12,23 +12,21 @@ import (
 // In the future that implementation might be replaced by direct access.
 type BucketFsAPI interface {
 	// ListBuckets returns a list of public buckets
-	ListBuckets() ([]string, error)
+	ListBuckets(ctx context.Context, db *sql.DB) ([]string, error)
 	// ListFiles lists the files in a given bucket
-	ListFiles(bucket string) ([]BfsFile, error)
+	ListFiles(ctx context.Context, db *sql.DB, bucket string) ([]BfsFile, error)
 }
 
 // CreateBucketFsAPI creates an instance of BucketFsAPI
-func CreateBucketFsAPI(ctx context.Context, db *sql.DB) BucketFsAPI {
-	return &bucketFsAPIImpl{db: db, ctx: ctx}
+func CreateBucketFsAPI() BucketFsAPI {
+	return &bucketFsAPIImpl{}
 }
 
 type bucketFsAPIImpl struct {
-	db  *sql.DB
-	ctx context.Context
 }
 
-func (bfs bucketFsAPIImpl) ListBuckets() ([]string, error) {
-	files, err := bfs.listDirInUDF("/buckets/bfsdefault/")
+func (bfs bucketFsAPIImpl) ListBuckets(ctx context.Context, db *sql.DB) ([]string, error) {
+	files, err := bfs.listDirInUDF(ctx, db, "/buckets/bfsdefault/")
 	if err != nil {
 		return nil, err
 	}
@@ -39,11 +37,11 @@ func (bfs bucketFsAPIImpl) ListBuckets() ([]string, error) {
 	return names, nil
 }
 
-func (bfs bucketFsAPIImpl) ListFiles(bucket string) ([]BfsFile, error) {
+func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB, bucket string) ([]BfsFile, error) {
 	if strings.Contains(bucket, "/") {
 		return nil, fmt.Errorf("invalid bucket name. Bucket name must not contain slashes")
 	}
-	return bfs.listDirInUDF("/buckets/bfsdefault/" + bucket)
+	return bfs.listDirInUDF(ctx, db, "/buckets/bfsdefault/"+bucket)
 }
 
 // BfsFile represents a file in BucketFS
@@ -52,8 +50,8 @@ type BfsFile struct {
 	Size int
 }
 
-func (bfs bucketFsAPIImpl) listDirInUDF(directory string) (files []BfsFile, retErr error) {
-	transaction, err := bfs.db.BeginTx(bfs.ctx, nil)
+func (bfs bucketFsAPIImpl) listDirInUDF(ctx context.Context, db *sql.DB, directory string) (files []BfsFile, retErr error) {
+	transaction, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a transaction. Cause: %w", err)
 	}

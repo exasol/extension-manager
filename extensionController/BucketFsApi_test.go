@@ -23,7 +23,7 @@ func TestBucketFsApiSuite(t *testing.T) {
 
 func (suite *BucketFsAPISuite) TestListBuckets() {
 	bfsAPI := suite.createBucketFs()
-	result, err := bfsAPI.ListBuckets()
+	result, err := bfsAPI.ListBuckets(context.Background(), suite.Connection)
 	suite.NoError(err)
 	suite.Contains(result, DEFAULT_BUCKET_NAME)
 }
@@ -33,11 +33,11 @@ func (suite *BucketFsAPISuite) TestListFiles() {
 	fileName := fmt.Sprintf("myFile-%d.txt", time.Now().Unix())
 	suite.NoError(suite.Exasol.UploadStringContent("12345", fileName))
 	defer func() { suite.NoError(suite.Exasol.DeleteFile(fileName)) }()
-	result, err := bfsAPI.ListFiles(DEFAULT_BUCKET_NAME)
+	result, err := bfsAPI.ListFiles(context.Background(), suite.Connection, DEFAULT_BUCKET_NAME)
 	suite.NoError(err)
 	suite.Contains(result, BfsFile{Name: fileName, Size: 5})
 }
 
 func (suite *BucketFsAPISuite) createBucketFs() BucketFsAPI {
-	return CreateBucketFsAPI(context.Background(), suite.Connection)
+	return CreateBucketFsAPI()
 }

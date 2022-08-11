@@ -51,24 +51,24 @@ type ExtInstallation struct {
 // Create an instance of ExtensionController
 func Create(pathToExtensionFolder string, extensionSchemaName string) ExtensionController {
 	ctrl := createImpl(pathToExtensionFolder, extensionSchemaName)
-	return &extensionControllerImpl{impl: ctrl}
+	return &extensionControllerImpl{impl: ctrl, bfsAPI: CreateBucketFsAPI()}
 }
 
 type extensionControllerImpl struct {
-	impl controller
+	impl   controller
+	bfsAPI BucketFsAPI
 }
 
 func (c *extensionControllerImpl) GetAllExtensions(ctx context.Context, db *sql.DB) ([]*Extension, error) {
-	bfsFiles, err := listBfsFiles(ctx, db)
+	bfsFiles, err := c.listBfsFiles(ctx, db)
 	if err != nil {
 		return nil, err
 	}
 	return c.impl.GetAllExtensions(bfsFiles)
 }
 
-func listBfsFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error) {
-	bfsAPI := CreateBucketFsAPI(ctx, db)
-	bfsFiles, err := bfsAPI.ListFiles("default")
+func (c *extensionControllerImpl) listBfsFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error) {
+	bfsFiles, err := c.bfsAPI.ListFiles(ctx, db, "default")
 	if err != nil {
 		return nil, fmt.Errorf("failed to search for required files in BucketFS. Cause: %w", err)
 	}
