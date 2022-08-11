@@ -43,6 +43,7 @@ func (suite *ExtensionControllerSuite) SetupTest() {
 }
 
 func (suite *ExtensionControllerSuite) AfterTest(suiteName, testName string) {
+	suite.IntegrationTestSuite.AfterTest(suiteName, testName)
 	err := os.RemoveAll(suite.tempExtensionRepo)
 	if err != nil {
 		panic(err)
@@ -128,12 +129,13 @@ func (suite *ExtensionControllerSuite) TestInstallSucceeds() {
 func (suite *ExtensionControllerSuite) TestEnsureSchemaExistsCreatesSchemaIfItDoesNotExist() {
 	suite.writeDefaultExtension()
 	const schemaName = "my_testing_schema"
+	suite.dropSchema(schemaName)
 	defer suite.dropSchema(schemaName)
 	controller := Create(suite.tempExtensionRepo, schemaName)
-	suite.Assert().NotContains(suite.getAllSchemaNames(), schemaName)
+	suite.NotContains(suite.getAllSchemaNames(), schemaName)
 	err := controller.InstallExtension(mockContext(), suite.Connection, DEFAULT_EXTENSION_ID, "ver")
 	suite.NoError(err)
-	suite.Assert().Contains(suite.getAllSchemaNames(), schemaName)
+	suite.Contains(suite.getAllSchemaNames(), schemaName)
 }
 
 func (suite *ExtensionControllerSuite) TestEnsureSchemaDoesNotFailIfSchemaAlreadyExists() {
@@ -192,12 +194,16 @@ func (suite *ExtensionControllerSuite) TestAddInstance_validParameters() {
 
 func (suite *ExtensionControllerSuite) createSchema(schemaName string) {
 	_, err := suite.Connection.Exec(fmt.Sprintf(`CREATE SCHEMA "%s"`, schemaName))
-	suite.NoError(err)
+	if err != nil {
+		suite.FailNowf("failed to create schema %s: %v", schemaName, err.Error())
+	}
 }
 
 func (suite *ExtensionControllerSuite) dropSchema(schemaName string) {
-	_, err := suite.Connection.Exec(fmt.Sprintf(`DROP SCHEMA IF EXISTS "%s"`, schemaName))
-	suite.NoError(err)
+	_, err := suite.Connection.Exec(fmt.Sprintf(`DROP SCHEMA IF EXISTS "%s" CASCADE`, schemaName))
+	if err != nil {
+		suite.FailNowf("failed to drop schema %s: %v", schemaName, err.Error())
+	}
 }
 
 func (suite *ExtensionControllerSuite) getAllSchemaNames() []string {

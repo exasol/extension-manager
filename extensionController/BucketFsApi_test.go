@@ -2,11 +2,16 @@ package extensionController
 
 import (
 	"context"
+	"fmt"
+	"time"
+
 	"testing"
 
 	"github.com/exasol/extension-manager/integrationTesting"
 	"github.com/stretchr/testify/suite"
 )
+
+const DEFAULT_BUCKET_NAME = "default"
 
 type BucketFsAPISuite struct {
 	integrationTesting.IntegrationTestSuite
@@ -17,23 +22,22 @@ func TestBucketFsApiSuite(t *testing.T) {
 }
 
 func (suite *BucketFsAPISuite) TestListBuckets() {
-	db, err := suite.Exasol.CreateConnectionWithConfig(false)
-	suite.NoError(err)
-	defer func() { suite.NoError(db.Close()) }()
-	bfsAPI := CreateBucketFsAPI(context.Background(), db)
+	bfsAPI := suite.createBucketFs()
 	result, err := bfsAPI.ListBuckets()
 	suite.NoError(err)
-	suite.Assert().Contains(result, "default")
+	suite.Contains(result, DEFAULT_BUCKET_NAME)
 }
 
 func (suite *BucketFsAPISuite) TestListFiles() {
-	db, err := suite.Exasol.CreateConnectionWithConfig(false)
+	bfsAPI := suite.createBucketFs()
+	fileName := fmt.Sprintf("myFile-%d.txt", time.Now().Unix())
+	suite.NoError(suite.Exasol.UploadStringContent("12345", fileName))
+	defer func() { suite.NoError(suite.Exasol.DeleteFile(fileName)) }()
+	result, err := bfsAPI.ListFiles(DEFAULT_BUCKET_NAME)
 	suite.NoError(err)
-	defer func() { suite.NoError(db.Close()) }()
-	bfsAPI := CreateBucketFsAPI(context.Background(), db)
-	suite.NoError(suite.Exasol.UploadStringContent("12345", "myFile.txt"))
-	defer func() { suite.NoError(suite.Exasol.DeleteFile("myFile.txt")) }()
-	result, err := bfsAPI.ListFiles("default")
-	suite.NoError(err)
-	suite.Assert().Contains(result, BfsFile{Name: "myFile.txt", Size: 5})
+	suite.Contains(result, BfsFile{Name: fileName, Size: 5})
+}
+
+func (suite *BucketFsAPISuite) createBucketFs() BucketFsAPI {
+	return CreateBucketFsAPI(context.Background(), suite.Connection)
 }

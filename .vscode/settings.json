@@ -1,0 +1,6 @@
+{
+    "go.testTimeout": "120s",
+    "go.testFlags": [
+        "-p", "1"
+    ]
+}
