@@ -8,7 +8,8 @@ import (
 	"time"
 )
 
-// BucketFsAPI allows access to BucketFS. Currently, it's implemented by running UDFs via SQL that read the data. In the future that implementation might be replaced by direct access.
+// BucketFsAPI allows access to BucketFS. Currently, it's implemented by running UDFs via SQL that read the data.
+// In the future that implementation might be replaced by direct access.
 type BucketFsAPI interface {
 	// ListBuckets returns a list of public buckets
 	ListBuckets() ([]string, error)

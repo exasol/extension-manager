@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 
 	"strings"
 
@@ -151,10 +150,7 @@ func beginTransaction(ctx context.Context, db *sql.DB) (*sql.Tx, error) {
 }
 
 func rollback(tx *sql.Tx) {
-	err := tx.Rollback()
-	if err != nil {
-		// Even if Tx.Rollback fails, the transaction will no longer be valid, nor will it have been committed to the database.
-		// See https://go.dev/doc/database/execute-transactions
-		log.Printf("Failed to rollback transaction: %v", err)
-	}
+	// Even if Tx.Rollback fails, the transaction will no longer be valid, nor will it have been committed to the database.
+	// See https://go.dev/doc/database/execute-transactions
+	_ = tx.Rollback()
 }
