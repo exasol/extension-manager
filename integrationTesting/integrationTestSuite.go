@@ -50,7 +50,7 @@ func (suite *IntegrationTestSuite) BeforeTest(suiteName, testName string) {
 
 func (suite *IntegrationTestSuite) AfterTest(suiteName, testName string) {
 	if suite.Connection == nil {
-		suite.FailNow("no connection to close after test")
+		suite.FailNow("no connection to close after test. Ensure to call 'suite.IntegrationTestSuite.SetupSuite()' in SetupSuite()")
 	}
 	err := suite.Connection.Close()
 	suite.NoError(err)
