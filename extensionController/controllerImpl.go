@@ -57,7 +57,6 @@ func (c *controllerImpl) requiredFilesAvailable(extension *extensionAPI.JsExtens
 			return false
 		}
 	}
-	log.Printf("Required files found for extension %q\n", extension.Name)
 	return true
 }
 
