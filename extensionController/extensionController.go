@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 
 	"strings"
 
@@ -84,15 +85,18 @@ func existsFileInBfs(bfsFiles []BfsFile, requiredFile extensionAPI.BucketFsUploa
 	return false
 }
 
-func (c *extensionControllerImpl) InstallExtension(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) error {
+func (c *extensionControllerImpl) InstallExtension(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) (returnErr error) {
 	tx, err := beginTransaction(ctx, db)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer rollback(tx)
 	err = c.impl.InstallExtension(tx, extensionId, extensionVersion)
 	if err == nil {
-		tx.Commit()
+		err = tx.Commit()
+		if err != nil {
+			return err
+		}
 	}
 	return err
 }
@@ -102,7 +106,7 @@ func (c *extensionControllerImpl) GetAllInstallations(ctx context.Context, db *s
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback()
+	defer rollback(tx)
 	return c.impl.GetAllInstallations(tx)
 }
 
@@ -111,10 +115,13 @@ func (c *extensionControllerImpl) CreateInstance(ctx context.Context, db *sql.DB
 	if err != nil {
 		return "", err
 	}
-	defer tx.Rollback()
+	defer rollback(tx)
 	instanceName, err := c.impl.CreateInstance(tx, extensionId, extensionVersion, parameterValues)
 	if err == nil {
-		tx.Commit()
+		err = tx.Commit()
+		if err != nil {
+			return "", err
+		}
 	}
 	return instanceName, err
 }
@@ -141,4 +148,13 @@ func validateParameters(parameterDefinitions []interface{}, params extensionAPI.
 
 func beginTransaction(ctx context.Context, db *sql.DB) (*sql.Tx, error) {
 	return db.BeginTx(ctx, nil)
+}
+
+func rollback(tx *sql.Tx) {
+	err := tx.Rollback()
+	if err != nil {
+		// Even if Tx.Rollback fails, the transaction will no longer be valid, nor will it have been committed to the database.
+		// See https://go.dev/doc/database/execute-transactions
+		log.Printf("Failed to rollback transaction: %v", err)
+	}
 }
