@@ -27,7 +27,9 @@ func (suite *IntegrationTestSuite) SetupSuite() {
 }
 
 func (suite *IntegrationTestSuite) TearDownSuite() {
-	suite.NoError(suite.Exasol.Stop())
+	if suite.Exasol != nil {
+		suite.NoError(suite.Exasol.Stop())
+	}
 }
 
 func (suite *IntegrationTestSuite) ExecSQL(query string) {
@@ -47,6 +49,9 @@ func (suite *IntegrationTestSuite) BeforeTest(suiteName, testName string) {
 }
 
 func (suite *IntegrationTestSuite) AfterTest(suiteName, testName string) {
+	if suite.Connection == nil {
+		suite.FailNow("no connection to close after test")
+	}
 	err := suite.Connection.Close()
 	suite.NoError(err)
 	suite.Connection = nil
