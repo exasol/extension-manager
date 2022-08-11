@@ -321,7 +321,7 @@ func (api *restAPIImpl) openDBConnection(c *gin.Context) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	config.Autocommit(false).ValidateServerCertificate(false)
+	config.ValidateServerCertificate(false)
 	database, err := sql.Open("exasol", config.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to open a database connection. Cause: %w", err)
