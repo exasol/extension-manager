@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"log"
 	"path"
+	"strings"
 
 	"github.com/exasol/extension-manager/extensionAPI"
+	"github.com/exasol/extension-manager/parameterValidator"
 )
 
 // controller is the core part of the extension-manager that provides the extension handling functionality.
@@ -184,6 +186,26 @@ func (c *controllerImpl) ensureSchemaExists(tx *sql.Tx) error {
 	_, err := tx.Exec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"`, c.schema))
 	if err != nil {
 		return fmt.Errorf("failed to create schema: %w", err)
+	}
+	return nil
+}
+
+func validateParameters(parameterDefinitions []interface{}, params extensionAPI.ParameterValues) error {
+	validator, err := parameterValidator.New()
+	if err != nil {
+		return fmt.Errorf("failed to create parameter validator: %w", err)
+	}
+	result, err := validator.ValidateParameters(parameterDefinitions, params)
+	if err != nil {
+		return fmt.Errorf("failed to validate parameters: %w", err)
+	}
+	message := ""
+	for _, r := range result {
+		message += r.Message + ", "
+	}
+	message = strings.TrimSuffix(message, ", ")
+	if message != "" {
+		return fmt.Errorf("invalid parameters: %s", message)
 	}
 	return nil
 }

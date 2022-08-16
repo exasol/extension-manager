@@ -5,10 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"strings"
-
 	"github.com/exasol/extension-manager/extensionAPI"
-	"github.com/exasol/extension-manager/parameterValidator"
 )
 
 // TransactionController is the core part of the extension-manager that provides the extension handling functionality.
@@ -123,26 +120,6 @@ func (c *transactionControllerImpl) CreateInstance(ctx context.Context, db *sql.
 		}
 	}
 	return instanceName, err
-}
-
-func validateParameters(parameterDefinitions []interface{}, params extensionAPI.ParameterValues) error {
-	validator, err := parameterValidator.New()
-	if err != nil {
-		return fmt.Errorf("failed to create parameter validator: %w", err)
-	}
-	result, err := validator.ValidateParameters(parameterDefinitions, params)
-	if err != nil {
-		return fmt.Errorf("failed to validate parameters: %w", err)
-	}
-	message := ""
-	for _, r := range result {
-		message += r.Message + ", "
-	}
-	message = strings.TrimSuffix(message, ", ")
-	if message != "" {
-		return fmt.Errorf("invalid parameters: %s", message)
-	}
-	return nil
 }
 
 func beginTransaction(ctx context.Context, db *sql.DB) (*sql.Tx, error) {

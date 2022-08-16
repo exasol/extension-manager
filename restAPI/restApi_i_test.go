@@ -70,10 +70,6 @@ func (suite *RestAPIIntegrationTestSuite) makeGetRequest(path string) string {
 	return suite.makeRequest("GET", path, "", 200)
 }
 
-func (suite *RestAPIIntegrationTestSuite) makePutRequest(path string) string {
-	return suite.makeRequest("PUT", path, "", 200)
-}
-
 func (suite *RestAPIIntegrationTestSuite) makeRequest(method string, path string, body string, expectedStatusCode int) string {
 	request, err := http.NewRequest(method, suite.baseUrl+path, strings.NewReader(body))
 	suite.NoError(err)
