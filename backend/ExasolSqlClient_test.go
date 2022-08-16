@@ -37,7 +37,28 @@ func (suite *ExasolSqlClientTestSuite) TestRun_succeeds() {
 func (suite *ExasolSqlClientTestSuite) TestRun_fails() {
 	client := NewSqlClient(suite.createMockTransaction())
 	suite.dbMock.ExpectExec("invalid").WillReturnError(fmt.Errorf("expected"))
-	suite.Panics(func() { client.RunQuery("invalid") })
+	suite.PanicsWithError("error executing statement \"invalid\": expected", func() { client.RunQuery("invalid") })
+}
+
+func (suite *ExasolSqlClientTestSuite) TestRun_validation() {
+	var tests = []struct {
+		statement        string
+		forbiddenCommand string
+	}{{"select 1", ""}, {"com mit", ""}, {"roll back", ""},
+		{"commit", "commit"}, {"rollback", "rollback"}, {"COMMIT", "commit"}, {"ROLLBACK", "rollback"},
+		{" commit; ", "commit"}, {"\t\r\n ; commit \t\r\n ; ", "commit"}, {"\t\r\n ; COMMIT \t\r\n ; ", "commit"}}
+	for _, test := range tests {
+		suite.Run(fmt.Sprintf("running statement %q contains forbidden command %q", test.statement, test.forbiddenCommand), func() {
+			client := NewSqlClient(suite.createMockTransaction())
+			if test.forbiddenCommand != "" {
+				expectedError := fmt.Sprintf("statement %q contains forbidden command %q. Transaction handling is done by extension manager", test.statement, test.forbiddenCommand)
+				suite.PanicsWithError(expectedError, func() { client.RunQuery(test.statement) })
+			} else {
+				suite.dbMock.ExpectExec(test.statement).WillReturnResult(sqlmock.NewResult(1, 0))
+				client.RunQuery(test.statement)
+			}
+		})
+	}
 }
 
 func (suite *ExasolSqlClientTestSuite) createMockTransaction() *sql.Tx {
