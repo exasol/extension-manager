@@ -43,12 +43,12 @@ type RestAPI interface {
 // @produce json
 
 // Create creates a new RestAPI.
-func Create(controller cont.ExtensionController, serverAddress string) RestAPI {
+func Create(controller cont.TransactionController, serverAddress string) RestAPI {
 	return &restAPIImpl{controller: controller, serverAddress: serverAddress}
 }
 
 type restAPIImpl struct {
-	controller    cont.ExtensionController
+	controller    cont.TransactionController
 	serverAddress string
 	server        *http.Server
 	stopped       *bool
@@ -67,11 +67,10 @@ func (api *restAPIImpl) Serve() {
 	router.PUT("/instances", api.handlePutInstance)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	srv := &http.Server{
+	api.server = &http.Server{
 		Addr:    api.serverAddress,
 		Handler: router,
 	}
-	api.server = srv
 	log.Printf("Starting server on %s...\n", api.serverAddress)
 	err := api.server.ListenAndServe() // blocking
 	if err != nil && !api.isStopped() {
@@ -130,7 +129,7 @@ func (api *restAPIImpl) getExtensions(c *gin.Context) (*ExtensionsResponse, erro
 		return nil, err
 	}
 	defer closeDbConnection(db)
-	extensions, err := api.controller.GetAllExtensions(db)
+	extensions, err := api.controller.GetAllExtensions(c, db)
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +179,7 @@ func (api *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResponse
 		return nil, err
 	}
 	defer closeDbConnection(db)
-	installations, err := api.controller.GetAllInstallations(db)
+	installations, err := api.controller.GetAllInstallations(c, db)
 	if err != nil {
 		return nil, err
 	}
@@ -229,7 +228,7 @@ func (api *restAPIImpl) installExtension(c *gin.Context) (string, error) {
 		return "", fmt.Errorf("missing parameter extensionVersion")
 	}
 
-	err = api.controller.InstallExtension(db, extensionId, extensionVersion)
+	err = api.controller.InstallExtension(c, db, extensionId, extensionVersion)
 
 	if err != nil {
 		return "", fmt.Errorf("error installing extension: %v", err)
@@ -270,7 +269,7 @@ func (api *restAPIImpl) createInstance(c *gin.Context) (CreateInstanceResponse, 
 	for _, p := range request.ParameterValues {
 		parameters = append(parameters, cont.ParameterValue{Name: p.Name, Value: p.Value})
 	}
-	response.InstanceName, err = api.controller.CreateInstance(db, request.ExtensionId, request.ExtensionVersion, parameters)
+	response.InstanceName, err = api.controller.CreateInstance(c, db, request.ExtensionId, request.ExtensionVersion, parameters)
 	if err != nil {
 		return response, fmt.Errorf("error installing extension: %v", err)
 	}
@@ -321,7 +320,8 @@ func (api *restAPIImpl) openDBConnection(c *gin.Context) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	config.Autocommit(false).ValidateServerCertificate(false)
+	config.ValidateServerCertificate(false)
+	config.Autocommit(false)
 	database, err := sql.Open("exasol", config.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to open a database connection. Cause: %w", err)

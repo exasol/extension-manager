@@ -2,7 +2,6 @@ package integrationTesting
 
 import (
 	"database/sql"
-	"log"
 	"testing"
 
 	testSetupAbstraction "github.com/exasol/exasol-test-setup-abstraction-server/go-client"
@@ -20,20 +19,40 @@ func (suite *IntegrationTestSuite) SetupSuite() {
 		suite.T().Skip()
 	}
 	/** TestSetupAbstraction reuses the container, so parallel use of this suite would cause conflicts. We make sure it's not used in parallel using a mutex. */
-	exasol, err := testSetupAbstraction.Create("./exasol-test-setup-config.json") // file does not exist. --> we use the testcontainer test setup
+	exasol, err := testSetupAbstraction.Create("./exasol-test-setup-config.json") // file does not exist --> we use the testcontainer test setup
 	if err != nil {
-		log.Fatalf("failed to create test setup abstraction. Cause: %v", err)
+		suite.FailNowf("failed to create test setup abstraction: %v", err.Error())
 	}
 	suite.Exasol = exasol
-	suite.Connection, err = suite.Exasol.CreateConnectionWithConfig(false)
-	suite.NoError(err)
 }
 
 func (suite *IntegrationTestSuite) TearDownSuite() {
-	suite.NoError(suite.Exasol.Stop())
+	if suite.Exasol != nil {
+		suite.NoError(suite.Exasol.Stop())
+	}
 }
 
 func (suite *IntegrationTestSuite) ExecSQL(query string) {
 	_, err := suite.Connection.Exec(query)
 	suite.NoError(err)
+}
+
+func (suite *IntegrationTestSuite) BeforeTest(suiteName, testName string) {
+	if suite.Connection != nil {
+		suite.FailNow("previous connection was not closed")
+	}
+	db, err := suite.Exasol.CreateConnectionWithConfig(false)
+	if err != nil {
+		suite.FailNowf("failed to connect to db: %v", err.Error())
+	}
+	suite.Connection = db
+}
+
+func (suite *IntegrationTestSuite) AfterTest(suiteName, testName string) {
+	if suite.Connection == nil {
+		suite.FailNow("no connection to close after test. Ensure to call 'suite.IntegrationTestSuite.SetupSuite()' in SetupSuite()")
+	}
+	err := suite.Connection.Close()
+	suite.NoError(err)
+	suite.Connection = nil
 }

@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -96,15 +95,15 @@ func (b TestExtensionBuilder) Build() *BuiltExtension {
 			panic(err)
 		}
 	}
-	err = ioutil.WriteFile(path.Join(workDir, "package.json"), packageJson, 0600)
+	err = os.WriteFile(path.Join(workDir, "package.json"), packageJson, 0600)
 	if err != nil {
 		panic(err)
 	}
-	err = ioutil.WriteFile(path.Join(workDir, "extensionForTesting.ts"), []byte(extensionTs), 0600)
+	err = os.WriteFile(path.Join(workDir, "extensionForTesting.ts"), []byte(extensionTs), 0600)
 	if err != nil {
 		panic(err)
 	}
-	err = ioutil.WriteFile(path.Join(workDir, "tsconfig.json"), tscConfig, 0600)
+	err = os.WriteFile(path.Join(workDir, "tsconfig.json"), tscConfig, 0600)
 	if err != nil {
 		panic(err)
 	}
@@ -124,7 +123,7 @@ func (extension BuiltExtension) Bytes() []byte {
 }
 
 func (e BuiltExtension) WriteToTmpFile() (fileName string) {
-	extensionFile, err := ioutil.TempFile(os.TempDir(), "extension-*.js")
+	extensionFile, err := os.CreateTemp(os.TempDir(), "extension-*.js")
 	if err != nil {
 		panic(err)
 	}
@@ -142,7 +141,7 @@ func (e BuiltExtension) WriteToTmpFile() (fileName string) {
 }
 
 func (e BuiltExtension) WriteToFile(fileName string) {
-	err := ioutil.WriteFile(fileName, e.content, 0600)
+	err := os.WriteFile(fileName, e.content, 0600)
 	if err != nil {
 		panic(err)
 	}
@@ -164,7 +163,7 @@ func runBuild(workDir string) []byte {
 		fmt.Println(stderr.String())
 		panic(fmt.Sprintf("failed to build extensionForTesting. Cause: %v", err))
 	}
-	builtExtension, err := ioutil.ReadFile(path.Join(workDir, "dist.js"))
+	builtExtension, err := os.ReadFile(path.Join(workDir, "dist.js"))
 	if err != nil {
 		panic(err)
 	}

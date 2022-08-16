@@ -16,8 +16,8 @@ func CreateContextWithClient(extensionSchemaName string, client SimpleSQLClient)
 	}
 }
 
-func CreateContext(extensionSchemaName string, dbConnection *sql.DB) *ExtensionContext {
-	var client SimpleSQLClient = backend.NewSqlClient(dbConnection)
+func CreateContext(extensionSchemaName string, tx *sql.Tx) *ExtensionContext {
+	var client SimpleSQLClient = backend.NewSqlClient(tx)
 	return CreateContextWithClient(extensionSchemaName, client)
 }
 

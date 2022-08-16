@@ -1,0 +1,9 @@
+{
+    "go.testTimeout": "120s",
+    "go.testFlags": [
+        "-p", "1"
+    ],
+    "go.coverOnSingleTest": true,
+    "go.coverOnSingleTestFile": true,
+    "go.coverOnTestPackage": true,
+}

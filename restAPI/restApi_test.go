@@ -1,9 +1,10 @@
 package restAPI
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -48,21 +49,21 @@ func (suite *RestAPISuite) TearDownTest() {
 	suite.restAPI.Stop()
 }
 
-func (mock *MockExtensionController) InstallExtension(dbConnection *sql.DB, extensionId string, extensionVersion string) error {
-	args := mock.Called(dbConnection, extensionId, extensionVersion)
+func (mock *MockExtensionController) InstallExtension(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) error {
+	args := mock.Called(ctx, db, extensionId, extensionVersion)
 	return args.Error(0)
 }
 
-func (mock *MockExtensionController) GetAllInstallations(dbConnection *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
-	args := mock.Called(dbConnection)
+func (mock *MockExtensionController) GetAllInstallations(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
+	args := mock.Called(ctx, db)
 	if installations, ok := args.Get(0).([]*extensionAPI.JsExtInstallation); ok {
 		return installations, args.Error(1)
 	}
 	return nil, args.Error(1)
 }
 
-func (mock *MockExtensionController) GetAllExtensions(dbConnectionWithNoAutocommit *sql.DB) ([]*extensionController.Extension, error) {
-	args := mock.Called(dbConnectionWithNoAutocommit)
+func (mock *MockExtensionController) GetAllExtensions(ctx context.Context, db *sql.DB) ([]*extensionController.Extension, error) {
+	args := mock.Called(ctx, db)
 	if extensions, ok := args.Get(0).([]*extensionController.Extension); ok {
 		return extensions, args.Error(1)
 	} else {
@@ -70,8 +71,8 @@ func (mock *MockExtensionController) GetAllExtensions(dbConnectionWithNoAutocomm
 	}
 }
 
-func (mock *MockExtensionController) CreateInstance(db *sql.DB, extensionId string, extensionVersion string, parameterValues []extensionController.ParameterValue) (string, error) {
-	args := mock.Called(db, extensionId, extensionVersion, parameterValues)
+func (mock *MockExtensionController) CreateInstance(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string, parameterValues []extensionController.ParameterValue) (string, error) {
+	args := mock.Called(ctx, db, extensionId, extensionVersion, parameterValues)
 	return args.String(0), args.Error(1)
 }
 
@@ -87,25 +88,25 @@ func (suite *RestAPISuite) TestInvalidParameterFormat() {
 }
 
 func (suite *RestAPISuite) TestGetInstallationsSuccessfully() {
-	suite.controller.On("GetAllInstallations", mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)
+	suite.controller.On("GetAllInstallations", mock.Anything, mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)
 	responseString := suite.makeGetRequest("/installations?dbHost=host&dbPort=8563&dbUser=user&dbPass=password")
 	suite.assertJSON.Assertf(responseString, `{"installations":[{"name":"test","version":"0.1.0","instanceParameters":[{"id":"param1","name":"My param","type":"string"}]}]}`)
 }
 
 func (suite *RestAPISuite) TestGetInstallationsFailed() {
-	suite.controller.On("GetAllInstallations", mock.Anything).Return(nil, fmt.Errorf("mock error"))
+	suite.controller.On("GetAllInstallations", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("mock error"))
 	responseString := suite.makeRequest("GET", "/installations?dbHost=host&dbPort=8563&dbUser=user&dbPass=password", "", 500)
 	suite.Equal("Request failed: mock error", responseString)
 }
 
 func (suite *RestAPISuite) TestGetAllExtensionsSuccessfully() {
-	suite.controller.On("GetAllExtensions", mock.Anything).Return([]*extensionController.Extension{{Id: "ext-id", Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
+	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return([]*extensionController.Extension{{Id: "ext-id", Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
 	responseString := suite.makeGetRequest("/extensions?dbHost=host&dbPort=8563&dbUser=user&dbPass=password")
 	suite.assertJSON.Assertf(responseString, `{"extensions":[{"id": "ext-id", "name":"my-extension","description":"a cool extension","installableVersions":["0.1.0"]}]}`)
 }
 
 func (suite *RestAPISuite) TestGetAllExtensionsFails() {
-	suite.controller.On("GetAllExtensions", mock.Anything).Return(nil, fmt.Errorf("mock error"))
+	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("mock error"))
 	responseString := suite.makeRequest("GET", "/extensions?dbHost=host&dbPort=8563&dbUser=user&dbPass=password", "", 500)
 	suite.Equal("Request failed: mock error", responseString)
 }
@@ -142,10 +143,10 @@ func (suite *RestAPISuite) TestRequestsFailForMissingParameters() {
 		{"PUT", "/instances", "dbHost=host&dbPort=8563&dbPass=password", "missing parameter dbUser"},
 		{"PUT", "/instances", "dbHost=host&dbPort=8563&dbUser=user", "missing parameter dbPass"},
 	}
-	suite.controller.On("GetAllExtensions", mock.Anything).Return([]*extensionController.Extension{{Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
-	suite.controller.On("GetAllInstallations", mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)
-	suite.controller.On("InstallExtension", mock.Anything, "ext-id", "ver").Return(nil)
-	suite.controller.On("CreateInstance", mock.Anything, "ext-id", "ver", mock.Anything).Return("instanceName", nil)
+	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return([]*extensionController.Extension{{Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
+	suite.controller.On("GetAllInstallations", mock.Anything, mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)
+	suite.controller.On("InstallExtension", mock.Anything, mock.Anything, "ext-id", "ver").Return(nil)
+	suite.controller.On("CreateInstance", mock.Anything, mock.Anything, "ext-id", "ver", mock.Anything).Return("instanceName", nil)
 	for _, test := range tests {
 		completePath := fmt.Sprintf("%s?%s", test.url, test.parameters)
 		responseString := suite.makeRequest(test.method, completePath, "", 500)
@@ -154,26 +155,26 @@ func (suite *RestAPISuite) TestRequestsFailForMissingParameters() {
 }
 
 func (suite *RestAPISuite) TestInstallExtensionsSuccessfully() {
-	suite.controller.On("InstallExtension", mock.Anything, "ext-id", "ver").Return(nil)
+	suite.controller.On("InstallExtension", mock.Anything, mock.Anything, "ext-id", "ver").Return(nil)
 	responseString := suite.makePutRequest("/installations?extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563&dbUser=user&dbPass=password")
 	suite.Equal("", responseString)
 }
 
 func (suite *RestAPISuite) TestInstallExtensionsFailed() {
-	suite.controller.On("InstallExtension", mock.Anything, "ext-id", "ver").Return(fmt.Errorf("mock error"))
+	suite.controller.On("InstallExtension", mock.Anything, mock.Anything, "ext-id", "ver").Return(fmt.Errorf("mock error"))
 	responseString := suite.makeRequest("PUT", "/installations?extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563&dbUser=user&dbPass=password", "", 500)
 	suite.Equal("Request failed: error installing extension: mock error", responseString)
 }
 
 func (suite *RestAPISuite) TestCreateInstanceSuccessfully() {
-	suite.controller.On("CreateInstance", mock.Anything, "ext-id", "ver", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return("instanceName", nil)
+	suite.controller.On("CreateInstance", mock.Anything, mock.Anything, "ext-id", "ver", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return("instanceName", nil)
 	responseString := suite.makeRequest("PUT", "/instances?dbHost=host&dbPort=8563&dbUser=user&dbPass=password",
 		`{"extensionId": "ext-id", "extensionVersion": "ver", "parameterValues": [{"name":"p1", "value":"v1"}]}`, 200)
 	suite.Equal(`{"instanceName":"instanceName"}`, responseString)
 }
 
 func (suite *RestAPISuite) TestCreateInstanceFailed() {
-	suite.controller.On("CreateInstance", mock.Anything, "ext-id", "ver", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return("", fmt.Errorf("mock error"))
+	suite.controller.On("CreateInstance", mock.Anything, mock.Anything, "ext-id", "ver", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return("", fmt.Errorf("mock error"))
 	responseString := suite.makeRequest("PUT", "/instances?dbHost=host&dbPort=8563&dbUser=user&dbPass=password",
 		`{"extensionId": "ext-id", "extensionVersion": "ver", "parameterValues": [{"name":"p1", "value":"v1"}]}`, 500)
 	suite.Equal("Request failed: error installing extension: mock error", responseString)
@@ -194,7 +195,7 @@ func (suite *RestAPISuite) makeRequest(method string, path string, body string, 
 	suite.NoError(err)
 	suite.Equal(expectedStatusCode, response.StatusCode)
 	defer func() { suite.NoError(response.Body.Close()) }()
-	bytes, err := ioutil.ReadAll(response.Body)
+	bytes, err := io.ReadAll(response.Body)
 	suite.NoError(err)
 	return string(bytes)
 }

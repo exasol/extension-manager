@@ -1,32 +1,32 @@
 package extensionController
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"strings"
 	"time"
 )
 
-// BucketFsAPI allows access to BucketFS. Currently, it's implemented by running UDFs via SQL that read the data. In the future that implementation might be replaced by direct access.
+// BucketFsAPI allows access to BucketFS. Currently, it's implemented by running UDFs via SQL that read the data.
+// In the future that implementation might be replaced by direct access.
 type BucketFsAPI interface {
 	// ListBuckets returns a list of public buckets
-	ListBuckets() ([]string, error)
+	ListBuckets(ctx context.Context, db *sql.DB) ([]string, error)
 	// ListFiles lists the files in a given bucket
-	ListFiles(bucket string) ([]BfsFile, error)
+	ListFiles(ctx context.Context, db *sql.DB, bucket string) ([]BfsFile, error)
 }
 
 // CreateBucketFsAPI creates an instance of BucketFsAPI
-func CreateBucketFsAPI(db *sql.DB) BucketFsAPI {
-	bucketFsAPI := bucketFsAPIImpl{db: db}
-	return &bucketFsAPI
+func CreateBucketFsAPI() BucketFsAPI {
+	return &bucketFsAPIImpl{}
 }
 
 type bucketFsAPIImpl struct {
-	db *sql.DB
 }
 
-func (bfsApi bucketFsAPIImpl) ListBuckets() ([]string, error) {
-	files, err := bfsApi.listDirInUDF("/buckets/bfsdefault/")
+func (bfs bucketFsAPIImpl) ListBuckets(ctx context.Context, db *sql.DB) ([]string, error) {
+	files, err := bfs.listDirInUDF(ctx, db, "/buckets/bfsdefault/")
 	if err != nil {
 		return nil, err
 	}
@@ -37,11 +37,11 @@ func (bfsApi bucketFsAPIImpl) ListBuckets() ([]string, error) {
 	return names, nil
 }
 
-func (bfsApi bucketFsAPIImpl) ListFiles(bucket string) ([]BfsFile, error) {
+func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB, bucket string) ([]BfsFile, error) {
 	if strings.Contains(bucket, "/") {
 		return nil, fmt.Errorf("invalid bucket name. Bucket name must not contain slashes")
 	}
-	return bfsApi.listDirInUDF("/buckets/bfsdefault/" + bucket)
+	return bfs.listDirInUDF(ctx, db, "/buckets/bfsdefault/"+bucket)
 }
 
 // BfsFile represents a file in BucketFS
@@ -50,8 +50,8 @@ type BfsFile struct {
 	Size int
 }
 
-func (bfsApi bucketFsAPIImpl) listDirInUDF(directory string) (files []BfsFile, retErr error) {
-	transaction, err := bfsApi.db.Begin()
+func (bfs bucketFsAPIImpl) listDirInUDF(ctx context.Context, db *sql.DB, directory string) (files []BfsFile, retErr error) {
+	transaction, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a transaction. Cause: %w", err)
 	}
