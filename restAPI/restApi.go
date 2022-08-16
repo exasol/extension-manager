@@ -67,11 +67,10 @@ func (api *restAPIImpl) Serve() {
 	router.PUT("/instances", api.handlePutInstance)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	srv := &http.Server{
+	api.server = &http.Server{
 		Addr:    api.serverAddress,
 		Handler: router,
 	}
-	api.server = srv
 	log.Printf("Starting server on %s...\n", api.serverAddress)
 	err := api.server.ListenAndServe() // blocking
 	if err != nil && !api.isStopped() {
