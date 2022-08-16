@@ -11,8 +11,8 @@ import (
 	"github.com/exasol/extension-manager/parameterValidator"
 )
 
-// ExtensionController is the core part of the extension-manager that provides the extension handling functionality.
-type ExtensionController interface {
+// TransactionController is the core part of the extension-manager that provides the extension handling functionality.
+type TransactionController interface {
 	// GetAllInstallations searches for installations of any extensions.
 	// db is a connection to the Exasol DB
 	GetAllInstallations(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error)
@@ -48,27 +48,27 @@ type ParameterValue struct {
 type ExtInstallation struct {
 }
 
-// Create an instance of ExtensionController
-func Create(pathToExtensionFolder string, extensionSchemaName string) ExtensionController {
-	ctrl := createImpl(pathToExtensionFolder, extensionSchemaName)
-	return &extensionControllerImpl{impl: ctrl, bfsAPI: CreateBucketFsAPI()}
+// Create an instance of TransactionController
+func Create(extensionFolder string, schema string) TransactionController {
+	controller := createImpl(extensionFolder, schema)
+	return &transactionControllerImpl{controller: controller, bucketFs: CreateBucketFsAPI()}
 }
 
-type extensionControllerImpl struct {
-	impl   controller
-	bfsAPI BucketFsAPI
+type transactionControllerImpl struct {
+	controller controller
+	bucketFs   BucketFsAPI
 }
 
-func (c *extensionControllerImpl) GetAllExtensions(ctx context.Context, db *sql.DB) ([]*Extension, error) {
+func (c *transactionControllerImpl) GetAllExtensions(ctx context.Context, db *sql.DB) ([]*Extension, error) {
 	bfsFiles, err := c.listBfsFiles(ctx, db)
 	if err != nil {
 		return nil, err
 	}
-	return c.impl.GetAllExtensions(bfsFiles)
+	return c.controller.GetAllExtensions(bfsFiles)
 }
 
-func (c *extensionControllerImpl) listBfsFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error) {
-	bfsFiles, err := c.bfsAPI.ListFiles(ctx, db, "default")
+func (c *transactionControllerImpl) listBfsFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error) {
+	bfsFiles, err := c.bucketFs.ListFiles(ctx, db, "default")
 	if err != nil {
 		return nil, fmt.Errorf("failed to search for required files in BucketFS. Cause: %w", err)
 	}
@@ -84,13 +84,13 @@ func existsFileInBfs(bfsFiles []BfsFile, requiredFile extensionAPI.BucketFsUploa
 	return false
 }
 
-func (c *extensionControllerImpl) InstallExtension(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) (returnErr error) {
+func (c *transactionControllerImpl) InstallExtension(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) (returnErr error) {
 	tx, err := beginTransaction(ctx, db)
 	if err != nil {
 		return err
 	}
 	defer rollback(tx)
-	err = c.impl.InstallExtension(tx, extensionId, extensionVersion)
+	err = c.controller.InstallExtension(tx, extensionId, extensionVersion)
 	if err == nil {
 		err = tx.Commit()
 		if err != nil {
@@ -100,22 +100,22 @@ func (c *extensionControllerImpl) InstallExtension(ctx context.Context, db *sql.
 	return err
 }
 
-func (c *extensionControllerImpl) GetAllInstallations(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
+func (c *transactionControllerImpl) GetAllInstallations(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
 	tx, err := beginTransaction(ctx, db)
 	if err != nil {
 		return nil, err
 	}
 	defer rollback(tx)
-	return c.impl.GetAllInstallations(tx)
+	return c.controller.GetAllInstallations(tx)
 }
 
-func (c *extensionControllerImpl) CreateInstance(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error) {
+func (c *transactionControllerImpl) CreateInstance(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error) {
 	tx, err := beginTransaction(ctx, db)
 	if err != nil {
 		return "", err
 	}
 	defer rollback(tx)
-	instanceName, err := c.impl.CreateInstance(tx, extensionId, extensionVersion, parameterValues)
+	instanceName, err := c.controller.CreateInstance(tx, extensionId, extensionVersion, parameterValues)
 	if err == nil {
 		err = tx.Commit()
 		if err != nil {

@@ -43,12 +43,12 @@ type RestAPI interface {
 // @produce json
 
 // Create creates a new RestAPI.
-func Create(controller cont.ExtensionController, serverAddress string) RestAPI {
+func Create(controller cont.TransactionController, serverAddress string) RestAPI {
 	return &restAPIImpl{controller: controller, serverAddress: serverAddress}
 }
 
 type restAPIImpl struct {
-	controller    cont.ExtensionController
+	controller    cont.TransactionController
 	serverAddress string
 	server        *http.Server
 	stopped       *bool

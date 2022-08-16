@@ -27,7 +27,11 @@ func (mock *mockControllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extensi
 }
 func (mock *mockControllerImpl) GetAllInstallations(tx *sql.Tx) ([]*extensionAPI.JsExtInstallation, error) {
 	args := mock.Called(tx)
-	return args.Get(0).([]*extensionAPI.JsExtInstallation), args.Error(1)
+	if result, ok := args.Get(0).([]*extensionAPI.JsExtInstallation); ok {
+		return result, args.Error(1)
+	} else {
+		return nil, args.Error(1)
+	}
 }
 func (mock *mockControllerImpl) InstallExtension(tx *sql.Tx, extensionId string, extensionVersion string) error {
 	args := mock.Called(tx, extensionId, extensionVersion)
@@ -61,7 +65,7 @@ func (mock *mockBucketFs) ListFiles(ctx context.Context, db *sql.DB, bucket stri
 
 type extCtrlUnitTestSuite struct {
 	suite.Suite
-	ctrl     ExtensionController
+	ctrl     TransactionController
 	db       *sql.DB
 	dbMock   sqlmock.Sqlmock
 	mockCtrl mockControllerImpl
@@ -75,13 +79,20 @@ func TestExtensionControllerUnitTestSuite(t *testing.T) {
 func (suite *extCtrlUnitTestSuite) SetupTest() {
 	suite.mockCtrl = mockControllerImpl{}
 	suite.mockBfs = mockBucketFs{}
-	suite.ctrl = &extensionControllerImpl{impl: &suite.mockCtrl, bfsAPI: &suite.mockBfs}
-	db, mock, err := sqlmock.New()
+	suite.ctrl = &transactionControllerImpl{controller: &suite.mockCtrl, bucketFs: &suite.mockBfs}
+	db, dbMock, err := sqlmock.New()
 	if err != nil {
 		suite.Failf("error '%v' was not expected when opening a stub database connection", err.Error())
 	}
+	dbMock.MatchExpectationsInOrder(true)
 	suite.db = db
-	suite.dbMock = mock
+	suite.dbMock = dbMock
+}
+
+func (suite *extCtrlUnitTestSuite) AfterTest(suiteName, testName string) {
+	if err := suite.dbMock.ExpectationsWereMet(); err != nil {
+		suite.Failf("there were unfulfilled expectations: %v", err.Error())
+	}
 }
 
 func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_Success() {
@@ -105,6 +116,25 @@ func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_GetFails() {
 	extensions, err := suite.ctrl.GetAllExtensions(mockContext(), suite.db)
 	suite.EqualError(err, "mock")
 	suite.Nil(extensions)
+}
+
+func (suite *extCtrlUnitTestSuite) TestGetAllInstallations_Success() {
+	suite.dbMock.ExpectBegin()
+	mockResult := []*extensionAPI.JsExtInstallation{{Name: "ext"}}
+	suite.mockCtrl.On("GetAllInstallations", mock.Anything).Return(mockResult, nil)
+	suite.dbMock.ExpectRollback()
+	installations, err := suite.ctrl.GetAllInstallations(mockContext(), suite.db)
+	suite.NoError(err)
+	suite.Equal(mockResult, installations)
+}
+
+func (suite *extCtrlUnitTestSuite) TestGetAllInstallations_Failure() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("GetAllInstallations", mock.Anything).Return(nil, fmt.Errorf("mock"))
+	suite.dbMock.ExpectRollback()
+	installations, err := suite.ctrl.GetAllInstallations(mockContext(), suite.db)
+	suite.EqualError(err, "mock")
+	suite.Nil(installations)
 }
 
 func (suite *extCtrlUnitTestSuite) TestInstallExtension_Success() {

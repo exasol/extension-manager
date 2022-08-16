@@ -9,7 +9,7 @@ import (
 	"github.com/exasol/extension-manager/extensionAPI"
 )
 
-// ExtensionController is the core part of the extension-manager that provides the extension handling functionality.
+// controller is the core part of the extension-manager that provides the extension handling functionality.
 type controller interface {
 	// GetAllExtensions reports all extension definitions.
 	GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, error)
@@ -27,12 +27,12 @@ type controller interface {
 }
 
 type controllerImpl struct {
-	pathToExtensionFolder string
-	extensionSchemaName   string
+	extensionFolder string
+	schema          string
 }
 
-func createImpl(pathToExtensionFolder string, extensionSchemaName string) controller {
-	return &controllerImpl{pathToExtensionFolder: pathToExtensionFolder, extensionSchemaName: extensionSchemaName}
+func createImpl(extensionFolder string, schema string) controller {
+	return &controllerImpl{extensionFolder: extensionFolder, schema: schema}
 }
 
 func (c *controllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, error) {
@@ -62,7 +62,7 @@ func (c *controllerImpl) requiredFilesAvailable(extension *extensionAPI.JsExtens
 
 func (c *controllerImpl) getAllExtensions() ([]*extensionAPI.JsExtension, error) {
 	var extensions []*extensionAPI.JsExtension
-	extensionPaths := FindJSFilesInDir(c.pathToExtensionFolder)
+	extensionPaths := FindJSFilesInDir(c.extensionFolder)
 	for _, path := range extensionPaths {
 		extension, err := c.loadExtensionFromFile(path)
 		if err == nil {
@@ -75,7 +75,7 @@ func (c *controllerImpl) getAllExtensions() ([]*extensionAPI.JsExtension, error)
 }
 
 func (c *controllerImpl) loadExtensionById(id string) (*extensionAPI.JsExtension, error) {
-	extensionPath := path.Join(c.pathToExtensionFolder, id)
+	extensionPath := path.Join(c.extensionFolder, id)
 	return c.loadExtensionFromFile(extensionPath)
 }
 
@@ -88,7 +88,7 @@ func (c *controllerImpl) loadExtensionFromFile(extensionPath string) (*extension
 }
 
 func (c *controllerImpl) GetAllInstallations(tx *sql.Tx) ([]*extensionAPI.JsExtInstallation, error) {
-	metadata, err := extensionAPI.ReadMetadataTables(tx, c.extensionSchemaName)
+	metadata, err := extensionAPI.ReadMetadataTables(tx, c.schema)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
@@ -157,7 +157,7 @@ func (c *controllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensio
 }
 
 func (c *controllerImpl) findInstallationByVersion(tx *sql.Tx, context *extensionAPI.ExtensionContext, extension *extensionAPI.JsExtension, version string) (*extensionAPI.JsExtInstallation, error) {
-	metadata, err := extensionAPI.ReadMetadataTables(tx, c.extensionSchemaName)
+	metadata, err := extensionAPI.ReadMetadataTables(tx, c.schema)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
@@ -177,11 +177,11 @@ func (c *controllerImpl) findInstallationByVersion(tx *sql.Tx, context *extensio
 }
 
 func (c *controllerImpl) createExtensionContext(tx *sql.Tx) *extensionAPI.ExtensionContext {
-	return extensionAPI.CreateContext(c.extensionSchemaName, tx)
+	return extensionAPI.CreateContext(c.schema, tx)
 }
 
 func (c *controllerImpl) ensureSchemaExists(tx *sql.Tx) error {
-	_, err := tx.Exec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"`, c.extensionSchemaName))
+	_, err := tx.Exec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"`, c.schema))
 	if err != nil {
 		return fmt.Errorf("failed to create schema: %w", err)
 	}
