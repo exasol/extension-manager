@@ -316,7 +316,7 @@ func closeDbConnection(db *sql.DB) {
 }
 
 func (api *restAPIImpl) openDBConnection(c *gin.Context) (*sql.DB, error) {
-	config, err := getDbConfig(c)
+	config, err := createDbConfig(c)
 	if err != nil {
 		return nil, err
 	}
@@ -329,30 +329,54 @@ func (api *restAPIImpl) openDBConnection(c *gin.Context) (*sql.DB, error) {
 	return database, nil
 }
 
-func getDbConfig(c *gin.Context) (*exasol.DSNConfigBuilder, error) {
+func createDbConfig(c *gin.Context) (*exasol.DSNConfigBuilder, error) {
 	query := c.Request.URL.Query()
-	host := query.Get("dbHost")
-	if host == "" {
-		return nil, fmt.Errorf("missing parameter dbHost")
-	}
-	portString := query.Get("dbPort")
-	if portString == "" {
-		return nil, fmt.Errorf("missing parameter dbPort")
-	}
-	port, err := strconv.Atoi(portString)
+	config, err := createDbConfigWithAuthentication(c)
 	if err != nil {
-		return nil, fmt.Errorf("invalid value %q for parameter dbPort", portString)
+		return nil, err
 	}
+
+	if host := query.Get("dbHost"); host == "" {
+		return nil, fmt.Errorf("missing parameter dbHost")
+	} else {
+		config.Host(host)
+	}
+
+	if portString := query.Get("dbPort"); portString == "" {
+		return nil, fmt.Errorf("missing parameter dbPort")
+	} else {
+		if port, err := strconv.Atoi(portString); err != nil {
+			return nil, fmt.Errorf("invalid value %q for parameter dbPort", portString)
+		} else {
+			config.Port(port)
+		}
+	}
+	return config, nil
+}
+
+func createDbConfigWithAuthentication(c *gin.Context) (*exasol.DSNConfigBuilder, error) {
+	query := c.Request.URL.Query()
+	accessToken := query.Get("accessToken")
+	if accessToken != "" {
+		return exasol.NewConfigWithAccessToken(accessToken), nil
+	}
+
+	refreshToken := query.Get("refreshToken")
+	if refreshToken != "" {
+		return exasol.NewConfigWithRefreshToken(refreshToken), nil
+	}
+
 	user := query.Get("dbUser")
 	if user == "" {
 		return nil, fmt.Errorf("missing parameter dbUser")
 	}
+
 	password := query.Get("dbPass")
 	if password == "" {
 		return nil, fmt.Errorf("missing parameter dbPass")
 	}
-	config := exasol.NewConfig(user, password).Port(port).Host(host)
-	return config, nil
+
+	return exasol.NewConfig(user, password), nil
 }
 
 type InstallationsResponse struct {

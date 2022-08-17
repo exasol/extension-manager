@@ -10,8 +10,9 @@ import (
 
 type IntegrationTestSuite struct {
 	suite.Suite
-	Exasol     *testSetupAbstraction.TestSetupAbstraction
-	Connection *sql.DB
+	Exasol         *testSetupAbstraction.TestSetupAbstraction
+	Connection     *sql.DB
+	ConnectionInfo *testSetupAbstraction.ConnectionInfo
 }
 
 func (suite *IntegrationTestSuite) SetupSuite() {
@@ -24,6 +25,11 @@ func (suite *IntegrationTestSuite) SetupSuite() {
 		suite.FailNowf("failed to create test setup abstraction: %v", err.Error())
 	}
 	suite.Exasol = exasol
+	connectionInfo, err := suite.Exasol.GetConnectionInfo()
+	if err != nil {
+		suite.FailNowf("error getting connection info: %v", err.Error())
+	}
+	suite.ConnectionInfo = connectionInfo
 }
 
 func (suite *IntegrationTestSuite) TearDownSuite() {

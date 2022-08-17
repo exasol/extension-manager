@@ -18,6 +18,7 @@ Code name:
 * #37: Added support for more metadata tables, use a specific schema for extensions
 * #41: Added step to create the `EXA_EXTENSION` schema before installing an extension
 * #45: Added endpoint for installing an extension
+* #54: Added database authentication via tokens
 
 ## Refactoring
 

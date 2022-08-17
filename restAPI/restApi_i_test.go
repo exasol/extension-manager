@@ -49,21 +49,46 @@ func (suite *RestAPIIntegrationTestSuite) TearDownTest() {
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestGetAllExtensionsSuccessfully() {
-	responseString := suite.makeGetRequest("/extensions?" + suite.getDbArgs())
-	suite.assertJSON.Assertf(responseString, `{"extensions":[]}`)
+	response := suite.makeGetRequest("/extensions?" + suite.getValidDbArgs())
+	suite.assertJSON.Assertf(response, `{"extensions":[]}`)
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsSuccessfully() {
-	responseString := suite.makeGetRequest("/installations?" + suite.getDbArgs())
-	suite.assertJSON.Assertf(responseString, `{"installations":[]}`)
+	response := suite.makeGetRequest("/installations?" + suite.getValidDbArgs())
+	suite.assertJSON.Assertf(response, `{"installations":[]}`)
 }
 
-func (suite *RestAPIIntegrationTestSuite) getDbArgs() string {
-	info, err := suite.Exasol.GetConnectionInfo()
-	if err != nil {
-		suite.FailNowf("error getting connection info: %v", err.Error())
+func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsFails_InvalidCredentials() {
+	var tests = []struct{ parameters string }{
+		{parameters: suite.getDbArgsWithUserPassword("invalidUser", "password")},
+		{parameters: suite.getDbArgsWithAccessToken("invalidAccessToken")},
+		{parameters: suite.getDbArgsWithRefreshToken("invalidRefreshToken")}}
+	for _, test := range tests {
+		suite.Run(test.parameters, func() {
+			response := suite.makeRequest("GET", "/installations?"+test.parameters, "", 500)
+			suite.Regexp("Request failed: E-EGOD-11: execution failed with SQL error code '08004' and message 'Connection exception - authentication failed.*", response)
+		})
 	}
-	return fmt.Sprintf("dbHost=%s&dbPort=%d&dbUser=%s&dbPass=%s", info.Host, info.Port, info.User, info.Password)
+}
+
+func (suite *RestAPIIntegrationTestSuite) getValidDbArgs() string {
+	info := suite.ConnectionInfo
+	return suite.getDbArgsWithUserPassword(info.User, info.Password)
+}
+
+func (suite *RestAPIIntegrationTestSuite) getDbArgsWithUserPassword(user string, password string) string {
+	info := suite.ConnectionInfo
+	return fmt.Sprintf("dbHost=%s&dbPort=%d&dbUser=%s&dbPass=%s", info.Host, info.Port, user, password)
+}
+
+func (suite *RestAPIIntegrationTestSuite) getDbArgsWithAccessToken(accessToken string) string {
+	info := suite.ConnectionInfo
+	return fmt.Sprintf("dbHost=%s&dbPort=%d&accessToken=%s", info.Host, info.Port, accessToken)
+}
+
+func (suite *RestAPIIntegrationTestSuite) getDbArgsWithRefreshToken(refreshToken string) string {
+	info := suite.ConnectionInfo
+	return fmt.Sprintf("dbHost=%s&dbPort=%d&refreshToken=%s", info.Host, info.Port, refreshToken)
 }
 
 func (suite *RestAPIIntegrationTestSuite) makeGetRequest(path string) string {
