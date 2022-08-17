@@ -78,17 +78,17 @@ func (suite *RestAPIIntegrationTestSuite) getValidDbArgs() string {
 
 func (suite *RestAPIIntegrationTestSuite) getDbArgsWithUserPassword(user string, password string) string {
 	info := suite.ConnectionInfo
-	return fmt.Sprintf("dbHost=%s&dbPort=%d&dbUser=%s&dbPass=%s", info.Host, info.Port, user, password)
+	return fmt.Sprintf("dbHost=%s&dbPort=%d&dbUser=%s&dbPassword=%s", info.Host, info.Port, user, password)
 }
 
 func (suite *RestAPIIntegrationTestSuite) getDbArgsWithAccessToken(accessToken string) string {
 	info := suite.ConnectionInfo
-	return fmt.Sprintf("dbHost=%s&dbPort=%d&accessToken=%s", info.Host, info.Port, accessToken)
+	return fmt.Sprintf("dbHost=%s&dbPort=%d&dbAccessToken=%s", info.Host, info.Port, accessToken)
 }
 
 func (suite *RestAPIIntegrationTestSuite) getDbArgsWithRefreshToken(refreshToken string) string {
 	info := suite.ConnectionInfo
-	return fmt.Sprintf("dbHost=%s&dbPort=%d&refreshToken=%s", info.Host, info.Port, refreshToken)
+	return fmt.Sprintf("dbHost=%s&dbPort=%d&dbRefreshToken=%s", info.Host, info.Port, refreshToken)
 }
 
 func (suite *RestAPIIntegrationTestSuite) makeGetRequest(path string) string {

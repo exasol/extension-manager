@@ -31,12 +31,15 @@ const docTemplate = `{
     "paths": {
         "/extensions": {
             "get": {
-                "description": "Get a list of all available extensions.",
+                "description": "Get a list of all available extensions, i.e. extensions that can be installed.",
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "extensions"
+                ],
                 "summary": "Get all extensions",
-                "operationId": "getExtensions",
+                "operationId": "getAvailableExtensions",
                 "parameters": [
                     {
                         "type": "string",
@@ -56,15 +59,25 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Username of the Exasol DB to manage",
                         "name": "dbUser",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "string",
                         "description": "Password of the Exasol DB to manage",
-                        "name": "dbPass",
-                        "in": "query",
-                        "required": true
+                        "name": "dbPassword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Access token of the Exasol DB to manage",
+                        "name": "dbAccessToken",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Refresh token of the Exasol DB to manage",
+                        "name": "dbRefreshToken",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -85,12 +98,15 @@ const docTemplate = `{
         },
         "/installations": {
             "get": {
-                "description": "Get a list of all installations. Installation means, that an extension is installed in the database (e.g. JAR files added to BucketFS, Adapter Script created).",
+                "description": "Get a list of all installed extensions. Installation means, that an extension is installed in the database (e.g. JAR files added to BucketFS and Adapter Script created).",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Get all installations.",
-                "operationId": "getInstallations",
+                "tags": [
+                    "extensions"
+                ],
+                "summary": "Get all installed extensions.",
+                "operationId": "getInstalledExtensions",
                 "parameters": [
                     {
                         "type": "string",
@@ -110,15 +126,25 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Username of the Exasol DB to manage",
                         "name": "dbUser",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "string",
                         "description": "Password of the Exasol DB to manage",
-                        "name": "dbPass",
-                        "in": "query",
-                        "required": true
+                        "name": "dbPassword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Access token of the Exasol DB to manage",
+                        "name": "dbAccessToken",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Refresh token of the Exasol DB to manage",
+                        "name": "dbRefreshToken",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -137,9 +163,12 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "This installs an extension in a given version.",
+                "description": "This installs an extension in a given version, e.g. by creating Adapter Scripts.",
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "extensions"
                 ],
                 "summary": "Install an extension.",
                 "operationId": "installExtension",
@@ -162,15 +191,25 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Username of the Exasol DB to manage",
                         "name": "dbUser",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "string",
                         "description": "Password of the Exasol DB to manage",
-                        "name": "dbPass",
-                        "in": "query",
-                        "required": true
+                        "name": "dbPassword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Access token of the Exasol DB to manage",
+                        "name": "dbAccessToken",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Refresh token of the Exasol DB to manage",
+                        "name": "dbRefreshToken",
+                        "in": "query"
                     },
                     {
                         "type": "string",
@@ -214,9 +253,12 @@ const docTemplate = `{
         },
         "/instances": {
             "put": {
-                "description": "This creates an instance of an extension, e.g. a virtual schema.",
+                "description": "This creates a new instance of an extension, e.g. a virtual schema.",
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "instances"
                 ],
                 "summary": "Create an instance of an extension.",
                 "operationId": "createInstance",
@@ -239,15 +281,25 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Username of the Exasol DB to manage",
                         "name": "dbUser",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "string",
                         "description": "Password of the Exasol DB to manage",
-                        "name": "dbPass",
-                        "in": "query",
-                        "required": true
+                        "name": "dbPassword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Access token of the Exasol DB to manage",
+                        "name": "dbAccessToken",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Refresh token of the Exasol DB to manage",
+                        "name": "dbRefreshToken",
+                        "in": "query"
                     },
                     {
                         "description": "Request data for creating an instance",
@@ -386,17 +438,27 @@ const docTemplate = `{
                 }
             }
         }
-    }
+    },
+    "tags": [
+        {
+            "description": "List, install and uninstall extensions",
+            "name": "extensions"
+        },
+        {
+            "description": "List, create and remove instances of an extension",
+            "name": "instances"
+        }
+    ]
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "0.1.0",
-	Host:             "",
+	Host:             "localhost:8080",
 	BasePath:         "/",
-	Schemes:          []string{},
+	Schemes:          []string{"http", "https"},
 	Title:            "Exasol extension manager REST API",
-	Description:      "Response data for creating a new instance of an extension.",
+	Description:      "This is a REST API for managing extensions like virtual schemas in an Exasol database.\n\nIt allows you to install a new extension and create multiple instances for it.\n\nAuthentication is done by passing database connection parameters host, port and credentials via URL parameters. Credentials can be either:\n- Username and password (parameters `dbUser` and `dbPassword`)\n- Access token (parameter `dbAccessToken`)\n- Refresh token (parameter `dbRefreshToken`)",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

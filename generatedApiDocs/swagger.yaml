@@ -79,11 +79,20 @@ definitions:
         description: The value of the parameter
         type: string
     type: object
+host: localhost:8080
 info:
   contact:
     email: opensource@exasol.com
     name: Exasol Integration team
-  description: Response data for creating a new instance of an extension.
+  description: |-
+    This is a REST API for managing extensions like virtual schemas in an Exasol database.
+
+    It allows you to install a new extension and create multiple instances for it.
+
+    Authentication is done by passing database connection parameters host, port and credentials via URL parameters. Credentials can be either:
+    - Username and password (parameters `dbUser` and `dbPassword`)
+    - Access token (parameter `dbAccessToken`)
+    - Refresh token (parameter `dbRefreshToken`)
   license:
     name: MIT
     url: https://github.com/exasol/extension-manager/blob/main/LICENSE
@@ -92,8 +101,9 @@ info:
 paths:
   /extensions:
     get:
-      description: Get a list of all available extensions.
-      operationId: getExtensions
+      description: Get a list of all available extensions, i.e. extensions that can
+        be installed.
+      operationId: getAvailableExtensions
       parameters:
       - description: Hostname of the Exasol DB to manage
         in: query
@@ -108,12 +118,18 @@ paths:
       - description: Username of the Exasol DB to manage
         in: query
         name: dbUser
-        required: true
         type: string
       - description: Password of the Exasol DB to manage
         in: query
-        name: dbPass
-        required: true
+        name: dbPassword
+        type: string
+      - description: Access token of the Exasol DB to manage
+        in: query
+        name: dbAccessToken
+        type: string
+      - description: Refresh token of the Exasol DB to manage
+        in: query
+        name: dbRefreshToken
         type: string
       produces:
       - application/json
@@ -127,12 +143,14 @@ paths:
           schema:
             type: string
       summary: Get all extensions
+      tags:
+      - extensions
   /installations:
     get:
-      description: Get a list of all installations. Installation means, that an extension
-        is installed in the database (e.g. JAR files added to BucketFS, Adapter Script
-        created).
-      operationId: getInstallations
+      description: Get a list of all installed extensions. Installation means, that
+        an extension is installed in the database (e.g. JAR files added to BucketFS
+        and Adapter Script created).
+      operationId: getInstalledExtensions
       parameters:
       - description: Hostname of the Exasol DB to manage
         in: query
@@ -147,12 +165,18 @@ paths:
       - description: Username of the Exasol DB to manage
         in: query
         name: dbUser
-        required: true
         type: string
       - description: Password of the Exasol DB to manage
         in: query
-        name: dbPass
-        required: true
+        name: dbPassword
+        type: string
+      - description: Access token of the Exasol DB to manage
+        in: query
+        name: dbAccessToken
+        type: string
+      - description: Refresh token of the Exasol DB to manage
+        in: query
+        name: dbRefreshToken
         type: string
       produces:
       - application/json
@@ -165,9 +189,12 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: Get all installations.
+      summary: Get all installed extensions.
+      tags:
+      - extensions
     put:
-      description: This installs an extension in a given version.
+      description: This installs an extension in a given version, e.g. by creating
+        Adapter Scripts.
       operationId: installExtension
       parameters:
       - description: Hostname of the Exasol DB to manage
@@ -183,12 +210,18 @@ paths:
       - description: Username of the Exasol DB to manage
         in: query
         name: dbUser
-        required: true
         type: string
       - description: Password of the Exasol DB to manage
         in: query
-        name: dbPass
-        required: true
+        name: dbPassword
+        type: string
+      - description: Access token of the Exasol DB to manage
+        in: query
+        name: dbAccessToken
+        type: string
+      - description: Refresh token of the Exasol DB to manage
+        in: query
+        name: dbRefreshToken
         type: string
       - description: ID of the extension to install
         in: query
@@ -218,9 +251,11 @@ paths:
           schema:
             type: string
       summary: Install an extension.
+      tags:
+      - extensions
   /instances:
     put:
-      description: This creates an instance of an extension, e.g. a virtual schema.
+      description: This creates a new instance of an extension, e.g. a virtual schema.
       operationId: createInstance
       parameters:
       - description: Hostname of the Exasol DB to manage
@@ -236,12 +271,18 @@ paths:
       - description: Username of the Exasol DB to manage
         in: query
         name: dbUser
-        required: true
         type: string
       - description: Password of the Exasol DB to manage
         in: query
-        name: dbPass
-        required: true
+        name: dbPassword
+        type: string
+      - description: Access token of the Exasol DB to manage
+        in: query
+        name: dbAccessToken
+        type: string
+      - description: Refresh token of the Exasol DB to manage
+        in: query
+        name: dbRefreshToken
         type: string
       - description: Request data for creating an instance
         in: body
@@ -261,6 +302,16 @@ paths:
           schema:
             type: string
       summary: Create an instance of an extension.
+      tags:
+      - instances
 produces:
 - application/json
+schemes:
+- http
+- https
 swagger: "2.0"
+tags:
+- description: List, install and uninstall extensions
+  name: extensions
+- description: List, create and remove instances of an extension
+  name: instances

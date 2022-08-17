@@ -83,14 +83,14 @@ func (suite *RestAPISuite) TestStopWithoutStartFails() {
 }
 
 func (suite *RestAPISuite) TestInvalidParameterFormat() {
-	responseString := suite.makeRequest("GET", "/extensions?dbHost=host;invalid&dbPort=8563&dbUser=user&dbPass=password", "", 500)
+	responseString := suite.makeRequest("GET", "/extensions?dbHost=host;invalid&dbPort=8563&dbUser=user&dbPassword=password", "", 500)
 	suite.Equal("Request failed: missing parameter dbHost", responseString)
 }
 
 var authSuccessTests = []struct{ parameters string }{
-	{parameters: "dbUser=user&dbPass=password"},
-	{parameters: "accessToken=token"},
-	{parameters: "refreshToken=token"}}
+	{parameters: "dbUser=user&dbPassword=password"},
+	{parameters: "dbAccessToken=token"},
+	{parameters: "dbRefreshToken=token"}}
 
 func (suite *RestAPISuite) TestGetInstallationsSuccessfully() {
 	suite.controller.On("GetAllInstallations", mock.Anything, mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)
@@ -104,7 +104,7 @@ func (suite *RestAPISuite) TestGetInstallationsSuccessfully() {
 
 func (suite *RestAPISuite) TestGetInstallationsFailed() {
 	suite.controller.On("GetAllInstallations", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("mock error"))
-	responseString := suite.makeRequest("GET", "/installations?dbHost=host&dbPort=8563&dbUser=user&dbPass=password", "", 500)
+	responseString := suite.makeRequest("GET", "/installations?dbHost=host&dbPort=8563&dbUser=user&dbPassword=password", "", 500)
 	suite.Equal("Request failed: mock error", responseString)
 }
 
@@ -120,7 +120,7 @@ func (suite *RestAPISuite) TestGetAllExtensionsSuccessfully() {
 
 func (suite *RestAPISuite) TestGetAllExtensionsFails() {
 	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("mock error"))
-	responseString := suite.makeRequest("GET", "/extensions?dbHost=host&dbPort=8563&dbUser=user&dbPass=password", "", 500)
+	responseString := suite.makeRequest("GET", "/extensions?dbHost=host&dbPort=8563&dbUser=user&dbPassword=password", "", 500)
 	suite.Equal("Request failed: mock error", responseString)
 }
 
@@ -136,7 +136,7 @@ func (suite *RestAPISuite) TestInstallExtensionsSuccessfully() {
 
 func (suite *RestAPISuite) TestInstallExtensionsFailed() {
 	suite.controller.On("InstallExtension", mock.Anything, mock.Anything, "ext-id", "ver").Return(fmt.Errorf("mock error"))
-	responseString := suite.makeRequest("PUT", "/installations?extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563&dbUser=user&dbPass=password", "", 500)
+	responseString := suite.makeRequest("PUT", "/installations?extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563&dbUser=user&dbPassword=password", "", 500)
 	suite.Equal("Request failed: error installing extension: mock error", responseString)
 }
 
@@ -153,14 +153,14 @@ func (suite *RestAPISuite) TestCreateInstanceSuccessfully() {
 
 func (suite *RestAPISuite) TestCreateInstanceFailed_invalidPayload() {
 	suite.controller.On("CreateInstance", mock.Anything, mock.Anything, "ext-id", "ver", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return("instanceName", nil)
-	responseString := suite.makeRequest("PUT", "/instances?dbHost=host&dbPort=8563&dbUser=user&dbPass=password",
+	responseString := suite.makeRequest("PUT", "/instances?dbHost=host&dbPort=8563&dbUser=user&dbPassword=password",
 		`invalid payload`, 400)
 	suite.Equal("Request failed: invalid request: invalid character 'i' looking for beginning of value", responseString)
 }
 
 func (suite *RestAPISuite) TestCreateInstanceFailed() {
 	suite.controller.On("CreateInstance", mock.Anything, mock.Anything, "ext-id", "ver", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return("", fmt.Errorf("mock error"))
-	responseString := suite.makeRequest("PUT", "/instances?dbHost=host&dbPort=8563&dbUser=user&dbPass=password",
+	responseString := suite.makeRequest("PUT", "/instances?dbHost=host&dbPort=8563&dbUser=user&dbPassword=password",
 		`{"extensionId": "ext-id", "extensionVersion": "ver", "parameterValues": [{"name":"p1", "value":"v1"}]}`, 500)
 	suite.Equal("Request failed: error installing extension: mock error", responseString)
 }
@@ -172,30 +172,30 @@ func (suite *RestAPISuite) TestRequestsFailForMissingParameters() {
 		parameters    string
 		expectedError string
 	}{
-		{"GET", "/extensions", "dbPort=8563&dbUser=user&dbPass=password", "missing parameter dbHost"},
-		{"GET", "/extensions", "dbHost=host&dbUser=user&dbPass=password", "missing parameter dbPort"},
-		{"GET", "/extensions", "dbHost=host&dbPort=invalidPort&dbUser=user&dbPass=password", "invalid value \"invalidPort\" for parameter dbPort"},
-		{"GET", "/extensions", "dbHost=host&dbPort=8563&dbPass=password", "missing parameter dbUser"},
-		{"GET", "/extensions", "dbHost=host&dbPort=8563&dbUser=user", "missing parameter dbPass"},
+		{"GET", "/extensions", "dbPort=8563&dbUser=user&dbPassword=password", "missing parameter dbHost"},
+		{"GET", "/extensions", "dbHost=host&dbUser=user&dbPassword=password", "missing parameter dbPort"},
+		{"GET", "/extensions", "dbHost=host&dbPort=invalidPort&dbUser=user&dbPassword=password", "invalid value \"invalidPort\" for parameter dbPort"},
+		{"GET", "/extensions", "dbHost=host&dbPort=8563&dbPassword=password", "missing parameter dbUser"},
+		{"GET", "/extensions", "dbHost=host&dbPort=8563&dbUser=user", "missing parameter dbPassword"},
 
-		{"GET", "/installations", "dbPort=8563&dbUser=user&dbPass=password", "missing parameter dbHost"},
-		{"GET", "/installations", "dbHost=host&dbUser=user&dbPass=password", "missing parameter dbPort"},
-		{"GET", "/installations", "dbHost=host&dbPort=invalidPort&dbUser=user&dbPass=password", "invalid value \"invalidPort\" for parameter dbPort"},
-		{"GET", "/installations", "dbHost=host&dbPort=8563&dbPass=password", "missing parameter dbUser"},
-		{"GET", "/installations", "dbHost=host&dbPort=8563&dbUser=user", "missing parameter dbPass"},
+		{"GET", "/installations", "dbPort=8563&dbUser=user&dbPassword=password", "missing parameter dbHost"},
+		{"GET", "/installations", "dbHost=host&dbUser=user&dbPassword=password", "missing parameter dbPort"},
+		{"GET", "/installations", "dbHost=host&dbPort=invalidPort&dbUser=user&dbPassword=password", "invalid value \"invalidPort\" for parameter dbPort"},
+		{"GET", "/installations", "dbHost=host&dbPort=8563&dbPassword=password", "missing parameter dbUser"},
+		{"GET", "/installations", "dbHost=host&dbPort=8563&dbUser=user", "missing parameter dbPassword"},
 
-		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbPort=8563&dbUser=user&dbPass=password", "missing parameter dbHost"},
-		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbHost=host&dbUser=user&dbPass=password", "missing parameter dbPort"},
-		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=invalidPort&dbUser=user&dbPass=password", "invalid value \"invalidPort\" for parameter dbPort"},
-		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563&dbPass=password", "missing parameter dbUser"},
-		{"PUT", "/installations", "extensionId=ext-id&dbHost=host&dbPort=8563&dbUser=user&dbPass=password", "missing parameter extensionVersion"},
-		{"PUT", "/installations", "extensionVersion=ver&dbHost=host&dbPort=8563&dbUser=user&dbPass=password", "missing parameter extensionId"},
+		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbPort=8563&dbUser=user&dbPassword=password", "missing parameter dbHost"},
+		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbHost=host&dbUser=user&dbPassword=password", "missing parameter dbPort"},
+		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=invalidPort&dbUser=user&dbPassword=password", "invalid value \"invalidPort\" for parameter dbPort"},
+		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563&dbPassword=password", "missing parameter dbUser"},
+		{"PUT", "/installations", "extensionId=ext-id&dbHost=host&dbPort=8563&dbUser=user&dbPassword=password", "missing parameter extensionVersion"},
+		{"PUT", "/installations", "extensionVersion=ver&dbHost=host&dbPort=8563&dbUser=user&dbPassword=password", "missing parameter extensionId"},
 
-		{"PUT", "/instances", "dbPort=8563&dbUser=user&dbPass=password", "missing parameter dbHost"},
-		{"PUT", "/instances", "dbHost=host&dbUser=user&dbPass=password", "missing parameter dbPort"},
-		{"PUT", "/instances", "dbHost=host&dbPort=invalidPort&dbUser=user&dbPass=password", "invalid value \"invalidPort\" for parameter dbPort"},
-		{"PUT", "/instances", "dbHost=host&dbPort=8563&dbPass=password", "missing parameter dbUser"},
-		{"PUT", "/instances", "dbHost=host&dbPort=8563&dbUser=user", "missing parameter dbPass"},
+		{"PUT", "/instances", "dbPort=8563&dbUser=user&dbPassword=password", "missing parameter dbHost"},
+		{"PUT", "/instances", "dbHost=host&dbUser=user&dbPassword=password", "missing parameter dbPort"},
+		{"PUT", "/instances", "dbHost=host&dbPort=invalidPort&dbUser=user&dbPassword=password", "invalid value \"invalidPort\" for parameter dbPort"},
+		{"PUT", "/instances", "dbHost=host&dbPort=8563&dbPassword=password", "missing parameter dbUser"},
+		{"PUT", "/instances", "dbHost=host&dbPort=8563&dbUser=user", "missing parameter dbPassword"},
 	}
 	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return([]*extensionController.Extension{{Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
 	suite.controller.On("GetAllInstallations", mock.Anything, mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)

@@ -28,19 +28,24 @@ type RestAPI interface {
 	Stop()
 }
 
-// @title           Exasol extension manager REST API
-// @version         0.1.0
-// @description     This is a REST API for managing extensions in an Exasol database.
+// Description for swagger must be at the end of the file!
 
+// @title          Exasol extension manager REST API
+// @version        0.1.0
 // @contact.name   Exasol Integration team
 // @contact.email  opensource@exasol.com
-
-// @license.name  MIT
-// @license.url   https://github.com/exasol/extension-manager/blob/main/LICENSE
-
+// @license.name   MIT
+// @license.url    https://github.com/exasol/extension-manager/blob/main/LICENSE
+// @host localhost:8080
 // @BasePath  /
-// @accept json
-// @produce json
+// @accept   json
+// @produce  json
+// @query.collection.format csv
+// @schemes http https
+// @tag.name extensions
+// @tag.description List, install and uninstall extensions
+// @tag.name instances
+// @tag.description List, create and remove instances of an extension
 
 // Create creates a new RestAPI.
 func Create(controller cont.TransactionController, serverAddress string) RestAPI {
@@ -108,14 +113,17 @@ func (api *restAPIImpl) Stop() {
 }
 
 // @Summary      Get all extensions
-// @Description  Get a list of all available extensions.
-// @Id           getExtensions
+// @Description  Get a list of all available extensions, i.e. extensions that can be installed.
+// @Id           getAvailableExtensions
+// @tags         extensions
 // @Produce      json
 // @Success      200 {object} ExtensionsResponse
 // @Param        dbHost query string true "Hostname of the Exasol DB to manage"
 // @Param        dbPort query int true "Port number of the Exasol DB to manage"
-// @Param        dbUser query string true "Username of the Exasol DB to manage"
-// @Param        dbPass query string true "Password of the Exasol DB to manage"
+// @Param        dbUser query string false "Username of the Exasol DB to manage"
+// @Param        dbPassword query string false "Password of the Exasol DB to manage"
+// @Param        dbAccessToken query string false "Access token of the Exasol DB to manage"
+// @Param        dbRefreshToken query string false "Refresh token of the Exasol DB to manage"
 // @Failure      500 {object} string
 // @Router       /extensions [get]
 func (api *restAPIImpl) handleGetExtensions(c *gin.Context) {
@@ -157,15 +165,18 @@ type ExtensionsResponseExtension struct {
 	InstallableVersions []string `json:"installableVersions"` // A list of versions of this extension available for installation.
 }
 
-// @Summary      Get all installations.
-// @Description  Get a list of all installations. Installation means, that an extension is installed in the database (e.g. JAR files added to BucketFS, Adapter Script created).
-// @Id           getInstallations
+// @Summary      Get all installed extensions.
+// @Description  Get a list of all installed extensions. Installation means, that an extension is installed in the database (e.g. JAR files added to BucketFS and Adapter Script created).
+// @Id           getInstalledExtensions
+// @tags         extensions
 // @Produce      json
 // @Success      200 {object} InstallationsResponse
 // @Param        dbHost query string true "Hostname of the Exasol DB to manage"
 // @Param        dbPort query int true "Port number of the Exasol DB to manage"
-// @Param        dbUser query string true "Username of the Exasol DB to manage"
-// @Param        dbPass query string true "Password of the Exasol DB to manage"
+// @Param        dbUser query string false "Username of the Exasol DB to manage"
+// @Param        dbPassword query string false "Password of the Exasol DB to manage"
+// @Param        dbAccessToken query string false "Access token of the Exasol DB to manage"
+// @Param        dbRefreshToken query string false "Refresh token of the Exasol DB to manage"
 // @Failure      500 {object} string
 // @Router       /installations [get]
 func (api *restAPIImpl) handleGetInstallations(c *gin.Context) {
@@ -194,14 +205,17 @@ func (api *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResponse
 }
 
 // @Summary      Install an extension.
-// @Description  This installs an extension in a given version.
+// @Description  This installs an extension in a given version, e.g. by creating Adapter Scripts.
 // @Id           installExtension
+// @tags         extensions
 // @Produce      json
 // @Success      200 {object} string
 // @Param        dbHost query string true "Hostname of the Exasol DB to manage"
 // @Param        dbPort query int true "Port number of the Exasol DB to manage"
-// @Param        dbUser query string true "Username of the Exasol DB to manage"
-// @Param        dbPass query string true "Password of the Exasol DB to manage"
+// @Param        dbUser query string false "Username of the Exasol DB to manage"
+// @Param        dbPassword query string false "Password of the Exasol DB to manage"
+// @Param        dbAccessToken query string false "Access token of the Exasol DB to manage"
+// @Param        dbRefreshToken query string false "Refresh token of the Exasol DB to manage"
 // @Param        extensionId query string true "ID of the extension to install"
 // @Param        extensionVersion query string true "Version of the extension to install"
 // @Param        dummy body string false "dummy body" default()
@@ -236,15 +250,19 @@ func (api *restAPIImpl) installExtension(c *gin.Context) (string, error) {
 	return "", nil
 }
 
+// handlePutInstance creates a new instance.
 // @Summary      Create an instance of an extension.
-// @Description  This creates an instance of an extension, e.g. a virtual schema.
+// @Description  This creates a new instance of an extension, e.g. a virtual schema.
 // @Id           createInstance
+// @tags         instances
 // @Produce      json
 // @Success      200 {object} CreateInstanceResponse
 // @Param        dbHost query string true "Hostname of the Exasol DB to manage"
 // @Param        dbPort query int true "Port number of the Exasol DB to manage"
-// @Param        dbUser query string true "Username of the Exasol DB to manage"
-// @Param        dbPass query string true "Password of the Exasol DB to manage"
+// @Param        dbUser query string false "Username of the Exasol DB to manage"
+// @Param        dbPassword query string false "Password of the Exasol DB to manage"
+// @Param        dbAccessToken query string false "Access token of the Exasol DB to manage"
+// @Param        dbRefreshToken query string false "Refresh token of the Exasol DB to manage"
 // @Param        createInstanceRequest body CreateInstanceRequest true "Request data for creating an instance"
 // @Failure      500 {object} string
 // @Router       /instances [put]
@@ -356,12 +374,12 @@ func createDbConfig(c *gin.Context) (*exasol.DSNConfigBuilder, error) {
 
 func createDbConfigWithAuthentication(c *gin.Context) (*exasol.DSNConfigBuilder, error) {
 	query := c.Request.URL.Query()
-	accessToken := query.Get("accessToken")
+	accessToken := query.Get("dbAccessToken")
 	if accessToken != "" {
 		return exasol.NewConfigWithAccessToken(accessToken), nil
 	}
 
-	refreshToken := query.Get("refreshToken")
+	refreshToken := query.Get("dbRefreshToken")
 	if refreshToken != "" {
 		return exasol.NewConfigWithRefreshToken(refreshToken), nil
 	}
@@ -371,9 +389,9 @@ func createDbConfigWithAuthentication(c *gin.Context) (*exasol.DSNConfigBuilder,
 		return nil, fmt.Errorf("missing parameter dbUser")
 	}
 
-	password := query.Get("dbPass")
+	password := query.Get("dbPassword")
 	if password == "" {
-		return nil, fmt.Errorf("missing parameter dbPass")
+		return nil, fmt.Errorf("missing parameter dbPassword")
 	}
 
 	return exasol.NewConfig(user, password), nil
@@ -388,3 +406,14 @@ type InstallationsResponseInstallation struct {
 	Version            string        `json:"version"`
 	InstanceParameters []interface{} `json:"instanceParameters"`
 }
+
+// General API documentation must be at the end of the file
+
+// @description This is a REST API for managing extensions like virtual schemas in an Exasol database.
+// @description
+// @description It allows you to install a new extension and create multiple instances for it.
+// @description
+// @description Authentication is done by passing database connection parameters host, port and credentials via URL parameters. Credentials can be either:
+// @description - Username and password (parameters `dbUser` and `dbPassword`)
+// @description - Access token (parameter `dbAccessToken`)
+// @description - Refresh token (parameter `dbRefreshToken`)
