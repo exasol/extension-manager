@@ -3,5 +3,5 @@ sources:
     path: go.mod
 version: 0.1.0
 linkReplacements:
-  - "https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.2.2/go-client/LICENSE|https://github.com/exasol/exasol-test-setup-abstraction-server/blob/main/LICENSE"
+  - "https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.2.3/go-client/LICENSE|https://github.com/exasol/exasol-test-setup-abstraction-server/blob/main/LICENSE"
   - "Unknown|https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE"
