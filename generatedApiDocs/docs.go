@@ -36,7 +36,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "extensions"
+                    "extension"
                 ],
                 "summary": "Get all extensions",
                 "operationId": "getAvailableExtensions",
@@ -103,7 +103,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "extensions"
+                    "extension"
                 ],
                 "summary": "Get all installed extensions.",
                 "operationId": "getInstalledExtensions",
@@ -168,7 +168,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "extensions"
+                    "extension"
                 ],
                 "summary": "Install an extension.",
                 "operationId": "installExtension",
@@ -258,7 +258,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "instances"
+                    "instance"
                 ],
                 "summary": "Create an instance of an extension.",
                 "operationId": "createInstance",
@@ -442,11 +442,11 @@ const docTemplate = `{
     "tags": [
         {
             "description": "List, install and uninstall extensions",
-            "name": "extensions"
+            "name": "extension"
         },
         {
             "description": "List, create and remove instances of an extension",
-            "name": "instances"
+            "name": "instance"
         }
     ]
 }`

@@ -144,7 +144,7 @@ paths:
             type: string
       summary: Get all extensions
       tags:
-      - extensions
+      - extension
   /installations:
     get:
       description: Get a list of all installed extensions. Installation means, that
@@ -191,7 +191,7 @@ paths:
             type: string
       summary: Get all installed extensions.
       tags:
-      - extensions
+      - extension
     put:
       description: This installs an extension in a given version, e.g. by creating
         Adapter Scripts.
@@ -252,7 +252,7 @@ paths:
             type: string
       summary: Install an extension.
       tags:
-      - extensions
+      - extension
   /instances:
     put:
       description: This creates a new instance of an extension, e.g. a virtual schema.
@@ -303,7 +303,7 @@ paths:
             type: string
       summary: Create an instance of an extension.
       tags:
-      - instances
+      - instance
 produces:
 - application/json
 schemes:
@@ -312,6 +312,6 @@ schemes:
 swagger: "2.0"
 tags:
 - description: List, install and uninstall extensions
-  name: extensions
+  name: extension
 - description: List, create and remove instances of an extension
-  name: instances
+  name: instance

@@ -42,9 +42,9 @@ type RestAPI interface {
 // @produce  json
 // @query.collection.format csv
 // @schemes http https
-// @tag.name extensions
+// @tag.name extension
 // @tag.description List, install and uninstall extensions
-// @tag.name instances
+// @tag.name instance
 // @tag.description List, create and remove instances of an extension
 
 // Create creates a new RestAPI.
@@ -115,7 +115,7 @@ func (api *restAPIImpl) Stop() {
 // @Summary      Get all extensions
 // @Description  Get a list of all available extensions, i.e. extensions that can be installed.
 // @Id           getAvailableExtensions
-// @tags         extensions
+// @tags         extension
 // @Produce      json
 // @Success      200 {object} ExtensionsResponse
 // @Param        dbHost query string true "Hostname of the Exasol DB to manage"
@@ -168,7 +168,7 @@ type ExtensionsResponseExtension struct {
 // @Summary      Get all installed extensions.
 // @Description  Get a list of all installed extensions. Installation means, that an extension is installed in the database (e.g. JAR files added to BucketFS and Adapter Script created).
 // @Id           getInstalledExtensions
-// @tags         extensions
+// @tags         extension
 // @Produce      json
 // @Success      200 {object} InstallationsResponse
 // @Param        dbHost query string true "Hostname of the Exasol DB to manage"
@@ -207,7 +207,7 @@ func (api *restAPIImpl) getInstallations(c *gin.Context) (*InstallationsResponse
 // @Summary      Install an extension.
 // @Description  This installs an extension in a given version, e.g. by creating Adapter Scripts.
 // @Id           installExtension
-// @tags         extensions
+// @tags         extension
 // @Produce      json
 // @Success      200 {object} string
 // @Param        dbHost query string true "Hostname of the Exasol DB to manage"
@@ -254,7 +254,7 @@ func (api *restAPIImpl) installExtension(c *gin.Context) (string, error) {
 // @Summary      Create an instance of an extension.
 // @Description  This creates a new instance of an extension, e.g. a virtual schema.
 // @Id           createInstance
-// @tags         instances
+// @tags         instance
 // @Produce      json
 // @Success      200 {object} CreateInstanceResponse
 // @Param        dbHost query string true "Hostname of the Exasol DB to manage"
