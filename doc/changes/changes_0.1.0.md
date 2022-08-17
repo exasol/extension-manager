@@ -38,16 +38,16 @@ Code name:
 
 ### Compile Dependency Updates
 
-* Added `golang:1.17`
+* Added `golang:1.19`
 * Added `github.com/gin-gonic/gin:v1.8.1`
-* Added `github.com/swaggo/swag:v1.8.3`
+* Added `github.com/swaggo/swag:v1.8.4`
 * Added `github.com/stretchr/testify:v1.8.0`
-* Added `github.com/dop251/goja:v0.0.0-20220705101429-189bfeb9f530`
-* Added `github.com/swaggo/files:v0.0.0-20220610200504-28940afbdbfe`
-* Added `github.com/dop251/goja_nodejs:v0.0.0-20220712185256-8cad205bf387`
-* Added `github.com/swaggo/gin-swagger:v1.5.1`
-* Added `github.com/exasol/exasol-driver-go:v0.4.3`
-* Added `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.2.2`
+* Added `github.com/dop251/goja:v0.0.0-20220815083517-0c74f9139fd6`
+* Added `github.com/swaggo/files:v0.0.0-20220728132757-551d4a08d97a`
+* Added `github.com/dop251/goja_nodejs:v0.0.0-20220808115320-bac29516aae9`
+* Added `github.com/swaggo/gin-swagger:v1.5.2`
+* Added `github.com/exasol/exasol-driver-go:v0.4.5`
+* Added `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.2.3`
 
 ### Test Dependency Updates
 

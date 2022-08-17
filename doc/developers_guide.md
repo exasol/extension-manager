@@ -91,12 +91,12 @@ golangci-lint run
 
 ## Generate API Documentation
 
-The develoeprs generate Swagger API documentation and check it in at
+The developers generate Swagger API documentation and check it in at
 [generatedApiDocs/](../generatedApiDocs/). To update the documentation
 first install the `swag` command:
 
 ```shell
-go install github.com/swaggo/swag/cmd/swag@v1.8.3
+go install github.com/swaggo/swag/cmd/swag@v1.8.4
 ```
 
 Make sure to use the same version as specified in
