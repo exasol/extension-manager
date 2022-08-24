@@ -58,6 +58,7 @@ jobs:
       - name: Build
         run: |
           go build ./...
+          go build -o extension-manager cmd/main.go
 
       - name: Unit tests
         run: |
