@@ -14,11 +14,20 @@ require (
 	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.2.3
 	github.com/go-chi/chi/v5 v5.0.4
 	github.com/kinbiko/jsonassert v1.1.0
+	github.com/swaggo/http-swagger v1.3.3
 )
 
 require (
+	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/getkin/kin-openapi v0.75.0 // indirect
+	github.com/go-openapi/jsonpointer v0.19.5 // indirect
+	github.com/go-openapi/jsonreference v0.20.0 // indirect
+	github.com/go-openapi/spec v0.20.6 // indirect
 	github.com/iancoleman/orderedmap v0.2.0 // indirect
+	github.com/josharian/intern v1.0.0 // indirect
+	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/swaggo/swag v1.8.1 // indirect
+	golang.org/x/tools v0.1.10 // indirect
 )
 
 require (
@@ -36,6 +45,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/objx v0.4.0 // indirect
+	github.com/swaggo/files v0.0.0-20220728132757-551d4a08d97a // indirect
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
 	golang.org/x/net v0.0.0-20220812174116-3211cb980234 // indirect
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect

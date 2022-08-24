@@ -9,6 +9,18 @@ go generate ./...
 go build -o extension-manager cmd/main.go
 ```
 
+Tu run the extension manager, execute
+
+```shell
+go run cmd/main.go
+```
+
+You can get the OpenApi definition by executing
+
+```shell
+curl "http://localhost:8080/openapi.json" -o extension-manager-api.json
+```
+
 ## Testing
 
 The different components of the project are responsible for testing different
@@ -82,9 +94,7 @@ go test -short ./...
 
 ## Linter
 
-To install golangci-lint on your machine, follow [these
-instruction](https://golangci-lint.run/usage/install/#local-installation). Then
-run
+To install golangci-lint on your machine, follow [these instruction](https://golangci-lint.run/usage/install/#local-installation). Then run
 
 ```shell
 golangci-lint run
@@ -92,11 +102,6 @@ golangci-lint run
 
 ## Using a Local Extension Interface
 
-To use a local, non-published version of the extension interface in
-integration tests, edit
-[integrationTesting/extensionForTesting/package.json](../integrationTesting/extensionForTesting/package.json)
-and replace the version of `"@exasol/extension-manager-interface"` with the
-path to your local clone of
-[extension-manager-interface](https://github.com/exasol/extension-manager-interface).
+To use a local, non-published version of the extension interface in integration tests, edit [integrationTesting/extensionForTesting/package.json](../integrationTesting/extensionForTesting/package.json) and replace the version of `"@exasol/extension-manager-interface"` with the path to your local clone of [extension-manager-interface](https://github.com/exasol/extension-manager-interface).
 
 Make sure to not commit the modified `package.json`.

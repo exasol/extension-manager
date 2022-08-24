@@ -11,6 +11,8 @@ import (
 	"github.com/exasol/extension-manager/extensionController"
 	"github.com/exasol/extension-manager/restAPI/core"
 
+	httpswagger "github.com/swaggo/http-swagger"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	log "github.com/sirupsen/logrus"
@@ -28,6 +30,17 @@ func setupStandaloneAPI(controller extensionController.TransactionController) (h
 		return nil, nil, err
 	}
 
+	openApiHandler, err := api.OpenAPIHandlerFunc()
+	if err != nil {
+		return nil, nil, err
+	}
+	r.Group(func(r chi.Router) {
+		r.MethodFunc(http.MethodGet, "/openapi.json", openApiHandler)
+		r.Method("GET", "/openapi/*", httpswagger.Handler(
+			httpswagger.URL("/openapi.json"),
+		))
+	})
+
 	r.Group(func(r chi.Router) {
 		for _, handleConfig := range api.GetHandleFunc() {
 			log.Printf("Add func %s %s", handleConfig.Method, handleConfig.Path)
@@ -41,7 +54,7 @@ func setupStandaloneAPI(controller extensionController.TransactionController) (h
 func createOpenApi() *openapi.API {
 	api := openapi.NewOpenAPI()
 	api.Title = "Exasol Extension Manager REST-API"
-	api.Description = "..."
+	api.Description = "Managed extensions and instances of extensions"
 	api.Version = "1.0"
 
 	api.DefaultResponse(&openapi.MethodResponse{

@@ -38,8 +38,9 @@ func (suite *RestAPIIntegrationTestSuite) SetupSuite() {
 
 func (suite *RestAPIIntegrationTestSuite) SetupTest() {
 	ctrl := extensionController.Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	suite.restAPI = Create(ctrl, "localhost:8081")
-	suite.baseUrl = "http://localhost:8081/api/v1"
+	hostAndPort := "localhost:8081"
+	suite.restAPI = Create(ctrl, hostAndPort)
+	suite.baseUrl = fmt.Sprintf("http://%s", hostAndPort)
 	go suite.restAPI.Serve()
 	time.Sleep(10 * time.Millisecond) // give the server some time to become ready
 }
@@ -49,12 +50,12 @@ func (suite *RestAPIIntegrationTestSuite) TearDownTest() {
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestGetAllExtensionsSuccessfully() {
-	response := suite.makeGetRequest("/extensions?" + suite.getValidDbArgs())
+	response := suite.makeGetRequest("/api/v1/extensions?" + suite.getValidDbArgs())
 	suite.assertJSON.Assertf(response, `{"extensions":[]}`)
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsSuccessfully() {
-	response := suite.makeGetRequest("/installations?" + suite.getValidDbArgs())
+	response := suite.makeGetRequest("/api/v1/installations?" + suite.getValidDbArgs())
 	suite.assertJSON.Assertf(response, `{"installations":[]}`)
 }
 
@@ -65,10 +66,20 @@ func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsFails_InvalidCrede
 		{parameters: suite.getDbArgsWithRefreshToken("invalidRefreshToken")}}
 	for _, test := range tests {
 		suite.Run(test.parameters, func() {
-			response := suite.makeRequest("GET", "/installations?"+test.parameters, "", 500)
+			response := suite.makeRequest("GET", "/api/v1/installations?"+test.parameters, "", 500)
 			suite.Regexp(`{"code":500,"message":"Internal server error".*`, response)
 		})
 	}
+}
+
+func (suite *RestAPIIntegrationTestSuite) TestGetOpenApiHtml() {
+	response := suite.makeGetRequest("/openapi/index.html")
+	suite.Regexp("\n<!DOCTYPE html>.*", response)
+}
+
+func (suite *RestAPIIntegrationTestSuite) TestGetOpenApiJson() {
+	response := suite.makeGetRequest("/openapi.json")
+	suite.Regexp(".*\"openapi\": \"3\\.0\\.0\",.*", response)
 }
 
 func (suite *RestAPIIntegrationTestSuite) getValidDbArgs() string {
