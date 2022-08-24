@@ -5,7 +5,8 @@
 To build the binary, run
 
 ```shell
-go build -o extension-manager main.go
+go generate ./...
+go build -o extension-manager cmd/main.go
 ```
 
 ## Testing
@@ -88,24 +89,6 @@ run
 ```shell
 golangci-lint run
 ```
-
-## Generate API Documentation
-
-The developers generate Swagger API documentation and check it in at
-[generatedApiDocs/](../generatedApiDocs/). To update the documentation
-first install the `swag` command:
-
-```shell
-go install github.com/swaggo/swag/cmd/swag@v1.8.4
-```
-
-Make sure to use the same version as specified in
-[.github/workflows/ci-build.yml](../.github/workflows/ci-build.yml).
-
-After making changes to the API follow these steps:
-
-1. Run `go generate`
-2. Commit changes in the [generatedApiDocs/](../generatedApiDocs/) directory
 
 ## Using a Local Extension Interface
 

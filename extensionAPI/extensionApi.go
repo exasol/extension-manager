@@ -2,9 +2,10 @@ package extensionAPI
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/console"

@@ -39,7 +39,7 @@ func (suite *RestAPIIntegrationTestSuite) SetupSuite() {
 func (suite *RestAPIIntegrationTestSuite) SetupTest() {
 	ctrl := extensionController.Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
 	suite.restAPI = Create(ctrl, "localhost:8081")
-	suite.baseUrl = "http://localhost:8081"
+	suite.baseUrl = "http://localhost:8081/api/v1"
 	go suite.restAPI.Serve()
 	time.Sleep(10 * time.Millisecond) // give the server some time to become ready
 }
@@ -66,7 +66,7 @@ func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsFails_InvalidCrede
 	for _, test := range tests {
 		suite.Run(test.parameters, func() {
 			response := suite.makeRequest("GET", "/installations?"+test.parameters, "", 500)
-			suite.Regexp("Request failed: E-EGOD-11: execution failed with SQL error code '08004' and message 'Connection exception - authentication failed.*", response)
+			suite.Regexp(`{"code":500,"message":"Internal server error".*`, response)
 		})
 	}
 }

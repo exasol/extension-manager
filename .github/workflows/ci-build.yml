@@ -44,14 +44,13 @@ jobs:
 
       - name: Check generated code
         run: |
-          go install github.com/swaggo/swag/cmd/swag@v1.8.4
-          go generate
+          go generate ./...
           if [[ `git status --porcelain` ]]; then
             echo "Project files did change:\n"
             git --no-pager diff
             exit 1
           fi
-          
+
       - name: golangci-lint
         run: |
           ./ci/install_and_run_golangci-lint.sh

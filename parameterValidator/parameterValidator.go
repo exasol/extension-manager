@@ -10,8 +10,8 @@ import (
 	"github.com/exasol/extension-manager/extensionAPI"
 )
 
-// The parameterValidator.js file is built using go:generate in ../main.go
-//
+//go:generate npm ci
+//go:generate npm run build
 //go:embed parameterValidator.js
 var dependencyValidatorJs string
 

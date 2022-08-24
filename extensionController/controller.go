@@ -3,9 +3,10 @@ package extensionController
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"path"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/exasol/extension-manager/extensionAPI"
 	"github.com/exasol/extension-manager/parameterValidator"

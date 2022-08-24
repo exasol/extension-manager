@@ -2,16 +2,13 @@ package main
 
 import (
 	"flag"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/exasol/extension-manager/restAPI"
 
 	"github.com/exasol/extension-manager/extensionController"
 )
-
-//go:generate swag init -g restAPI/restApi.go -o generatedApiDocs
-//go:generate npm --prefix parameterValidator ci
-//go:generate npm --prefix parameterValidator run build
 
 const EXTENSION_SCHEMA_NAME = "EXA_EXTENSIONS"
 
@@ -19,6 +16,7 @@ func main() {
 	var pathToExtensionFolder = flag.String("pathToExtensionFolder", "../extensionApi/extensionForTesting/", "Path to folder containing extensions as .js files")
 	var serverAddress = flag.String("serverAddress", ":8080", `Server address, e.g. ":8080" (all network interfaces) or "localhost:8080" (only local interface)`)
 	flag.Parse()
+	log.SetLevel(log.DebugLevel)
 	startServer(*pathToExtensionFolder, *serverAddress)
 }
 
