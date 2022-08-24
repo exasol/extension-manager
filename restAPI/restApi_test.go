@@ -207,10 +207,6 @@ func (suite *RestAPISuite) makeGetRequest(path string) string {
 	return suite.makeRequest("GET", path, "", 200)
 }
 
-func (suite *RestAPISuite) makePutRequest(path string, body string) string {
-	return suite.makeRequest("PUT", path, body, 200)
-}
-
 func (suite *RestAPISuite) makeRequest(method string, path string, body string, expectedStatusCode int) string {
 	request, err := http.NewRequest(method, suite.baseUrl+path, strings.NewReader(body))
 	if body != "" {
