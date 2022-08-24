@@ -6,7 +6,6 @@ import (
 	"github.com/Nightapes/go-rest/pkg/openapi"
 	"github.com/exasol/extension-manager/extensionAPI"
 	"github.com/exasol/extension-manager/restAPI/core"
-	"github.com/exasol/extension-manager/restAPI/models"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,8 +17,8 @@ func ListInstalledExtensions(apiContext core.ApiContext) *openapi.Get {
 		Tags:           []string{core.TagExtension},
 		Authentication: map[string][]string{core.BearerAuth: {}},
 		Response: map[string]openapi.MethodResponse{
-			"200": {Description: "List of extensions", Value: models.ExtensionsResponse{
-				Extensions: []models.ExtensionsResponseExtension{{
+			"200": {Description: "List of extensions", Value: ExtensionsResponse{
+				Extensions: []ExtensionsResponseExtension{{
 					Id:                  "s3-vs",
 					Name:                "S3 Virtual Schema",
 					Description:         "...",
@@ -51,14 +50,26 @@ func handleListInstalledExtensions(apiContext core.ApiContext) func(writer http.
 	}
 }
 
-func createResponse(installations []*extensionAPI.JsExtInstallation) models.InstallationsResponse {
-	convertedInstallations := make([]models.InstallationsResponseInstallation, 0, len(installations))
+func createResponse(installations []*extensionAPI.JsExtInstallation) InstallationsResponse {
+	convertedInstallations := make([]InstallationsResponseInstallation, 0, len(installations))
 	for _, installation := range installations {
-		convertedInstallations = append(convertedInstallations, models.InstallationsResponseInstallation{
+		convertedInstallations = append(convertedInstallations, InstallationsResponseInstallation{
 			Name: installation.Name, Version: installation.Version, InstanceParameters: installation.InstanceParameters,
 		})
 	}
-	return models.InstallationsResponse{
+	return InstallationsResponse{
 		Installations: convertedInstallations,
 	}
+}
+
+// InstallationsResponse contains all installed extensions.
+type InstallationsResponse struct {
+	Installations []InstallationsResponseInstallation `json:"installations"`
+}
+
+// InstallationsResponseInstallation contains information about installed extensions.
+type InstallationsResponseInstallation struct {
+	Name               string        `json:"name"`
+	Version            string        `json:"version"`
+	InstanceParameters []interface{} `json:"instanceParameters"`
 }

@@ -17,12 +17,17 @@ func addPublicEndpointsWithController(api *openapi.API, controller extensionCont
 	api.AddTag(core.TagInstance, "Calls to list, create and remove instances of an extension")
 
 	apiContext := core.NewApiContext(controller)
-	err := api.Get(extensions.ListAvailableExtensions(apiContext))
-	if err != nil {
+
+	if err := api.Get(extensions.ListAvailableExtensions(apiContext)); err != nil {
 		return err
 	}
-	err = api.Get(extensions.ListInstalledExtensions(apiContext))
-	if err != nil {
+	if err := api.Get(extensions.ListInstalledExtensions(apiContext)); err != nil {
+		return err
+	}
+	if err := api.Put(extensions.InstallExtension(apiContext)); err != nil {
+		return err
+	}
+	if err := api.Put(extensions.CreateInstance(apiContext)); err != nil {
 		return err
 	}
 	return nil

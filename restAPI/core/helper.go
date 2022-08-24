@@ -3,8 +3,11 @@ package core
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5/middleware"
 	log "github.com/sirupsen/logrus"
@@ -71,6 +74,13 @@ func NewAPIErrorF(status int, format string, a ...interface{}) error {
 	}
 }
 
+func NewAPIError(status int, message string) error {
+	return &APIError{
+		Status:  status,
+		Message: message,
+	}
+}
+
 type ContextKeyAPIID int
 
 const APIIDKey ContextKeyAPIID = 1
@@ -97,4 +107,52 @@ func GetContextValue(ctx context.Context, id interface{}) string {
 		return reqID
 	}
 	return ""
+}
+
+func DecodeJSONBody(writer http.ResponseWriter, request *http.Request, dst interface{}) error {
+	if value := request.Header.Get("Content-Type"); value != "application/json" {
+		return NewAPIError(http.StatusBadRequest, "Content-Type header is not application/json")
+	}
+
+	request.Body = http.MaxBytesReader(writer, request.Body, 1048576)
+
+	dec := json.NewDecoder(request.Body)
+	dec.DisallowUnknownFields()
+
+	err := dec.Decode(&dst)
+	if err != nil {
+		var syntaxError *json.SyntaxError
+		var unmarshalTypeError *json.UnmarshalTypeError
+
+		switch {
+		case errors.As(err, &syntaxError):
+			return NewBadRequestErrorF("Request body contains badly-formed JSON (at position %d)", syntaxError.Offset)
+
+		case errors.Is(err, io.ErrUnexpectedEOF):
+			return NewBadRequestErrorF("Request body contains badly-formed JSON")
+
+		case errors.As(err, &unmarshalTypeError):
+			return NewBadRequestErrorF("Request body contains an invalid value for the %q field (at position %d)", unmarshalTypeError.Field, unmarshalTypeError.Offset)
+
+		case strings.HasPrefix(err.Error(), "json: unknown field "):
+			fieldName := strings.TrimPrefix(err.Error(), "json: unknown field ")
+			return NewBadRequestErrorF("Request body contains unknown field %q", fieldName)
+
+		case errors.Is(err, io.EOF):
+			return NewBadRequestErrorF("Request body must not be empty")
+
+		case err.Error() == "http: request body too large":
+			return NewBadRequestErrorF("Request body must not be larger than 1MB")
+
+		default:
+			return err
+		}
+	}
+
+	err = dec.Decode(&struct{}{})
+	if err != io.EOF {
+		return NewBadRequestErrorF("Request body must only contain a single JSON object")
+	}
+
+	return nil
 }

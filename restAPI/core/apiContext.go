@@ -7,20 +7,20 @@ import (
 	"strconv"
 
 	"github.com/exasol/exasol-driver-go"
-	ctrl "github.com/exasol/extension-manager/extensionController"
+	"github.com/exasol/extension-manager/extensionController"
 )
 
 type ApiContext interface {
 	OpenDBConnection(request *http.Request) (*sql.DB, error)
-	Controller() ctrl.TransactionController
+	Controller() extensionController.TransactionController
 }
 
-func NewApiContext(controller ctrl.TransactionController) ApiContext {
+func NewApiContext(controller extensionController.TransactionController) ApiContext {
 	return &contextImpl{controller: controller}
 }
 
 type contextImpl struct {
-	controller ctrl.TransactionController
+	controller extensionController.TransactionController
 }
 
 func (c *contextImpl) OpenDBConnection(request *http.Request) (*sql.DB, error) {
@@ -54,7 +54,7 @@ func createDbConfig(request *http.Request) (*exasol.DSNConfigBuilder, error) {
 		return nil, NewBadRequestErrorF("missing parameter dbPort")
 	} else {
 		if port, err := strconv.Atoi(portString); err != nil {
-			return nil, NewBadRequestErrorF("invalid value %q for parameter dbPort", portString)
+			return nil, NewBadRequestErrorF("invalid value '%s' for parameter dbPort", portString)
 		} else {
 			config.Port(port)
 		}
@@ -87,7 +87,7 @@ func createDbConfigWithAuthentication(request *http.Request) (*exasol.DSNConfigB
 	return exasol.NewConfig(user, password), nil
 }
 
-func (c *contextImpl) Controller() ctrl.TransactionController {
+func (c *contextImpl) Controller() extensionController.TransactionController {
 	return c.controller
 }
 
