@@ -57,7 +57,7 @@ jobs:
 
       - name: Build
         run: |
-          go build
+          go build ./...
 
       - name: Unit tests
         run: |

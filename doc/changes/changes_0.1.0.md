@@ -39,17 +39,17 @@ Code name:
 ### Compile Dependency Updates
 
 * Added `golang:1.19`
-* Added `github.com/gin-gonic/gin:v1.8.1`
-* Added `github.com/swaggo/swag:v1.8.4`
 * Added `github.com/stretchr/testify:v1.8.0`
 * Added `github.com/dop251/goja:v0.0.0-20220815083517-0c74f9139fd6`
-* Added `github.com/swaggo/files:v0.0.0-20220728132757-551d4a08d97a`
+* Added `github.com/sirupsen/logrus:v1.9.0`
 * Added `github.com/dop251/goja_nodejs:v0.0.0-20220808115320-bac29516aae9`
-* Added `github.com/swaggo/gin-swagger:v1.5.2`
+* Added `github.com/swaggo/http-swagger:v1.3.3`
 * Added `github.com/exasol/exasol-driver-go:v0.4.5`
 * Added `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.2.3`
+* Added `github.com/go-chi/chi/v5:v5.0.4`
 
 ### Test Dependency Updates
 
+* Added `github.com/Nightapes/go-rest:v0.0.1`
 * Added `github.com/kinbiko/jsonassert:v1.1.0`
 * Added `github.com/DATA-DOG/go-sqlmock:v1.5.0`
