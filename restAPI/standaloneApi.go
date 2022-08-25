@@ -20,13 +20,16 @@ import (
 )
 
 func setupStandaloneAPI(controller extensionController.TransactionController) (http.Handler, *openapi.API, error) {
-	api := createOpenApi()
+	api, err := createOpenApi()
+	if err != nil {
+		return nil, nil, err
+	}
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(loggerMiddleware())
 	r.Use(middleware.Recoverer)
 
-	err := addPublicEndpointsWithController(api, controller)
+	err = addPublicEndpointsWithController(api, controller)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -52,13 +55,17 @@ func setupStandaloneAPI(controller extensionController.TransactionController) (h
 	return r, api, nil
 }
 
-func createOpenApi() *openapi.API {
+func createOpenApi() (*openapi.API, error) {
 	api := openapi.NewOpenAPI()
 	api.Title = "Exasol Extension Manager REST-API"
 	api.Description = "Managed extensions and instances of extensions"
 	api.Version = "1.0"
-	api.WithBasicAuth(core.BasicAuth)
-	api.WithBearerAuth(core.BearerAuth, "bearer", "JWT")
+	if err := api.WithBasicAuth(core.BasicAuth); err != nil {
+		return nil, err
+	}
+	if err := api.WithBearerAuth(core.BearerAuth, "bearer", "JWT"); err != nil {
+		return nil, err
+	}
 	api.DefaultResponse(&openapi.MethodResponse{
 		Description: "Default error",
 		Value: &apiErrors.APIError{
@@ -70,7 +77,7 @@ func createOpenApi() *openapi.API {
 			OriginalError: nil,
 		},
 	})
-	return api
+	return api, nil
 }
 
 func loggerMiddleware() func(next http.Handler) http.Handler {
