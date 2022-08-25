@@ -1,4 +1,4 @@
-package extensions
+package requests
 
 import (
 	"net/http"

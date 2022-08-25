@@ -57,8 +57,8 @@ func createOpenApi() *openapi.API {
 	api.Title = "Exasol Extension Manager REST-API"
 	api.Description = "Managed extensions and instances of extensions"
 	api.Version = "1.0"
-	api.WithBasicAuth("DbUserPassword")
-	api.WithBearerAuth("AccessToken", "bearer", "JWT")
+	api.WithBasicAuth(core.BasicAuth)
+	api.WithBearerAuth(core.BearerAuth, "bearer", "JWT")
 	api.DefaultResponse(&openapi.MethodResponse{
 		Description: "Default error",
 		Value: &apiErrors.APIError{

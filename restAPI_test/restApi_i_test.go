@@ -1,4 +1,4 @@
-package restAPI
+package restAPI_test
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/exasol/extension-manager/extensionController"
 	"github.com/exasol/extension-manager/integrationTesting"
+	"github.com/exasol/extension-manager/restAPI"
 	"github.com/kinbiko/jsonassert"
 
 	"github.com/stretchr/testify/suite"
@@ -36,7 +37,7 @@ func (suite *RestAPIIntegrationTestSuite) SetupSuite() {
 func (suite *RestAPIIntegrationTestSuite) SetupTest() {
 	ctrl := extensionController.Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
 	hostAndPort := "localhost:8081"
-	suite.restAPI = Create(ctrl, hostAndPort)
+	suite.restAPI = restAPI.Create(ctrl, hostAndPort)
 	suite.baseUrl = fmt.Sprintf("http://%s", hostAndPort)
 	go suite.restAPI.Serve()
 	time.Sleep(10 * time.Millisecond) // give the server some time to become ready

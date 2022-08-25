@@ -1,4 +1,4 @@
-package restAPI
+package restAPI_test
 
 import (
 	"encoding/base64"
@@ -6,13 +6,14 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/exasol/extension-manager/restAPI"
 	"github.com/stretchr/testify/suite"
 )
 
 type baseRestAPITest struct {
 	suite.Suite
 	baseUrl string
-	restAPI RestAPI
+	restAPI restAPI.RestAPI
 }
 
 func (suite *baseRestAPITest) TearDownTest() {

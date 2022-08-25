@@ -8,8 +8,8 @@ const (
 	TagExtension = "Extension"
 	TagInstance  = "Instance"
 
-	BearerAuth = "BearerAuth"
-	BasicAuth  = "BasicAuth"
+	BearerAuth = "DbAccessToken"
+	BasicAuth  = "DbUsernamePassword"
 )
 
 type ExaPath struct {

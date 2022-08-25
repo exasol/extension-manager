@@ -1,4 +1,4 @@
-package restAPI
+package restAPI_test
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 
 	"github.com/exasol/extension-manager/extensionAPI"
 	"github.com/exasol/extension-manager/extensionController"
+	"github.com/exasol/extension-manager/restAPI"
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -34,7 +35,7 @@ func (suite *RestAPISuite) SetupSuite() {
 
 func (suite *RestAPISuite) SetupTest() {
 	suite.controller = &MockExtensionController{}
-	suite.restAPI = Create(suite.controller, "localhost:8080")
+	suite.restAPI = restAPI.Create(suite.controller, "localhost:8080")
 	suite.baseUrl = "http://localhost:8080/api/v1"
 	go suite.restAPI.Serve()
 	time.Sleep(10 * time.Millisecond) // give the server some time to become ready
@@ -69,7 +70,7 @@ func (mock *MockExtensionController) CreateInstance(ctx context.Context, db *sql
 
 func (suite *RestAPISuite) TestStopWithoutStartFails() {
 	controller := &MockExtensionController{}
-	restAPI := Create(controller, "localhost:8080")
+	restAPI := restAPI.Create(controller, "localhost:8080")
 	suite.Panics(restAPI.Stop)
 }
 
