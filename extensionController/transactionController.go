@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 
+	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/extensionAPI"
 )
 
@@ -123,7 +125,14 @@ func (c *transactionControllerImpl) CreateInstance(ctx context.Context, db *sql.
 }
 
 func beginTransaction(ctx context.Context, db *sql.DB) (*sql.Tx, error) {
-	return db.BeginTx(ctx, nil)
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		if strings.Contains(err.Error(), "Connection exception - authentication failed") {
+			return nil, apiErrors.NewUnauthorizedErrorF("invalid database credentials")
+		}
+		return nil, fmt.Errorf("failed to begin transaction: %v", err)
+	}
+	return tx, nil
 }
 
 func rollback(tx *sql.Tx) {

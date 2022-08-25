@@ -15,18 +15,15 @@ func ListInstalledExtensions(apiContext core.ApiContext) *openapi.Get {
 		Description:    "Get a list of all installed extensions.",
 		OperationID:    "ListInstalledExtensions",
 		Tags:           []string{core.TagExtension},
-		Authentication: map[string][]string{core.BearerAuth: {}},
+		Authentication: authentication,
 		Response: map[string]openapi.MethodResponse{
-			"200": {Description: "List of extensions", Value: ExtensionsResponse{
-				Extensions: []ExtensionsResponseExtension{{
-					Id:                  "s3-vs",
-					Name:                "S3 Virtual Schema",
-					Description:         "...",
-					InstallableVersions: []string{"1.0.0", "1.2.0"},
-				}},
+			"200": {Description: "List of extensions", Value: InstallationsResponse{
+				Installations: []InstallationsResponseInstallation{
+					{Name: "s3-vs", Version: "1.0.0", InstanceParameters: nil},
+					{Name: "s3-vs", Version: "1.1.0", InstanceParameters: nil}},
 			}},
 		},
-		Path:        core.NewPublicPath().Add("installations"),
+		Path:        core.NewPathWithDbQueryParams().Add("installations"),
 		HandlerFunc: handleListInstalledExtensions(apiContext),
 	}
 }

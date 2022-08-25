@@ -2,11 +2,14 @@ package core
 
 import (
 	"database/sql"
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/exasol/exasol-driver-go"
+	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/extensionController"
 )
 
@@ -45,16 +48,16 @@ func createDbConfig(request *http.Request) (*exasol.DSNConfigBuilder, error) {
 	}
 
 	if host := query.Get("dbHost"); host == "" {
-		return nil, NewBadRequestErrorF("missing parameter dbHost")
+		return nil, apiErrors.NewBadRequestErrorF("missing parameter dbHost")
 	} else {
 		config.Host(host)
 	}
 
 	if portString := query.Get("dbPort"); portString == "" {
-		return nil, NewBadRequestErrorF("missing parameter dbPort")
+		return nil, apiErrors.NewBadRequestErrorF("missing parameter dbPort")
 	} else {
 		if port, err := strconv.Atoi(portString); err != nil {
-			return nil, NewBadRequestErrorF("invalid value '%s' for parameter dbPort", portString)
+			return nil, apiErrors.NewBadRequestErrorF("invalid value '%s' for parameter dbPort", portString)
 		} else {
 			config.Port(port)
 		}
@@ -63,28 +66,46 @@ func createDbConfig(request *http.Request) (*exasol.DSNConfigBuilder, error) {
 }
 
 func createDbConfigWithAuthentication(request *http.Request) (*exasol.DSNConfigBuilder, error) {
-	query := request.URL.Query()
-	accessToken := query.Get("dbAccessToken")
-	if accessToken != "" {
-		return exasol.NewConfigWithAccessToken(accessToken), nil
+	auth := request.Header.Get("Authorization")
+	if auth == "" {
+		return nil, apiErrors.NewUnauthorizedErrorF("missing Authorization header")
 	}
-
-	refreshToken := query.Get("dbRefreshToken")
-	if refreshToken != "" {
-		return exasol.NewConfigWithRefreshToken(refreshToken), nil
+	parts := strings.Split(auth, " ")
+	if len(parts) < 2 {
+		return nil, apiErrors.NewUnauthorizedErrorF("invalid Authorization header %q", auth)
 	}
-
-	user := query.Get("dbUser")
-	if user == "" {
-		return nil, NewBadRequestErrorF("missing parameter dbUser")
+	scheme := parts[0]
+	switch scheme {
+	case "Basic":
+		return newUserPasswordConfig(parts[1])
+	case "Bearer":
+		return exasol.NewConfigWithAccessToken(parts[1]), nil
+	default:
+		return nil, apiErrors.NewUnauthorizedErrorF("invalid Authorization scheme %q", parts[0])
 	}
+}
 
-	password := query.Get("dbPassword")
-	if password == "" {
-		return nil, NewBadRequestErrorF("missing parameter dbPassword")
+func newUserPasswordConfig(basicAuthCredentials string) (*exasol.DSNConfigBuilder, error) {
+	user, password, err := extractUserPassword(basicAuthCredentials)
+	if err != nil {
+		return nil, err
 	}
-
 	return exasol.NewConfig(user, password), nil
+}
+
+func extractUserPassword(basicAuthCredentials string) (string, string, error) {
+	data, err := base64.StdEncoding.DecodeString(basicAuthCredentials)
+	if err != nil {
+		return "", "", apiErrors.NewUnauthorizedErrorF("invalid basic auth header %q: %v", basicAuthCredentials, err)
+	}
+	userPassword := string(data)
+	colon := strings.Index(userPassword, ":")
+	if colon < 0 {
+		return "", "", apiErrors.NewUnauthorizedErrorF("colon missing in basic auth header")
+	}
+	user := userPassword[:colon]
+	password := userPassword[colon+1:]
+	return user, password, nil
 }
 
 func (c *contextImpl) Controller() extensionController.TransactionController {

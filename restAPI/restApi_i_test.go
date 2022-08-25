@@ -2,15 +2,13 @@ package restAPI
 
 import (
 	"fmt"
-	"io"
-	"net/http"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/exasol/extension-manager/extensionController"
 	"github.com/exasol/extension-manager/integrationTesting"
 	"github.com/kinbiko/jsonassert"
+
 	"github.com/stretchr/testify/suite"
 )
 
@@ -20,11 +18,10 @@ const (
 )
 
 type RestAPIIntegrationTestSuite struct {
-	integrationTesting.IntegrationTestSuite
+	baseRestAPITest
+	exasol            integrationTesting.IntegrationTestSuite
 	tempExtensionRepo string
 	assertJSON        *jsonassert.Asserter
-	restAPI           RestAPI
-	baseUrl           string
 }
 
 func TestRestAPIIntegrationTestSuite(t *testing.T) {
@@ -32,7 +29,7 @@ func TestRestAPIIntegrationTestSuite(t *testing.T) {
 }
 
 func (suite *RestAPIIntegrationTestSuite) SetupSuite() {
-	suite.IntegrationTestSuite.SetupSuite()
+	suite.exasol.SetupSuite()
 	suite.assertJSON = jsonassert.New(suite.T())
 }
 
@@ -45,10 +42,6 @@ func (suite *RestAPIIntegrationTestSuite) SetupTest() {
 	time.Sleep(10 * time.Millisecond) // give the server some time to become ready
 }
 
-func (suite *RestAPIIntegrationTestSuite) TearDownTest() {
-	suite.restAPI.Stop()
-}
-
 func (suite *RestAPIIntegrationTestSuite) TestGetAllExtensionsSuccessfully() {
 	response := suite.makeGetRequest("/api/v1/extensions?" + suite.getValidDbArgs())
 	suite.assertJSON.Assertf(response, `{"extensions":[]}`)
@@ -59,17 +52,14 @@ func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsSuccessfully() {
 	suite.assertJSON.Assertf(response, `{"installations":[]}`)
 }
 
-func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsFails_InvalidCredentials() {
-	var tests = []struct{ parameters string }{
-		{parameters: suite.getDbArgsWithUserPassword("invalidUser", "password")},
-		{parameters: suite.getDbArgsWithAccessToken("invalidAccessToken")},
-		{parameters: suite.getDbArgsWithRefreshToken("invalidRefreshToken")}}
-	for _, test := range tests {
-		suite.Run(test.parameters, func() {
-			response := suite.makeRequest("GET", "/api/v1/installations?"+test.parameters, "", 500)
-			suite.Regexp(`{"code":500,"message":"Internal server error".*`, response)
-		})
-	}
+func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsFails_InvalidUsernamePassword() {
+	response := suite.makeRequestWithAuthHeader("GET", "/api/v1/installations?"+suite.getValidDbArgs(), createBasicAuthHeader("wrong", "user"), "", 401)
+	suite.Regexp(`{"code":401,"message":"invalid database credentials".*`, response)
+}
+
+func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsFails_InvalidBearerToken() {
+	response := suite.makeRequestWithAuthHeader("GET", "/api/v1/installations?"+suite.getValidDbArgs(), "Bearer invalid", "", 401)
+	suite.Regexp(`{"code":401,"message":"invalid database credentials".*`, response)
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestGetOpenApiHtml() {
@@ -83,23 +73,12 @@ func (suite *RestAPIIntegrationTestSuite) TestGetOpenApiJson() {
 }
 
 func (suite *RestAPIIntegrationTestSuite) getValidDbArgs() string {
-	info := suite.ConnectionInfo
-	return suite.getDbArgsWithUserPassword(info.User, info.Password)
+	return suite.getDbArgsWithUserPassword()
 }
 
-func (suite *RestAPIIntegrationTestSuite) getDbArgsWithUserPassword(user string, password string) string {
-	info := suite.ConnectionInfo
-	return fmt.Sprintf("dbHost=%s&dbPort=%d&dbUser=%s&dbPassword=%s", info.Host, info.Port, user, password)
-}
-
-func (suite *RestAPIIntegrationTestSuite) getDbArgsWithAccessToken(accessToken string) string {
-	info := suite.ConnectionInfo
-	return fmt.Sprintf("dbHost=%s&dbPort=%d&dbAccessToken=%s", info.Host, info.Port, accessToken)
-}
-
-func (suite *RestAPIIntegrationTestSuite) getDbArgsWithRefreshToken(refreshToken string) string {
-	info := suite.ConnectionInfo
-	return fmt.Sprintf("dbHost=%s&dbPort=%d&dbRefreshToken=%s", info.Host, info.Port, refreshToken)
+func (suite *RestAPIIntegrationTestSuite) getDbArgsWithUserPassword() string {
+	info := suite.exasol.ConnectionInfo
+	return fmt.Sprintf("dbHost=%s&dbPort=%d", info.Host, info.Port)
 }
 
 func (suite *RestAPIIntegrationTestSuite) makeGetRequest(path string) string {
@@ -107,13 +86,6 @@ func (suite *RestAPIIntegrationTestSuite) makeGetRequest(path string) string {
 }
 
 func (suite *RestAPIIntegrationTestSuite) makeRequest(method string, path string, body string, expectedStatusCode int) string {
-	request, err := http.NewRequest(method, suite.baseUrl+path, strings.NewReader(body))
-	suite.NoError(err)
-	response, err := http.DefaultClient.Do(request)
-	suite.NoError(err)
-	suite.Equal(expectedStatusCode, response.StatusCode)
-	defer func() { suite.NoError(response.Body.Close()) }()
-	bytes, err := io.ReadAll(response.Body)
-	suite.NoError(err)
-	return string(bytes)
+	info := suite.exasol.ConnectionInfo
+	return suite.makeRequestWithAuthHeader(method, path, createBasicAuthHeader(info.User, info.Password), body, expectedStatusCode)
 }

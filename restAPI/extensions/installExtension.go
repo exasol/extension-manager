@@ -13,13 +13,13 @@ func InstallExtension(apiContext core.ApiContext) *openapi.Put {
 		Summary:        "Install an extension.",
 		Description:    "This installs an extension in a given version, e.g. by creating Adapter Scripts.",
 		OperationID:    "InstallExtension",
-		Tags:           []string{core.TagInstance},
-		Authentication: map[string][]string{core.BearerAuth: {}},
+		Tags:           []string{core.TagExtension},
+		Authentication: authentication,
 		RequestBody:    InstallExtensionRequest{},
 		Response: map[string]openapi.MethodResponse{
 			"204": {Description: "OK"},
 		},
-		Path:        core.NewPublicPath().Add("installations"),
+		Path:        core.NewPathWithDbQueryParams().Add("installations"),
 		HandlerFunc: handleInstallExtension(apiContext),
 	}
 }

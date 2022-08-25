@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
+	"time"
+
 	"io"
 	"net/http"
 	"strings"
 
+	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/go-chi/chi/v5/middleware"
 	log "github.com/sirupsen/logrus"
 )
@@ -43,41 +45,38 @@ func SendJSONWithStatus(ctx context.Context, status int, writer http.ResponseWri
 }
 
 func HandleError(context context.Context, writer http.ResponseWriter, err error) {
+	var errorToSend *apiErrors.APIError
 	switch apiError := err.(type) {
 	default:
 		log.Errorf("Internal error: %s", err.Error())
-		NewInternalServerError(err).(*APIError).Send(context, writer)
-	case *APIError:
+		errorToSend = apiErrors.NewInternalServerError(err).(*apiErrors.APIError)
+
+	case *apiErrors.APIError:
 		if apiError.OriginalError != nil {
 			log.Errorf("Error: %s (original: %s)", err.Error(), apiError.OriginalError.Error())
+		} else {
+			log.Errorf("Error: %s", err.Error())
 		}
-		apiError.Send(context, writer)
+		errorToSend = err.(*apiErrors.APIError)
 	}
+	sendError(errorToSend, context, writer)
 }
 
-func NewInternalServerError(originalError error) error {
-	return &APIError{
-		Status:        http.StatusInternalServerError,
-		Message:       "Internal server error",
-		OriginalError: originalError,
+func sendError(a *apiErrors.APIError, context context.Context, writer http.ResponseWriter) {
+	logger := GetLogger(context)
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(a.Status)
+	if context != nil && a.Status != http.StatusUnauthorized {
+		a.RequestID = middleware.GetReqID(context)
+		if a.Timestamp == "" {
+			a.Timestamp = time.Now().Format(time.RFC3339)
+		}
+		a.APIID = GetContextValue(context, APIIDKey)
 	}
-}
 
-func NewBadRequestErrorF(format string, a ...interface{}) error {
-	return NewAPIErrorF(http.StatusBadRequest, format, a...)
-}
-
-func NewAPIErrorF(status int, format string, a ...interface{}) error {
-	return &APIError{
-		Status:  status,
-		Message: fmt.Sprintf(format, a...),
-	}
-}
-
-func NewAPIError(status int, message string) error {
-	return &APIError{
-		Status:  status,
-		Message: message,
+	err := json.NewEncoder(writer).Encode(a)
+	if err != nil {
+		logger.Errorf("Could not send simple error to client %s", err.Error())
 	}
 }
 
@@ -111,7 +110,7 @@ func GetContextValue(ctx context.Context, id interface{}) string {
 
 func DecodeJSONBody(writer http.ResponseWriter, request *http.Request, dst interface{}) error {
 	if value := request.Header.Get("Content-Type"); value != "application/json" {
-		return NewAPIError(http.StatusBadRequest, "Content-Type header is not application/json")
+		return apiErrors.NewAPIError(http.StatusBadRequest, "Content-Type header is not application/json")
 	}
 
 	request.Body = http.MaxBytesReader(writer, request.Body, 1048576)
@@ -126,23 +125,23 @@ func DecodeJSONBody(writer http.ResponseWriter, request *http.Request, dst inter
 
 		switch {
 		case errors.As(err, &syntaxError):
-			return NewBadRequestErrorF("Request body contains badly-formed JSON (at position %d)", syntaxError.Offset)
+			return apiErrors.NewBadRequestErrorF("Request body contains badly-formed JSON (at position %d)", syntaxError.Offset)
 
 		case errors.Is(err, io.ErrUnexpectedEOF):
-			return NewBadRequestErrorF("Request body contains badly-formed JSON")
+			return apiErrors.NewBadRequestErrorF("Request body contains badly-formed JSON")
 
 		case errors.As(err, &unmarshalTypeError):
-			return NewBadRequestErrorF("Request body contains an invalid value for the %q field (at position %d)", unmarshalTypeError.Field, unmarshalTypeError.Offset)
+			return apiErrors.NewBadRequestErrorF("Request body contains an invalid value for the %q field (at position %d)", unmarshalTypeError.Field, unmarshalTypeError.Offset)
 
 		case strings.HasPrefix(err.Error(), "json: unknown field "):
 			fieldName := strings.TrimPrefix(err.Error(), "json: unknown field ")
-			return NewBadRequestErrorF("Request body contains unknown field %q", fieldName)
+			return apiErrors.NewBadRequestErrorF("Request body contains unknown field %q", fieldName)
 
 		case errors.Is(err, io.EOF):
-			return NewBadRequestErrorF("Request body must not be empty")
+			return apiErrors.NewBadRequestErrorF("Request body must not be empty")
 
 		case err.Error() == "http: request body too large":
-			return NewBadRequestErrorF("Request body must not be larger than 1MB")
+			return apiErrors.NewBadRequestErrorF("Request body must not be larger than 1MB")
 
 		default:
 			return err
@@ -151,7 +150,7 @@ func DecodeJSONBody(writer http.ResponseWriter, request *http.Request, dst inter
 
 	err = dec.Decode(&struct{}{})
 	if err != io.EOF {
-		return NewBadRequestErrorF("Request body must only contain a single JSON object")
+		return apiErrors.NewBadRequestErrorF("Request body must only contain a single JSON object")
 	}
 
 	return nil

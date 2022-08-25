@@ -17,7 +17,7 @@ func ListAvailableExtensions(apiContext core.ApiContext) *openapi.Get {
 		Description:    "Get a list of all available extensions, i.e. extensions that can be installed.",
 		OperationID:    "ListAvailableExtensions",
 		Tags:           []string{core.TagExtension},
-		Authentication: map[string][]string{core.BearerAuth: {}},
+		Authentication: authentication,
 		Response: map[string]openapi.MethodResponse{
 			"200": {Description: "List of extensions", Value: ExtensionsResponse{
 				Extensions: []ExtensionsResponseExtension{{
@@ -28,7 +28,7 @@ func ListAvailableExtensions(apiContext core.ApiContext) *openapi.Get {
 				}},
 			}},
 		},
-		Path:        core.NewPublicPath().Add("extensions"),
+		Path:        core.NewPathWithDbQueryParams().Add("extensions"),
 		HandlerFunc: handleListAvailableExtensions(apiContext),
 	}
 }

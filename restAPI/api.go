@@ -8,6 +8,7 @@ import (
 
 	"github.com/Nightapes/go-rest/pkg/openapi"
 
+	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/extensionController"
 	"github.com/exasol/extension-manager/restAPI/core"
 
@@ -43,7 +44,7 @@ func setupStandaloneAPI(controller extensionController.TransactionController) (h
 
 	r.Group(func(r chi.Router) {
 		for _, handleConfig := range api.GetHandleFunc() {
-			log.Printf("Add func %s %s", handleConfig.Method, handleConfig.Path)
+			log.Tracef("Add func %s %s", handleConfig.Method, handleConfig.Path)
 			r.With(middleware.Timeout(60*time.Second)).Method(handleConfig.Method, handleConfig.Path, handleConfig.HandlerFunc)
 		}
 	})
@@ -56,10 +57,11 @@ func createOpenApi() *openapi.API {
 	api.Title = "Exasol Extension Manager REST-API"
 	api.Description = "Managed extensions and instances of extensions"
 	api.Version = "1.0"
-
+	api.WithBasicAuth("DbUserPassword")
+	api.WithBearerAuth("AccessToken", "bearer", "JWT")
 	api.DefaultResponse(&openapi.MethodResponse{
 		Description: "Default error",
-		Value: &core.APIError{
+		Value: &apiErrors.APIError{
 			Status:        500,
 			Message:       "Something went wrong.",
 			RequestID:     "Rn3x8gcEInnHt205B4c7QZ",

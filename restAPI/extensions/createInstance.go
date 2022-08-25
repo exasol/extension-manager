@@ -15,12 +15,12 @@ func CreateInstance(apiContext core.ApiContext) *openapi.Put {
 		Description:    "This creates a new instance of an extension, e.g. a virtual schema.",
 		OperationID:    "CreateInstance",
 		Tags:           []string{core.TagInstance},
-		Authentication: map[string][]string{core.BearerAuth: {}},
+		Authentication: authentication,
 		RequestBody:    CreateInstanceRequest{ExtensionId: "s3-vs", ExtensionVersion: "1.1.0", ParameterValues: []ParameterValue{{Name: "param1", Value: "value1"}}},
 		Response: map[string]openapi.MethodResponse{
 			"200": {Description: "OK", Value: CreateInstanceResponse{InstanceName: "new-instance-name"}},
 		},
-		Path:        core.NewPublicPath().Add("instances"),
+		Path:        core.NewPathWithDbQueryParams().Add("instances"),
 		HandlerFunc: handleCreateInstance(apiContext),
 	}
 }

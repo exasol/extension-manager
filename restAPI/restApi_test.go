@@ -4,9 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"io"
-	"net/http"
-	"strings"
 	"testing"
 	"time"
 
@@ -18,11 +15,9 @@ import (
 )
 
 type RestAPISuite struct {
-	suite.Suite
+	baseRestAPITest
 	assertJSON *jsonassert.Asserter
 	controller *MockExtensionController
-	restAPI    RestAPI
-	baseUrl    string
 }
 
 func TestRestApiSuite(t *testing.T) {
@@ -43,10 +38,6 @@ func (suite *RestAPISuite) SetupTest() {
 	suite.baseUrl = "http://localhost:8080/api/v1"
 	go suite.restAPI.Serve()
 	time.Sleep(10 * time.Millisecond) // give the server some time to become ready
-}
-
-func (suite *RestAPISuite) TearDownTest() {
-	suite.restAPI.Stop()
 }
 
 func (mock *MockExtensionController) InstallExtension(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) error {
@@ -99,7 +90,7 @@ func (suite *RestAPISuite) TestGetInstallationsSuccessfully() {
 
 func (suite *RestAPISuite) TestGetInstallationsFailed() {
 	suite.controller.On("GetAllInstallations", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("mock error"))
-	responseString := suite.makeRequest("GET", "/installations?dbHost=host&dbPort=8563&dbUser=user&dbPassword=password", "", 500)
+	responseString := suite.makeRequest("GET", "/installations?dbHost=host&dbPort=8563", "", 500)
 	suite.Regexp(`{"code":500,"message":"Internal server error",`, responseString)
 }
 
@@ -115,7 +106,7 @@ func (suite *RestAPISuite) TestGetAllExtensionsSuccessfully() {
 
 func (suite *RestAPISuite) TestGetAllExtensionsFails() {
 	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("mock error"))
-	responseString := suite.makeRequest("GET", "/extensions?dbHost=host&dbPort=8563&dbUser=user&dbPassword=password", "", 500)
+	responseString := suite.makeRequest("GET", "/extensions?dbHost=host&dbPort=8563", "", 500)
 	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
 }
 
@@ -131,7 +122,7 @@ func (suite *RestAPISuite) TestInstallExtensionsSuccessfully() {
 
 func (suite *RestAPISuite) TestInstallExtensionsFailed() {
 	suite.controller.On("InstallExtension", mock.Anything, mock.Anything, "ext-id", "ver").Return(fmt.Errorf("mock error"))
-	responseString := suite.makeRequest("PUT", "/installations?extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563&dbUser=user&dbPassword=password", `{"extensionId": "ext-id", "extensionVersion": "ver"}`, 500)
+	responseString := suite.makeRequest("PUT", "/installations?extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563", `{"extensionId": "ext-id", "extensionVersion": "ver"}`, 500)
 	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
 }
 
@@ -148,14 +139,14 @@ func (suite *RestAPISuite) TestCreateInstanceSuccessfully() {
 
 func (suite *RestAPISuite) TestCreateInstanceFailed_invalidPayload() {
 	suite.controller.On("CreateInstance", mock.Anything, mock.Anything, "ext-id", "ver", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return("instanceName", nil)
-	responseString := suite.makeRequest("PUT", "/instances?dbHost=host&dbPort=8563&dbUser=user&dbPassword=password",
+	responseString := suite.makeRequest("PUT", "/instances?dbHost=host&dbPort=8563",
 		`invalid payload`, 400)
 	suite.Regexp("{\"code\":400,\"message\":\"Request body contains badly-formed JSON \\(at position 1\\)\".*", responseString)
 }
 
 func (suite *RestAPISuite) TestCreateInstanceFailed() {
 	suite.controller.On("CreateInstance", mock.Anything, mock.Anything, "ext-id", "ver", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return("", fmt.Errorf("mock error"))
-	responseString := suite.makeRequest("PUT", "/instances?dbHost=host&dbPort=8563&dbUser=user&dbPassword=password",
+	responseString := suite.makeRequest("PUT", "/instances?dbHost=host&dbPort=8563",
 		`{"extensionId": "ext-id", "extensionVersion": "ver", "parameterValues": [{"name":"p1", "value":"v1"}]}`, 500)
 	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
 }
@@ -167,28 +158,21 @@ func (suite *RestAPISuite) TestRequestsFailForMissingParameters() {
 		parameters    string
 		expectedError string
 	}{
-		{"GET", "/extensions", "dbPort=8563&dbUser=user&dbPassword=password", "missing parameter dbHost"},
-		{"GET", "/extensions", "dbHost=host&dbUser=user&dbPassword=password", "missing parameter dbPort"},
-		{"GET", "/extensions", "dbHost=host&dbPort=invalidPort&dbUser=user&dbPassword=password", "invalid value 'invalidPort' for parameter dbPort"},
-		{"GET", "/extensions", "dbHost=host&dbPort=8563&dbPassword=password", "missing parameter dbUser"},
-		{"GET", "/extensions", "dbHost=host&dbPort=8563&dbUser=user", "missing parameter dbPassword"},
+		{"GET", "/extensions", "dbPort=8563", "missing parameter dbHost"},
+		{"GET", "/extensions", "dbHost=host", "missing parameter dbPort"},
+		{"GET", "/extensions", "dbHost=host&dbPort=invalidPort", "invalid value 'invalidPort' for parameter dbPort"},
 
-		{"GET", "/installations", "dbPort=8563&dbUser=user&dbPassword=password", "missing parameter dbHost"},
-		{"GET", "/installations", "dbHost=host&dbUser=user&dbPassword=password", "missing parameter dbPort"},
-		{"GET", "/installations", "dbHost=host&dbPort=invalidPort&dbUser=user&dbPassword=password", "invalid value 'invalidPort' for parameter dbPort"},
-		{"GET", "/installations", "dbHost=host&dbPort=8563&dbPassword=password", "missing parameter dbUser"},
-		{"GET", "/installations", "dbHost=host&dbPort=8563&dbUser=user", "missing parameter dbPassword"},
+		{"GET", "/installations", "dbPort=8563", "missing parameter dbHost"},
+		{"GET", "/installations", "dbHost=host", "missing parameter dbPort"},
+		{"GET", "/installations", "dbHost=host&dbPort=invalidPort", "invalid value 'invalidPort' for parameter dbPort"},
 
-		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbPort=8563&dbUser=user&dbPassword=password", "missing parameter dbHost"},
-		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbHost=host&dbUser=user&dbPassword=password", "missing parameter dbPort"},
-		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=invalidPort&dbUser=user&dbPassword=password", "invalid value 'invalidPort' for parameter dbPort"},
-		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563&dbPassword=password", "missing parameter dbUser"},
+		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbPort=8563", "missing parameter dbHost"},
+		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbHost=host", "missing parameter dbPort"},
+		{"PUT", "/installations", "extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=invalidPort", "invalid value 'invalidPort' for parameter dbPort"},
 
-		{"PUT", "/instances", "dbPort=8563&dbUser=user&dbPassword=password", "missing parameter dbHost"},
-		{"PUT", "/instances", "dbHost=host&dbUser=user&dbPassword=password", "missing parameter dbPort"},
-		{"PUT", "/instances", "dbHost=host&dbPort=invalidPort&dbUser=user&dbPassword=password", "invalid value 'invalidPort' for parameter dbPort"},
-		{"PUT", "/instances", "dbHost=host&dbPort=8563&dbPassword=password", "missing parameter dbUser"},
-		{"PUT", "/instances", "dbHost=host&dbPort=8563&dbUser=user", "missing parameter dbPassword"},
+		{"PUT", "/instances", "dbPort=8563", "missing parameter dbHost"},
+		{"PUT", "/instances", "dbHost=host", "missing parameter dbPort"},
+		{"PUT", "/instances", "dbHost=host&dbPort=invalidPort", "invalid value 'invalidPort' for parameter dbPort"},
 	}
 	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return([]*extensionController.Extension{{Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
 	suite.controller.On("GetAllInstallations", mock.Anything, mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)
@@ -207,17 +191,7 @@ func (suite *RestAPISuite) makeGetRequest(path string) string {
 	return suite.makeRequest("GET", path, "", 200)
 }
 
-func (suite *RestAPISuite) makeRequest(method string, path string, body string, expectedStatusCode int) string {
-	request, err := http.NewRequest(method, suite.baseUrl+path, strings.NewReader(body))
-	if body != "" {
-		request.Header.Add("Content-Type", "application/json")
-	}
-	suite.NoError(err)
-	response, err := http.DefaultClient.Do(request)
-	suite.NoError(err)
-	suite.Equal(expectedStatusCode, response.StatusCode)
-	defer func() { suite.NoError(response.Body.Close()) }()
-	bytes, err := io.ReadAll(response.Body)
-	suite.NoError(err)
-	return string(bytes)
+func (suite *RestAPISuite) makeRequest(method, path, body string, expectedStatus int) string {
+	authHeader := createBasicAuthHeader("user", "password")
+	return suite.makeRequestWithAuthHeader(method, path, authHeader, body, expectedStatus)
 }
