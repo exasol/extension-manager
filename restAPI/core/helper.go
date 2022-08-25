@@ -45,11 +45,15 @@ func SendJSONWithStatus(ctx context.Context, status int, writer http.ResponseWri
 }
 
 func HandleError(context context.Context, writer http.ResponseWriter, err error) {
-	var errorToSend *apiErrors.APIError
+	errorToSend := convertToApiError(err)
+	sendError(errorToSend, context, writer)
+}
+
+func convertToApiError(err error) *apiErrors.APIError {
 	switch apiError := err.(type) {
 	default:
 		log.Errorf("Internal error: %s", err.Error())
-		errorToSend = apiErrors.NewInternalServerError(err).(*apiErrors.APIError)
+		return apiErrors.NewInternalServerError(err).(*apiErrors.APIError)
 
 	case *apiErrors.APIError:
 		if apiError.OriginalError != nil {
@@ -57,13 +61,11 @@ func HandleError(context context.Context, writer http.ResponseWriter, err error)
 		} else {
 			log.Errorf("Error: %s", err.Error())
 		}
-		errorToSend = err.(*apiErrors.APIError)
+		return err.(*apiErrors.APIError)
 	}
-	sendError(errorToSend, context, writer)
 }
 
 func sendError(a *apiErrors.APIError, context context.Context, writer http.ResponseWriter) {
-	logger := GetLogger(context)
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(a.Status)
 	if context != nil && a.Status != http.StatusUnauthorized {
@@ -71,11 +73,12 @@ func sendError(a *apiErrors.APIError, context context.Context, writer http.Respo
 		if a.Timestamp == "" {
 			a.Timestamp = time.Now().Format(time.RFC3339)
 		}
-		a.APIID = GetContextValue(context, APIIDKey)
+		a.APIID = getContextValue(context, APIIDKey)
 	}
 
 	err := json.NewEncoder(writer).Encode(a)
 	if err != nil {
+		logger := GetLogger(context)
 		logger.Errorf("Could not send simple error to client %s", err.Error())
 	}
 }
@@ -86,19 +89,16 @@ const APIIDKey ContextKeyAPIID = 1
 
 func GetLogger(context context.Context) *log.Entry {
 	fields := log.Fields{}
-
-	if id := GetContextValue(context, APIIDKey); id != "" {
+	if id := getContextValue(context, APIIDKey); id != "" {
 		fields["api"] = id
 	}
-
 	if id := middleware.GetReqID(context); id != "" {
 		fields["request"] = id
 	}
-
 	return log.WithFields(fields)
 }
 
-func GetContextValue(ctx context.Context, id interface{}) string {
+func getContextValue(ctx context.Context, id interface{}) string {
 	if ctx == nil {
 		return ""
 	}

@@ -97,7 +97,7 @@ func (suite *ExtensionControllerSuite) TestGetAllExtensionsThrowingJSError() {
 	suite.NoError(suite.Exasol.UploadStringContent("123", jarName)) // create file with 3B size
 	defer func() { suite.NoError(suite.Exasol.DeleteFile(jarName)) }()
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	extensions, err := controller.GetAllInstallations(mockContext(), suite.Connection)
+	extensions, err := controller.GetInstalledExtensions(mockContext(), suite.Connection)
 	suite.ErrorContains(err, `failed to find installations: failed to find installations for extension "testing-extension.js": Error: mock error from js at`)
 	suite.Nil(extensions)
 }
@@ -107,7 +107,7 @@ func (suite *ExtensionControllerSuite) TestGetAllInstallations() {
 	fixture := integrationTesting.CreateLuaScriptFixture(suite.Connection)
 	controller := Create(suite.tempExtensionRepo, fixture.GetSchemaName())
 	defer fixture.Close()
-	installations, err := controller.GetAllInstallations(mockContext(), suite.Connection)
+	installations, err := controller.GetInstalledExtensions(mockContext(), suite.Connection)
 	suite.NoError(err)
 	suite.Assert().Equal(1, len(installations))
 	suite.Assert().Equal(fixture.GetSchemaName()+".MY_SCRIPT", installations[0].Name)

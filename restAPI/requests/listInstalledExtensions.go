@@ -23,7 +23,7 @@ func ListInstalledExtensions(apiContext core.ApiContext) *openapi.Get {
 					{Name: "s3-vs", Version: "1.1.0", InstanceParameters: nil}},
 			}},
 		},
-		Path:        core.NewPathWithDbQueryParams().Add("installations"),
+		Path:        NewPathWithDbQueryParams().Add("installations"),
 		HandlerFunc: handleListInstalledExtensions(apiContext),
 	}
 }
@@ -36,7 +36,7 @@ func handleListInstalledExtensions(apiContext core.ApiContext) func(writer http.
 			return
 		}
 		defer core.CloseDbConnection(db)
-		installations, err := apiContext.Controller().GetAllInstallations(request.Context(), db)
+		installations, err := apiContext.Controller().GetInstalledExtensions(request.Context(), db)
 		if err != nil {
 			core.HandleError(request.Context(), writer, err)
 			return

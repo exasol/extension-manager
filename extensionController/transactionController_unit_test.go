@@ -120,7 +120,7 @@ func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_GetFails() {
 
 func (suite *extCtrlUnitTestSuite) TestGetAllInstallations_BeginTransactionFailure() {
 	suite.dbMock.ExpectBegin().WillReturnError(fmt.Errorf("mock"))
-	installations, err := suite.ctrl.GetAllInstallations(mockContext(), suite.db)
+	installations, err := suite.ctrl.GetInstalledExtensions(mockContext(), suite.db)
 	suite.EqualError(err, "failed to begin transaction: mock")
 	suite.Nil(installations)
 }
@@ -130,7 +130,7 @@ func (suite *extCtrlUnitTestSuite) TestGetAllInstallations_Success() {
 	mockResult := []*extensionAPI.JsExtInstallation{{Name: "ext"}}
 	suite.mockCtrl.On("GetAllInstallations", mock.Anything).Return(mockResult, nil)
 	suite.dbMock.ExpectRollback()
-	installations, err := suite.ctrl.GetAllInstallations(mockContext(), suite.db)
+	installations, err := suite.ctrl.GetInstalledExtensions(mockContext(), suite.db)
 	suite.NoError(err)
 	suite.Equal(mockResult, installations)
 }
@@ -139,7 +139,7 @@ func (suite *extCtrlUnitTestSuite) TestGetAllInstallations_Failure() {
 	suite.dbMock.ExpectBegin()
 	suite.mockCtrl.On("GetAllInstallations", mock.Anything).Return(nil, fmt.Errorf("mock"))
 	suite.dbMock.ExpectRollback()
-	installations, err := suite.ctrl.GetAllInstallations(mockContext(), suite.db)
+	installations, err := suite.ctrl.GetInstalledExtensions(mockContext(), suite.db)
 	suite.EqualError(err, "mock")
 	suite.Nil(installations)
 }

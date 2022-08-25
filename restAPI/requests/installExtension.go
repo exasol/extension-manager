@@ -19,7 +19,7 @@ func InstallExtension(apiContext core.ApiContext) *openapi.Put {
 		Response: map[string]openapi.MethodResponse{
 			"204": {Description: "OK"},
 		},
-		Path:        core.NewPathWithDbQueryParams().Add("installations"),
+		Path:        NewPathWithDbQueryParams().Add("installations"),
 		HandlerFunc: handleInstallExtension(apiContext),
 	}
 }

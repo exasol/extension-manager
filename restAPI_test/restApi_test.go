@@ -46,7 +46,7 @@ func (mock *MockExtensionController) InstallExtension(ctx context.Context, db *s
 	return args.Error(0)
 }
 
-func (mock *MockExtensionController) GetAllInstallations(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
+func (mock *MockExtensionController) GetInstalledExtensions(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
 	args := mock.Called(ctx, db)
 	if installations, ok := args.Get(0).([]*extensionAPI.JsExtInstallation); ok {
 		return installations, args.Error(1)

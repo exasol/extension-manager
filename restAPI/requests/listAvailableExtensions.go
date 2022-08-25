@@ -28,7 +28,7 @@ func ListAvailableExtensions(apiContext core.ApiContext) *openapi.Get {
 				}},
 			}},
 		},
-		Path:        core.NewPathWithDbQueryParams().Add("extensions"),
+		Path:        NewPathWithDbQueryParams().Add("extensions"),
 		HandlerFunc: handleListAvailableExtensions(apiContext),
 	}
 }
@@ -70,7 +70,7 @@ type ExtensionsResponse struct {
 
 // ExtensionsResponseExtension contains information about an available extension that can be installed.
 type ExtensionsResponseExtension struct {
-	Id                  string   `json:"id"`                  // ID of the extension. Don't store this as it may change in the future.
+	Id                  string   `json:"id"`                  // ID of the extension. Don't store this as it may change when restarting the server.
 	Name                string   `json:"name"`                // The name of the extension to be displayed to the user.
 	Description         string   `json:"description"`         // The description of the extension to be displayed to the user.
 	InstallableVersions []string `json:"installableVersions"` // A list of versions of this extension available for installation.

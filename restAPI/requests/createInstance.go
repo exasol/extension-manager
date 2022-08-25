@@ -20,7 +20,7 @@ func CreateInstance(apiContext core.ApiContext) *openapi.Put {
 		Response: map[string]openapi.MethodResponse{
 			"200": {Description: "OK", Value: CreateInstanceResponse{InstanceName: "new-instance-name"}},
 		},
-		Path:        core.NewPathWithDbQueryParams().Add("instances"),
+		Path:        NewPathWithDbQueryParams().Add("instances"),
 		HandlerFunc: handleCreateInstance(apiContext),
 	}
 }
