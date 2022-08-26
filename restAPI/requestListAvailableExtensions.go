@@ -9,16 +9,14 @@ import (
 	"github.com/Nightapes/go-rest/pkg/openapi"
 
 	"github.com/exasol/extension-manager/extensionController"
-	"github.com/exasol/extension-manager/restAPI/core"
-	"github.com/exasol/extension-manager/restAPI/dbRequest"
 )
 
-func ListAvailableExtensions(apiContext *core.ApiContext) *openapi.Get {
+func ListAvailableExtensions(apiContext *ApiContext) *openapi.Get {
 	return &openapi.Get{
 		Summary:        "List available extensions",
 		Description:    "Get a list of all available extensions, i.e. extensions that can be installed.",
 		OperationID:    "ListAvailableExtensions",
-		Tags:           []string{core.TagExtension},
+		Tags:           []string{TagExtension},
 		Authentication: authentication,
 		Response: map[string]openapi.MethodResponse{
 			"200": {Description: "List of extensions", Value: ExtensionsResponse{
@@ -31,20 +29,20 @@ func ListAvailableExtensions(apiContext *core.ApiContext) *openapi.Get {
 			}},
 		},
 		Path:        newPathWithDbQueryParams().Add("extensions"),
-		HandlerFunc: dbRequest.CreateHandler(handleListAvailableExtensions(apiContext)),
+		HandlerFunc: adaptDbHandler(handleListAvailableExtensions(apiContext)),
 	}
 }
 
-func handleListAvailableExtensions(apiContext *core.ApiContext) dbRequest.DbHandler {
+func handleListAvailableExtensions(apiContext *ApiContext) dbHandler {
 	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) {
 		extensions, err := apiContext.Controller.GetAllExtensions(request.Context(), db)
 		if err != nil {
-			core.HandleError(request.Context(), writer, err)
+			HandleError(request.Context(), writer, err)
 			return
 		}
 		response := convertResponse(extensions)
 		log.Debugf("Got %d available extensions", len(response.Extensions))
-		core.SendJSON(request.Context(), writer, response)
+		SendJSON(request.Context(), writer, response)
 	}
 }
 

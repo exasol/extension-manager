@@ -3,10 +3,17 @@ package restAPI
 import (
 	"github.com/Nightapes/go-rest/pkg/openapi"
 	"github.com/exasol/extension-manager/extensionController"
-	"github.com/exasol/extension-manager/restAPI/core"
 )
 
-const EXTENSION_SCHEMA_NAME = "EXA_EXTENSIONS"
+const (
+	EXTENSION_SCHEMA_NAME = "EXA_EXTENSIONS"
+
+	TagExtension = "Extension"
+	TagInstance  = "Instance"
+
+	BearerAuth = "DbAccessToken"
+	BasicAuth  = "DbUsernamePassword"
+)
 
 // Configuration options for the extension manager.
 type ExtensionManagerConfig struct {
@@ -21,10 +28,10 @@ func AddPublicEndpoints(api *openapi.API, config ExtensionManagerConfig) error {
 }
 
 func addPublicEndpointsWithController(api *openapi.API, controller extensionController.TransactionController) error {
-	api.AddTag(core.TagExtension, "Calls to list, install and uninstall extensions")
-	api.AddTag(core.TagInstance, "Calls to list, create and remove instances of an extension")
+	api.AddTag(TagExtension, "Calls to list, install and uninstall extensions")
+	api.AddTag(TagInstance, "Calls to list, create and remove instances of an extension")
 
-	apiContext := core.NewApiContext(controller)
+	apiContext := NewApiContext(controller)
 
 	if err := api.Get(ListAvailableExtensions(apiContext)); err != nil {
 		return err

@@ -1,4 +1,4 @@
-package core
+package restAPI
 
 import (
 	"github.com/exasol/extension-manager/extensionController"

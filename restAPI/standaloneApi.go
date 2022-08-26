@@ -10,7 +10,6 @@ import (
 
 	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/extensionController"
-	"github.com/exasol/extension-manager/restAPI/core"
 
 	httpswagger "github.com/swaggo/http-swagger"
 
@@ -60,10 +59,10 @@ func createOpenApi() (*openapi.API, error) {
 	api.Title = "Exasol Extension Manager REST-API"
 	api.Description = "Managed extensions and instances of extensions"
 	api.Version = "1.0"
-	if err := api.WithBasicAuth(core.BasicAuth); err != nil {
+	if err := api.WithBasicAuth(BasicAuth); err != nil {
 		return nil, err
 	}
-	if err := api.WithBearerAuth(core.BearerAuth, "bearer", "JWT"); err != nil {
+	if err := api.WithBearerAuth(BearerAuth, "bearer", "JWT"); err != nil {
 		return nil, err
 	}
 	api.DefaultResponse(&openapi.MethodResponse{
@@ -85,7 +84,7 @@ func loggerMiddleware() func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 			buf := &bytes.Buffer{}
-			logger := core.GetLogger(r.Context())
+			logger := GetLogger(r.Context())
 			t1 := time.Now()
 			defer func() {
 

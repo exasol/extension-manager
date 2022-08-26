@@ -8,33 +8,30 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/exasol/extension-manager/extensionController"
-	"github.com/exasol/extension-manager/restAPI/core"
-
-	"github.com/exasol/extension-manager/restAPI/dbRequest"
 )
 
-func CreateInstance(apiContext *core.ApiContext) *openapi.Put {
+func CreateInstance(apiContext *ApiContext) *openapi.Put {
 	return &openapi.Put{
 		Summary:        "Create an instance of an extension.",
 		Description:    "This creates a new instance of an extension, e.g. a virtual schema.",
 		OperationID:    "CreateInstance",
-		Tags:           []string{core.TagInstance},
+		Tags:           []string{TagInstance},
 		Authentication: authentication,
 		RequestBody:    CreateInstanceRequest{ExtensionId: "s3-vs", ExtensionVersion: "1.1.0", ParameterValues: []ParameterValue{{Name: "param1", Value: "value1"}}},
 		Response: map[string]openapi.MethodResponse{
 			"200": {Description: "OK", Value: CreateInstanceResponse{InstanceName: "new-instance-name"}},
 		},
 		Path:        newPathWithDbQueryParams().Add("instances"),
-		HandlerFunc: dbRequest.CreateHandler(handleCreateInstance(apiContext)),
+		HandlerFunc: adaptDbHandler(handleCreateInstance(apiContext)),
 	}
 }
 
-func handleCreateInstance(apiContext *core.ApiContext) dbRequest.DbHandler {
+func handleCreateInstance(apiContext *ApiContext) dbHandler {
 	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) {
 		requestBody := CreateInstanceRequest{}
-		err := core.DecodeJSONBody(writer, request, &requestBody)
+		err := DecodeJSONBody(writer, request, &requestBody)
 		if err != nil {
-			core.HandleError(request.Context(), writer, err)
+			HandleError(request.Context(), writer, err)
 			return
 		}
 		var parameters []extensionController.ParameterValue
@@ -43,11 +40,11 @@ func handleCreateInstance(apiContext *core.ApiContext) dbRequest.DbHandler {
 		}
 		instanceName, err := apiContext.Controller.CreateInstance(request.Context(), db, requestBody.ExtensionId, requestBody.ExtensionVersion, parameters)
 		if err != nil {
-			core.HandleError(request.Context(), writer, err)
+			HandleError(request.Context(), writer, err)
 			return
 		}
 		logrus.Debugf("Created instance %q", instanceName)
-		core.SendJSON(request.Context(), writer, CreateInstanceResponse{InstanceName: instanceName})
+		SendJSON(request.Context(), writer, CreateInstanceResponse{InstanceName: instanceName})
 	}
 }
 

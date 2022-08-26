@@ -2,10 +2,9 @@ package restAPI
 
 import (
 	"github.com/Nightapes/go-rest/pkg/openapi"
-	"github.com/exasol/extension-manager/restAPI/core"
 )
 
-var authentication = map[string][]string{core.BasicAuth: {}, core.BearerAuth: {}}
+var authentication = map[string][]string{BasicAuth: {}, BearerAuth: {}}
 
 type exaPath struct {
 	*openapi.PathBuilder

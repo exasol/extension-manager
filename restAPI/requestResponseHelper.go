@@ -1,14 +1,13 @@
-package core
+package restAPI
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
-	"time"
-
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/go-chi/chi/v5/middleware"
@@ -33,6 +32,7 @@ func SendJSONWithStatus(ctx context.Context, status int, writer http.ResponseWri
 	logger := GetLogger(ctx)
 	writer.Header().Set(HeaderContentType, ContentTypeJson)
 	writer.WriteHeader(status)
+
 	if log.IsLevelEnabled(log.TraceLevel) {
 		jsonData, _ := json.MarshalIndent(data, "", "    ")
 		logger.Debugf("Send json %s", jsonData)

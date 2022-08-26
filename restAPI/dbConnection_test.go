@@ -1,4 +1,4 @@
-package dbRequest
+package restAPI
 
 import (
 	"encoding/base64"

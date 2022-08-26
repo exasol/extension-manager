@@ -6,17 +6,16 @@ import (
 
 	"github.com/Nightapes/go-rest/pkg/openapi"
 	"github.com/exasol/extension-manager/extensionAPI"
-	"github.com/exasol/extension-manager/restAPI/core"
-	"github.com/exasol/extension-manager/restAPI/dbRequest"
+
 	log "github.com/sirupsen/logrus"
 )
 
-func ListInstalledExtensions(apiContext *core.ApiContext) *openapi.Get {
+func ListInstalledExtensions(apiContext *ApiContext) *openapi.Get {
 	return &openapi.Get{
 		Summary:        "List installed extensions",
 		Description:    "Get a list of all installed extensions.",
 		OperationID:    "ListInstalledExtensions",
-		Tags:           []string{core.TagExtension},
+		Tags:           []string{TagExtension},
 		Authentication: authentication,
 		Response: map[string]openapi.MethodResponse{
 			"200": {Description: "List of extensions", Value: InstallationsResponse{
@@ -26,20 +25,20 @@ func ListInstalledExtensions(apiContext *core.ApiContext) *openapi.Get {
 			}},
 		},
 		Path:        newPathWithDbQueryParams().Add("installations"),
-		HandlerFunc: dbRequest.CreateHandler(handleListInstalledExtensions(apiContext)),
+		HandlerFunc: adaptDbHandler(handleListInstalledExtensions(apiContext)),
 	}
 }
 
-func handleListInstalledExtensions(apiContext *core.ApiContext) dbRequest.DbHandler {
+func handleListInstalledExtensions(apiContext *ApiContext) dbHandler {
 	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) {
 		installations, err := apiContext.Controller.GetInstalledExtensions(request.Context(), db)
 		if err != nil {
-			core.HandleError(request.Context(), writer, err)
+			HandleError(request.Context(), writer, err)
 			return
 		}
 		response := createResponse(installations)
 		log.Debugf("Installed extensions: %d", len(response.Installations))
-		core.SendJSON(request.Context(), writer, response)
+		SendJSON(request.Context(), writer, response)
 	}
 }
 

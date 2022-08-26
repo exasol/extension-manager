@@ -1,4 +1,4 @@
-package dbRequest
+package restAPI
 
 import (
 	"database/sql"
@@ -10,17 +10,16 @@ import (
 
 	"github.com/exasol/exasol-driver-go"
 	"github.com/exasol/extension-manager/apiErrors"
-	"github.com/exasol/extension-manager/restAPI/core"
 )
 
 type generalHandlerFunc = func(writer http.ResponseWriter, request *http.Request)
-type DbHandler = func(db *sql.DB, writer http.ResponseWriter, request *http.Request)
+type dbHandler = func(db *sql.DB, writer http.ResponseWriter, request *http.Request)
 
-func CreateHandler(f DbHandler) generalHandlerFunc {
+func adaptDbHandler(f dbHandler) generalHandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		db, err := opendbRequest(request)
 		if err != nil {
-			core.HandleError(request.Context(), writer, err)
+			HandleError(request.Context(), writer, err)
 			return
 		}
 		defer closedbRequest(db)
