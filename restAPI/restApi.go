@@ -35,6 +35,11 @@ type restAPIImpl struct {
 	stoppedMutex  *sync.Mutex
 }
 
+func (api *restAPIImpl) StartInBackground() {
+	go api.Serve()
+	api.waitUntilServerReplies()
+}
+
 func (api *restAPIImpl) Serve() {
 	if api.server != nil {
 		panic("server already running")
@@ -59,11 +64,6 @@ func (api *restAPIImpl) startServer() {
 	if err != nil && !api.isStopped() {
 		log.Fatalf("failed to start server: %v", err)
 	}
-}
-
-func (api *restAPIImpl) StartInBackground() {
-	go api.Serve()
-	api.waitUntilServerReplies()
 }
 
 func (api *restAPIImpl) waitUntilServerReplies() {
