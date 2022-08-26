@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/exasol/extension-manager/extensionController"
 	"github.com/stretchr/testify/suite"
@@ -18,9 +17,7 @@ func startRestApi(suite *suite.Suite, controller extensionController.Transaction
 		suite:   suite,
 		restAPI: Create(controller, hostAndPort),
 		baseUrl: fmt.Sprintf("http://%s", hostAndPort)}
-
-	go api.restAPI.Serve()
-	time.Sleep(10 * time.Millisecond) // give the server some time to become ready
+	api.restAPI.StartInBackground()
 	return &api
 }
 

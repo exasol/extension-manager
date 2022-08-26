@@ -70,7 +70,7 @@ func (mock *MockExtensionController) CreateInstance(ctx context.Context, db *sql
 
 func (suite *RestAPISuite) TestStopWithoutStartFails() {
 	controller := &MockExtensionController{}
-	restAPI := Create(controller, "localhost:8080")
+	restAPI := Create(controller, "localhost:8082")
 	suite.Panics(restAPI.Stop)
 }
 
