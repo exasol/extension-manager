@@ -3,7 +3,6 @@ package restAPI
 import (
 	"context"
 	"fmt"
-	"net"
 	"net/http"
 	"strings"
 	"sync"
@@ -17,10 +16,10 @@ import (
 type RestAPI interface {
 	// Serve starts the server. This method blocks until the server is stopped or fails.
 	Serve()
+	// StartInBackground starts the server in the background and blocks until it is ready, i.e. reacts to HTTP requests.
+	StartInBackground()
 	// Stop stops the server.
 	Stop()
-	// StartInBackground starts the server in the background and blocks until it is ready.
-	StartInBackground()
 }
 
 // Create creates a new RestAPI.
@@ -34,7 +33,6 @@ type restAPIImpl struct {
 	server        *http.Server
 	stopped       *bool
 	stoppedMutex  *sync.Mutex
-	waitGroup     *sync.WaitGroup
 }
 
 func (api *restAPIImpl) Serve() {
@@ -54,24 +52,17 @@ func (api *restAPIImpl) Serve() {
 	api.startServer()
 }
 
+// startServer starts the server on the given serverAddress. This method blocks until the server is stopped or fails.
 func (api *restAPIImpl) startServer() {
-	ln, err := net.Listen("tcp", api.serverAddress)
-	if err != nil {
-		log.Fatalf("failed to listen on address %s: %v", api.serverAddress, err)
-	}
 	log.Printf("Starting server on %s...\n", api.serverAddress)
-	api.waitGroup.Done()
-	err = api.server.Serve(ln) // blocking
+	err := api.server.ListenAndServe() // blocking
 	if err != nil && !api.isStopped() {
 		log.Fatalf("failed to start server: %v", err)
 	}
 }
 
 func (api *restAPIImpl) StartInBackground() {
-	api.waitGroup = &sync.WaitGroup{}
-	api.waitGroup.Add(1)
 	go api.Serve()
-	api.waitGroup.Wait()
 	api.waitUntilServerReplies()
 }
 
