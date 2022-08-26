@@ -1,4 +1,4 @@
-package requests
+package restAPI
 
 import (
 	"github.com/Nightapes/go-rest/pkg/openapi"

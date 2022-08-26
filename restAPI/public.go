@@ -4,7 +4,6 @@ import (
 	"github.com/Nightapes/go-rest/pkg/openapi"
 	"github.com/exasol/extension-manager/extensionController"
 	"github.com/exasol/extension-manager/restAPI/core"
-	"github.com/exasol/extension-manager/restAPI/requests"
 )
 
 const EXTENSION_SCHEMA_NAME = "EXA_EXTENSIONS"
@@ -27,16 +26,16 @@ func addPublicEndpointsWithController(api *openapi.API, controller extensionCont
 
 	apiContext := core.NewApiContext(controller)
 
-	if err := api.Get(requests.ListAvailableExtensions(apiContext)); err != nil {
+	if err := api.Get(ListAvailableExtensions(apiContext)); err != nil {
 		return err
 	}
-	if err := api.Get(requests.ListInstalledExtensions(apiContext)); err != nil {
+	if err := api.Get(ListInstalledExtensions(apiContext)); err != nil {
 		return err
 	}
-	if err := api.Put(requests.InstallExtension(apiContext)); err != nil {
+	if err := api.Put(InstallExtension(apiContext)); err != nil {
 		return err
 	}
-	if err := api.Put(requests.CreateInstance(apiContext)); err != nil {
+	if err := api.Put(CreateInstance(apiContext)); err != nil {
 		return err
 	}
 	return nil

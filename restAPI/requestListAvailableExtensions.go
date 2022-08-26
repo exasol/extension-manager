@@ -1,4 +1,4 @@
-package requests
+package restAPI
 
 import (
 	"database/sql"
@@ -10,7 +10,7 @@ import (
 
 	"github.com/exasol/extension-manager/extensionController"
 	"github.com/exasol/extension-manager/restAPI/core"
-	"github.com/exasol/extension-manager/restAPI/requests/dbRequest"
+	"github.com/exasol/extension-manager/restAPI/dbRequest"
 )
 
 func ListAvailableExtensions(apiContext *core.ApiContext) *openapi.Get {

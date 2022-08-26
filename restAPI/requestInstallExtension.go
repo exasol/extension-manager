@@ -1,4 +1,4 @@
-package requests
+package restAPI
 
 import (
 	"database/sql"
@@ -7,7 +7,7 @@ import (
 	"github.com/Nightapes/go-rest/pkg/openapi"
 
 	"github.com/exasol/extension-manager/restAPI/core"
-	"github.com/exasol/extension-manager/restAPI/requests/dbRequest"
+	"github.com/exasol/extension-manager/restAPI/dbRequest"
 )
 
 func InstallExtension(apiContext *core.ApiContext) *openapi.Put {
