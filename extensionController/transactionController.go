@@ -4,25 +4,27 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 
+	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/extensionAPI"
 )
 
 // TransactionController is the core part of the extension-manager that provides the extension handling functionality.
 type TransactionController interface {
-	// GetAllInstallations searches for installations of any extensions.
+	// GetAllExtensions reports all extension definitions.
 	// db is a connection to the Exasol DB
-	GetAllInstallations(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error)
+	GetAllExtensions(ctx context.Context, db *sql.DB) ([]*Extension, error)
+
+	// GetInstalledExtensions searches for installations of any extensions.
+	// db is a connection to the Exasol DB
+	GetInstalledExtensions(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error)
 
 	// InstallExtension installs an extension.
 	// db is a connection to the Exasol DB
 	// extensionId is the ID of the extension to install
 	// extensionVersion is the version of the extension to install
 	InstallExtension(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) error
-
-	// GetAllExtensions reports all extension definitions.
-	// db is a connection to the Exasol DB
-	GetAllExtensions(ctx context.Context, db *sql.DB) ([]*Extension, error)
 
 	// CreateInstance creates a new instance of an extension, e.g. a virtual schema and returns it's name.
 	// db is a connection to the Exasol DB
@@ -97,7 +99,7 @@ func (c *transactionControllerImpl) InstallExtension(ctx context.Context, db *sq
 	return err
 }
 
-func (c *transactionControllerImpl) GetAllInstallations(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
+func (c *transactionControllerImpl) GetInstalledExtensions(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
 	tx, err := beginTransaction(ctx, db)
 	if err != nil {
 		return nil, err
@@ -123,7 +125,14 @@ func (c *transactionControllerImpl) CreateInstance(ctx context.Context, db *sql.
 }
 
 func beginTransaction(ctx context.Context, db *sql.DB) (*sql.Tx, error) {
-	return db.BeginTx(ctx, nil)
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		if strings.Contains(err.Error(), "Connection exception - authentication failed") {
+			return nil, apiErrors.NewUnauthorizedErrorF("invalid database credentials")
+		}
+		return nil, fmt.Errorf("failed to begin transaction: %v", err)
+	}
+	return tx, nil
 }
 
 func rollback(tx *sql.Tx) {

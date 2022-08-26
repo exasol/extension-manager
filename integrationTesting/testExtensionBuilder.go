@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
 	"sync"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func CreateTestExtensionBuilder() *TestExtensionBuilder {

@@ -41,3 +41,4 @@ vendor/
 
 /parameterValidator/node_modules/
 /parameterValidator/dist/
+coverage.out

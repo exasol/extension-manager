@@ -3,8 +3,9 @@ package backend
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type ExasolSqlClient struct {

@@ -19,10 +19,6 @@ The extension-manager exposes a REST API for the frontend.
 <!-- markdown-link-check-disable-next-line -->
 This API is documented via Swagger. In order to view it, checkout this repo, run `go run ./...` and open `http://localhost:8080/swagger/index.html`.
 
-You can find the API definition here:
-* [swagger.json](./generatedApiDocs/swagger.json)
-* [swagger.yaml](./generatedApiDocs/swagger.yaml)
-
 ## Additional Information
 
 * [Changelog](doc/changes/changelog.md)
