@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Nightapes/go-rest/pkg/openapi"
+	"github.com/sirupsen/logrus"
 
 	"github.com/exasol/extension-manager/extensionController"
 	"github.com/exasol/extension-manager/restAPI/core"
@@ -45,6 +46,7 @@ func handleCreateInstance(apiContext *core.ApiContext) dbRequest.DbHandler {
 			core.HandleError(request.Context(), writer, err)
 			return
 		}
+		logrus.Debugf("Created instance %q", instanceName)
 		core.SendJSON(request.Context(), writer, CreateInstanceResponse{InstanceName: instanceName})
 	}
 }

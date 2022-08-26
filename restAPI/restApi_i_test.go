@@ -1,4 +1,4 @@
-package restAPI_test
+package restAPI
 
 import (
 	"fmt"

@@ -1,4 +1,4 @@
-package restAPI_test
+package restAPI
 
 import (
 	"encoding/base64"
@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/exasol/extension-manager/extensionController"
-	"github.com/exasol/extension-manager/restAPI"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -17,7 +16,7 @@ func startRestApi(suite *suite.Suite, controller extensionController.Transaction
 	hostAndPort := "localhost:8081"
 	api := baseRestAPITest{
 		suite:   suite,
-		restAPI: restAPI.Create(controller, hostAndPort),
+		restAPI: Create(controller, hostAndPort),
 		baseUrl: fmt.Sprintf("http://%s", hostAndPort)}
 
 	go api.restAPI.Serve()
@@ -28,7 +27,7 @@ func startRestApi(suite *suite.Suite, controller extensionController.Transaction
 type baseRestAPITest struct {
 	suite   *suite.Suite
 	baseUrl string
-	restAPI restAPI.RestAPI
+	restAPI RestAPI
 }
 
 func (t *baseRestAPITest) makeRequestWithAuthHeader(method string, path string, authHeader string, body string, expectedStatusCode int) string {
