@@ -3,6 +3,7 @@ package restAPI
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"sync"
 
@@ -48,9 +49,17 @@ func (api *restAPIImpl) Serve() {
 		Addr:    api.serverAddress,
 		Handler: handler,
 	}
+	api.startServer()
+}
+
+func (api *restAPIImpl) startServer() {
+	ln, err := net.Listen("tcp", api.serverAddress)
+	if err != nil {
+		log.Fatalf("failed to listen on address %s: %v", api.serverAddress, err)
+	}
 	log.Printf("Starting server on %s...\n", api.serverAddress)
 	api.waitGroup.Done()
-	err = api.server.ListenAndServe() // blocking
+	err = api.server.Serve(ln) // blocking
 	if err != nil && !api.isStopped() {
 		log.Fatalf("failed to start server: %v", err)
 	}
