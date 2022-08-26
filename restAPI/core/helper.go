@@ -15,6 +15,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	ContentTypeJson   = "application/json"
+	HeaderContentType = "Content-Type"
+)
+
 // SendJSON to writer
 func SendJSON(ctx context.Context, writer http.ResponseWriter, data interface{}) {
 	SendJSONWithStatus(ctx, 200, writer, data)
@@ -26,7 +31,7 @@ func SendNoContent(ctx context.Context, writer http.ResponseWriter) {
 
 func SendJSONWithStatus(ctx context.Context, status int, writer http.ResponseWriter, data interface{}) {
 	logger := GetLogger(ctx)
-	writer.Header().Set("Content-Type", "application/json")
+	writer.Header().Set(HeaderContentType, ContentTypeJson)
 	writer.WriteHeader(status)
 	if log.IsLevelEnabled(log.TraceLevel) {
 		jsonData, _ := json.MarshalIndent(data, "", "    ")
@@ -66,7 +71,7 @@ func convertToApiError(err error) *apiErrors.APIError {
 }
 
 func sendError(a *apiErrors.APIError, context context.Context, writer http.ResponseWriter) {
-	writer.Header().Set("Content-Type", "application/json")
+	writer.Header().Set(HeaderContentType, ContentTypeJson)
 	writer.WriteHeader(a.Status)
 	if context != nil && a.Status != http.StatusUnauthorized {
 		a.RequestID = middleware.GetReqID(context)
@@ -109,7 +114,7 @@ func getContextValue(ctx context.Context, id interface{}) string {
 }
 
 func DecodeJSONBody(writer http.ResponseWriter, request *http.Request, dst interface{}) error {
-	if value := request.Header.Get("Content-Type"); value != "application/json" {
+	if value := request.Header.Get(HeaderContentType); value != ContentTypeJson {
 		return apiErrors.NewAPIError(http.StatusBadRequest, "Content-Type header is not application/json")
 	}
 
