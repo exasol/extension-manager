@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/exasol/extension-manager/extensionController"
 	log "github.com/sirupsen/logrus"
@@ -70,6 +72,24 @@ func (api *restAPIImpl) StartInBackground() {
 	api.waitGroup.Add(1)
 	go api.Serve()
 	api.waitGroup.Wait()
+	api.waitUntilServerReplies()
+}
+
+func (api *restAPIImpl) waitUntilServerReplies() {
+	request, err := http.NewRequest("GET", fmt.Sprintf("http://%s", api.serverAddress), strings.NewReader(""))
+	if err != nil {
+		log.Fatalf("failed to create request: %v", err)
+	}
+	timeout := time.Now().Add(1 * time.Second)
+	for {
+		response, err := http.DefaultClient.Do(request)
+		if err == nil && response.StatusCode == 404 {
+			return
+		}
+		if time.Now().After(timeout) {
+			log.Fatalf("Server did not reply within 1s, error: %v, response: %d %s", err, response.StatusCode, response.Status)
+		}
+	}
 }
 
 func (api *restAPIImpl) setStopped(stopped bool) {
