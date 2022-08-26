@@ -80,7 +80,7 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaSetScript() {
 func (suite *ExaAllScriptsTableSuite) readMetaDataTables(schemaName string) *ExaMetadata {
 	tx, err := suite.exasol.GetConnection().Begin()
 	suite.NoError(err)
-	metaData, err := ReadMetadataTables(tx, schemaName)
+	metaData, err := CreateExaMetaDataReader().ReadMetadataTables(tx, schemaName)
 	suite.NoError(err)
 	return metaData
 }

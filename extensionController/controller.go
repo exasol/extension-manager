@@ -32,10 +32,11 @@ type controller interface {
 type controllerImpl struct {
 	extensionFolder string
 	schema          string
+	metaDataReader  extensionAPI.ExaMetadataReader
 }
 
 func createImpl(extensionFolder string, schema string) controller {
-	return &controllerImpl{extensionFolder: extensionFolder, schema: schema}
+	return &controllerImpl{extensionFolder: extensionFolder, schema: schema, metaDataReader: extensionAPI.CreateExaMetaDataReader()}
 }
 
 func (c *controllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, error) {
@@ -56,7 +57,7 @@ func (c *controllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, err
 func (c *controllerImpl) requiredFilesAvailable(extension *extensionAPI.JsExtension, bfsFiles []BfsFile) bool {
 	for _, requiredFile := range extension.BucketFsUploads {
 		if !existsFileInBfs(bfsFiles, requiredFile) {
-			log.Printf("Ignoring extension %q since the required file %q does not exist or has a wrong file size.\n", extension.Name, requiredFile.Name)
+			log.Printf("Ignoring extension %q since the required file %q (%q) does not exist or has a wrong file size.\n", extension.Name, requiredFile.Name, requiredFile.BucketFsFilename)
 			return false
 		}
 	}
@@ -91,7 +92,7 @@ func (c *controllerImpl) loadExtensionFromFile(extensionPath string) (*extension
 }
 
 func (c *controllerImpl) GetAllInstallations(tx *sql.Tx) ([]*extensionAPI.JsExtInstallation, error) {
-	metadata, err := extensionAPI.ReadMetadataTables(tx, c.schema)
+	metadata, err := c.metaDataReader.ReadMetadataTables(tx, c.schema)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
@@ -160,7 +161,7 @@ func (c *controllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensio
 }
 
 func (c *controllerImpl) findInstallationByVersion(tx *sql.Tx, context *extensionAPI.ExtensionContext, extension *extensionAPI.JsExtension, version string) (*extensionAPI.JsExtInstallation, error) {
-	metadata, err := extensionAPI.ReadMetadataTables(tx, c.schema)
+	metadata, err := c.metaDataReader.ReadMetadataTables(tx, c.schema)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}

@@ -5,11 +5,21 @@ import (
 	"fmt"
 )
 
+type ExaMetadataReader interface {
+	ReadMetadataTables(tx *sql.Tx, schemaName string) (*ExaMetadata, error)
+}
 type ExaMetadata struct {
 	AllScripts ExaAllScriptTable `json:"allScripts"`
 }
 
-func ReadMetadataTables(tx *sql.Tx, schemaName string) (*ExaMetadata, error) {
+func CreateExaMetaDataReader() ExaMetadataReader {
+	return &metaDataReaderImpl{}
+}
+
+type metaDataReaderImpl struct {
+}
+
+func (r *metaDataReaderImpl) ReadMetadataTables(tx *sql.Tx, schemaName string) (*ExaMetadata, error) {
 	allScripts, err := readExaAllScriptTable(tx, schemaName)
 	if err != nil {
 		return nil, err
