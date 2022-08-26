@@ -1,6 +1,7 @@
 package requests
 
 import (
+	"database/sql"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -9,9 +10,10 @@ import (
 
 	"github.com/exasol/extension-manager/extensionController"
 	"github.com/exasol/extension-manager/restAPI/core"
+	"github.com/exasol/extension-manager/restAPI/requests/dbRequest"
 )
 
-func ListAvailableExtensions(apiContext core.ApiContext) *openapi.Get {
+func ListAvailableExtensions(apiContext *core.ApiContext) *openapi.Get {
 	return &openapi.Get{
 		Summary:        "List available extensions",
 		Description:    "Get a list of all available extensions, i.e. extensions that can be installed.",
@@ -28,20 +30,14 @@ func ListAvailableExtensions(apiContext core.ApiContext) *openapi.Get {
 				}},
 			}},
 		},
-		Path:        NewPathWithDbQueryParams().Add("extensions"),
-		HandlerFunc: handleListAvailableExtensions(apiContext),
+		Path:        newPathWithDbQueryParams().Add("extensions"),
+		HandlerFunc: dbRequest.CreateHandler(handleListAvailableExtensions(apiContext)),
 	}
 }
 
-func handleListAvailableExtensions(apiContext core.ApiContext) func(writer http.ResponseWriter, request *http.Request) {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		db, err := apiContext.OpenDBConnection(request)
-		if err != nil {
-			core.HandleError(request.Context(), writer, err)
-			return
-		}
-		defer core.CloseDbConnection(db)
-		extensions, err := apiContext.Controller().GetAllExtensions(request.Context(), db)
+func handleListAvailableExtensions(apiContext *core.ApiContext) dbRequest.DbHandler {
+	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) {
+		extensions, err := apiContext.Controller.GetAllExtensions(request.Context(), db)
 		if err != nil {
 			core.HandleError(request.Context(), writer, err)
 			return

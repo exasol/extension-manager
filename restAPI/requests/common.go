@@ -7,12 +7,12 @@ import (
 
 var authentication = map[string][]string{core.BasicAuth: {}, core.BearerAuth: {}}
 
-type ExaPath struct {
+type exaPath struct {
 	*openapi.PathBuilder
 }
 
-func NewPathWithDbQueryParams() *ExaPath {
-	path := &ExaPath{getV1PublicBasePath(openapi.NewPathBuilder())}
+func newPathWithDbQueryParams() *exaPath {
+	path := &exaPath{getV1PublicBasePath(openapi.NewPathBuilder())}
 	path.WithQueryParameter("dbHost", openapi.STRING, "Exasol database hostname", true)
 	path.WithQueryParameter("dbPort", openapi.INTEGER, "Exasol database port number", true)
 	return path

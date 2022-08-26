@@ -1,15 +1,18 @@
 package requests
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/Nightapes/go-rest/pkg/openapi"
 
 	"github.com/exasol/extension-manager/extensionController"
 	"github.com/exasol/extension-manager/restAPI/core"
+
+	"github.com/exasol/extension-manager/restAPI/requests/dbRequest"
 )
 
-func CreateInstance(apiContext core.ApiContext) *openapi.Put {
+func CreateInstance(apiContext *core.ApiContext) *openapi.Put {
 	return &openapi.Put{
 		Summary:        "Create an instance of an extension.",
 		Description:    "This creates a new instance of an extension, e.g. a virtual schema.",
@@ -20,22 +23,15 @@ func CreateInstance(apiContext core.ApiContext) *openapi.Put {
 		Response: map[string]openapi.MethodResponse{
 			"200": {Description: "OK", Value: CreateInstanceResponse{InstanceName: "new-instance-name"}},
 		},
-		Path:        NewPathWithDbQueryParams().Add("instances"),
-		HandlerFunc: handleCreateInstance(apiContext),
+		Path:        newPathWithDbQueryParams().Add("instances"),
+		HandlerFunc: dbRequest.CreateHandler(handleCreateInstance(apiContext)),
 	}
 }
 
-func handleCreateInstance(apiContext core.ApiContext) func(writer http.ResponseWriter, request *http.Request) {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		db, err := apiContext.OpenDBConnection(request)
-		if err != nil {
-			core.HandleError(request.Context(), writer, err)
-			return
-		}
-		defer core.CloseDbConnection(db)
-
+func handleCreateInstance(apiContext *core.ApiContext) dbRequest.DbHandler {
+	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) {
 		requestBody := CreateInstanceRequest{}
-		err = core.DecodeJSONBody(writer, request, &requestBody)
+		err := core.DecodeJSONBody(writer, request, &requestBody)
 		if err != nil {
 			core.HandleError(request.Context(), writer, err)
 			return
@@ -44,7 +40,7 @@ func handleCreateInstance(apiContext core.ApiContext) func(writer http.ResponseW
 		for _, p := range requestBody.ParameterValues {
 			parameters = append(parameters, extensionController.ParameterValue{Name: p.Name, Value: p.Value})
 		}
-		instanceName, err := apiContext.Controller().CreateInstance(request.Context(), db, requestBody.ExtensionId, requestBody.ExtensionVersion, parameters)
+		instanceName, err := apiContext.Controller.CreateInstance(request.Context(), db, requestBody.ExtensionId, requestBody.ExtensionVersion, parameters)
 		if err != nil {
 			core.HandleError(request.Context(), writer, err)
 			return

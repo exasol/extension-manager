@@ -1,15 +1,17 @@
 package requests
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/Nightapes/go-rest/pkg/openapi"
 	"github.com/exasol/extension-manager/extensionAPI"
 	"github.com/exasol/extension-manager/restAPI/core"
+	"github.com/exasol/extension-manager/restAPI/requests/dbRequest"
 	log "github.com/sirupsen/logrus"
 )
 
-func ListInstalledExtensions(apiContext core.ApiContext) *openapi.Get {
+func ListInstalledExtensions(apiContext *core.ApiContext) *openapi.Get {
 	return &openapi.Get{
 		Summary:        "List installed extensions",
 		Description:    "Get a list of all installed extensions.",
@@ -23,20 +25,14 @@ func ListInstalledExtensions(apiContext core.ApiContext) *openapi.Get {
 					{Name: "s3-vs", Version: "1.1.0", InstanceParameters: nil}},
 			}},
 		},
-		Path:        NewPathWithDbQueryParams().Add("installations"),
-		HandlerFunc: handleListInstalledExtensions(apiContext),
+		Path:        newPathWithDbQueryParams().Add("installations"),
+		HandlerFunc: dbRequest.CreateHandler(handleListInstalledExtensions(apiContext)),
 	}
 }
 
-func handleListInstalledExtensions(apiContext core.ApiContext) func(writer http.ResponseWriter, request *http.Request) {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		db, err := apiContext.OpenDBConnection(request)
-		if err != nil {
-			core.HandleError(request.Context(), writer, err)
-			return
-		}
-		defer core.CloseDbConnection(db)
-		installations, err := apiContext.Controller().GetInstalledExtensions(request.Context(), db)
+func handleListInstalledExtensions(apiContext *core.ApiContext) dbRequest.DbHandler {
+	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) {
+		installations, err := apiContext.Controller.GetInstalledExtensions(request.Context(), db)
 		if err != nil {
 			core.HandleError(request.Context(), writer, err)
 			return

@@ -1,9 +1,10 @@
-package core
+package dbRequest
 
 import (
 	"encoding/base64"
-	"github.com/stretchr/testify/suite"
 	"testing"
+
+	"github.com/stretchr/testify/suite"
 )
 
 type ApiContextSuite struct {

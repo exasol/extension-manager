@@ -74,23 +74,22 @@ func (suite *RestAPISuite) TestStopWithoutStartFails() {
 	suite.Panics(restAPI.Stop)
 }
 
-var authSuccessTests = []struct{ parameters string }{
-	{parameters: "dbUser=user&dbPassword=password"},
-	{parameters: "dbAccessToken=token"},
-	{parameters: "dbRefreshToken=token"}}
+var authSuccessTests = []struct{ authHeader string }{
+	{authHeader: "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="},
+	{authHeader: "Bearer token"}}
 
 func (suite *RestAPISuite) TestGetInstallationsSuccessfully() {
-	suite.controller.On("GetAllInstallations", mock.Anything, mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)
+	suite.controller.On("GetInstalledExtensions", mock.Anything, mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)
 	for _, test := range authSuccessTests {
-		suite.Run(test.parameters, func() {
-			responseString := suite.makeGetRequest("/installations?dbHost=host&dbPort=8563&" + test.parameters)
+		suite.Run(test.authHeader, func() {
+			responseString := suite.makeRequestWithAuthHeader("GET", "/installations?dbHost=host&dbPort=8563&", test.authHeader, "", 200)
 			suite.assertJSON.Assertf(responseString, `{"installations":[{"name":"test","version":"0.1.0","instanceParameters":[{"id":"param1","name":"My param","type":"string"}]}]}`)
 		})
 	}
 }
 
 func (suite *RestAPISuite) TestGetInstallationsFailed() {
-	suite.controller.On("GetAllInstallations", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("mock error"))
+	suite.controller.On("GetInstalledExtensions", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("mock error"))
 	responseString := suite.makeRequest("GET", "/installations?dbHost=host&dbPort=8563", "", 500)
 	suite.Regexp(`{"code":500,"message":"Internal server error",`, responseString)
 }
@@ -98,8 +97,8 @@ func (suite *RestAPISuite) TestGetInstallationsFailed() {
 func (suite *RestAPISuite) TestGetAllExtensionsSuccessfully() {
 	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return([]*extensionController.Extension{{Id: "ext-id", Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
 	for _, test := range authSuccessTests {
-		suite.Run(test.parameters, func() {
-			responseString := suite.makeGetRequest("/extensions?dbHost=host&dbPort=8563&" + test.parameters)
+		suite.Run(test.authHeader, func() {
+			responseString := suite.makeRequestWithAuthHeader("GET", "/extensions?dbHost=host&dbPort=8563&", test.authHeader, "", 200)
 			suite.assertJSON.Assertf(responseString, `{"extensions":[{"id": "ext-id", "name":"my-extension","description":"a cool extension","installableVersions":["0.1.0"]}]}`)
 		})
 	}
@@ -114,8 +113,8 @@ func (suite *RestAPISuite) TestGetAllExtensionsFails() {
 func (suite *RestAPISuite) TestInstallExtensionsSuccessfully() {
 	suite.controller.On("InstallExtension", mock.Anything, mock.Anything, "ext-id", "ver").Return(nil)
 	for _, test := range authSuccessTests {
-		suite.Run(test.parameters, func() {
-			responseString := suite.makeRequest("PUT", "/installations?dbHost=host&dbPort=8563&"+test.parameters, `{"extensionId": "ext-id", "extensionVersion": "ver"}`, 204)
+		suite.Run(test.authHeader, func() {
+			responseString := suite.makeRequestWithAuthHeader("PUT", "/installations?dbHost=host&dbPort=8563&", test.authHeader, `{"extensionId": "ext-id", "extensionVersion": "ver"}`, 204)
 			suite.Equal("", responseString)
 		})
 	}
@@ -130,8 +129,8 @@ func (suite *RestAPISuite) TestInstallExtensionsFailed() {
 func (suite *RestAPISuite) TestCreateInstanceSuccessfully() {
 	suite.controller.On("CreateInstance", mock.Anything, mock.Anything, "ext-id", "ver", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return("instanceName", nil)
 	for _, test := range authSuccessTests {
-		suite.Run(test.parameters, func() {
-			responseString := suite.makeRequest("PUT", "/instances?dbHost=host&dbPort=8563&"+test.parameters,
+		suite.Run(test.authHeader, func() {
+			responseString := suite.makeRequestWithAuthHeader("PUT", "/instances?dbHost=host&dbPort=8563&", test.authHeader,
 				`{"extensionId": "ext-id", "extensionVersion": "ver", "parameterValues": [{"name":"p1", "value":"v1"}]}`, 200)
 			suite.Equal("{\"instanceName\":\"instanceName\"}\n", responseString)
 		})
@@ -176,7 +175,7 @@ func (suite *RestAPISuite) TestRequestsFailForMissingParameters() {
 		{"PUT", "/instances", "dbHost=host&dbPort=invalidPort", "invalid value 'invalidPort' for parameter dbPort"},
 	}
 	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return([]*extensionController.Extension{{Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
-	suite.controller.On("GetAllInstallations", mock.Anything, mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)
+	suite.controller.On("GetInstalledExtensions", mock.Anything, mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)
 	suite.controller.On("InstallExtension", mock.Anything, mock.Anything, "ext-id", "ver").Return(nil)
 	suite.controller.On("CreateInstance", mock.Anything, mock.Anything, "ext-id", "ver", mock.Anything).Return("instanceName", nil)
 	for _, test := range tests {
@@ -186,10 +185,6 @@ func (suite *RestAPISuite) TestRequestsFailForMissingParameters() {
 			suite.Regexp(fmt.Sprintf(`{"code":400,"message":"%s"`, test.expectedError), responseString)
 		})
 	}
-}
-
-func (suite *RestAPISuite) makeGetRequest(path string) string {
-	return suite.makeRequest("GET", path, "", 200)
 }
 
 func (suite *RestAPISuite) makeRequest(method, path, body string, expectedStatus int) string {
