@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-func startRestApi(suite *suite.Suite, controller extensionController.TransactionController) baseRestAPITest {
+func startRestApi(suite *suite.Suite, controller extensionController.TransactionController) *baseRestAPITest {
 	hostAndPort := "localhost:8081"
 	api := baseRestAPITest{
 		suite:   suite,
@@ -22,7 +22,7 @@ func startRestApi(suite *suite.Suite, controller extensionController.Transaction
 
 	go api.restAPI.Serve()
 	time.Sleep(10 * time.Millisecond) // give the server some time to become ready
-	return api
+	return &api
 }
 
 type baseRestAPITest struct {

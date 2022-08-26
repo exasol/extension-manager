@@ -18,8 +18,8 @@ const (
 
 type RestAPIIntegrationTestSuite struct {
 	suite.Suite
-	restApi           baseRestAPITest
-	exasol            integrationTesting.IntegrationTestSuite
+	restApi           *baseRestAPITest
+	exasol            *integrationTesting.DbTestSetup
 	tempExtensionRepo string
 	assertJSON        *jsonassert.Asserter
 }
@@ -29,8 +29,12 @@ func TestRestAPIIntegrationTestSuite(t *testing.T) {
 }
 
 func (suite *RestAPIIntegrationTestSuite) SetupSuite() {
-	suite.exasol.SetupSuite()
+	suite.exasol = integrationTesting.StartDbSetup(&suite.Suite)
 	suite.assertJSON = jsonassert.New(suite.T())
+}
+
+func (suite *RestAPIIntegrationTestSuite) TearDownSuite() {
+	suite.exasol.StopDb()
 }
 
 func (suite *RestAPIIntegrationTestSuite) SetupTest() {

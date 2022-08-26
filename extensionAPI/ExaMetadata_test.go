@@ -8,15 +8,32 @@ import (
 )
 
 type ExaAllScriptsTableSuite struct {
-	integrationTesting.IntegrationTestSuite
+	suite.Suite
+	exasol *integrationTesting.DbTestSetup
 }
 
 func TestExaAllScriptsTableSuite(t *testing.T) {
 	suite.Run(t, new(ExaAllScriptsTableSuite))
 }
 
+func (suite *ExaAllScriptsTableSuite) SetupSuite() {
+	suite.exasol = integrationTesting.StartDbSetup(&suite.Suite)
+}
+
+func (suite *ExaAllScriptsTableSuite) TearDownSuite() {
+	suite.exasol.StopDb()
+}
+
+func (suite *ExaAllScriptsTableSuite) BeforeTest(suiteName, testName string) {
+	suite.exasol.CreateConnection()
+}
+
+func (suite *ExaAllScriptsTableSuite) AfterTest(suiteName, testName string) {
+	suite.exasol.CloseConnection()
+}
+
 func (suite *ExaAllScriptsTableSuite) TestReadMetadataWithAllColumnsDefined() {
-	fixture := integrationTesting.CreateLuaScriptFixture(suite.Connection)
+	fixture := integrationTesting.CreateLuaScriptFixture(suite.exasol.GetConnection())
 	defer fixture.Close()
 	result := suite.readMetaDataTables(fixture.GetSchemaName())
 	suite.Assert().Equal(
@@ -31,7 +48,7 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataWithAllColumnsDefined() {
 }
 
 func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaAdapterScript() {
-	fixture := integrationTesting.CreateJavaAdapterScriptFixture(suite.Connection)
+	fixture := integrationTesting.CreateJavaAdapterScriptFixture(suite.exasol.GetConnection())
 	defer fixture.Close()
 	result := suite.readMetaDataTables(fixture.GetSchemaName())
 	suite.Assert().Equal(
@@ -46,7 +63,7 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaAdapterScript() {
 }
 
 func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaSetScript() {
-	fixture := integrationTesting.CreateJavaSetScriptFixture(suite.Connection)
+	fixture := integrationTesting.CreateJavaSetScriptFixture(suite.exasol.GetConnection())
 	defer fixture.Close()
 	result := suite.readMetaDataTables(fixture.GetSchemaName())
 	suite.Assert().Equal(
@@ -61,7 +78,7 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaSetScript() {
 }
 
 func (suite *ExaAllScriptsTableSuite) readMetaDataTables(schemaName string) *ExaMetadata {
-	tx, err := suite.Connection.Begin()
+	tx, err := suite.exasol.GetConnection().Begin()
 	suite.NoError(err)
 	metaData, err := ReadMetadataTables(tx, schemaName)
 	suite.NoError(err)

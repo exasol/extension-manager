@@ -16,7 +16,7 @@ import (
 
 type RestAPISuite struct {
 	suite.Suite
-	restApi    baseRestAPITest
+	restApi    *baseRestAPITest
 	assertJSON *jsonassert.Asserter
 	controller *MockExtensionController
 }
