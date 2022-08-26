@@ -9,13 +9,13 @@ go generate ./...
 go build -o extension-manager cmd/main.go
 ```
 
-Tu run the extension manager, execute
+To run the extension manager, execute
 
 ```shell
 go run cmd/main.go
 ```
 
-You can get the OpenApi definition by executing
+After starting the server you can get the OpenApi definition by executing
 
 ```shell
 curl "http://localhost:8080/openapi.json" -o extension-manager-api.json
