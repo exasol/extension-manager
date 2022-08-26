@@ -35,7 +35,7 @@ func (suite *RestAPIIntegrationTestSuite) SetupSuite() {
 
 func (suite *RestAPIIntegrationTestSuite) SetupTest() {
 	ctrl := extensionController.Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	suite.restApi = startRestApi(suite.Suite, ctrl)
+	suite.restApi = startRestApi(&suite.Suite, ctrl)
 }
 
 func (suite *RestAPIIntegrationTestSuite) TearDownTest() {

@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-func startRestApi(suite suite.Suite, controller extensionController.TransactionController) baseRestAPITest {
+func startRestApi(suite *suite.Suite, controller extensionController.TransactionController) baseRestAPITest {
 	hostAndPort := "localhost:8081"
 	api := baseRestAPITest{
 		suite:   suite,
@@ -26,7 +26,7 @@ func startRestApi(suite suite.Suite, controller extensionController.TransactionC
 }
 
 type baseRestAPITest struct {
-	suite   suite.Suite
+	suite   *suite.Suite
 	baseUrl string
 	restAPI restAPI.RestAPI
 }

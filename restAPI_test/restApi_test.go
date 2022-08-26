@@ -35,7 +35,7 @@ func (suite *RestAPISuite) SetupSuite() {
 
 func (suite *RestAPISuite) SetupTest() {
 	suite.controller = &MockExtensionController{}
-	suite.restApi = startRestApi(suite.Suite, suite.controller)
+	suite.restApi = startRestApi(&suite.Suite, suite.controller)
 }
 
 func (suite *RestAPISuite) TearDownTest() {
