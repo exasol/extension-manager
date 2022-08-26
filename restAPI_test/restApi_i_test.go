@@ -3,11 +3,9 @@ package restAPI_test
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/exasol/extension-manager/extensionController"
 	"github.com/exasol/extension-manager/integrationTesting"
-	"github.com/exasol/extension-manager/restAPI"
 	"github.com/kinbiko/jsonassert"
 
 	"github.com/stretchr/testify/suite"
@@ -19,7 +17,8 @@ const (
 )
 
 type RestAPIIntegrationTestSuite struct {
-	baseRestAPITest
+	suite.Suite
+	restApi           baseRestAPITest
 	exasol            integrationTesting.IntegrationTestSuite
 	tempExtensionRepo string
 	assertJSON        *jsonassert.Asserter
@@ -36,11 +35,11 @@ func (suite *RestAPIIntegrationTestSuite) SetupSuite() {
 
 func (suite *RestAPIIntegrationTestSuite) SetupTest() {
 	ctrl := extensionController.Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	hostAndPort := "localhost:8081"
-	suite.restAPI = restAPI.Create(ctrl, hostAndPort)
-	suite.baseUrl = fmt.Sprintf("http://%s", hostAndPort)
-	go suite.restAPI.Serve()
-	time.Sleep(10 * time.Millisecond) // give the server some time to become ready
+	suite.restApi = startRestApi(suite.Suite, ctrl)
+}
+
+func (suite *RestAPIIntegrationTestSuite) TearDownTest() {
+	suite.restApi.restAPI.Stop()
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestGetAllExtensionsSuccessfully() {
@@ -54,12 +53,12 @@ func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsSuccessfully() {
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsFails_InvalidUsernamePassword() {
-	response := suite.makeRequestWithAuthHeader("GET", "/api/v1/installations?"+suite.getValidDbArgs(), createBasicAuthHeader("wrong", "user"), "", 401)
+	response := suite.restApi.makeRequestWithAuthHeader("GET", "/api/v1/installations?"+suite.getValidDbArgs(), createBasicAuthHeader("wrong", "user"), "", 401)
 	suite.Regexp(`{"code":401,"message":"invalid database credentials".*`, response)
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsFails_InvalidBearerToken() {
-	response := suite.makeRequestWithAuthHeader("GET", "/api/v1/installations?"+suite.getValidDbArgs(), "Bearer invalid", "", 401)
+	response := suite.restApi.makeRequestWithAuthHeader("GET", "/api/v1/installations?"+suite.getValidDbArgs(), "Bearer invalid", "", 401)
 	suite.Regexp(`{"code":401,"message":"invalid database credentials".*`, response)
 }
 
@@ -88,5 +87,5 @@ func (suite *RestAPIIntegrationTestSuite) makeGetRequest(path string) string {
 
 func (suite *RestAPIIntegrationTestSuite) makeRequest(method string, path string, body string, expectedStatusCode int) string {
 	info := suite.exasol.ConnectionInfo
-	return suite.makeRequestWithAuthHeader(method, path, createBasicAuthHeader(info.User, info.Password), body, expectedStatusCode)
+	return suite.restApi.makeRequestWithAuthHeader(method, path, createBasicAuthHeader(info.User, info.Password), body, expectedStatusCode)
 }
