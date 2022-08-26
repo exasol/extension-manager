@@ -28,18 +28,26 @@ type baseRestAPITest struct {
 }
 
 func (t *baseRestAPITest) makeRequestWithAuthHeader(method string, path string, authHeader string, body string, expectedStatusCode int) string {
-	request, err := http.NewRequest(method, t.baseUrl+path, strings.NewReader(body))
+	url := t.baseUrl + path
+	request, err := http.NewRequest(method, url, strings.NewReader(body))
+	if err != nil {
+		t.suite.FailNowf("Creating request %s %s failed: %v", method, url, err)
+	}
 	request.Header.Add("Authorization", authHeader)
 	if body != "" {
 		request.Header.Add("Content-Type", "application/json")
 	}
-	t.suite.NoError(err)
+
 	response, err := http.DefaultClient.Do(request)
-	t.suite.NoError(err)
+	if err != nil {
+		t.suite.FailNowf("Request %s %s failed: %v", method, url, err)
+	}
 	t.suite.Equal(expectedStatusCode, response.StatusCode)
 	defer func() { t.suite.NoError(response.Body.Close()) }()
 	bytes, err := io.ReadAll(response.Body)
-	t.suite.NoError(err)
+	if err != nil {
+		t.suite.FailNowf("Reading body failed: %v", err.Error())
+	}
 	responseBody := string(bytes)
 	return responseBody
 }
