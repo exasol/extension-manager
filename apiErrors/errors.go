@@ -35,6 +35,17 @@ func NewAPIError(status int, message string) error {
 	}
 }
 
+func NewAPIErrorWithCause(message string, cause error) error {
+	if apiErr, ok := cause.(*APIError); ok {
+		return &APIError{
+			Status:        apiErr.Status,
+			Message:       fmt.Sprintf("%s: %s", message, apiErr.Message),
+			OriginalError: cause,
+		}
+	}
+	return fmt.Errorf("%s: %w", message, cause)
+}
+
 type APIError struct {
 	Status        int    `json:"code"`                // HTTP status code
 	Message       string `json:"message"`             // human-readable message

@@ -89,7 +89,7 @@ func (suite *ControllerITestSuite) TestGetAllExtensionsWithMissingJar() {
 	suite.Assert().Empty(extensions)
 }
 
-func (suite *ControllerITestSuite) TestGetAllExtensionsThrowingJSError() {
+func (suite *ControllerITestSuite) GetInstalledExtensions_failsWithGenericError() {
 	const jarName = "my-failing-extension-1.2.3.jar"
 	integrationTesting.CreateTestExtensionBuilder().
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: jarName, FileSize: 3}).
@@ -104,7 +104,7 @@ func (suite *ControllerITestSuite) TestGetAllExtensionsThrowingJSError() {
 	suite.Nil(extensions)
 }
 
-func (suite *ControllerITestSuite) TestGetAllExtensionsThrowingJSApiError() {
+func (suite *ControllerITestSuite) GetInstalledExtensions_failsWithApiError() {
 	const jarName = "my-failing-extension-1.2.3.jar"
 	integrationTesting.CreateTestExtensionBuilder().
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: jarName, FileSize: 3}).
@@ -119,7 +119,7 @@ func (suite *ControllerITestSuite) TestGetAllExtensionsThrowingJSApiError() {
 		suite.Equal("mock error from js", apiError.Message)
 		suite.Equal(400, apiError.Status)
 	} else {
-		suite.Fail("wrong error type", "Expected APIError but got %t: %v", err, err)
+		suite.Fail("wrong error type", "Expected APIError but got %T: %v", err, err)
 	}
 	suite.Nil(extensions)
 }

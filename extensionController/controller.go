@@ -8,6 +8,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/extensionAPI"
 	"github.com/exasol/extension-manager/parameterValidator"
 )
@@ -105,7 +106,7 @@ func (c *controllerImpl) GetAllInstallations(tx *sql.Tx) ([]*extensionAPI.JsExtI
 	for _, extension := range extensions {
 		installations, err := extension.FindInstallations(extensionContext, metadata)
 		if err != nil {
-			return nil, fmt.Errorf("failed to find installations: %v", err)
+			return nil, apiErrors.NewAPIErrorWithCause(fmt.Sprintf("failed to find installations for extension %q", extension.Name), err)
 		} else {
 			allInstallations = append(allInstallations, installations...)
 		}
@@ -168,7 +169,7 @@ func (c *controllerImpl) findInstallationByVersion(tx *sql.Tx, context *extensio
 
 	installations, err := extension.FindInstallations(context, metadata)
 	if err != nil {
-		return nil, fmt.Errorf("failed to find installations. Cause: %w", err)
+		return nil, apiErrors.NewAPIErrorWithCause(fmt.Sprintf("failed to find installations for extension %q", extension.Name), err)
 	}
 	var availableVersions []string
 	for _, i := range installations {

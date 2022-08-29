@@ -86,34 +86,25 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsWithMissingJar() {
 	suite.Empty(extensions)
 }
 
-func (suite *ControllerUTestSuite) TestGetAllExtensionsThrowingJSError() {
-	const jarName = "my-failing-extension-1.2.3.jar"
+func (suite *ControllerUTestSuite) TestGetAllInstallations_failsWithGenericError() {
 	integrationTesting.CreateTestExtensionBuilder().
-		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: jarName, FileSize: 3}).
 		WithFindInstallationsFunc("throw Error(`mock error from js`)").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
 	suite.simulateExaMetaData(extensionAPI.ExaMetadata{})
 	extensions, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
-	suite.ErrorContains(err, `failed to find installations: failed to find installations for extension "testing-extension.js": Error: mock error from js at`)
+	suite.EqualError(err, `failed to find installations for extension "MyDemoExtension": mock error from js`)
 	suite.Nil(extensions)
 }
 
-func (suite *ControllerUTestSuite) TestGetAllExtensionsThrowingJSApiError() {
-	const jarName = "my-failing-extension-1.2.3.jar"
+func (suite *ControllerUTestSuite) TestGetAllInstallations_failsWithApiError() {
 	integrationTesting.CreateTestExtensionBuilder().
-		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: jarName, FileSize: 3}).
 		WithFindInstallationsFunc("throw new ApiError(400, `mock error from js`)").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
 	suite.simulateExaMetaData(extensionAPI.ExaMetadata{})
 	extensions, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
-	if apiError, ok := err.(*apiErrors.APIError); ok {
-		suite.Equal("mock error from js", apiError.Message)
-		suite.Equal(400, apiError.Status)
-	} else {
-		suite.Fail("wrong error type", "Expected APIError but got %t: %v", err, err)
-	}
+	suite.assertApiError(err, 400, "failed to find installations for extension \"MyDemoExtension\": mock error from js")
 	suite.Nil(extensions)
 }
 
@@ -132,12 +123,37 @@ func (suite *ControllerUTestSuite) TestInstallFailsForUnknownExtensionId() {
 }
 
 func (suite *ControllerUTestSuite) TestInstallSucceeds() {
-	suite.writeDefaultExtension()
+	integrationTesting.CreateTestExtensionBuilder().
+		WithInstallFunc("context.sqlClient.runQuery('install extension')").
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
 	suite.dbMock.ExpectExec("install extension").WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()
 	err := suite.controller.InstallExtension(mockContext(), suite.db, DEFAULT_EXTENSION_ID, "ver")
 	suite.NoError(err)
 	suite.dbMock.ExpectCommit()
+}
+
+func (suite *ControllerUTestSuite) TestInstall_FailsWithGenericError() {
+	integrationTesting.CreateTestExtensionBuilder().
+		WithInstallFunc("throw Error('mock error from js')").
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
+	suite.dbMock.ExpectCommit()
+	err := suite.controller.InstallExtension(mockContext(), suite.db, DEFAULT_EXTENSION_ID, "ver")
+	suite.EqualError(err, "mock error from js")
+	suite.dbMock.ExpectRollback()
+}
+
+func (suite *ControllerUTestSuite) TestInstall_FailsWithApiError() {
+	integrationTesting.CreateTestExtensionBuilder().
+		WithInstallFunc("throw new ApiError(400, 'mock error from js')").
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
+	suite.dbMock.ExpectCommit()
+	err := suite.controller.InstallExtension(mockContext(), suite.db, DEFAULT_EXTENSION_ID, "ver")
+	suite.assertApiError(err, 400, "mock error from js")
+	suite.dbMock.ExpectRollback()
 }
 
 func (suite *ControllerUTestSuite) TestEnsureSchemaExistsCreatesSchemaIfItDoesNotExist() {
@@ -166,6 +182,7 @@ func (suite *ControllerUTestSuite) TestAddInstance_wrongVersion() {
 	instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, DEFAULT_EXTENSION_ID, "wrongVersion", []ParameterValue{})
 	suite.EqualError(err, `failed to find installations: version "wrongVersion" not found for extension "testing-extension.js", available versions: ["0.1.0"]`)
 	suite.Equal("", instanceName)
+	suite.dbMock.ExpectRollback()
 }
 
 func (suite *ControllerUTestSuite) TestAddInstance_invalidParameters() {
@@ -182,6 +199,33 @@ func (suite *ControllerUTestSuite) TestAddInstance_invalidParameters() {
 	instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{})
 	suite.EqualError(err, `invalid parameters: Failed to validate parameter "My param": This is a required parameter.`)
 	suite.Equal("", instanceName)
+	suite.dbMock.ExpectRollback()
+}
+
+func (suite *ControllerUTestSuite) TestAddInstance_failsWithGenericError() {
+	integrationTesting.CreateTestExtensionBuilder().
+		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
+		WithAddInstanceFunc("throw Error('mock error from js')").
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
+	suite.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{})
+	instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{})
+	suite.EqualError(err, `mock error from js`)
+	suite.Equal("", instanceName)
+	suite.dbMock.ExpectRollback()
+}
+
+func (suite *ControllerUTestSuite) TestAddInstance_failsWithApiError() {
+	integrationTesting.CreateTestExtensionBuilder().
+		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
+		WithAddInstanceFunc("throw new ApiError(400, 'mock error from js')").
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
+	suite.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{})
+	instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{})
+	suite.assertApiError(err, 400, `mock error from js`)
+	suite.Equal("", instanceName)
+	suite.dbMock.ExpectRollback()
 }
 
 func (suite *ControllerUTestSuite) TestAddInstance_validParameters() {
@@ -225,4 +269,13 @@ func (suite *ControllerUTestSuite) writeDefaultExtension() {
 
 func mockContext() context.Context {
 	return context.Background()
+}
+
+func (suite *ControllerUTestSuite) assertApiError(err error, expectedStatus int, expectedMessage string) {
+	if apiError, ok := err.(*apiErrors.APIError); ok {
+		suite.Equal(expectedMessage, apiError.Message)
+		suite.Equal(400, apiError.Status)
+	} else {
+		suite.Fail("wrong error type", "Expected APIError but got %T: %v", err, err)
+	}
 }
