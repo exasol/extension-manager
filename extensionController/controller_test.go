@@ -59,7 +59,7 @@ func (suite *ControllerUTestSuite) SetupTest() {
 }
 
 func (suite *ControllerUTestSuite) TeardownTest() {
-	suite.dbMock.ExpectationsWereMet()
+	suite.NoError(suite.dbMock.ExpectationsWereMet())
 	err := os.RemoveAll(suite.tempExtensionRepo)
 	if err != nil {
 		panic(err)
