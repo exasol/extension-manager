@@ -67,7 +67,7 @@ func (suite *ControllerITestSuite) TestGetAllExtensions() {
 }
 
 func (suite *ControllerITestSuite) writeDefaultExtension() {
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "my-extension.1.2.3.jar", FileSize: 3}).
 		WithFindInstallationsFunc(`
 		return metadata.allScripts.rows.map(row => {
@@ -78,7 +78,7 @@ func (suite *ControllerITestSuite) writeDefaultExtension() {
 }
 
 func (suite *ControllerITestSuite) TestGetAllExtensionsWithMissingJar() {
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "missing-jar.jar", FileSize: 3}).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
@@ -90,7 +90,7 @@ func (suite *ControllerITestSuite) TestGetAllExtensionsWithMissingJar() {
 
 func (suite *ControllerITestSuite) GetInstalledExtensions_failsWithGenericError() {
 	const jarName = "my-failing-extension-1.2.3.jar"
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: jarName, FileSize: 3}).
 		WithFindInstallationsFunc("throw Error(`mock error from js`)").
 		Build().
@@ -104,7 +104,7 @@ func (suite *ControllerITestSuite) GetInstalledExtensions_failsWithGenericError(
 
 func (suite *ControllerITestSuite) GetInstalledExtensions_failsWithApiError() {
 	const jarName = "my-failing-extension-1.2.3.jar"
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: jarName, FileSize: 3}).
 		WithFindInstallationsFunc("throw new ApiError(400, `mock error from js`)").
 		Build().
@@ -169,7 +169,7 @@ func (suite *ControllerITestSuite) TestEnsureSchemaDoesNotFailIfSchemaAlreadyExi
 }
 
 func (suite *ControllerITestSuite) TestAddInstance_wrongVersion() {
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
 		WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
@@ -181,7 +181,7 @@ func (suite *ControllerITestSuite) TestAddInstance_wrongVersion() {
 }
 
 func (suite *ControllerITestSuite) TestAddInstance_invalidParameters() {
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
 		id: "p1",
 		name: "My param",
@@ -197,7 +197,7 @@ func (suite *ControllerITestSuite) TestAddInstance_invalidParameters() {
 }
 
 func (suite *ControllerITestSuite) TestAddInstance_validParameters() {
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
 		id: "p1",
 		name: "My param",

@@ -77,7 +77,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensions() {
 
 func (suite *ControllerUTestSuite) TestGetAllExtensionsWithMissingJar() {
 	suite.simulateBucketFs([]BfsFile{})
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "missing-jar.jar", FileSize: 3}).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
@@ -87,7 +87,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsWithMissingJar() {
 }
 
 func (suite *ControllerUTestSuite) TestGetAllInstallations_failsWithGenericError() {
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc("throw Error(`mock error from js`)").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
@@ -98,7 +98,7 @@ func (suite *ControllerUTestSuite) TestGetAllInstallations_failsWithGenericError
 }
 
 func (suite *ControllerUTestSuite) TestGetAllInstallations_failsWithApiError() {
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc("throw new ApiError(400, `mock error from js`)").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
@@ -123,7 +123,7 @@ func (suite *ControllerUTestSuite) TestInstallFailsForUnknownExtensionId() {
 }
 
 func (suite *ControllerUTestSuite) TestInstallSucceeds() {
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithInstallFunc("context.sqlClient.runQuery('install extension')").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
@@ -135,7 +135,7 @@ func (suite *ControllerUTestSuite) TestInstallSucceeds() {
 }
 
 func (suite *ControllerUTestSuite) TestInstall_FailsWithGenericError() {
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithInstallFunc("throw Error('mock error from js')").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
@@ -146,7 +146,7 @@ func (suite *ControllerUTestSuite) TestInstall_FailsWithGenericError() {
 }
 
 func (suite *ControllerUTestSuite) TestInstall_FailsWithApiError() {
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithInstallFunc("throw new ApiError(400, 'mock error from js')").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
@@ -173,7 +173,7 @@ func (suite *ControllerUTestSuite) TestEnsureSchemaDoesNotFailIfSchemaAlreadyExi
 }
 
 func (suite *ControllerUTestSuite) TestAddInstance_wrongVersion() {
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
 		WithAddInstanceFunc("return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
@@ -186,7 +186,7 @@ func (suite *ControllerUTestSuite) TestAddInstance_wrongVersion() {
 }
 
 func (suite *ControllerUTestSuite) TestAddInstance_invalidParameters() {
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
 		id: "p1",
 		name: "My param",
@@ -203,7 +203,7 @@ func (suite *ControllerUTestSuite) TestAddInstance_invalidParameters() {
 }
 
 func (suite *ControllerUTestSuite) TestAddInstance_failsWithGenericError() {
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
 		WithAddInstanceFunc("throw Error('mock error from js')").
 		Build().
@@ -216,7 +216,7 @@ func (suite *ControllerUTestSuite) TestAddInstance_failsWithGenericError() {
 }
 
 func (suite *ControllerUTestSuite) TestAddInstance_failsWithApiError() {
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
 		WithAddInstanceFunc("throw new ApiError(400, 'mock error from js')").
 		Build().
@@ -229,7 +229,7 @@ func (suite *ControllerUTestSuite) TestAddInstance_failsWithApiError() {
 }
 
 func (suite *ControllerUTestSuite) TestAddInstance_validParameters() {
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
 		id: "p1",
 		name: "My param",
@@ -256,7 +256,7 @@ func (suite *ControllerUTestSuite) simulateExaMetaData(metaData extensionAPI.Exa
 }
 
 func (suite *ControllerUTestSuite) writeDefaultExtension() {
-	integrationTesting.CreateTestExtensionBuilder().
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "my-extension.1.2.3.jar", FileSize: 3}).
 		WithFindInstallationsFunc(`
 		return metadata.allScripts.rows.map(row => {
