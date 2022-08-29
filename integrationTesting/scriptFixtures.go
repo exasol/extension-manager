@@ -3,6 +3,7 @@ package integrationTesting
 import (
 	"database/sql"
 	"fmt"
+	"testing"
 )
 
 type ScriptFixture struct {
@@ -52,6 +53,8 @@ func (f ScriptFixture) GetSchemaName() string {
 	return "TEST"
 }
 
-func (f ScriptFixture) Close() {
-	execSQL(f.db, "DROP SCHEMA IF EXISTS TEST CASCADE")
+func (f ScriptFixture) Cleanup(t *testing.T) {
+	t.Cleanup(func() {
+		execSQL(f.db, "DROP SCHEMA IF EXISTS TEST CASCADE")
+	})
 }

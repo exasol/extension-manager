@@ -37,25 +37,27 @@ func (suite *ControllerITestSuite) TearDownSuite() {
 
 func (suite *ControllerITestSuite) SetupTest() {
 	suite.exasol.CreateConnection()
+	suite.T().Cleanup(func() {
+		suite.exasol.CloseConnection()
+	})
 	tempExtensionRepo, err := os.MkdirTemp(os.TempDir(), "ExtensionControllerSuite")
 	if err != nil {
-		panic(err)
+		suite.FailNow("failed to create temp dir: %v", err)
 	}
+	suite.T().Cleanup(func() {
+		err := os.RemoveAll(suite.tempExtensionRepo)
+		suite.NoError(err)
+	})
 	suite.tempExtensionRepo = tempExtensionRepo
 }
 
 func (suite *ControllerITestSuite) AfterTest(suiteName, testName string) {
-	suite.exasol.CloseConnection()
-	err := os.RemoveAll(suite.tempExtensionRepo)
-	if err != nil {
-		panic(err)
-	}
+
 }
 
 func (suite *ControllerITestSuite) TestGetAllExtensions() {
 	suite.writeDefaultExtension()
-	suite.NoError(suite.exasol.Exasol.UploadStringContent("123", "my-extension.1.2.3.jar")) // create file with 3B size
-	defer func() { suite.NoError(suite.exasol.Exasol.DeleteFile("my-extension.1.2.3.jar")) }()
+	suite.uploadBucketFsFile("123", "my-extension.1.2.3.jar") // create file with 3B size
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
 	extensions, err := controller.GetAllExtensions(mockContext(), suite.exasol.GetConnection())
 	suite.NoError(err)
@@ -81,10 +83,7 @@ func (suite *ControllerITestSuite) TestGetAllExtensionsWithMissingJar() {
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	db, err := suite.exasol.Exasol.CreateConnectionWithConfig(false)
-	suite.NoError(err)
-	defer func() { suite.NoError(db.Close()) }()
-	extensions, err := controller.GetAllExtensions(mockContext(), db)
+	extensions, err := controller.GetAllExtensions(mockContext(), suite.exasol.GetConnection())
 	suite.NoError(err)
 	suite.Assert().Empty(extensions)
 }
@@ -96,8 +95,7 @@ func (suite *ControllerITestSuite) GetInstalledExtensions_failsWithGenericError(
 		WithFindInstallationsFunc("throw Error(`mock error from js`)").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
-	suite.NoError(suite.exasol.Exasol.UploadStringContent("123", jarName)) // create file with 3B size
-	defer func() { suite.NoError(suite.exasol.Exasol.DeleteFile(jarName)) }()
+	suite.uploadBucketFsFile("123", jarName) // create file with 3B size
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
 	extensions, err := controller.GetInstalledExtensions(mockContext(), suite.exasol.GetConnection())
 	suite.ErrorContains(err, `failed to find installations: failed to find installations for extension "testing-extension.js": Error: mock error from js at`)
@@ -111,8 +109,7 @@ func (suite *ControllerITestSuite) GetInstalledExtensions_failsWithApiError() {
 		WithFindInstallationsFunc("throw new ApiError(400, `mock error from js`)").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
-	suite.NoError(suite.exasol.Exasol.UploadStringContent("123", jarName))
-	defer func() { suite.NoError(suite.exasol.Exasol.DeleteFile(jarName)) }()
+	suite.uploadBucketFsFile("123", jarName)
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
 	extensions, err := controller.GetInstalledExtensions(mockContext(), suite.exasol.GetConnection())
 	if apiError, ok := err.(*apiErrors.APIError); ok {
@@ -128,7 +125,7 @@ func (suite *ControllerITestSuite) TestGetAllInstallations() {
 	suite.writeDefaultExtension()
 	fixture := integrationTesting.CreateLuaScriptFixture(suite.exasol.GetConnection())
 	controller := Create(suite.tempExtensionRepo, fixture.GetSchemaName())
-	defer fixture.Close()
+	fixture.Cleanup(suite.T())
 	installations, err := controller.GetInstalledExtensions(mockContext(), suite.exasol.GetConnection())
 	suite.NoError(err)
 	suite.Assert().Equal(1, len(installations))
@@ -239,4 +236,14 @@ func (suite *ControllerITestSuite) getAllSchemaNames() []string {
 		schemaNames = append(schemaNames, schemaName)
 	}
 	return schemaNames
+}
+
+func (suite *ControllerITestSuite) uploadBucketFsFile(content, fileName string) {
+	err := suite.exasol.Exasol.UploadStringContent(content, fileName)
+	if err != nil {
+		suite.FailNowf("upload failed", "failed to upload string content: %v", err)
+	}
+	suite.T().Cleanup(func() {
+		suite.NoError(suite.exasol.Exasol.DeleteFile(fileName))
+	})
 }

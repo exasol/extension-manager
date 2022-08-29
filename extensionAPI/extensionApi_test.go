@@ -106,7 +106,7 @@ func (suite *ExtensionApiSuite) Test_FindInstallationsCanReadAllScriptsTable() {
 		return metadata.allScripts.rows.map(row => {
 			return {name: row.name, version: "0.1.0", instanceParameters: []}
 		});`).Build().WriteToTmpFile()
-	defer deleteFileAndCheckError(extensionFile)
+	suite.cleanupFileAfterTest(extensionFile)
 	extension, err := GetExtensionFromFile(extensionFile)
 	suite.NoError(err)
 	exaMetadata := createMockMetadata()
@@ -122,7 +122,7 @@ func (suite *ExtensionApiSuite) Test_FindInstallationsReturningParameters() {
 		name: "My param",
 		type: "string"
 	}]`)).Build().WriteToTmpFile()
-	defer deleteFileAndCheckError(extensionFile)
+	suite.cleanupFileAfterTest(extensionFile)
 	extension, err := GetExtensionFromFile(extensionFile)
 	suite.NoError(err)
 	exaMetadata := createMockMetadata()
@@ -167,4 +167,10 @@ func (suite *ExtensionApiSuite) writeExtension(extensionJs string) string {
 	extensionFile := path.Join(suite.T().TempDir(), "extension.js")
 	suite.NoError(os.WriteFile(extensionFile, []byte(extensionJs), 0600))
 	return extensionFile
+}
+
+func (suite *ExtensionApiSuite) cleanupFileAfterTest(file string) {
+	suite.T().Cleanup(func() {
+		deleteFileAndCheckError(file)
+	})
 }

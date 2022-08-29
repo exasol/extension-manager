@@ -26,15 +26,14 @@ func (suite *ExaAllScriptsTableSuite) TearDownSuite() {
 
 func (suite *ExaAllScriptsTableSuite) BeforeTest(suiteName, testName string) {
 	suite.exasol.CreateConnection()
-}
-
-func (suite *ExaAllScriptsTableSuite) AfterTest(suiteName, testName string) {
-	suite.exasol.CloseConnection()
+	suite.T().Cleanup(func() {
+		suite.exasol.CloseConnection()
+	})
 }
 
 func (suite *ExaAllScriptsTableSuite) TestReadMetadataWithAllColumnsDefined() {
 	fixture := integrationTesting.CreateLuaScriptFixture(suite.exasol.GetConnection())
-	defer fixture.Close()
+	fixture.Cleanup(suite.T())
 	result := suite.readMetaDataTables(fixture.GetSchemaName())
 	suite.Assert().Equal(
 		ExaAllScriptTable{Rows: []ExaAllScriptRow{{
@@ -49,7 +48,7 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataWithAllColumnsDefined() {
 
 func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaAdapterScript() {
 	fixture := integrationTesting.CreateJavaAdapterScriptFixture(suite.exasol.GetConnection())
-	defer fixture.Close()
+	fixture.Cleanup(suite.T())
 	result := suite.readMetaDataTables(fixture.GetSchemaName())
 	suite.Assert().Equal(
 		ExaAllScriptTable{Rows: []ExaAllScriptRow{{
@@ -64,7 +63,7 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaAdapterScript() {
 
 func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaSetScript() {
 	fixture := integrationTesting.CreateJavaSetScriptFixture(suite.exasol.GetConnection())
-	defer fixture.Close()
+	fixture.Cleanup(suite.T())
 	result := suite.readMetaDataTables(fixture.GetSchemaName())
 	suite.Assert().Equal(
 		ExaAllScriptTable{Rows: []ExaAllScriptRow{{
