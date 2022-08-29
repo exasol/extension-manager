@@ -56,7 +56,7 @@ func (v *Validator) ValidateParameters(definitions []interface{}, params extensi
 			return nil, err
 		}
 		if !r.Success {
-			result = append(result, ValidationResult{Success: false, Message: fmt.Sprintf("Failed to validate parameter %q: %s", name, r.Message)})
+			result = append(result, ValidationResult{Success: false, Message: fmt.Sprintf("Failed to validate parameter '%s': %s", name, r.Message)})
 		}
 	}
 	return result, nil

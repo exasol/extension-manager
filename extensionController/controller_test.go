@@ -197,7 +197,7 @@ func (suite *ControllerUTestSuite) TestAddInstance_invalidParameters() {
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
 	suite.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{})
 	instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{})
-	suite.EqualError(err, `invalid parameters: Failed to validate parameter "My param": This is a required parameter.`)
+	suite.EqualError(err, `invalid parameters: Failed to validate parameter 'My param': This is a required parameter.`)
 	suite.Equal("", instanceName)
 	suite.dbMock.ExpectRollback()
 }

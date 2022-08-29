@@ -208,7 +208,7 @@ func validateParameters(parameterDefinitions []interface{}, params extensionAPI.
 	}
 	message = strings.TrimSuffix(message, ", ")
 	if message != "" {
-		return fmt.Errorf("invalid parameters: %s", message)
+		return apiErrors.NewBadRequestErrorF("invalid parameters: %s", message)
 	}
 	return nil
 }

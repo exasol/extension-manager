@@ -195,7 +195,7 @@ func (suite *ControllerITestSuite) TestAddInstance_invalidParameters() {
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
 	instanceName, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{})
-	suite.EqualError(err, `invalid parameters: Failed to validate parameter "My param": This is a required parameter.`)
+	suite.EqualError(err, `invalid parameters: Failed to validate parameter 'My param': This is a required parameter.`)
 	suite.Equal("", instanceName)
 }
 
