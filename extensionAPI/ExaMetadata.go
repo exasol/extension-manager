@@ -8,6 +8,7 @@ import (
 type ExaMetadataReader interface {
 	ReadMetadataTables(tx *sql.Tx, schemaName string) (*ExaMetadata, error)
 }
+
 type ExaMetadata struct {
 	AllScripts ExaAllScriptTable `json:"allScripts"`
 }

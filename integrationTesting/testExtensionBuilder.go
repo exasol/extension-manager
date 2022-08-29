@@ -142,7 +142,7 @@ func (e BuiltExtension) WriteToTmpFile() (fileName string) {
 	if err != nil {
 		panic(err)
 	}
-	e.cleanupFile(extensionFile.Name())
+	cleanupFile(e.testing, extensionFile.Name())
 	return extensionFile.Name()
 }
 
@@ -151,14 +151,17 @@ func (e BuiltExtension) WriteToFile(fileName string) {
 	if err != nil {
 		panic(err)
 	}
-	e.cleanupFile(fileName)
+	cleanupFile(e.testing, fileName)
 }
 
-func (e BuiltExtension) cleanupFile(fileName string) {
-	e.testing.Cleanup(func() {
+func cleanupFile(t *testing.T, fileName string) {
+	t.Cleanup(func() {
+		if _, err := os.Stat(fileName); errors.Is(err, os.ErrNotExist) {
+			return
+		}
 		err := os.Remove(fileName)
 		if err != nil {
-			e.testing.Errorf("failed to delete file %s: %v", fileName, err)
+			t.Errorf("failed to delete file: %v", err)
 		}
 	})
 }
@@ -180,6 +183,7 @@ func (b TestExtensionBuilder) runBuild(workDir string) []byte {
 		panic(fmt.Sprintf("failed to build extension in workdir %s. See log for details: %v", workDir, err))
 	}
 	path := path.Join(workDir, "dist.js")
+	cleanupFile(b.testing, path)
 	builtExtension, err := os.ReadFile(path)
 	if err != nil {
 		b.testing.Fatalf("failed to read %s: %v", path, err)

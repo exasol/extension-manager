@@ -30,17 +30,17 @@ func TestControllerUTestSuite(t *testing.T) {
 	suite.Run(t, new(ControllerUTestSuite))
 }
 
-func (suite *ControllerUTestSuite) SetupSuite() {
-}
-
-func (suite *ControllerUTestSuite) TearDownSuite() {
-}
-
 func (suite *ControllerUTestSuite) SetupTest() {
 	tempExtensionRepo, err := os.MkdirTemp(os.TempDir(), "ExtensionControllerSuite")
 	if err != nil {
 		panic(err)
 	}
+	suite.T().Cleanup(func() {
+		err := os.RemoveAll(suite.tempExtensionRepo)
+		if err != nil {
+			panic(err)
+		}
+	})
 	suite.tempExtensionRepo = tempExtensionRepo
 	suite.bucketFsMock = createBucketFsMock()
 	suite.metaDataMock = createExaMetaDataReaderMock()
@@ -60,10 +60,6 @@ func (suite *ControllerUTestSuite) SetupTest() {
 
 func (suite *ControllerUTestSuite) TeardownTest() {
 	suite.NoError(suite.dbMock.ExpectationsWereMet())
-	err := os.RemoveAll(suite.tempExtensionRepo)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (suite *ControllerUTestSuite) TestGetAllExtensions() {

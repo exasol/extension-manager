@@ -51,10 +51,6 @@ func (suite *ControllerITestSuite) SetupTest() {
 	suite.tempExtensionRepo = tempExtensionRepo
 }
 
-func (suite *ControllerITestSuite) AfterTest(suiteName, testName string) {
-
-}
-
 func (suite *ControllerITestSuite) TestGetAllExtensions() {
 	suite.writeDefaultExtension()
 	suite.uploadBucketFsFile("123", "my-extension.1.2.3.jar") // create file with 3B size
