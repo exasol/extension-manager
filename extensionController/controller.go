@@ -41,10 +41,7 @@ func createImpl(extensionFolder string, schema string) controller {
 }
 
 func (c *controllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, error) {
-	jsExtensions, err := c.getAllExtensions()
-	if err != nil {
-		return nil, err
-	}
+	jsExtensions := c.getAllExtensions()
 	var extensions []*Extension
 	for _, jsExtension := range jsExtensions {
 		if c.requiredFilesAvailable(jsExtension, bfsFiles) {
@@ -65,7 +62,7 @@ func (c *controllerImpl) requiredFilesAvailable(extension *extensionAPI.JsExtens
 	return true
 }
 
-func (c *controllerImpl) getAllExtensions() ([]*extensionAPI.JsExtension, error) {
+func (c *controllerImpl) getAllExtensions() []*extensionAPI.JsExtension {
 	var extensions []*extensionAPI.JsExtension
 	extensionPaths := FindJSFilesInDir(c.extensionFolder)
 	for _, path := range extensionPaths {
@@ -76,7 +73,7 @@ func (c *controllerImpl) getAllExtensions() ([]*extensionAPI.JsExtension, error)
 			log.Printf("error: Failed to load extension. This extension will be ignored. Cause: %v\n", err)
 		}
 	}
-	return extensions, nil
+	return extensions
 }
 
 func (c *controllerImpl) loadExtensionById(id string) (*extensionAPI.JsExtension, error) {
@@ -97,10 +94,7 @@ func (c *controllerImpl) GetAllInstallations(tx *sql.Tx) ([]*extensionAPI.JsExtI
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
-	extensions, err := c.getAllExtensions()
-	if err != nil {
-		return nil, err
-	}
+	extensions := c.getAllExtensions()
 	extensionContext := c.createExtensionContext(tx)
 	var allInstallations []*extensionAPI.JsExtInstallation
 	for _, extension := range extensions {
