@@ -2,7 +2,6 @@ package extensionController
 
 import (
 	"fmt"
-	"os"
 	"path"
 	"testing"
 
@@ -40,14 +39,7 @@ func (suite *ControllerITestSuite) SetupTest() {
 	suite.T().Cleanup(func() {
 		suite.exasol.CloseConnection()
 	})
-	tempExtensionRepo, err := os.MkdirTemp(os.TempDir(), "ExtensionControllerSuite")
-	if err != nil {
-		suite.FailNow("failed to create temp dir: %v", err)
-	}
-	suite.T().Cleanup(func() {
-		err := os.RemoveAll(suite.tempExtensionRepo)
-		suite.NoError(err)
-	})
+	tempExtensionRepo := suite.T().TempDir()
 	suite.tempExtensionRepo = tempExtensionRepo
 }
 

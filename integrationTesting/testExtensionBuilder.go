@@ -128,7 +128,7 @@ func (extension BuiltExtension) Bytes() []byte {
 }
 
 func (e BuiltExtension) WriteToTmpFile() (fileName string) {
-	extensionFile, err := os.CreateTemp(os.TempDir(), "extension-*.js")
+	extensionFile, err := os.CreateTemp(e.testing.TempDir(), "extension-*.js")
 	if err != nil {
 		panic(err)
 	}
@@ -142,7 +142,6 @@ func (e BuiltExtension) WriteToTmpFile() (fileName string) {
 	if err != nil {
 		panic(err)
 	}
-	cleanupFile(e.testing, extensionFile.Name())
 	return extensionFile.Name()
 }
 

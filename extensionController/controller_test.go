@@ -3,7 +3,6 @@ package extensionController
 import (
 	"context"
 	"database/sql"
-	"os"
 	"path"
 	"testing"
 
@@ -31,16 +30,7 @@ func TestControllerUTestSuite(t *testing.T) {
 }
 
 func (suite *ControllerUTestSuite) SetupTest() {
-	tempExtensionRepo, err := os.MkdirTemp(os.TempDir(), "ExtensionControllerSuite")
-	if err != nil {
-		panic(err)
-	}
-	suite.T().Cleanup(func() {
-		err := os.RemoveAll(suite.tempExtensionRepo)
-		if err != nil {
-			panic(err)
-		}
-	})
+	tempExtensionRepo := suite.T().TempDir()
 	suite.tempExtensionRepo = tempExtensionRepo
 	suite.bucketFsMock = createBucketFsMock()
 	suite.metaDataMock = createExaMetaDataReaderMock()
