@@ -3,6 +3,7 @@ package extensionController
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"path"
 	"testing"
 
@@ -11,7 +12,6 @@ import (
 	"github.com/exasol/extension-manager/extensionAPI"
 	"github.com/exasol/extension-manager/integrationTesting"
 
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -33,7 +33,7 @@ func (suite *ControllerUTestSuite) SetupTest() {
 	tempExtensionRepo := suite.T().TempDir()
 	suite.tempExtensionRepo = tempExtensionRepo
 	suite.bucketFsMock = createBucketFsMock()
-	suite.metaDataMock = createExaMetaDataReaderMock()
+	suite.metaDataMock = createExaMetaDataReaderMock(EXTENSION_SCHEMA)
 	ctrl := &controllerImpl{extensionFolder: suite.tempExtensionRepo, schema: EXTENSION_SCHEMA, metaDataReader: &suite.metaDataMock}
 	suite.controller = &transactionControllerImpl{controller: ctrl, bucketFs: &suite.bucketFsMock}
 
@@ -54,7 +54,7 @@ func (suite *ControllerUTestSuite) TeardownTest() {
 
 func (suite *ControllerUTestSuite) TestGetAllExtensions() {
 	suite.writeDefaultExtension()
-	suite.simulateBucketFs([]BfsFile{{Name: "my-extension.1.2.3.jar", Size: 3}})
+	suite.bucketFsMock.simulateFiles([]BfsFile{{Name: "my-extension.1.2.3.jar", Size: 3}})
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
 	suite.NoError(err)
 	suite.Equal([]*Extension{{Name: "MyDemoExtension", Id: "testing-extension.js", Description: "An extension for testing.",
@@ -62,11 +62,8 @@ func (suite *ControllerUTestSuite) TestGetAllExtensions() {
 }
 
 func (suite *ControllerUTestSuite) TestGetAllExtensionsWithMissingJar() {
-	suite.simulateBucketFs([]BfsFile{})
-	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "missing-jar.jar", FileSize: 3}).
-		Build().
-		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
+	suite.writeDefaultExtension()
+	suite.bucketFsMock.simulateFiles([]BfsFile{})
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
 	suite.NoError(err)
 	suite.Empty(extensions)
@@ -77,7 +74,7 @@ func (suite *ControllerUTestSuite) TestGetAllInstallations_failsWithGenericError
 		WithFindInstallationsFunc("throw Error(`mock error from js`)").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
-	suite.simulateExaMetaData(extensionAPI.ExaMetadata{})
+	suite.metaDataMock.simulateExaMetaData(extensionAPI.ExaMetadata{})
 	extensions, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
 	suite.EqualError(err, `failed to find installations for extension "MyDemoExtension": mock error from js`)
 	suite.Nil(extensions)
@@ -88,7 +85,7 @@ func (suite *ControllerUTestSuite) TestGetAllInstallations_failsWithApiError() {
 		WithFindInstallationsFunc("throw new ApiError(400, `mock error from js`)").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
-	suite.simulateExaMetaData(extensionAPI.ExaMetadata{})
+	suite.metaDataMock.simulateExaMetaData(extensionAPI.ExaMetadata{})
 	extensions, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
 	suite.assertApiError(err, 400, "failed to find installations for extension \"MyDemoExtension\": mock error from js")
 	suite.Nil(extensions)
@@ -96,7 +93,7 @@ func (suite *ControllerUTestSuite) TestGetAllInstallations_failsWithApiError() {
 
 func (suite *ControllerUTestSuite) TestGetAllInstallations() {
 	suite.writeDefaultExtension()
-	suite.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{{Schema: "schema", Name: "script"}})
+	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{{Schema: "schema", Name: "script"}})
 	installations, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
 	suite.NoError(err)
 	suite.Assert().Equal([]*extensionAPI.JsExtInstallation{{Name: "schema.script", Version: "0.1.0",
@@ -117,7 +114,17 @@ func (suite *ControllerUTestSuite) TestInstallSucceeds() {
 	suite.dbMock.ExpectCommit()
 	err := suite.controller.InstallExtension(mockContext(), suite.db, DEFAULT_EXTENSION_ID, "ver")
 	suite.NoError(err)
-	suite.dbMock.ExpectCommit()
+}
+
+func (suite *ControllerUTestSuite) TestInstall_QueryFails() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithInstallFunc("context.sqlClient.runQuery('install extension')").
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
+	suite.dbMock.ExpectExec("install extension").WillReturnError(fmt.Errorf("mock"))
+	suite.dbMock.ExpectRollback()
+	err := suite.controller.InstallExtension(mockContext(), suite.db, DEFAULT_EXTENSION_ID, "ver")
+	suite.EqualError(err, "failed to install extension \"testing-extension.js\": error executing statement \"install extension\": mock")
 }
 
 func (suite *ControllerUTestSuite) TestInstall_FailsWithGenericError() {
@@ -142,29 +149,12 @@ func (suite *ControllerUTestSuite) TestInstall_FailsWithApiError() {
 	suite.dbMock.ExpectRollback()
 }
 
-func (suite *ControllerUTestSuite) TestEnsureSchemaExistsCreatesSchemaIfItDoesNotExist() {
-	suite.writeDefaultExtension()
-	suite.dbMock.ExpectExec("install extension").WillReturnResult(sqlmock.NewResult(0, 0))
-	suite.dbMock.ExpectCommit()
-	err := suite.controller.InstallExtension(mockContext(), suite.db, DEFAULT_EXTENSION_ID, "ver")
-	suite.NoError(err)
-}
-
-func (suite *ControllerUTestSuite) TestEnsureSchemaDoesNotFailIfSchemaAlreadyExists() {
-	suite.writeDefaultExtension()
-	suite.dbMock.ExpectExec("install extension").WillReturnResult(sqlmock.NewResult(0, 0))
-	suite.dbMock.ExpectCommit()
-	err := suite.controller.InstallExtension(mockContext(), suite.db, DEFAULT_EXTENSION_ID, "ver")
-	suite.NoError(err)
-}
-
 func (suite *ControllerUTestSuite) TestAddInstance_wrongVersion() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
-		WithAddInstanceFunc("return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
-	suite.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{{Schema: "schema", Name: "script"}})
+	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{{Schema: "schema", Name: "script"}})
 	instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, DEFAULT_EXTENSION_ID, "wrongVersion", []ParameterValue{})
 	suite.EqualError(err, `failed to find installations: version "wrongVersion" not found for extension "testing-extension.js", available versions: ["0.1.0"]`)
 	suite.Equal("", instanceName)
@@ -181,7 +171,7 @@ func (suite *ControllerUTestSuite) TestAddInstance_invalidParameters() {
 	}]`)).WithAddInstanceFunc("return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
-	suite.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{})
+	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{})
 	instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{})
 	suite.EqualError(err, `invalid parameters: Failed to validate parameter 'My param': This is a required parameter.`)
 	suite.Equal("", instanceName)
@@ -194,7 +184,7 @@ func (suite *ControllerUTestSuite) TestAddInstance_failsWithGenericError() {
 		WithAddInstanceFunc("throw Error('mock error from js')").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
-	suite.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{})
+	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{})
 	instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{})
 	suite.EqualError(err, `mock error from js`)
 	suite.Equal("", instanceName)
@@ -207,7 +197,7 @@ func (suite *ControllerUTestSuite) TestAddInstance_failsWithApiError() {
 		WithAddInstanceFunc("throw new ApiError(400, 'mock error from js')").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
-	suite.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{})
+	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{})
 	instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{})
 	suite.assertApiError(err, 400, `mock error from js`)
 	suite.Equal("", instanceName)
@@ -223,22 +213,11 @@ func (suite *ControllerUTestSuite) TestAddInstance_validParameters() {
 	}]`)).WithAddInstanceFunc("return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
-	suite.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{})
+	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{})
 	suite.dbMock.ExpectCommit()
 	instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p1", Value: "val"}})
 	suite.NoError(err)
 	suite.Equal("ext_0.1.0_p1_val", instanceName)
-}
-
-func (suite *ControllerUTestSuite) simulateBucketFs(files []BfsFile) {
-	suite.bucketFsMock.On("ListFiles", mock.Anything, mock.Anything, "default").Return(files, nil)
-}
-
-func (suite *ControllerUTestSuite) simulateExaAllScripts(scripts []extensionAPI.ExaAllScriptRow) {
-	suite.simulateExaMetaData(extensionAPI.ExaMetadata{AllScripts: extensionAPI.ExaAllScriptTable{Rows: scripts}})
-}
-func (suite *ControllerUTestSuite) simulateExaMetaData(metaData extensionAPI.ExaMetadata) {
-	suite.metaDataMock.On("ReadMetadataTables", mock.Anything, EXTENSION_SCHEMA).Return(&metaData, nil)
 }
 
 func (suite *ControllerUTestSuite) writeDefaultExtension() {
