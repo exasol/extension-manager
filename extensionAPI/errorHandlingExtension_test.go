@@ -17,8 +17,8 @@ func TestJsExtensionSuite(t *testing.T) {
 }
 
 func (suite *ErrorHandlingExtensionSuite) SetupSuite() {
-	suite.rawExtension = &rawJsExtension{Id: "id", Name: "name", Description: "desc", InstallableVersions: []string{"v1", "v2"}, BucketFsUploads: []BucketFsUpload{{Name: "uploadName"}}}
-	suite.extension = wrapExtension(suite.rawExtension)
+	suite.rawExtension = &rawJsExtension{Name: "name", Description: "desc", InstallableVersions: []string{"v1", "v2"}, BucketFsUploads: []BucketFsUpload{{Name: "uploadName"}}}
+	suite.extension = wrapExtension(suite.rawExtension, "id", nil)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestProperties() {

@@ -2,10 +2,14 @@ package extensionAPI
 
 import (
 	"fmt"
+
+	"github.com/dop251/goja"
+	"github.com/exasol/extension-manager/apiErrors"
 )
 
 type JsExtension struct {
 	extension           *rawJsExtension
+	vm                  *goja.Runtime
 	Id                  string
 	Name                string
 	Description         string
@@ -13,20 +17,22 @@ type JsExtension struct {
 	BucketFsUploads     []BucketFsUpload
 }
 
-func wrapExtension(ext *rawJsExtension) *JsExtension {
+func wrapExtension(ext *rawJsExtension, id string, vm *goja.Runtime) *JsExtension {
 	return &JsExtension{
 		extension:           ext,
-		Id:                  ext.Id,
+		Id:                  id,
+		vm:                  vm,
 		Name:                ext.Name,
 		Description:         ext.Description,
 		InstallableVersions: ext.InstallableVersions,
-		BucketFsUploads:     ext.BucketFsUploads}
+		BucketFsUploads:     ext.BucketFsUploads,
+	}
 }
 
 func (e *JsExtension) Install(context *ExtensionContext, version string) (errorResult error) {
 	defer func() {
 		if err := recover(); err != nil {
-			errorResult = fmt.Errorf("failed to install extension %q: %v", e.Id, err)
+			errorResult = e.convertError(fmt.Sprintf("failed to install extension %q", e.Id), err)
 		}
 	}()
 	e.extension.Install(context, version)
@@ -36,7 +42,7 @@ func (e *JsExtension) Install(context *ExtensionContext, version string) (errorR
 func (e *JsExtension) FindInstallations(context *ExtensionContext, metadata *ExaMetadata) (installations []*JsExtInstallation, errorResult error) {
 	defer func() {
 		if err := recover(); err != nil {
-			errorResult = fmt.Errorf("failed to find installations for extension %q: %v", e.Id, err)
+			errorResult = e.convertError(fmt.Sprintf("failed to find installations for extension %q", e.Id), err)
 		}
 	}()
 	return e.extension.FindInstallations(context, metadata), nil
@@ -45,8 +51,25 @@ func (e *JsExtension) FindInstallations(context *ExtensionContext, metadata *Exa
 func (e *JsExtension) AddInstance(context *ExtensionContext, version string, params *ParameterValues) (instance *JsExtInstance, errorResult error) {
 	defer func() {
 		if err := recover(); err != nil {
-			errorResult = fmt.Errorf("failed to add instance for extension %q: %v", e.Id, err)
+			errorResult = e.convertError(fmt.Sprintf("failed to add instance for extension %q", e.Id), err)
 		}
 	}()
 	return e.extension.AddInstance(context, version, params), nil
+}
+
+func (e *JsExtension) convertError(message string, err any) error {
+	if exception, ok := err.(*goja.Exception); ok {
+		var apiError jsApiError
+		exportErr := e.vm.ExportTo(exception.Value(), &apiError)
+		if exportErr != nil {
+			return fmt.Errorf("failed to convert error %v of type %T (message: %q) to ApiError: %w", err, err, message, exportErr)
+		}
+		return apiErrors.NewAPIError(apiError.Status, apiError.Message)
+	}
+	return fmt.Errorf("%s: %v", message, err)
+}
+
+type jsApiError struct {
+	Status  int    `json:"status"`
+	Message string `json:"message"`
 }

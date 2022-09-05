@@ -2,225 +2,208 @@ package extensionController
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
-	"os"
-	"path"
 	"testing"
 
-	"github.com/exasol/extension-manager/integrationTesting"
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/exasol/extension-manager/extensionAPI"
 
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
-const (
-	EXTENSION_SCHEMA     = "test"
-	DEFAULT_EXTENSION_ID = "testing-extension.js"
-)
+type mockControllerImpl struct {
+	mock.Mock
+}
 
-type ExtensionControllerSuite struct {
+func (mock *mockControllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, error) {
+	args := mock.Called(bfsFiles)
+	if ext, ok := args.Get(0).([]*Extension); ok {
+		return ext, args.Error(1)
+	} else {
+		return nil, args.Error(1)
+	}
+}
+func (mock *mockControllerImpl) GetAllInstallations(tx *sql.Tx) ([]*extensionAPI.JsExtInstallation, error) {
+	args := mock.Called(tx)
+	if result, ok := args.Get(0).([]*extensionAPI.JsExtInstallation); ok {
+		return result, args.Error(1)
+	} else {
+		return nil, args.Error(1)
+	}
+}
+func (mock *mockControllerImpl) InstallExtension(tx *sql.Tx, extensionId string, extensionVersion string) error {
+	args := mock.Called(tx, extensionId, extensionVersion)
+	return args.Error(0)
+}
+func (mock *mockControllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error) {
+	args := mock.Called(tx, extensionId, extensionVersion, parameterValues)
+	return args.String(0), args.Error(1)
+}
+
+type mockBucketFs struct {
+	mock.Mock
+}
+
+func (mock *mockBucketFs) ListBuckets(ctx context.Context, db *sql.DB) ([]string, error) {
+	args := mock.Called(ctx, db)
+	if buckets, ok := args.Get(0).([]string); ok {
+		return buckets, args.Error(1)
+	} else {
+		return args.Get(0).([]string), args.Error(1)
+	}
+}
+func (mock *mockBucketFs) ListFiles(ctx context.Context, db *sql.DB, bucket string) ([]BfsFile, error) {
+	args := mock.Called(ctx, db, bucket)
+	if files, ok := args.Get(0).([]BfsFile); ok {
+		return files, args.Error(1)
+	} else {
+		return nil, args.Error(1)
+	}
+}
+
+type extCtrlUnitTestSuite struct {
 	suite.Suite
-	exasol            *integrationTesting.DbTestSetup
-	tempExtensionRepo string
+	ctrl     TransactionController
+	db       *sql.DB
+	dbMock   sqlmock.Sqlmock
+	mockCtrl mockControllerImpl
+	mockBfs  mockBucketFs
 }
 
-func TestExtensionControllerSuite(t *testing.T) {
-	suite.Run(t, new(ExtensionControllerSuite))
+func TestExtensionControllerUnitTestSuite(t *testing.T) {
+	suite.Run(t, new(extCtrlUnitTestSuite))
 }
 
-func (suite *ExtensionControllerSuite) SetupSuite() {
-	suite.exasol = integrationTesting.StartDbSetup(&suite.Suite)
-}
-
-func (suite *ExtensionControllerSuite) TearDownSuite() {
-	suite.exasol.StopDb()
-}
-
-func (suite *ExtensionControllerSuite) SetupTest() {
-	suite.exasol.CreateConnection()
-	tempExtensionRepo, err := os.MkdirTemp(os.TempDir(), "ExtensionControllerSuite")
+func (suite *extCtrlUnitTestSuite) SetupTest() {
+	suite.mockCtrl = mockControllerImpl{}
+	suite.mockBfs = mockBucketFs{}
+	suite.ctrl = &transactionControllerImpl{controller: &suite.mockCtrl, bucketFs: &suite.mockBfs}
+	db, dbMock, err := sqlmock.New()
 	if err != nil {
-		panic(err)
+		suite.Failf("error '%v' was not expected when opening a stub database connection", err.Error())
 	}
-	suite.tempExtensionRepo = tempExtensionRepo
+	dbMock.MatchExpectationsInOrder(true)
+	suite.db = db
+	suite.dbMock = dbMock
 }
 
-func (suite *ExtensionControllerSuite) AfterTest(suiteName, testName string) {
-	suite.exasol.CloseConnection()
-	err := os.RemoveAll(suite.tempExtensionRepo)
-	if err != nil {
-		panic(err)
+func (suite *extCtrlUnitTestSuite) AfterTest(suiteName, testName string) {
+	if err := suite.dbMock.ExpectationsWereMet(); err != nil {
+		suite.Failf("there were unfulfilled expectations: %v", err.Error())
 	}
 }
 
-func (suite *ExtensionControllerSuite) TestGetAllExtensions() {
-	suite.writeDefaultExtension()
-	suite.NoError(suite.exasol.Exasol.UploadStringContent("123", "my-extension.1.2.3.jar")) // create file with 3B size
-	defer func() { suite.NoError(suite.exasol.Exasol.DeleteFile("my-extension.1.2.3.jar")) }()
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	extensions, err := controller.GetAllExtensions(mockContext(), suite.exasol.GetConnection())
+func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_Success() {
+	suite.mockBfs.On("ListFiles", mock.Anything, mock.Anything, "default").Return([]BfsFile{}, nil)
+	suite.mockCtrl.On("GetAllExtensions", mock.Anything).Return([]*Extension{}, nil)
+	extensions, err := suite.ctrl.GetAllExtensions(mockContext(), suite.db)
 	suite.NoError(err)
-	suite.Assert().Equal(1, len(extensions))
-	suite.Assert().Equal("MyDemoExtension", extensions[0].Name, "name")
-	suite.Assert().Equal(DEFAULT_EXTENSION_ID, extensions[0].Id, "id")
+	suite.Len(extensions, 0)
 }
 
-func (suite *ExtensionControllerSuite) writeDefaultExtension() {
-	integrationTesting.CreateTestExtensionBuilder().
-		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "my-extension.1.2.3.jar", FileSize: 3}).
-		WithFindInstallationsFunc(`
-		return metadata.allScripts.rows.map(row => {
-			return {name: row.schema + "." + row.name, version: "0.1.0", instanceParameters: []}
-		});`).
-		Build().
-		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
-}
-
-func (suite *ExtensionControllerSuite) TestGetAllExtensionsWithMissingJar() {
-	integrationTesting.CreateTestExtensionBuilder().
-		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "missing-jar.jar", FileSize: 3}).
-		Build().
-		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	db, err := suite.exasol.Exasol.CreateConnectionWithConfig(false)
-	suite.NoError(err)
-	defer func() { suite.NoError(db.Close()) }()
-	extensions, err := controller.GetAllExtensions(mockContext(), db)
-	suite.NoError(err)
-	suite.Assert().Empty(extensions)
-}
-
-func (suite *ExtensionControllerSuite) TestGetAllExtensionsThrowingJSError() {
-	const jarName = "my-failing-extension-1.2.3.jar"
-	integrationTesting.CreateTestExtensionBuilder().
-		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: jarName, FileSize: 3}).
-		WithFindInstallationsFunc("throw Error(`mock error from js`)").
-		Build().
-		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
-	suite.NoError(suite.exasol.Exasol.UploadStringContent("123", jarName)) // create file with 3B size
-	defer func() { suite.NoError(suite.exasol.Exasol.DeleteFile(jarName)) }()
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	extensions, err := controller.GetInstalledExtensions(mockContext(), suite.exasol.GetConnection())
-	suite.ErrorContains(err, `failed to find installations: failed to find installations for extension "testing-extension.js": Error: mock error from js at`)
+func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_BucketFsListFails() {
+	suite.mockBfs.On("ListFiles", mock.Anything, mock.Anything, "default").Return(nil, fmt.Errorf("mock"))
+	extensions, err := suite.ctrl.GetAllExtensions(mockContext(), suite.db)
+	suite.EqualError(err, "failed to search for required files in BucketFS. Cause: mock")
 	suite.Nil(extensions)
 }
 
-func (suite *ExtensionControllerSuite) TestGetAllInstallations() {
-	suite.writeDefaultExtension()
-	fixture := integrationTesting.CreateLuaScriptFixture(suite.exasol.GetConnection())
-	controller := Create(suite.tempExtensionRepo, fixture.GetSchemaName())
-	defer fixture.Close()
-	installations, err := controller.GetInstalledExtensions(mockContext(), suite.exasol.GetConnection())
+func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_GetFails() {
+	suite.mockBfs.On("ListFiles", mock.Anything, mock.Anything, "default").Return([]BfsFile{}, nil)
+	suite.mockCtrl.On("GetAllExtensions", mock.Anything).Return(nil, fmt.Errorf("mock"))
+	extensions, err := suite.ctrl.GetAllExtensions(mockContext(), suite.db)
+	suite.EqualError(err, "mock")
+	suite.Nil(extensions)
+}
+
+func (suite *extCtrlUnitTestSuite) TestGetAllInstallations_BeginTransactionFailure() {
+	suite.dbMock.ExpectBegin().WillReturnError(fmt.Errorf("mock"))
+	installations, err := suite.ctrl.GetInstalledExtensions(mockContext(), suite.db)
+	suite.EqualError(err, "failed to begin transaction: mock")
+	suite.Nil(installations)
+}
+
+func (suite *extCtrlUnitTestSuite) TestGetAllInstallations_Success() {
+	suite.dbMock.ExpectBegin()
+	mockResult := []*extensionAPI.JsExtInstallation{{Name: "ext"}}
+	suite.mockCtrl.On("GetAllInstallations", mock.Anything).Return(mockResult, nil)
+	suite.dbMock.ExpectRollback()
+	installations, err := suite.ctrl.GetInstalledExtensions(mockContext(), suite.db)
 	suite.NoError(err)
-	suite.Assert().Equal(1, len(installations))
-	suite.Assert().Equal(fixture.GetSchemaName()+".MY_SCRIPT", installations[0].Name)
+	suite.Equal(mockResult, installations)
 }
 
-func (suite *ExtensionControllerSuite) TestInstallFailsForUnknownExtensionId() {
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	err := controller.InstallExtension(mockContext(), suite.exasol.GetConnection(), "unknown-extension-id", "ver")
-	suite.ErrorContains(err, "failed to load extension with id \"unknown-extension-id\": failed to load extension from file")
+func (suite *extCtrlUnitTestSuite) TestGetAllInstallations_Failure() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("GetAllInstallations", mock.Anything).Return(nil, fmt.Errorf("mock"))
+	suite.dbMock.ExpectRollback()
+	installations, err := suite.ctrl.GetInstalledExtensions(mockContext(), suite.db)
+	suite.EqualError(err, "mock")
+	suite.Nil(installations)
 }
 
-func (suite *ExtensionControllerSuite) TestInstallSucceeds() {
-	suite.writeDefaultExtension()
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	err := controller.InstallExtension(mockContext(), suite.exasol.GetConnection(), DEFAULT_EXTENSION_ID, "ver")
+func (suite *extCtrlUnitTestSuite) TestInstallExtension_BeginTransactionFailure() {
+	suite.dbMock.ExpectBegin().WillReturnError(fmt.Errorf("mock"))
+	err := suite.ctrl.InstallExtension(mockContext(), suite.db, "extId", "extVer")
+	suite.EqualError(err, "failed to begin transaction: mock")
+}
+
+func (suite *extCtrlUnitTestSuite) TestInstallExtension_Success() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("InstallExtension", mock.Anything, "extId", "extVer").Return(nil)
+	suite.dbMock.ExpectCommit()
+	err := suite.ctrl.InstallExtension(mockContext(), suite.db, "extId", "extVer")
 	suite.NoError(err)
 }
 
-func (suite *ExtensionControllerSuite) TestEnsureSchemaExistsCreatesSchemaIfItDoesNotExist() {
-	suite.writeDefaultExtension()
-	const schemaName = "my_testing_schema"
-	suite.dropSchema(schemaName)
-	defer suite.dropSchema(schemaName)
-	controller := Create(suite.tempExtensionRepo, schemaName)
-	suite.NotContains(suite.getAllSchemaNames(), schemaName)
-	err := controller.InstallExtension(mockContext(), suite.exasol.GetConnection(), DEFAULT_EXTENSION_ID, "ver")
-	suite.NoError(err)
-	suite.Contains(suite.getAllSchemaNames(), schemaName)
+func (suite *extCtrlUnitTestSuite) TestInstallExtension_FailureRollback() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("InstallExtension", mock.Anything, "extId", "extVer").Return(fmt.Errorf("mock"))
+	suite.dbMock.ExpectRollback()
+	err := suite.ctrl.InstallExtension(mockContext(), suite.db, "extId", "extVer")
+	suite.EqualError(err, "mock")
 }
 
-func (suite *ExtensionControllerSuite) TestEnsureSchemaDoesNotFailIfSchemaAlreadyExists() {
-	suite.writeDefaultExtension()
-	const schemaName = "my_testing_schema"
-	defer suite.dropSchema(schemaName)
-	controller := Create(suite.tempExtensionRepo, schemaName)
-	suite.createSchema(schemaName)
-	err := controller.InstallExtension(mockContext(), suite.exasol.GetConnection(), DEFAULT_EXTENSION_ID, "ver")
-	suite.NoError(err)
-	suite.Assert().Contains(suite.getAllSchemaNames(), schemaName)
+func (suite *extCtrlUnitTestSuite) TestInstallExtension_CommitFailure() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("InstallExtension", mock.Anything, "extId", "extVer").Return(nil)
+	suite.dbMock.ExpectCommit().WillReturnError(fmt.Errorf("commit failed"))
+	err := suite.ctrl.InstallExtension(mockContext(), suite.db, "extId", "extVer")
+	suite.EqualError(err, "commit failed")
 }
 
-func (suite *ExtensionControllerSuite) TestAddInstance_wrongVersion() {
-	integrationTesting.CreateTestExtensionBuilder().
-		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
-		WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
-		Build().
-		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instanceName, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), DEFAULT_EXTENSION_ID, "wrongVersion", []ParameterValue{})
-	suite.EqualError(err, `failed to find installations: version "wrongVersion" not found for extension "testing-extension.js", available versions: ["0.1.0"]`)
+func (suite *extCtrlUnitTestSuite) TestCreateInstance_BeginTransactionFailure() {
+	suite.dbMock.ExpectBegin().WillReturnError(fmt.Errorf("mock"))
+	instanceName, err := suite.ctrl.CreateInstance(mockContext(), suite.db, "extId", "extVer", []ParameterValue{})
+	suite.EqualError(err, "failed to begin transaction: mock")
 	suite.Equal("", instanceName)
 }
 
-func (suite *ExtensionControllerSuite) TestAddInstance_invalidParameters() {
-	integrationTesting.CreateTestExtensionBuilder().
-		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
-		id: "p1",
-		name: "My param",
-		type: "string",
-		required: true
-	}]`)).WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
-		Build().
-		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instanceName, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{})
-	suite.EqualError(err, `invalid parameters: Failed to validate parameter "My param": This is a required parameter.`)
+func (suite *extCtrlUnitTestSuite) TestCreateInstance_Success() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("CreateInstance", mock.Anything, "extId", "extVer", mock.Anything).Return("newInst", nil)
+	suite.dbMock.ExpectCommit()
+	instanceName, err := suite.ctrl.CreateInstance(mockContext(), suite.db, "extId", "extVer", []ParameterValue{})
+	suite.NoError(err)
+	suite.Equal("newInst", instanceName)
+}
+
+func (suite *extCtrlUnitTestSuite) TestCreateInstance_Failure() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("CreateInstance", mock.Anything, "extId", "extVer", mock.Anything).Return("", fmt.Errorf("mock"))
+	suite.dbMock.ExpectRollback()
+	instanceName, err := suite.ctrl.CreateInstance(mockContext(), suite.db, "extId", "extVer", []ParameterValue{})
+	suite.EqualError(err, "mock")
 	suite.Equal("", instanceName)
 }
 
-func (suite *ExtensionControllerSuite) TestAddInstance_validParameters() {
-	integrationTesting.CreateTestExtensionBuilder().
-		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
-		id: "p1",
-		name: "My param",
-		type: "string"
-	}]`)).WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
-		Build().
-		WriteToFile(path.Join(suite.tempExtensionRepo, DEFAULT_EXTENSION_ID))
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instanceName, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), DEFAULT_EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p1", Value: "val"}})
-	suite.NoError(err)
-	suite.Equal("ext_0.1.0_p1_val", instanceName)
-}
-
-func (suite *ExtensionControllerSuite) createSchema(schemaName string) {
-	_, err := suite.exasol.GetConnection().Exec(fmt.Sprintf(`CREATE SCHEMA "%s"`, schemaName))
-	if err != nil {
-		suite.FailNowf("failed to create schema %s: %v", schemaName, err.Error())
-	}
-}
-
-func (suite *ExtensionControllerSuite) dropSchema(schemaName string) {
-	_, err := suite.exasol.GetConnection().Exec(fmt.Sprintf(`DROP SCHEMA IF EXISTS "%s" CASCADE`, schemaName))
-	if err != nil {
-		suite.FailNowf("failed to drop schema %s: %v", schemaName, err.Error())
-	}
-}
-
-func (suite *ExtensionControllerSuite) getAllSchemaNames() []string {
-	rows, err := suite.exasol.GetConnection().Query("SELECT SCHEMA_NAME FROM EXA_ALL_SCHEMAS ORDER BY SCHEMA_NAME")
-	suite.NoError(err)
-	defer rows.Close()
-	var schemaNames []string
-	for rows.Next() {
-		var schemaName string
-		suite.NoError(rows.Scan(&schemaName))
-		schemaNames = append(schemaNames, schemaName)
-	}
-	return schemaNames
-}
-
-func mockContext() context.Context {
-	return context.Background()
+func (suite *extCtrlUnitTestSuite) TestCreateInstance_CommitFailure() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("CreateInstance", mock.Anything, "extId", "extVer", mock.Anything).Return("newInst", nil)
+	suite.dbMock.ExpectCommit().WillReturnError(fmt.Errorf("mock"))
+	instanceName, err := suite.ctrl.CreateInstance(mockContext(), suite.db, "extId", "extVer", []ParameterValue{})
+	suite.EqualError(err, "mock")
+	suite.Equal("", instanceName)
 }

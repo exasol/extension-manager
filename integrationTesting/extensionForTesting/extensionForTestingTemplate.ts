@@ -1,5 +1,5 @@
 import {
-    Context, ExaMetadata, ExasolExtension,
+    ApiError, Context, ExaMetadata, ExasolExtension,
     Installation,
     Instance, ParameterValues,
     registerExtension
@@ -33,6 +33,11 @@ function createExtension(): ExasolExtension {
             return undefined;
         }
     }
+}
+
+if(false){
+    // dummy to keep import
+    throw new ApiError(200, "OK");
 }
 
 registerExtension(createExtension())

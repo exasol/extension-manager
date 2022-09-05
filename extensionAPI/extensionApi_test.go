@@ -21,21 +21,10 @@ func TestExtensionApiSuite(t *testing.T) {
 }
 
 func (suite *ExtensionApiSuite) SetupSuite() {
-	suite.validExtensionFile = integrationTesting.CreateTestExtensionBuilder().WithFindInstallationsFunc(`
+	suite.validExtensionFile = integrationTesting.CreateTestExtensionBuilder(suite.T()).WithFindInstallationsFunc(`
 		return metadata.allScripts.rows.map(row => {
 			return {name: row.schema + "." + row.name, version: "0.1.0", instanceParameters: []}
 		});`).Build().WriteToTmpFile()
-}
-
-func (suite *ExtensionApiSuite) TearDownSuite() {
-	deleteFileAndCheckError(suite.validExtensionFile)
-}
-
-func deleteFileAndCheckError(file string) {
-	err := os.Remove(file)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (suite *ExtensionApiSuite) Test_GetExtensionFromFile() {
@@ -63,7 +52,7 @@ func (suite *ExtensionApiSuite) Test_Install() {
 }
 
 func (suite *ExtensionApiSuite) Test_Install_ResolveBucketFsPath() {
-	extensionFile := integrationTesting.CreateTestExtensionBuilder().
+	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithInstallFunc("context.sqlClient.runQuery(`create script path ${context.bucketFs.resolvePath('my-adapter-'+version+'.jar')}`)").
 		Build().WriteToTmpFile()
 	mockSQLClient := MockSimpleSQLClient{}
@@ -76,7 +65,7 @@ func (suite *ExtensionApiSuite) Test_Install_ResolveBucketFsPath() {
 }
 
 func (suite *ExtensionApiSuite) Test_AddInstance_validParameters() {
-	extensionFile := integrationTesting.CreateTestExtensionBuilder().
+	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithAddInstanceFunc("context.sqlClient.runQuery('create vs');\n" +
 			"return {name: `instance_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
@@ -102,11 +91,10 @@ func createMockMetadata() ExaMetadata {
 }
 
 func (suite *ExtensionApiSuite) Test_FindInstallationsCanReadAllScriptsTable() {
-	extensionFile := integrationTesting.CreateTestExtensionBuilder().WithFindInstallationsFunc(`
+	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).WithFindInstallationsFunc(`
 		return metadata.allScripts.rows.map(row => {
 			return {name: row.name, version: "0.1.0", instanceParameters: []}
 		});`).Build().WriteToTmpFile()
-	defer deleteFileAndCheckError(extensionFile)
 	extension, err := GetExtensionFromFile(extensionFile)
 	suite.NoError(err)
 	exaMetadata := createMockMetadata()
@@ -116,13 +104,12 @@ func (suite *ExtensionApiSuite) Test_FindInstallationsCanReadAllScriptsTable() {
 }
 
 func (suite *ExtensionApiSuite) Test_FindInstallationsReturningParameters() {
-	extensionFile := integrationTesting.CreateTestExtensionBuilder().WithFindInstallationsFunc(integrationTesting.
+	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).WithFindInstallationsFunc(integrationTesting.
 		MockFindInstallationsFunction("test", "0.1.0", `[{
 		id: "param1",
 		name: "My param",
 		type: "string"
 	}]`)).Build().WriteToTmpFile()
-	defer deleteFileAndCheckError(extensionFile)
 	extension, err := GetExtensionFromFile(extensionFile)
 	suite.NoError(err)
 	exaMetadata := createMockMetadata()

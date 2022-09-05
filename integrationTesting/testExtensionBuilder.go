@@ -11,12 +11,13 @@ import (
 	"path"
 	"strings"
 	"sync"
+	"testing"
 
 	log "github.com/sirupsen/logrus"
 )
 
-func CreateTestExtensionBuilder() *TestExtensionBuilder {
-	builder := TestExtensionBuilder{}
+func CreateTestExtensionBuilder(t *testing.T) *TestExtensionBuilder {
+	builder := TestExtensionBuilder{testing: t}
 	builder.findInstallationsFunc = "return []"
 	builder.installFunc = "context.sqlClient.runQuery('select 1')"
 	builder.addInstanceFunc = "return undefined"
@@ -24,6 +25,7 @@ func CreateTestExtensionBuilder() *TestExtensionBuilder {
 }
 
 type TestExtensionBuilder struct {
+	testing               *testing.T
 	bucketFsUploads       []BucketFsUploadParams
 	findInstallationsFunc string
 	installFunc           string
@@ -108,10 +110,12 @@ func (b TestExtensionBuilder) Build() *BuiltExtension {
 	if err != nil {
 		panic(err)
 	}
-	return &BuiltExtension{runBuild(workDir)}
+	content := b.runBuild(workDir)
+	return &BuiltExtension{content: content, testing: b.testing}
 }
 
 type BuiltExtension struct {
+	testing *testing.T
 	content []byte
 }
 
@@ -124,7 +128,7 @@ func (extension BuiltExtension) Bytes() []byte {
 }
 
 func (e BuiltExtension) WriteToTmpFile() (fileName string) {
-	extensionFile, err := os.CreateTemp(os.TempDir(), "extension-*.js")
+	extensionFile, err := os.CreateTemp(e.testing.TempDir(), "extension-*.js")
 	if err != nil {
 		panic(err)
 	}
@@ -146,27 +150,42 @@ func (e BuiltExtension) WriteToFile(fileName string) {
 	if err != nil {
 		panic(err)
 	}
+	cleanupFile(e.testing, fileName)
+}
+
+func cleanupFile(t *testing.T, fileName string) {
+	t.Cleanup(func() {
+		if _, err := os.Stat(fileName); errors.Is(err, os.ErrNotExist) {
+			return
+		}
+		err := os.Remove(fileName)
+		if err != nil {
+			t.Errorf("failed to delete file: %v", err)
+		}
+	})
 }
 
 var buildLock sync.Mutex
 var isNpmInstallCalled = false
 
-func runBuild(workDir string) []byte {
+func (b TestExtensionBuilder) runBuild(workDir string) []byte {
 	buildLock.Lock()
 	runNpmInstall(workDir)
-	var stderr bytes.Buffer
+	var output bytes.Buffer
 	buildCommand := exec.Command("npm", "run", "build")
-	buildCommand.Stdout = &stderr
-	buildCommand.Stderr = &stderr
+	buildCommand.Stdout = &output
+	buildCommand.Stderr = &output
 	buildCommand.Dir = workDir
 	err := buildCommand.Run()
 	if err != nil {
-		fmt.Println(stderr.String())
-		panic(fmt.Sprintf("failed to build extensionForTesting. Cause: %v", err))
+		fmt.Println(output.String())
+		panic(fmt.Sprintf("failed to build extension in workdir %s. See log for details: %v", workDir, err))
 	}
-	builtExtension, err := os.ReadFile(path.Join(workDir, "dist.js"))
+	path := path.Join(workDir, "dist.js")
+	cleanupFile(b.testing, path)
+	builtExtension, err := os.ReadFile(path)
 	if err != nil {
-		panic(err)
+		b.testing.Fatalf("failed to read %s: %v", path, err)
 	}
 	buildLock.Unlock()
 	return builtExtension

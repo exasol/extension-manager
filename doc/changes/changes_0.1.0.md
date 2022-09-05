@@ -19,6 +19,7 @@ Code name:
 * #41: Added step to create the `EXA_EXTENSION` schema before installing an extension
 * #45: Added endpoint for installing an extension
 * #54: Added database authentication via tokens
+* #55: Converted JavaScript ApiError to Go APIError to use correct response status code
 
 ## Refactoring
 

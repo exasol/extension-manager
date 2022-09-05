@@ -8,6 +8,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/extensionAPI"
 	"github.com/exasol/extension-manager/parameterValidator"
 )
@@ -32,17 +33,15 @@ type controller interface {
 type controllerImpl struct {
 	extensionFolder string
 	schema          string
+	metaDataReader  extensionAPI.ExaMetadataReader
 }
 
 func createImpl(extensionFolder string, schema string) controller {
-	return &controllerImpl{extensionFolder: extensionFolder, schema: schema}
+	return &controllerImpl{extensionFolder: extensionFolder, schema: schema, metaDataReader: extensionAPI.CreateExaMetaDataReader()}
 }
 
 func (c *controllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, error) {
-	jsExtensions, err := c.getAllExtensions()
-	if err != nil {
-		return nil, err
-	}
+	jsExtensions := c.getAllExtensions()
 	var extensions []*Extension
 	for _, jsExtension := range jsExtensions {
 		if c.requiredFilesAvailable(jsExtension, bfsFiles) {
@@ -56,14 +55,14 @@ func (c *controllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, err
 func (c *controllerImpl) requiredFilesAvailable(extension *extensionAPI.JsExtension, bfsFiles []BfsFile) bool {
 	for _, requiredFile := range extension.BucketFsUploads {
 		if !existsFileInBfs(bfsFiles, requiredFile) {
-			log.Printf("Ignoring extension %q since the required file %q does not exist or has a wrong file size.\n", extension.Name, requiredFile.Name)
+			log.Printf("Ignoring extension %q since the required file %q (%q) does not exist or has a wrong file size.\n", extension.Name, requiredFile.Name, requiredFile.BucketFsFilename)
 			return false
 		}
 	}
 	return true
 }
 
-func (c *controllerImpl) getAllExtensions() ([]*extensionAPI.JsExtension, error) {
+func (c *controllerImpl) getAllExtensions() []*extensionAPI.JsExtension {
 	var extensions []*extensionAPI.JsExtension
 	extensionPaths := FindJSFilesInDir(c.extensionFolder)
 	for _, path := range extensionPaths {
@@ -74,7 +73,7 @@ func (c *controllerImpl) getAllExtensions() ([]*extensionAPI.JsExtension, error)
 			log.Printf("error: Failed to load extension. This extension will be ignored. Cause: %v\n", err)
 		}
 	}
-	return extensions, nil
+	return extensions
 }
 
 func (c *controllerImpl) loadExtensionById(id string) (*extensionAPI.JsExtension, error) {
@@ -91,20 +90,17 @@ func (c *controllerImpl) loadExtensionFromFile(extensionPath string) (*extension
 }
 
 func (c *controllerImpl) GetAllInstallations(tx *sql.Tx) ([]*extensionAPI.JsExtInstallation, error) {
-	metadata, err := extensionAPI.ReadMetadataTables(tx, c.schema)
+	metadata, err := c.metaDataReader.ReadMetadataTables(tx, c.schema)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
-	extensions, err := c.getAllExtensions()
-	if err != nil {
-		return nil, err
-	}
+	extensions := c.getAllExtensions()
 	extensionContext := c.createExtensionContext(tx)
 	var allInstallations []*extensionAPI.JsExtInstallation
 	for _, extension := range extensions {
 		installations, err := extension.FindInstallations(extensionContext, metadata)
 		if err != nil {
-			return nil, fmt.Errorf("failed to find installations: %v", err)
+			return nil, apiErrors.NewAPIErrorWithCause(fmt.Sprintf("failed to find installations for extension %q", extension.Name), err)
 		} else {
 			allInstallations = append(allInstallations, installations...)
 		}
@@ -160,14 +156,14 @@ func (c *controllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensio
 }
 
 func (c *controllerImpl) findInstallationByVersion(tx *sql.Tx, context *extensionAPI.ExtensionContext, extension *extensionAPI.JsExtension, version string) (*extensionAPI.JsExtInstallation, error) {
-	metadata, err := extensionAPI.ReadMetadataTables(tx, c.schema)
+	metadata, err := c.metaDataReader.ReadMetadataTables(tx, c.schema)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
 
 	installations, err := extension.FindInstallations(context, metadata)
 	if err != nil {
-		return nil, fmt.Errorf("failed to find installations. Cause: %w", err)
+		return nil, apiErrors.NewAPIErrorWithCause(fmt.Sprintf("failed to find installations for extension %q", extension.Name), err)
 	}
 	var availableVersions []string
 	for _, i := range installations {
@@ -206,7 +202,7 @@ func validateParameters(parameterDefinitions []interface{}, params extensionAPI.
 	}
 	message = strings.TrimSuffix(message, ", ")
 	if message != "" {
-		return fmt.Errorf("invalid parameters: %s", message)
+		return apiErrors.NewBadRequestErrorF("invalid parameters: %s", message)
 	}
 	return nil
 }
