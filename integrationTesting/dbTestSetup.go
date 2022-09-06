@@ -19,6 +19,7 @@ func StartDbSetup(suite *suite.Suite) *DbTestSetup {
 	if testing.Short() {
 		suite.T().Skip()
 	}
+	suite.T().Log("Starting Exasol test setup abstraction...")
 	exasol, err := testSetupAbstraction.Create("./exasol-test-setup-config.json") // file does not exist --> we use the testcontainer test setup
 	if err != nil {
 		suite.FailNowf("failed to create test setup abstraction: %v", err.Error())

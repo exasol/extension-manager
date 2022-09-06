@@ -1,7 +1,7 @@
 import {
-    ApiError, Context, ExaMetadata, ExasolExtension,
+    BadRequestError, Context, ExaMetadata, ExasolExtension,
     Installation,
-    Instance, ParameterValues,
+    Instance, InternalServerError, ParameterValues,
     registerExtension
 } from "@exasol/extension-manager-interface";
 
@@ -35,9 +35,13 @@ function createExtension(): ExasolExtension {
     }
 }
 
-if(false){
+if(false) {
     // dummy to keep import
-    throw new ApiError(200, "OK");
+    throw new BadRequestError("dummy");
+}
+if(false) {
+    // dummy to keep import
+    throw new InternalServerError("dummy");
 }
 
 registerExtension(createExtension())

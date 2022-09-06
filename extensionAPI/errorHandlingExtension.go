@@ -59,6 +59,10 @@ func (e *JsExtension) AddInstance(context *ExtensionContext, version string, par
 
 func (e *JsExtension) convertError(message string, err any) error {
 	if exception, ok := err.(*goja.Exception); ok {
+		statusField := exception.Value().ToObject(e.vm).Get("status")
+		if statusField == nil {
+			return basicError(message, err)
+		}
 		var apiError jsApiError
 		exportErr := e.vm.ExportTo(exception.Value(), &apiError)
 		if exportErr != nil {
@@ -66,6 +70,10 @@ func (e *JsExtension) convertError(message string, err any) error {
 		}
 		return apiErrors.NewAPIError(apiError.Status, apiError.Message)
 	}
+	return basicError(message, err)
+}
+
+func basicError(message string, err any) error {
 	return fmt.Errorf("%s: %v", message, err)
 }
 

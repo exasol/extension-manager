@@ -39,6 +39,8 @@ vendor/
 /doc/tracing-report.md
 /doc/tracing-report.html
 
+/integrationTesting/extensionForTesting/node_modules/
+/integrationTesting/extensionForTesting/package-lock.json
 /parameterValidator/node_modules/
 /parameterValidator/dist/
-coverage.out
+/coverage.out
