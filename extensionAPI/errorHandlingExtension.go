@@ -59,6 +59,9 @@ func (e *JsExtension) AddInstance(context *ExtensionContext, version string, par
 
 func (e *JsExtension) convertError(message string, err any) error {
 	if exception, ok := err.(*goja.Exception); ok {
+		if exception.Value() == nil {
+			return basicError(message, err)
+		}
 		statusField := exception.Value().ToObject(e.vm).Get("status")
 		if statusField == nil {
 			return basicError(message, err)
