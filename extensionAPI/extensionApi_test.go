@@ -30,7 +30,7 @@ func (suite *ExtensionApiSuite) SetupSuite() {
 func (suite *ExtensionApiSuite) Test_GetExtensionFromFile() {
 	extension, err := GetExtensionFromFile(suite.validExtensionFile)
 	suite.NoError(err)
-	suite.Assert().Equal("MyDemoExtension", extension.Name)
+	suite.Equal("MyDemoExtension", extension.Name)
 }
 
 type MockSimpleSQLClient struct {
@@ -99,7 +99,7 @@ func (suite *ExtensionApiSuite) Test_FindInstallationsCanReadAllScriptsTable() {
 	suite.NoError(err)
 	exaMetadata := createMockMetadata()
 	result, err := extension.FindInstallations(createMockContext(), &exaMetadata)
-	suite.Assert().Equal("test", result[0].Name)
+	suite.Equal("test", result[0].Name)
 	suite.NoError(err)
 }
 
@@ -114,9 +114,9 @@ func (suite *ExtensionApiSuite) Test_FindInstallationsReturningParameters() {
 	suite.NoError(err)
 	exaMetadata := createMockMetadata()
 	result, err := extension.FindInstallations(createMockContext(), &exaMetadata)
-	suite.Assert().Equal("test", result[0].Name)
-	suite.Assert().Equal("0.1.0", result[0].Version)
-	suite.Assert().Equal([]interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}, result[0].InstanceParameters)
+	suite.Equal("test", result[0].Name)
+	suite.Equal("0.1.0", result[0].Version)
+	suite.Equal([]interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}, result[0].InstanceParameters)
 	suite.NoError(err)
 }
 

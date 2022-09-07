@@ -12,7 +12,7 @@ import (
 	"github.com/dop251/goja_nodejs/require"
 )
 
-const SupportedApiVersion = "0.1.11"
+const SupportedApiVersion = "0.1.12"
 
 // GetExtensionFromFile loads an extension from a .js file.
 func GetExtensionFromFile(extensionPath string) (*JsExtension, error) {

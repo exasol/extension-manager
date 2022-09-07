@@ -38,7 +38,7 @@ func (suite *ParameterValidatorSuite) TestValidateParameter() {
 	for _, testCase := range cases {
 		result, err := suite.validator.ValidateParameter(testCase.definition, "test")
 		suite.NoError(err)
-		suite.Assert().Equal(testCase.expected, *result)
+		suite.Equal(testCase.expected, *result)
 	}
 }
 

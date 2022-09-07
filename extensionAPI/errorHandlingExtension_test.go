@@ -1,8 +1,11 @@
 package extensionAPI
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/dop251/goja"
+	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -18,17 +21,18 @@ func TestJsExtensionSuite(t *testing.T) {
 
 func (suite *ErrorHandlingExtensionSuite) SetupSuite() {
 	suite.rawExtension = &rawJsExtension{Name: "name", Description: "desc", InstallableVersions: []string{"v1", "v2"}, BucketFsUploads: []BucketFsUpload{{Name: "uploadName"}}}
-	suite.extension = wrapExtension(suite.rawExtension, "id", nil)
+	suite.extension = wrapExtension(suite.rawExtension, "id", newJavaScriptVm())
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestProperties() {
-	suite.Assert().Equal(&JsExtension{
+	suite.Equal(&JsExtension{
 		Id:                  "id",
 		Name:                "name",
 		Description:         "desc",
 		InstallableVersions: []string{"v1", "v2"},
 		BucketFsUploads:     []BucketFsUpload{{Name: "uploadName"}},
-		extension:           suite.rawExtension},
+		extension:           suite.rawExtension,
+		vm:                  suite.extension.vm},
 		suite.extension)
 }
 
@@ -91,4 +95,62 @@ func (suite *ErrorHandlingExtensionSuite) TestAddInstanceFails() {
 	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{})
 	suite.EqualError(err, "failed to add instance for extension \"id\": mock error")
 	suite.Nil(instance)
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestConvertError_nonErrorObject() {
+	err := suite.extension.convertError("msg", "dummyError")
+	suite.EqualError(err, "msg: dummyError")
+	suite.Equal("*errors.errorString", fmt.Sprintf("%T", err))
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestConvertError_errorObject() {
+	err := suite.extension.convertError("msg", fmt.Errorf("dummyError"))
+	suite.EqualError(err, "msg: dummyError")
+	suite.Equal("*errors.errorString", fmt.Sprintf("%T", err))
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestConvertError_nilGojaException() {
+	var exception goja.Exception
+	err := suite.extension.convertError("msg", &exception)
+	suite.Equal("*errors.errorString", fmt.Sprintf("%T", err))
+	suite.EqualError(err, "msg: <nil>")
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestConvertError_genericJavaScriptError() {
+	exception := suite.getGojaException("throw Error('jsError')")
+	err := suite.extension.convertError("msg", exception)
+	suite.Equal("*errors.errorString", fmt.Sprintf("%T", err))
+	suite.EqualError(err, "msg: Error: jsError at <eval>:1:1(3)")
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestConvertError_genericNewJavaScriptError() {
+	exception := suite.getGojaException("throw new Error('jsError')")
+	err := suite.extension.convertError("msg", exception)
+	suite.Equal("*errors.errorString", fmt.Sprintf("%T", err))
+	suite.EqualError(err, "msg: Error: jsError at <eval>:1:7(2)")
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestConvertError_JavaScriptString() {
+	exception := suite.getGojaException("throw 'jsError'")
+	err := suite.extension.convertError("msg", exception)
+	suite.Equal("*errors.errorString", fmt.Sprintf("%T", err))
+	suite.EqualError(err, "msg: jsError at <eval>:1:1(1)")
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestConvertError_JavaScriptErrorWithStatus() {
+	exception := suite.getGojaException("const err = new Error('jsError'); err.status = 400; throw err")
+	err := suite.extension.convertError("msg", exception)
+	suite.Equal("*apiErrors.APIError", fmt.Sprintf("%T", err))
+	suite.EqualError(err, "jsError")
+	apiErr := err.(*apiErrors.APIError)
+	suite.Equal(apiErrors.NewAPIError(400, "jsError"), apiErr)
+}
+
+func (suite *ErrorHandlingExtensionSuite) getGojaException(javaScript string) *goja.Exception {
+	_, err := suite.extension.vm.RunString(javaScript)
+	suite.Error(err)
+	suite.Equal("*goja.Exception", fmt.Sprintf("%T", err))
+	exception := err.(*goja.Exception)
+	suite.NotNil(exception)
+	return exception
 }

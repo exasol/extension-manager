@@ -170,7 +170,7 @@ var isNpmInstallCalled = false
 
 func (b TestExtensionBuilder) runBuild(workDir string) []byte {
 	buildLock.Lock()
-	runNpmInstall(workDir)
+	b.runNpmInstall(workDir)
 	var output bytes.Buffer
 	buildCommand := exec.Command("npm", "run", "build")
 	buildCommand.Stdout = &output
@@ -191,8 +191,9 @@ func (b TestExtensionBuilder) runBuild(workDir string) []byte {
 	return builtExtension
 }
 
-func runNpmInstall(workDir string) {
+func (b TestExtensionBuilder) runNpmInstall(workDir string) {
 	if !isNpmInstallCalled { // running it once is enough
+		b.testing.Logf("Running npm install in %s", workDir)
 		var stderr bytes.Buffer
 		installCommand := exec.Command("npm", "install")
 		installCommand.Dir = workDir
