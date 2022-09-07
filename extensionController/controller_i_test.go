@@ -49,9 +49,9 @@ func (suite *ControllerITestSuite) TestGetAllExtensions() {
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
 	extensions, err := controller.GetAllExtensions(mockContext(), suite.exasol.GetConnection())
 	suite.NoError(err)
-	suite.Assert().Equal(1, len(extensions))
-	suite.Assert().Equal("MyDemoExtension", extensions[0].Name, "name")
-	suite.Assert().Equal(EXTENSION_ID, extensions[0].Id, "id")
+	suite.Equal(1, len(extensions))
+	suite.Equal("MyDemoExtension", extensions[0].Name, "name")
+	suite.Equal(EXTENSION_ID, extensions[0].Id, "id")
 }
 
 func (suite *ControllerITestSuite) writeDefaultExtension() {
@@ -73,7 +73,7 @@ func (suite *ControllerITestSuite) TestGetAllExtensionsWithMissingJar() {
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
 	extensions, err := controller.GetAllExtensions(mockContext(), suite.exasol.GetConnection())
 	suite.NoError(err)
-	suite.Assert().Empty(extensions)
+	suite.Empty(extensions)
 }
 
 func (suite *ControllerITestSuite) GetInstalledExtensions_failsWithGenericError() {
@@ -116,8 +116,8 @@ func (suite *ControllerITestSuite) TestGetAllInstallations() {
 	fixture.Cleanup(suite.T())
 	installations, err := controller.GetInstalledExtensions(mockContext(), suite.exasol.GetConnection())
 	suite.NoError(err)
-	suite.Assert().Equal(1, len(installations))
-	suite.Assert().Equal(fixture.GetSchemaName()+".MY_SCRIPT", installations[0].Name)
+	suite.Equal(1, len(installations))
+	suite.Equal(fixture.GetSchemaName()+".MY_SCRIPT", installations[0].Name)
 }
 
 func (suite *ControllerITestSuite) TestInstallFailsForUnknownExtensionId() {
@@ -153,7 +153,7 @@ func (suite *ControllerITestSuite) TestEnsureSchemaDoesNotFailIfSchemaAlreadyExi
 	suite.createSchema(schemaName)
 	err := controller.InstallExtension(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "ver")
 	suite.NoError(err)
-	suite.Assert().Contains(suite.getAllSchemaNames(), schemaName)
+	suite.Contains(suite.getAllSchemaNames(), schemaName)
 }
 
 func (suite *ControllerITestSuite) TestAddInstance_wrongVersion() {

@@ -35,7 +35,7 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataWithAllColumnsDefined() {
 	fixture := integrationTesting.CreateLuaScriptFixture(suite.exasol.GetConnection())
 	fixture.Cleanup(suite.T())
 	result := suite.readMetaDataTables(fixture.GetSchemaName())
-	suite.Assert().Equal(
+	suite.Equal(
 		ExaAllScriptTable{Rows: []ExaAllScriptRow{{
 			Schema:     "TEST",
 			Name:       "MY_SCRIPT",
@@ -50,7 +50,7 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaAdapterScript() {
 	fixture := integrationTesting.CreateJavaAdapterScriptFixture(suite.exasol.GetConnection())
 	fixture.Cleanup(suite.T())
 	result := suite.readMetaDataTables(fixture.GetSchemaName())
-	suite.Assert().Equal(
+	suite.Equal(
 		ExaAllScriptTable{Rows: []ExaAllScriptRow{{
 			Schema:     "TEST",
 			Name:       "VS_ADAPTER",
@@ -65,7 +65,7 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaSetScript() {
 	fixture := integrationTesting.CreateJavaSetScriptFixture(suite.exasol.GetConnection())
 	fixture.Cleanup(suite.T())
 	result := suite.readMetaDataTables(fixture.GetSchemaName())
-	suite.Assert().Equal(
+	suite.Equal(
 		ExaAllScriptTable{Rows: []ExaAllScriptRow{{
 			Schema:     "TEST",
 			Name:       "IMPORT_FROM_S3_DOCUMENT_FILES",

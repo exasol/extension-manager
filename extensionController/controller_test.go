@@ -125,7 +125,7 @@ func (suite *ControllerUTestSuite) TestGetAllInstallations() {
 	suite.dbMock.ExpectRollback()
 	installations, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
 	suite.NoError(err)
-	suite.Assert().Equal([]*extensionAPI.JsExtInstallation{{Name: "schema.script", Version: "0.1.0",
+	suite.Equal([]*extensionAPI.JsExtInstallation{{Name: "schema.script", Version: "0.1.0",
 		InstanceParameters: []interface{}{map[string]interface{}{"id": "p1", "name": "param1", "type": "string"}}}}, installations)
 }
 
