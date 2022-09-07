@@ -188,9 +188,9 @@ func (suite *ControllerUTestSuite) TestAddInstance_wrongVersion() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectRollback()
-	instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "wrongVersion", []ParameterValue{})
+	instance, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "wrongVersion", []ParameterValue{})
 	suite.EqualError(err, `failed to find installations: version "wrongVersion" not found for extension "testing-extension.js", available versions: ["0.1.0"]`)
-	suite.Equal("", instanceName)
+	suite.Nil(instance)
 }
 
 func (suite *ControllerUTestSuite) TestAddInstance_invalidParameters() {
@@ -200,16 +200,16 @@ func (suite *ControllerUTestSuite) TestAddInstance_invalidParameters() {
 		name: "My param",
 		type: "string",
 		required: true
-	}]`)).WithAddInstanceFunc("return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+	}]`)).WithAddInstanceFunc("return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectRollback()
-	instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{})
+	instance, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{})
 	suite.EqualError(err, `invalid parameters: Failed to validate parameter 'My param': This is a required parameter.`)
-	suite.Equal("", instanceName)
+	suite.Nil(instance)
 }
 
 func (suite *ControllerUTestSuite) TestAddInstanceFails() {
@@ -224,9 +224,9 @@ func (suite *ControllerUTestSuite) TestAddInstanceFails() {
 			suite.dbMock.ExpectBegin()
 			suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 			suite.dbMock.ExpectRollback()
-			instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{})
+			instance, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{})
 			suite.assertError(t, err)
-			suite.Equal("", instanceName)
+			suite.Nil(instance)
 		})
 	}
 }
@@ -237,16 +237,16 @@ func (suite *ControllerUTestSuite) TestAddInstance_validParameters() {
 		id: "p1",
 		name: "My param",
 		type: "string"
-	}]`)).WithAddInstanceFunc("return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+	}]`)).WithAddInstanceFunc("return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()
-	instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p1", Value: "val"}})
+	instance, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p1", Value: "val"}})
 	suite.NoError(err)
-	suite.Equal("ext_0.1.0_p1_val", instanceName)
+	suite.Equal(&extensionAPI.JsExtInstance{Id: "instId", Name: "ext_0.1.0_p1_val"}, instance)
 }
 
 func (suite *ControllerUTestSuite) writeDefaultExtension() {

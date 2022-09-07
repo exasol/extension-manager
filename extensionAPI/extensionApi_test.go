@@ -67,7 +67,7 @@ func (suite *ExtensionApiSuite) Test_Install_ResolveBucketFsPath() {
 func (suite *ExtensionApiSuite) Test_AddInstance_validParameters() {
 	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithAddInstanceFunc("context.sqlClient.runQuery('create vs');\n" +
-			"return {name: `instance_${version}_${params.values[0].name}_${params.values[0].value}`};").
+			"return {id: 'instId', name: `instance_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
 				id: "p1",
 				name: "My param",
@@ -80,8 +80,7 @@ func (suite *ExtensionApiSuite) Test_AddInstance_validParameters() {
 	suite.NoError(err)
 	instance, err := extension.AddInstance(createMockContextWithSqlClient(&mockSQLClient), "extensionVersion", &ParameterValues{Values: []ParameterValue{{Name: "p1", Value: "v1"}}})
 	suite.NoError(err)
-	suite.NotNil(instance)
-	suite.Equal("instance_extensionVersion_p1_v1", instance.Name)
+	suite.Equal(&JsExtInstance{Id: "instId", Name: "instance_extensionVersion_p1_v1"}, instance)
 	mockSQLClient.AssertCalled(suite.T(), "RunQuery", "create vs")
 }
 

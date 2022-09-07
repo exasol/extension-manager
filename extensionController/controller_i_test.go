@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/exasol/extension-manager/apiErrors"
+	"github.com/exasol/extension-manager/extensionAPI"
 	"github.com/exasol/extension-manager/integrationTesting"
 
 	"github.com/stretchr/testify/suite"
@@ -159,13 +160,13 @@ func (suite *ControllerITestSuite) TestEnsureSchemaDoesNotFailIfSchemaAlreadyExi
 func (suite *ControllerITestSuite) TestAddInstance_wrongVersion() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
-		WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+		WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instanceName, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "wrongVersion", []ParameterValue{})
+	instance, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "wrongVersion", []ParameterValue{})
 	suite.EqualError(err, `failed to find installations: version "wrongVersion" not found for extension "testing-extension.js", available versions: ["0.1.0"]`)
-	suite.Equal("", instanceName)
+	suite.Nil(instance)
 }
 
 func (suite *ControllerITestSuite) TestAddInstance_invalidParameters() {
@@ -175,13 +176,13 @@ func (suite *ControllerITestSuite) TestAddInstance_invalidParameters() {
 		name: "My param",
 		type: "string",
 		required: true
-	}]`)).WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+	}]`)).WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instanceName, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0", []ParameterValue{})
+	instance, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0", []ParameterValue{})
 	suite.EqualError(err, `invalid parameters: Failed to validate parameter 'My param': This is a required parameter.`)
-	suite.Equal("", instanceName)
+	suite.Nil(instance)
 }
 
 func (suite *ControllerITestSuite) TestAddInstance_validParameters() {
@@ -190,13 +191,13 @@ func (suite *ControllerITestSuite) TestAddInstance_validParameters() {
 		id: "p1",
 		name: "My param",
 		type: "string"
-	}]`)).WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+	}]`)).WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instanceName, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p1", Value: "val"}})
+	instance, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p1", Value: "val"}})
 	suite.NoError(err)
-	suite.Equal("ext_0.1.0_p1_val", instanceName)
+	suite.Equal(&extensionAPI.JsExtInstance{Id: "instId", Name: "ext_0.1.0_p1_val"}, instance)
 }
 
 func (suite *ControllerITestSuite) createSchema(schemaName string) {

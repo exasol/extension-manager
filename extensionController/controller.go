@@ -27,7 +27,13 @@ type controller interface {
 	InstallExtension(tx *sql.Tx, extensionId string, extensionVersion string) error
 
 	// CreateInstance creates a new instance of an extension, e.g. a virtual schema and returns it's name.
-	CreateInstance(tx *sql.Tx, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error)
+	CreateInstance(tx *sql.Tx, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error)
+
+	// FindInstances returns a list of all instances for the given version.
+	FindInstances(tx *sql.Tx, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error)
+
+	// DeleteInstance deletes instance with the given ID.
+	DeleteInstance(tx *sql.Tx, extensionId string, instanceId string) error
 }
 
 type controllerImpl struct {
@@ -120,14 +126,14 @@ func (c *controllerImpl) InstallExtension(tx *sql.Tx, extensionId string, extens
 	return extension.Install(c.createExtensionContext(tx), extensionVersion)
 }
 
-func (c *controllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error) {
+func (c *controllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
-		return "", fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
+		return nil, fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
 	}
 	err = c.ensureSchemaExists(tx)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	params := extensionAPI.ParameterValues{}
 	for _, p := range parameterValues {
@@ -137,22 +143,32 @@ func (c *controllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensio
 	extensionContext := c.createExtensionContext(tx)
 	installation, err := c.findInstallationByVersion(tx, extensionContext, extension, extensionVersion)
 	if err != nil {
-		return "", fmt.Errorf("failed to find installations: %w", err)
+		return nil, fmt.Errorf("failed to find installations: %w", err)
 	}
 
 	err = validateParameters(installation.InstanceParameters, params)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	instance, err := extension.AddInstance(extensionContext, extensionVersion, &params)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if instance == nil {
-		return "", fmt.Errorf("extension did not return an instance")
+		return nil, fmt.Errorf("extension did not return an instance")
 	}
-	return instance.Name, nil
+	return instance, nil
+}
+
+func (c *controllerImpl) DeleteInstance(tx *sql.Tx, extensionId string, instanceId string) error {
+	// TODO
+	return nil
+}
+
+func (c *controllerImpl) FindInstances(tx *sql.Tx, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error) {
+	// TODO
+	return []*extensionAPI.JsExtInstance{}, nil
 }
 
 func (c *controllerImpl) findInstallationByVersion(tx *sql.Tx, context *extensionAPI.ExtensionContext, extension *extensionAPI.JsExtension, version string) (*extensionAPI.JsExtInstallation, error) {
