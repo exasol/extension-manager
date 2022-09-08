@@ -57,6 +57,25 @@ func (e *JsExtension) AddInstance(context *ExtensionContext, version string, par
 	return e.extension.AddInstance(context, version, params), nil
 }
 
+func (e *JsExtension) ListInstances(context *ExtensionContext, metadata *ExaMetadata, version string) (instances []*JsExtInstance, errorResult error) {
+	defer func() {
+		if err := recover(); err != nil {
+			errorResult = e.convertError(fmt.Sprintf("failed to list instances for extension %q in version %q", e.Id, version), err)
+		}
+	}()
+	return e.extension.FindInstances(context, metadata, version), nil
+}
+
+func (e *JsExtension) DeleteInstance(context *ExtensionContext, instanceId string) (errorResult error) {
+	defer func() {
+		if err := recover(); err != nil {
+			errorResult = e.convertError(fmt.Sprintf("failed to delete instance %q for extension %q", instanceId, e.Id), err)
+		}
+	}()
+	e.extension.DeleteInstance(context, instanceId)
+	return
+}
+
 func (e *JsExtension) convertError(message string, err any) error {
 	if exception, ok := err.(*goja.Exception); ok {
 		if exception.Value() == nil {

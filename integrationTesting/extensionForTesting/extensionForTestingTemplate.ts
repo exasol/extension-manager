@@ -21,13 +21,13 @@ function createExtension(): ExasolExtension {
             $FIND_INSTALLATIONS$
         },
         findInstances(context: Context, metadata: ExaMetadata, version: string): Instance[] {
-            return [];
+            $FIND_INSTANCES$
         },
         uninstall(context: Context, installation: Installation): void {
             //empty on purpose
         },
         deleteInstance(context: Context, instanceId: string): void {
-            //empty on purpose
+            $DELETE_INSTANCE$
         },
         readInstanceParameters(context: Context, metadata: ExaMetadata, instanceId: string): ParameterValues {
             return undefined;

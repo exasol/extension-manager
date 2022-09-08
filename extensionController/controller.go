@@ -162,13 +162,24 @@ func (c *controllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensio
 }
 
 func (c *controllerImpl) DeleteInstance(tx *sql.Tx, extensionId string, instanceId string) error {
-	// TODO
-	return nil
+	log.Printf("ctrl delete instance %s %s\n", extensionId, instanceId)
+	extension, err := c.loadExtensionById(extensionId)
+	if err != nil {
+		return fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
+	}
+	return extension.DeleteInstance(c.createExtensionContext(tx), extensionId)
 }
 
 func (c *controllerImpl) FindInstances(tx *sql.Tx, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error) {
-	// TODO
-	return []*extensionAPI.JsExtInstance{}, nil
+	extension, err := c.loadExtensionById(extensionId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
+	}
+	metadata, err := c.metaDataReader.ReadMetadataTables(tx, c.schema)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
+	}
+	return extension.ListInstances(c.createExtensionContext(tx), metadata, extensionVersion)
 }
 
 func (c *controllerImpl) findInstallationByVersion(tx *sql.Tx, context *extensionAPI.ExtensionContext, extension *extensionAPI.JsExtension, version string) (*extensionAPI.JsExtInstallation, error) {

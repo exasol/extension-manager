@@ -21,6 +21,8 @@ func CreateTestExtensionBuilder(t *testing.T) *TestExtensionBuilder {
 	builder.findInstallationsFunc = "return []"
 	builder.installFunc = "context.sqlClient.runQuery('select 1')"
 	builder.addInstanceFunc = "return undefined"
+	builder.findInstancesFunc = "return []"
+	builder.deleteInstanceFunc = "context.sqlClient.runQuery(`drop instance ${instanceId}`)"
 	return &builder
 }
 
@@ -30,6 +32,8 @@ type TestExtensionBuilder struct {
 	findInstallationsFunc string
 	installFunc           string
 	addInstanceFunc       string
+	findInstancesFunc     string
+	deleteInstanceFunc    string
 }
 
 type BucketFsUploadParams struct {
@@ -53,6 +57,16 @@ func (b *TestExtensionBuilder) WithInstallFunc(tsFunctionCode string) *TestExten
 
 func (b *TestExtensionBuilder) WithAddInstanceFunc(tsFunctionCode string) *TestExtensionBuilder {
 	b.addInstanceFunc = tsFunctionCode
+	return b
+}
+
+func (b *TestExtensionBuilder) WithFindInstancesFunc(tsFunctionCode string) *TestExtensionBuilder {
+	b.findInstancesFunc = tsFunctionCode
+	return b
+}
+
+func (b *TestExtensionBuilder) WithDeleteInstanceFunc(tsFunctionCode string) *TestExtensionBuilder {
+	b.deleteInstanceFunc = tsFunctionCode
 	return b
 }
 
@@ -91,6 +105,8 @@ func (b TestExtensionBuilder) Build() *BuiltExtension {
 	extensionTs = strings.Replace(extensionTs, "$FIND_INSTALLATIONS$", b.findInstallationsFunc, 1)
 	extensionTs = strings.Replace(extensionTs, "$INSTALL$", b.installFunc, 1)
 	extensionTs = strings.Replace(extensionTs, "$ADD_INSTANCE$", b.addInstanceFunc, 1)
+	extensionTs = strings.Replace(extensionTs, "$FIND_INSTANCES$", b.findInstancesFunc, 1)
+	extensionTs = strings.Replace(extensionTs, "$DELETE_INSTANCE$", b.deleteInstanceFunc, 1)
 	workDir := path.Join(os.TempDir(), "extension-manager-test-extension-build-dir")
 	if _, err := os.Stat(workDir); errors.Is(err, os.ErrNotExist) {
 		err := os.Mkdir(workDir, os.ModePerm)

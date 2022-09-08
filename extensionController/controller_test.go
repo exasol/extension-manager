@@ -98,10 +98,44 @@ func (suite *ControllerUTestSuite) TestGetAllInstallationsFails() {
 			suite.metaDataMock.simulateExaMetaData(extensionAPI.ExaMetadata{})
 			suite.initDbMock()
 			suite.dbMock.ExpectBegin()
+			suite.dbMock.ExpectRollback()
 			extensions, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
-
 			suite.assertError(t, err)
 			suite.Nil(extensions)
+		})
+	}
+}
+
+func (suite *ControllerUTestSuite) TestFindInstancesFails() {
+	for _, t := range errorTests {
+		suite.Run(t.testName, func() {
+			integrationTesting.CreateTestExtensionBuilder(suite.T()).
+				WithFindInstancesFunc(t.throwCommand).
+				Build().
+				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+			suite.metaDataMock.simulateExaMetaData(extensionAPI.ExaMetadata{})
+			suite.initDbMock()
+			suite.dbMock.ExpectBegin()
+			suite.dbMock.ExpectRollback()
+			extensions, err := suite.controller.FindInstances(mockContext(), suite.db, EXTENSION_ID, "ver")
+			suite.assertError(t, err)
+			suite.Nil(extensions)
+		})
+	}
+}
+
+func (suite *ControllerUTestSuite) TestDeleteInstancesFails() {
+	for _, t := range errorTests {
+		suite.Run(t.testName, func() {
+			integrationTesting.CreateTestExtensionBuilder(suite.T()).
+				WithDeleteInstanceFunc(t.throwCommand).
+				Build().
+				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+			suite.initDbMock()
+			suite.dbMock.ExpectBegin()
+			suite.dbMock.ExpectRollback()
+			err := suite.controller.DeleteInstance(mockContext(), suite.db, EXTENSION_ID, "instId")
+			suite.assertError(t, err)
 		})
 	}
 }

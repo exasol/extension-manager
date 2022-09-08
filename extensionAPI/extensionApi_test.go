@@ -21,10 +21,13 @@ func TestExtensionApiSuite(t *testing.T) {
 }
 
 func (suite *ExtensionApiSuite) SetupSuite() {
+}
+
+func (suite *ExtensionApiSuite) SetupTest() {
 	suite.mockSQLClient = sqlClientMock{}
 }
 
-func (suite *ExtensionApiSuite) TeardownSuite() {
+func (suite *ExtensionApiSuite) TearDownTest() {
 	suite.mockSQLClient.AssertExpectations(suite.T())
 }
 
@@ -72,9 +75,37 @@ func (suite *ExtensionApiSuite) Test_AddInstance_validParameters() {
 	suite.Equal(&JsExtInstance{Id: "instId", Name: "instance_extensionVersion_p1_v1"}, instance)
 }
 
-func createMockMetadata() ExaMetadata {
+func (suite *ExtensionApiSuite) Test_ListInstances_EmptyResult() {
+	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		Build().WriteToTmpFile()
+	extension := suite.loadExtension(extensionFile)
+	instances, err := extension.ListInstances(suite.mockContext(), createMockMetadata(), "ver")
+	suite.NoError(err)
+	suite.Empty(instances)
+}
+
+func (suite *ExtensionApiSuite) Test_ListInstances_NonEmptyResult() {
+	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithFindInstancesFunc(`return [{id: "instId", name: "instName"}]`).
+		Build().WriteToTmpFile()
+	extension := suite.loadExtension(extensionFile)
+	instances, err := extension.ListInstances(suite.mockContext(), createMockMetadata(), "ver")
+	suite.NoError(err)
+	suite.Equal([]*JsExtInstance{{Id: "instId", Name: "instName"}}, instances)
+}
+
+func (suite *ExtensionApiSuite) Test_DeleteInstance() {
+	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		Build().WriteToTmpFile()
+	extension := suite.loadExtension(extensionFile)
+	suite.mockSQLClient.On("RunQuery", "drop instance instId").Return()
+	err := extension.DeleteInstance(suite.mockContext(), "instId")
+	suite.NoError(err)
+}
+
+func createMockMetadata() *ExaMetadata {
 	exaAllScripts := ExaAllScriptTable{Rows: []ExaAllScriptRow{{Name: "test"}}}
-	return ExaMetadata{AllScripts: exaAllScripts}
+	return &ExaMetadata{AllScripts: exaAllScripts}
 }
 
 func (suite *ExtensionApiSuite) Test_FindInstallationsCanReadAllScriptsTable() {
@@ -84,8 +115,7 @@ func (suite *ExtensionApiSuite) Test_FindInstallationsCanReadAllScriptsTable() {
 			return {name: row.name, version: "0.1.0", instanceParameters: []}
 		});`).Build().WriteToTmpFile()
 	extension := suite.loadExtension(extensionFile)
-	exaMetadata := createMockMetadata()
-	result, err := extension.FindInstallations(createMockContext(), &exaMetadata)
+	result, err := extension.FindInstallations(createMockContext(), createMockMetadata())
 	suite.Equal([]*JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{}}}, result)
 	suite.NoError(err)
 }
@@ -99,8 +129,7 @@ func (suite *ExtensionApiSuite) Test_FindInstallationsReturningParameters() {
 		type: "string"
 	}]`)).Build().WriteToTmpFile()
 	extension := suite.loadExtension(extensionFile)
-	exaMetadata := createMockMetadata()
-	result, err := extension.FindInstallations(createMockContext(), &exaMetadata)
+	result, err := extension.FindInstallations(createMockContext(), createMockMetadata())
 	suite.Equal([]*JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, result)
 	suite.NoError(err)
 }

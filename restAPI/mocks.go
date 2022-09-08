@@ -43,3 +43,17 @@ func (m *mockExtensionController) CreateInstance(ctx context.Context, db *sql.DB
 		return nil, args.Error(1)
 	}
 }
+
+func (m *mockExtensionController) FindInstances(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error) {
+	args := m.Called(ctx, db, extensionId, extensionVersion)
+	if instances, ok := args.Get(0).([]*extensionAPI.JsExtInstance); ok {
+		return instances, args.Error(1)
+	} else {
+		return nil, args.Error(1)
+	}
+}
+
+func (m *mockExtensionController) DeleteInstance(ctx context.Context, db *sql.DB, extensionId string, instanceId string) error {
+	args := m.Called(ctx, db, extensionId, instanceId)
+	return args.Error(0)
+}
