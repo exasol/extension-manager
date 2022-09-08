@@ -41,7 +41,7 @@ func createMockContextWithSqlClient(sqlClient SimpleSQLClient) *ExtensionContext
 }
 
 func createMockContext() *ExtensionContext {
-	var client SimpleSQLClient = &MockSimpleSQLClient{}
+	var client SimpleSQLClient = &sqlClientMock{}
 	return CreateContextWithClient("extension_schema", client)
 }
 
