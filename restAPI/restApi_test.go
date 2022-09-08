@@ -78,6 +78,8 @@ func (suite *RestAPISuite) TestGetAllExtensionsFails() {
 	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
 }
 
+// Install extension
+
 func (suite *RestAPISuite) TestInstallExtensionsSuccessfully() {
 	suite.controller.On("InstallExtension", mock.Anything, mock.Anything, "ext-id", "ver").Return(nil)
 	for _, test := range authSuccessTests {
@@ -93,6 +95,8 @@ func (suite *RestAPISuite) TestInstallExtensionsFailed() {
 	responseString := suite.makeRequest("PUT", "/api/v1/installations?extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563", `{"extensionId": "ext-id", "extensionVersion": "ver"}`, 500)
 	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
 }
+
+// Create instance
 
 func (suite *RestAPISuite) TestCreateInstanceSuccessfully() {
 	suite.controller.On("CreateInstance", mock.Anything, mock.Anything, "ext-id", "ver", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return(&extensionAPI.JsExtInstance{Id: "instId", Name: "instName"}, nil)
@@ -119,12 +123,14 @@ func (suite *RestAPISuite) TestCreateInstanceFailed() {
 	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
 }
 
+// List instances
+
 func (suite *RestAPISuite) TestListInstancesSuccessfully() {
 	suite.controller.On("FindInstances", mock.Anything, mock.Anything, "ext-id", "ver").Return([]*extensionAPI.JsExtInstance{{Id: "instId", Name: "instName"}}, nil)
 	for _, test := range authSuccessTests {
 		suite.Run(test.authHeader, func() {
 			responseString := suite.restApi.makeRequestWithAuthHeader("GET", "/api/v1/extension/ext-id/ver/instances?dbHost=host&dbPort=8563&", test.authHeader, "", 200)
-			suite.Equal(`{"Instances":[{"id":"instId","name":"instName"}]}`+"\n", responseString)
+			suite.Equal(`{"instances":[{"id":"instId","name":"instName"}]}`+"\n", responseString)
 		})
 	}
 }
@@ -138,6 +144,30 @@ func (suite *RestAPISuite) TestListInstancesFailed_genericError() {
 func (suite *RestAPISuite) TestListInstancesFailed_apiError() {
 	suite.controller.On("FindInstances", mock.Anything, mock.Anything, "ext-id", "ver").Return(nil, apiErrors.NewAPIError(432, "mock"))
 	responseString := suite.restApi.makeRequestWithAuthHeader("GET", "/api/v1/extension/ext-id/ver/instances?dbHost=host&dbPort=8563&", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "", 432)
+	suite.Contains(responseString, "{\"code\":432,\"message\":\"mock\",")
+}
+
+// Delete instance
+
+func (suite *RestAPISuite) TestDeleteInstanceSuccessfully() {
+	suite.controller.On("DeleteInstance", mock.Anything, mock.Anything, "ext-id", "inst-id").Return(nil)
+	for _, test := range authSuccessTests {
+		suite.Run(test.authHeader, func() {
+			responseString := suite.restApi.makeRequestWithAuthHeader("DELETE", "/api/v1/extension/ext-id/instance/inst-id?dbHost=host&dbPort=8563&", test.authHeader, "", 204)
+			suite.Equal("", responseString)
+		})
+	}
+}
+
+func (suite *RestAPISuite) TestDeleteInstanceFailed_genericError() {
+	suite.controller.On("DeleteInstance", mock.Anything, mock.Anything, "ext-id", "inst-id").Return(fmt.Errorf("mock"))
+	responseString := suite.restApi.makeRequestWithAuthHeader("DELETE", "/api/v1/extension/ext-id/instance/inst-id?dbHost=host&dbPort=8563&", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "", 500)
+	suite.Contains(responseString, "{\"code\":500,\"message\":\"Internal server error\"")
+}
+
+func (suite *RestAPISuite) TestDeleteInstanceFailed_apiError() {
+	suite.controller.On("DeleteInstance", mock.Anything, mock.Anything, "ext-id", "inst-id").Return(apiErrors.NewAPIError(432, "mock"))
+	responseString := suite.restApi.makeRequestWithAuthHeader("DELETE", "/api/v1/extension/ext-id/instance/inst-id?dbHost=host&dbPort=8563&", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "", 432)
 	suite.Contains(responseString, "{\"code\":432,\"message\":\"mock\",")
 }
 
@@ -167,6 +197,10 @@ func (suite *RestAPISuite) TestRequestsFailForMissingParameters() {
 		{"GET", "/api/v1/extension/extId/extVersion/instances", "dbPort=8563", "missing parameter dbHost"},
 		{"GET", "/api/v1/extension/extId/extVersion/instances", "dbHost=host", "missing parameter dbPort"},
 		{"GET", "/api/v1/extension/extId/extVersion/instances", "dbHost=host&dbPort=invalidPort", "invalid value 'invalidPort' for parameter dbPort"},
+
+		{"DELETE", "/api/v1/extension/extId/instance/inst-id", "dbPort=8563", "missing parameter dbHost"},
+		{"DELETE", "/api/v1/extension/extId/instance/inst-id", "dbHost=host", "missing parameter dbPort"},
+		{"DELETE", "/api/v1/extension/extId/instance/inst-id", "dbHost=host&dbPort=invalidPort", "invalid value 'invalidPort' for parameter dbPort"},
 	}
 	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return([]*extensionController.Extension{{Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
 	suite.controller.On("GetInstalledExtensions", mock.Anything, mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)

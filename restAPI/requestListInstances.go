@@ -12,7 +12,7 @@ func ListInstances(apiContext *ApiContext) *openapi.Get {
 	return &openapi.Get{
 		Summary:        "List all instances of an extension.",
 		Description:    "This lists all instances of an extension, e.g. virtual schema.",
-		OperationID:    "CreateInstance",
+		OperationID:    "ListInstances",
 		Tags:           []string{TagInstance},
 		Authentication: authentication,
 		Response: map[string]openapi.MethodResponse{
