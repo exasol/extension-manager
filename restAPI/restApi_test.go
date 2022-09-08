@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/extensionAPI"
 	"github.com/exasol/extension-manager/extensionController"
 	"github.com/kinbiko/jsonassert"
@@ -118,6 +119,28 @@ func (suite *RestAPISuite) TestCreateInstanceFailed() {
 	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
 }
 
+func (suite *RestAPISuite) TestListInstancesSuccessfully() {
+	suite.controller.On("FindInstances", mock.Anything, mock.Anything, "ext-id", "ver").Return([]*extensionAPI.JsExtInstance{{Id: "instId", Name: "instName"}}, nil)
+	for _, test := range authSuccessTests {
+		suite.Run(test.authHeader, func() {
+			responseString := suite.restApi.makeRequestWithAuthHeader("GET", "/api/v1/extension/ext-id/ver/instances?dbHost=host&dbPort=8563&", test.authHeader, "", 200)
+			suite.Equal(`{"Instances":[{"id":"instId","name":"instName"}]}`+"\n", responseString)
+		})
+	}
+}
+
+func (suite *RestAPISuite) TestListInstancesFailed_genericError() {
+	suite.controller.On("FindInstances", mock.Anything, mock.Anything, "ext-id", "ver").Return(nil, fmt.Errorf("mock"))
+	responseString := suite.restApi.makeRequestWithAuthHeader("GET", "/api/v1/extension/ext-id/ver/instances?dbHost=host&dbPort=8563&", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "", 500)
+	suite.Contains(responseString, "{\"code\":500,\"message\":\"Internal server error\"")
+}
+
+func (suite *RestAPISuite) TestListInstancesFailed_apiError() {
+	suite.controller.On("FindInstances", mock.Anything, mock.Anything, "ext-id", "ver").Return(nil, apiErrors.NewAPIError(432, "mock"))
+	responseString := suite.restApi.makeRequestWithAuthHeader("GET", "/api/v1/extension/ext-id/ver/instances?dbHost=host&dbPort=8563&", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "", 432)
+	suite.Contains(responseString, "{\"code\":432,\"message\":\"mock\",")
+}
+
 func (suite *RestAPISuite) TestRequestsFailForMissingParameters() {
 	var tests = []struct {
 		method        string
@@ -140,6 +163,10 @@ func (suite *RestAPISuite) TestRequestsFailForMissingParameters() {
 		{"PUT", "/api/v1/instances", "dbPort=8563", "missing parameter dbHost"},
 		{"PUT", "/api/v1/instances", "dbHost=host", "missing parameter dbPort"},
 		{"PUT", "/api/v1/instances", "dbHost=host&dbPort=invalidPort", "invalid value 'invalidPort' for parameter dbPort"},
+
+		{"GET", "/api/v1/extension/extId/extVersion/instances", "dbPort=8563", "missing parameter dbHost"},
+		{"GET", "/api/v1/extension/extId/extVersion/instances", "dbHost=host", "missing parameter dbPort"},
+		{"GET", "/api/v1/extension/extId/extVersion/instances", "dbHost=host&dbPort=invalidPort", "invalid value 'invalidPort' for parameter dbPort"},
 	}
 	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return([]*extensionController.Extension{{Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
 	suite.controller.On("GetInstalledExtensions", mock.Anything, mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)
