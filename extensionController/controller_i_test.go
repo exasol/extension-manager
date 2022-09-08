@@ -200,6 +200,34 @@ func (suite *ControllerITestSuite) TestAddInstance_validParameters() {
 	suite.Equal(&extensionAPI.JsExtInstance{Id: "instId", Name: "ext_0.1.0_p1_val"}, instance)
 }
 
+func (suite *ControllerITestSuite) TestFindInstances() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithFindInstancesFunc("context.sqlClient.runQuery('select 1'); return [{id: 'instId', name: 'instName_ver'+version}]").
+		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
+	instances, err := controller.FindInstances(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0")
+	suite.NoError(err)
+	suite.Equal([]*extensionAPI.JsExtInstance{{Id: "instId", Name: "instName_ver0.1.0"}}, instances)
+}
+
+func (suite *ControllerITestSuite) TestDeleteInstances_failsWithInvalidQuery() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithDeleteInstanceFunc("context.sqlClient.runQuery('drop instance')").
+		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
+	err := controller.DeleteInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "instId")
+	suite.ErrorContains(err, `failed to delete instance "testing-extension.js" for extension "testing-extension.js": error executing statement "drop instance"`)
+}
+
+func (suite *ControllerITestSuite) TestDeleteInstances_succeeds() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithDeleteInstanceFunc("context.sqlClient.runQuery('select 1')").
+		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
+	err := controller.DeleteInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "instId")
+	suite.NoError(err)
+}
+
 func (suite *ControllerITestSuite) createSchema(schemaName string) {
 	_, err := suite.exasol.GetConnection().Exec(fmt.Sprintf(`CREATE SCHEMA "%s"`, schemaName))
 	if err != nil {
