@@ -104,7 +104,7 @@ func (suite *ExtensionApiSuite) Test_DeleteInstance() {
 }
 
 func createMockMetadata() *ExaMetadata {
-	exaAllScripts := ExaAllScriptTable{Rows: []ExaAllScriptRow{{Name: "test"}}}
+	exaAllScripts := ExaScriptTable{Rows: []ExaScriptRow{{Name: "test"}}}
 	return &ExaMetadata{AllScripts: exaAllScripts}
 }
 

@@ -49,8 +49,8 @@ func createExaMetaDataReaderMock(extensionSchema string) exaMetaDataReaderMock {
 	return exaMetaDataReaderMock{extensionSchema: extensionSchema}
 }
 
-func (m *exaMetaDataReaderMock) simulateExaAllScripts(scripts []extensionAPI.ExaAllScriptRow) {
-	m.simulateExaMetaData(extensionAPI.ExaMetadata{AllScripts: extensionAPI.ExaAllScriptTable{Rows: scripts}})
+func (m *exaMetaDataReaderMock) simulateExaAllScripts(scripts []extensionAPI.ExaScriptRow) {
+	m.simulateExaMetaData(extensionAPI.ExaMetadata{AllScripts: extensionAPI.ExaScriptTable{Rows: scripts}})
 }
 func (m *exaMetaDataReaderMock) simulateExaMetaData(metaData extensionAPI.ExaMetadata) {
 	m.On("ReadMetadataTables", mock.Anything, m.extensionSchema).Return(&metaData, nil)
