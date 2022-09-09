@@ -15,7 +15,7 @@ type ExasolSqlClient struct {
 }
 
 func NewSqlClient(ctx context.Context, tx *sql.Tx) *ExasolSqlClient {
-	return &ExasolSqlClient{transaction: tx}
+	return &ExasolSqlClient{ctx: ctx, transaction: tx}
 }
 
 func (c ExasolSqlClient) RunQuery(query string) {
