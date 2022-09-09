@@ -176,11 +176,7 @@ func (c *controllerImpl) FindInstances(tx *sql.Tx, extensionId string, extension
 	if err != nil {
 		return nil, fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
 	}
-	metadata, err := c.metaDataReader.ReadMetadataTables(tx, c.schema)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
-	}
-	return extension.ListInstances(c.createExtensionContext(tx), metadata, extensionVersion)
+	return extension.ListInstances(c.createExtensionContext(tx), extensionVersion)
 }
 
 func (c *controllerImpl) findInstallationByVersion(tx *sql.Tx, context *extensionAPI.ExtensionContext, extension *extensionAPI.JsExtension, version string) (*extensionAPI.JsExtInstallation, error) {

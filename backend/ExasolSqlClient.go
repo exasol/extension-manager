@@ -18,7 +18,7 @@ func NewSqlClient(ctx context.Context, tx *sql.Tx) *ExasolSqlClient {
 	return &ExasolSqlClient{ctx: ctx, transaction: tx}
 }
 
-func (c ExasolSqlClient) RunQuery(query string) {
+func (c ExasolSqlClient) Execute(query string) {
 	err := validateQuery(query)
 	if err != nil {
 		reportError(err)
@@ -32,6 +32,14 @@ func (c ExasolSqlClient) RunQuery(query string) {
 		reportError(fmt.Errorf("error getting rows affected for statement %q: %v", query, err))
 	}
 	log.Printf("Executed statement %q: rows affected: %d", query, rowsAffected)
+}
+
+func (c ExasolSqlClient) Query(query string) Rows {
+	// TODO
+	return Rows{}
+}
+
+type Rows struct {
 }
 
 var transactionStatements = []string{"commit", "rollback"}

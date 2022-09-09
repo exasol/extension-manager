@@ -19,10 +19,10 @@ import (
 func CreateTestExtensionBuilder(t *testing.T) *TestExtensionBuilder {
 	builder := TestExtensionBuilder{testing: t}
 	builder.findInstallationsFunc = "return []"
-	builder.installFunc = "context.sqlClient.runQuery('select 1')"
+	builder.installFunc = "context.sqlClient.execute('select 1')"
 	builder.addInstanceFunc = "return undefined"
 	builder.findInstancesFunc = "return []"
-	builder.deleteInstanceFunc = "context.sqlClient.runQuery(`drop instance ${instanceId}`)"
+	builder.deleteInstanceFunc = "context.sqlClient.execute(`drop instance ${instanceId}`)"
 	return &builder
 }
 

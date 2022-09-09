@@ -57,13 +57,13 @@ func (e *JsExtension) AddInstance(context *ExtensionContext, version string, par
 	return e.extension.AddInstance(context, version, params), nil
 }
 
-func (e *JsExtension) ListInstances(context *ExtensionContext, metadata *ExaMetadata, version string) (instances []*JsExtInstance, errorResult error) {
+func (e *JsExtension) ListInstances(context *ExtensionContext, version string) (instances []*JsExtInstance, errorResult error) {
 	defer func() {
 		if err := recover(); err != nil {
 			errorResult = e.convertError(fmt.Sprintf("failed to list instances for extension %q in version %q", e.Id, version), err)
 		}
 	}()
-	return e.extension.FindInstances(context, metadata, version), nil
+	return e.extension.FindInstances(context, version), nil
 }
 
 func (e *JsExtension) DeleteInstance(context *ExtensionContext, instanceId string) (errorResult error) {

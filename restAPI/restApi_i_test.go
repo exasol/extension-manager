@@ -69,7 +69,7 @@ func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsFails_InvalidBeare
 
 func (suite *RestAPIIntegrationTestSuite) TestListInstancesSuccessfully() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithFindInstancesFunc("context.sqlClient.runQuery('select 1'); return [{id: 'instId', name: 'instName_ver'+version}]").
+		WithFindInstancesFunc("context.sqlClient.execute('select 1'); return [{id: 'instId', name: 'instName_ver'+version}]").
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, "ext-id"))
 	response := suite.makeGetRequest("/api/v1/extension/ext-id/ver/instances?" + suite.getValidDbArgs())
 	suite.assertJSON.Assertf(response, `{"instances":[{"id":"instId","name":"instName_verver"}]}`)
@@ -77,7 +77,7 @@ func (suite *RestAPIIntegrationTestSuite) TestListInstancesSuccessfully() {
 
 func (suite *RestAPIIntegrationTestSuite) TestListInstancesQueryFails() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithFindInstancesFunc("context.sqlClient.runQuery('invalid query'); return [{id: 'instId', name: 'instName_ver'+version}]").
+		WithFindInstancesFunc("context.sqlClient.execute('invalid query'); return [{id: 'instId', name: 'instName_ver'+version}]").
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, "ext-id"))
 	response := suite.makeRequest("GET", "/api/v1/extension/ext-id/ver/instances?"+suite.getValidDbArgs(), "", 500)
 	suite.Contains(response, `{"code":500,"message":"Internal server error"`)
@@ -85,7 +85,7 @@ func (suite *RestAPIIntegrationTestSuite) TestListInstancesQueryFails() {
 
 func (suite *RestAPIIntegrationTestSuite) TestDeleteInstanceSuccessfully() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithDeleteInstanceFunc("context.sqlClient.runQuery('select 1')").
+		WithDeleteInstanceFunc("context.sqlClient.execute('select 1')").
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, "ext-id"))
 	response := suite.makeRequest("DELETE", "/api/v1/extension/ext-id/instance/inst-id?"+suite.getValidDbArgs(), "", 204)
 	suite.Equal("", response)
@@ -93,7 +93,7 @@ func (suite *RestAPIIntegrationTestSuite) TestDeleteInstanceSuccessfully() {
 
 func (suite *RestAPIIntegrationTestSuite) TestDeleteInstanceFails() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithDeleteInstanceFunc("context.sqlClient.runQuery('invalid query')").
+		WithDeleteInstanceFunc("context.sqlClient.execute('invalid query')").
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, "ext-id"))
 	response := suite.makeRequest("DELETE", "/api/v1/extension/ext-id/instance/inst-id?"+suite.getValidDbArgs(), "", 500)
 	suite.Contains(response, `{"code":500,"message":"Internal server error"`)

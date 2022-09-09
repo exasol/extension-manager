@@ -160,7 +160,7 @@ func (suite *ControllerITestSuite) TestEnsureSchemaDoesNotFailIfSchemaAlreadyExi
 func (suite *ControllerITestSuite) TestAddInstance_wrongVersion() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
-		WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+		WithAddInstanceFunc("context.sqlClient.execute('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
@@ -176,7 +176,7 @@ func (suite *ControllerITestSuite) TestAddInstance_invalidParameters() {
 		name: "My param",
 		type: "string",
 		required: true
-	}]`)).WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+	}]`)).WithAddInstanceFunc("context.sqlClient.execute('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
@@ -191,7 +191,7 @@ func (suite *ControllerITestSuite) TestAddInstance_validParameters() {
 		id: "p1",
 		name: "My param",
 		type: "string"
-	}]`)).WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+	}]`)).WithAddInstanceFunc("context.sqlClient.execute('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
@@ -202,7 +202,7 @@ func (suite *ControllerITestSuite) TestAddInstance_validParameters() {
 
 func (suite *ControllerITestSuite) TestFindInstances() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithFindInstancesFunc("context.sqlClient.runQuery('select 1'); return [{id: 'instId', name: 'instName_ver'+version}]").
+		WithFindInstancesFunc("context.sqlClient.execute('select 1'); return [{id: 'instId', name: 'instName_ver'+version}]").
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
 	instances, err := controller.FindInstances(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0")
@@ -212,7 +212,7 @@ func (suite *ControllerITestSuite) TestFindInstances() {
 
 func (suite *ControllerITestSuite) TestDeleteInstances_failsWithInvalidQuery() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithDeleteInstanceFunc("context.sqlClient.runQuery('drop instance')").
+		WithDeleteInstanceFunc("context.sqlClient.execute('drop instance')").
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
 	err := controller.DeleteInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "instId")
@@ -221,7 +221,7 @@ func (suite *ControllerITestSuite) TestDeleteInstances_failsWithInvalidQuery() {
 
 func (suite *ControllerITestSuite) TestDeleteInstances_succeeds() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithDeleteInstanceFunc("context.sqlClient.runQuery('select 1')").
+		WithDeleteInstanceFunc("context.sqlClient.execute('select 1')").
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
 	err := controller.DeleteInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "instId")

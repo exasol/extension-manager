@@ -172,7 +172,7 @@ func (suite *ControllerUTestSuite) TestInstallFailsForUnknownExtensionId() {
 
 func (suite *ControllerUTestSuite) TestInstallSucceeds() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithInstallFunc("context.sqlClient.runQuery('install extension')").
+		WithInstallFunc("context.sqlClient.execute('install extension')").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.dbMock.ExpectBegin()
@@ -185,7 +185,7 @@ func (suite *ControllerUTestSuite) TestInstallSucceeds() {
 
 func (suite *ControllerUTestSuite) TestInstall_QueryFails() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithInstallFunc("context.sqlClient.runQuery('install extension')").
+		WithInstallFunc("context.sqlClient.execute('install extension')").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.dbMock.ExpectBegin()
@@ -290,7 +290,7 @@ func (suite *ControllerUTestSuite) writeDefaultExtension() {
 		return metadata.allScripts.rows.map(row => {
 			return {name: row.schema + "." + row.name, version: "0.1.0", instanceParameters: [{id:"p1", name:"param1", type:"string"}]}
 		});`).
-		WithInstallFunc("context.sqlClient.runQuery('install extension')").
+		WithInstallFunc("context.sqlClient.execute('install extension')").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 }

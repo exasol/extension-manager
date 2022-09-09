@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/exasol/extension-manager/backend"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/dop251/goja"
@@ -80,7 +81,7 @@ type rawJsExtension struct {
 	Install             func(context *ExtensionContext, version string)                                         `json:"install"`
 	FindInstallations   func(context *ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation             `json:"findInstallations"`
 	AddInstance         func(context *ExtensionContext, version string, params *ParameterValues) *JsExtInstance `json:"addInstance"`
-	FindInstances       func(context *ExtensionContext, metadata *ExaMetadata, version string) []*JsExtInstance `json:"findInstances"`
+	FindInstances       func(context *ExtensionContext, version string) []*JsExtInstance                        `json:"findInstances"`
 	DeleteInstance      func(context *ExtensionContext, instanceId string)                                      `json:"deleteInstance"`
 }
 
@@ -123,13 +124,18 @@ type ParameterValue struct {
 	Value string `json:"value"`
 }
 
+// Extensions use this SQL client to execute queries.
 type SimpleSQLClient interface {
-	RunQuery(query string)
+	// Execute runs a query that does not return rows, e.g. INSERT or UPDATE.
+	Execute(query string)
+
+	// Query runs a query that returns rows, typically a SELECT.
+	Query(query string) backend.Rows
 }
 
 type LoggingSimpleSQLClient struct {
 }
 
-func (client LoggingSimpleSQLClient) RunQuery(query string) {
+func (client LoggingSimpleSQLClient) Execute(query string) {
 	fmt.Printf("sql: %v\n", query)
 }
