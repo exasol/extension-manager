@@ -210,6 +210,20 @@ func (suite *ControllerITestSuite) TestFindInstances() {
 	suite.Equal([]*extensionAPI.JsExtInstance{{Id: "instId", Name: "instName_ver0.1.0"}}, instances)
 }
 
+func (suite *ControllerITestSuite) TestFindInstances_useSqlQueryResult() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithFindInstancesFunc(`const result=context.sqlClient.query("select 1 as c1, 'a' as c2 from dual where 1=?", 1);
+			const col1 = result.columns[0];
+			const col2 = result.columns[1];
+			const row1 = result.rows[0];` +
+			"return [{id: 'instId', name: `${col1.name}: ${col1.typeName}/${typeof(row1[0])} = ${row1[0]}, ${col2.name}: ${col2.typeName}/${typeof(row1[1])} = ${row1[1]}`}]").
+		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
+	instances, err := controller.FindInstances(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0")
+	suite.NoError(err)
+	suite.Equal([]*extensionAPI.JsExtInstance{{Id: "instId", Name: "C1: DECIMAL/number = 1, C2: CHAR/string = a"}}, instances)
+}
+
 func (suite *ControllerITestSuite) TestDeleteInstances_failsWithInvalidQuery() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithDeleteInstanceFunc("context.sqlClient.execute('drop instance')").

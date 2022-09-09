@@ -127,10 +127,10 @@ type ParameterValue struct {
 // Extensions use this SQL client to execute queries.
 type SimpleSQLClient interface {
 	// Execute runs a query that does not return rows, e.g. INSERT or UPDATE.
-	Execute(query string)
+	Execute(query string, args ...any)
 
 	// Query runs a query that returns rows, typically a SELECT.
-	Query(query string) backend.Rows
+	Query(query string, args ...any) backend.QueryResult
 }
 
 type LoggingSimpleSQLClient struct {

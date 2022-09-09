@@ -10,17 +10,17 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type ExasolSqlClientTestSuite struct {
+type ExasolSqlClientUTestSuite struct {
 	suite.Suite
 	db     *sql.DB
 	dbMock sqlmock.Sqlmock
 }
 
-func TestExasolSqlClient(t *testing.T) {
-	suite.Run(t, new(ExasolSqlClientTestSuite))
+func TestExasolSqlClientUTestSuite(t *testing.T) {
+	suite.Run(t, new(ExasolSqlClientUTestSuite))
 }
 
-func (suite *ExasolSqlClientTestSuite) SetupTest() {
+func (suite *ExasolSqlClientUTestSuite) SetupTest() {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		suite.Failf("an error '%v' was not expected when opening a stub database connection", err.Error())
@@ -29,23 +29,23 @@ func (suite *ExasolSqlClientTestSuite) SetupTest() {
 	suite.dbMock = mock
 }
 
-func (suite *ExasolSqlClientTestSuite) createClient() *ExasolSqlClient {
+func (suite *ExasolSqlClientUTestSuite) createClient() *ExasolSqlClient {
 	return NewSqlClient(context.Background(), suite.createMockTransaction())
 }
 
-func (suite *ExasolSqlClientTestSuite) TestRun_succeeds() {
+func (suite *ExasolSqlClientUTestSuite) TestRun_succeeds() {
 	client := suite.createClient()
 	suite.dbMock.ExpectExec("select 1").WillReturnResult(sqlmock.NewResult(1, 1))
 	client.Execute("select 1")
 }
 
-func (suite *ExasolSqlClientTestSuite) TestRun_fails() {
+func (suite *ExasolSqlClientUTestSuite) TestRun_fails() {
 	client := suite.createClient()
 	suite.dbMock.ExpectExec("invalid").WillReturnError(fmt.Errorf("expected"))
 	suite.PanicsWithError("error executing statement \"invalid\": expected", func() { client.Execute("invalid") })
 }
 
-func (suite *ExasolSqlClientTestSuite) TestRun_validation() {
+func (suite *ExasolSqlClientUTestSuite) TestRun_validation() {
 	var tests = []struct {
 		statement        string
 		forbiddenCommand string
@@ -66,7 +66,7 @@ func (suite *ExasolSqlClientTestSuite) TestRun_validation() {
 	}
 }
 
-func (suite *ExasolSqlClientTestSuite) createMockTransaction() *sql.Tx {
+func (suite *ExasolSqlClientUTestSuite) createMockTransaction() *sql.Tx {
 	suite.dbMock.ExpectBegin()
 	tx, err := suite.db.Begin()
 	suite.NoError(err)

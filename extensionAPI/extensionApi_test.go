@@ -42,13 +42,13 @@ type sqlClientMock struct {
 	mock.Mock
 }
 
-func (mock *sqlClientMock) Execute(query string) {
-	mock.Called(query)
+func (mock *sqlClientMock) Execute(query string, args ...any) {
+	mock.Called(query, args)
 }
 
-func (mock *sqlClientMock) Query(query string) backend.Rows {
-	args := mock.Called(query)
-	return args.Get(0).(backend.Rows)
+func (mock *sqlClientMock) Query(query string, args ...any) backend.QueryResult {
+	mockArgs := mock.Called(query, args)
+	return mockArgs.Get(0).(backend.QueryResult)
 }
 
 func (suite *ExtensionApiSuite) Test_Install() {

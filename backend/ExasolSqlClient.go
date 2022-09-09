@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type ExasolSqlClient struct {
@@ -18,29 +16,87 @@ func NewSqlClient(ctx context.Context, tx *sql.Tx) *ExasolSqlClient {
 	return &ExasolSqlClient{ctx: ctx, transaction: tx}
 }
 
-func (c ExasolSqlClient) Execute(query string) {
+func (c *ExasolSqlClient) Execute(query string, args ...any) {
 	err := validateQuery(query)
 	if err != nil {
 		reportError(err)
 	}
-	result, err := c.transaction.ExecContext(c.ctx, query)
+
+	_, err = c.transaction.ExecContext(c.ctx, query, args...)
 	if err != nil {
 		reportError(fmt.Errorf("error executing statement %q: %v", query, err))
 	}
-	rowsAffected, err := result.RowsAffected()
+}
+
+func (c *ExasolSqlClient) Query(query string, args ...any) QueryResult {
+	err := validateQuery(query)
 	if err != nil {
-		reportError(fmt.Errorf("error getting rows affected for statement %q: %v", query, err))
+		reportError(err)
 	}
-	log.Printf("Executed statement %q: rows affected: %d", query, rowsAffected)
+	rows, err := c.transaction.QueryContext(c.ctx, query, args...)
+	if err != nil {
+		reportError(fmt.Errorf("error executing statement %q: %v", query, err))
+	}
+	defer func() {
+		err := rows.Close()
+		if err != nil {
+			reportError(fmt.Errorf("error closing result: %v", err))
+		}
+	}()
+	result, err := c.extractResult(rows)
+	if err != nil || result == nil {
+		reportError(fmt.Errorf("error executing statement %q: %v", query, err))
+	}
+	return *result
 }
 
-func (c ExasolSqlClient) Query(query string) Rows {
-	// TODO
-	return Rows{}
+func (c ExasolSqlClient) extractResult(rows *sql.Rows) (*QueryResult, error) {
+	colTypes, err := rows.ColumnTypes()
+	if err != nil {
+		return nil, err
+	}
+	cols := make([]Column, 0, len(colTypes))
+	for _, c := range colTypes {
+		cols = append(cols, Column{Name: c.Name(), TypeName: c.DatabaseTypeName()})
+	}
+
+	resultRows, err := extractRows(rows, len(cols))
+	if err != nil {
+		return nil, err
+	}
+	return &QueryResult{Columns: cols, Rows: resultRows}, nil
 }
 
-type Rows struct {
+func extractRows(rows *sql.Rows, columnCount int) ([]Row, error) {
+	resultRows := make([]Row, 0)
+	values := make([]interface{}, columnCount)
+	for rows.Next() {
+		for i := range values {
+			values[i] = new(interface{})
+		}
+		if err := rows.Scan(values...); err != nil {
+			return nil, err
+		}
+		row := make([]any, 0, len(values))
+		for _, v := range values {
+			row = append(row, *v.(*interface{}))
+		}
+		resultRows = append(resultRows, row)
+	}
+	return resultRows, nil
 }
+
+type QueryResult struct {
+	Columns []Column `json:"columns"`
+	Rows    []Row    `json:"rows"`
+}
+
+type Column struct {
+	Name     string `json:"name"`
+	TypeName string `json:"typeName"`
+}
+
+type Row []any
 
 var transactionStatements = []string{"commit", "rollback"}
 
