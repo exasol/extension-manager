@@ -1,6 +1,7 @@
 package extensionAPI
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/exasol/extension-manager/backend"
@@ -16,8 +17,8 @@ func CreateContextWithClient(extensionSchemaName string, client SimpleSQLClient)
 	}
 }
 
-func CreateContext(extensionSchemaName string, tx *sql.Tx) *ExtensionContext {
-	var client SimpleSQLClient = backend.NewSqlClient(tx)
+func CreateContext(ctx context.Context, extensionSchemaName string, tx *sql.Tx) *ExtensionContext {
+	var client SimpleSQLClient = backend.NewSqlClient(ctx, tx)
 	return CreateContextWithClient(extensionSchemaName, client)
 }
 

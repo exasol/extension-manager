@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"testing"
@@ -28,14 +29,18 @@ func (suite *ExasolSqlClientTestSuite) SetupTest() {
 	suite.dbMock = mock
 }
 
+func (suite *ExasolSqlClientTestSuite) createClient() *ExasolSqlClient {
+	return NewSqlClient(context.Background(), suite.createMockTransaction())
+}
+
 func (suite *ExasolSqlClientTestSuite) TestRun_succeeds() {
-	client := NewSqlClient(suite.createMockTransaction())
+	client := suite.createClient()
 	suite.dbMock.ExpectExec("select 1").WillReturnResult(sqlmock.NewResult(1, 1))
 	client.RunQuery("select 1")
 }
 
 func (suite *ExasolSqlClientTestSuite) TestRun_fails() {
-	client := NewSqlClient(suite.createMockTransaction())
+	client := suite.createClient()
 	suite.dbMock.ExpectExec("invalid").WillReturnError(fmt.Errorf("expected"))
 	suite.PanicsWithError("error executing statement \"invalid\": expected", func() { client.RunQuery("invalid") })
 }
@@ -49,7 +54,7 @@ func (suite *ExasolSqlClientTestSuite) TestRun_validation() {
 		{" commit; ", "commit"}, {"\t\r\n ; commit \t\r\n ; ", "commit"}, {"\t\r\n ; COMMIT \t\r\n ; ", "commit"}}
 	for _, test := range tests {
 		suite.Run(fmt.Sprintf("running statement %q contains forbidden command %q", test.statement, test.forbiddenCommand), func() {
-			client := NewSqlClient(suite.createMockTransaction())
+			client := suite.createClient()
 			if test.forbiddenCommand != "" {
 				expectedError := fmt.Sprintf("statement %q contains forbidden command %q. Transaction handling is done by extension manager", test.statement, test.forbiddenCommand)
 				suite.PanicsWithError(expectedError, func() { client.RunQuery(test.statement) })

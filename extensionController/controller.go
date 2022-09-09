@@ -1,6 +1,7 @@
 package extensionController
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"path"
@@ -203,7 +204,7 @@ func (c *controllerImpl) findInstallationByVersion(tx *sql.Tx, context *extensio
 }
 
 func (c *controllerImpl) createExtensionContext(tx *sql.Tx) *extensionAPI.ExtensionContext {
-	return extensionAPI.CreateContext(c.schema, tx)
+	return extensionAPI.CreateContext(context.TODO(), c.schema, tx)
 }
 
 func (c *controllerImpl) ensureSchemaExists(tx *sql.Tx) error {

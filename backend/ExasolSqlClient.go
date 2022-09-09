@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"strings"
@@ -10,9 +11,10 @@ import (
 
 type ExasolSqlClient struct {
 	transaction *sql.Tx
+	ctx         context.Context
 }
 
-func NewSqlClient(tx *sql.Tx) *ExasolSqlClient {
+func NewSqlClient(ctx context.Context, tx *sql.Tx) *ExasolSqlClient {
 	return &ExasolSqlClient{transaction: tx}
 }
 
@@ -21,7 +23,7 @@ func (c ExasolSqlClient) RunQuery(query string) {
 	if err != nil {
 		reportError(err)
 	}
-	result, err := c.transaction.Exec(query)
+	result, err := c.transaction.ExecContext(c.ctx, query)
 	if err != nil {
 		reportError(fmt.Errorf("error executing statement %q: %v", query, err))
 	}
