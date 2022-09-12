@@ -45,7 +45,7 @@ func (c *ExasolSqlClient) Query(query string, args ...any) QueryResult {
 	}()
 	result, err := c.extractResult(rows)
 	if err != nil || result == nil {
-		reportError(fmt.Errorf("error executing statement %q: %v", query, err))
+		reportError(fmt.Errorf("error reading result from statement %q: %v", query, err))
 	}
 	return *result
 }

@@ -118,7 +118,7 @@ func (c *controllerImpl) GetAllInstallations(tx *sql.Tx) ([]*extensionAPI.JsExtI
 func (c *controllerImpl) InstallExtension(tx *sql.Tx, extensionId string, extensionVersion string) error {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
-		return fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
+		return extensionLoadingFailed(extensionId, err)
 	}
 	err = c.ensureSchemaExists(tx)
 	if err != nil {
@@ -130,7 +130,7 @@ func (c *controllerImpl) InstallExtension(tx *sql.Tx, extensionId string, extens
 func (c *controllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
+		return nil, extensionLoadingFailed(extensionId, err)
 	}
 	err = c.ensureSchemaExists(tx)
 	if err != nil {
@@ -166,7 +166,7 @@ func (c *controllerImpl) DeleteInstance(tx *sql.Tx, extensionId string, instance
 	log.Printf("ctrl delete instance %s %s\n", extensionId, instanceId)
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
-		return fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
+		return extensionLoadingFailed(extensionId, err)
 	}
 	return extension.DeleteInstance(c.createExtensionContext(tx), extensionId)
 }
@@ -174,7 +174,7 @@ func (c *controllerImpl) DeleteInstance(tx *sql.Tx, extensionId string, instance
 func (c *controllerImpl) FindInstances(tx *sql.Tx, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error) {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
+		return nil, extensionLoadingFailed(extensionId, err)
 	}
 	return extension.ListInstances(c.createExtensionContext(tx), extensionVersion)
 }
@@ -229,4 +229,8 @@ func validateParameters(parameterDefinitions []interface{}, params extensionAPI.
 		return apiErrors.NewBadRequestErrorF("invalid parameters: %s", message)
 	}
 	return nil
+}
+
+func extensionLoadingFailed(extensionId string, err error) error {
+	return fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
 }
