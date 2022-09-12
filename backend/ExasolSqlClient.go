@@ -50,8 +50,7 @@ func closeRows(rows *sql.Rows) {
 	if err != nil {
 		reportError(fmt.Errorf("error closing result: %v", err))
 	}
-	err = rows.Err()
-	if err != nil {
+	if err = rows.Err(); err != nil {
 		reportError(fmt.Errorf("error while iterating result: %v", err))
 	}
 }
