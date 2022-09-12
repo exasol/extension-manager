@@ -20,6 +20,7 @@ func CreateTestExtensionBuilder(t *testing.T) *TestExtensionBuilder {
 	builder := TestExtensionBuilder{testing: t}
 	builder.findInstallationsFunc = "return []"
 	builder.installFunc = "context.sqlClient.execute('select 1')"
+	builder.uninstallFunc = ""
 	builder.addInstanceFunc = "return undefined"
 	builder.findInstancesFunc = "return []"
 	builder.deleteInstanceFunc = "context.sqlClient.execute(`drop instance ${instanceId}`)"
@@ -31,6 +32,7 @@ type TestExtensionBuilder struct {
 	bucketFsUploads       []BucketFsUploadParams
 	findInstallationsFunc string
 	installFunc           string
+	uninstallFunc         string
 	addInstanceFunc       string
 	findInstancesFunc     string
 	deleteInstanceFunc    string
@@ -52,6 +54,11 @@ func (b *TestExtensionBuilder) WithFindInstallationsFunc(tsFunctionCode string) 
 
 func (b *TestExtensionBuilder) WithInstallFunc(tsFunctionCode string) *TestExtensionBuilder {
 	b.installFunc = tsFunctionCode
+	return b
+}
+
+func (b *TestExtensionBuilder) WithUninstallFunc(tsFunctionCode string) *TestExtensionBuilder {
+	b.uninstallFunc = tsFunctionCode
 	return b
 }
 
@@ -103,7 +110,8 @@ func (b TestExtensionBuilder) Build() *BuiltExtension {
 	}
 	extensionTs := strings.Replace(template, "$UPLOADS$", string(bfsUploadsJson), 1)
 	extensionTs = strings.Replace(extensionTs, "$FIND_INSTALLATIONS$", b.findInstallationsFunc, 1)
-	extensionTs = strings.Replace(extensionTs, "$INSTALL$", b.installFunc, 1)
+	extensionTs = strings.Replace(extensionTs, "$INSTALL_EXTENSION$", b.installFunc, 1)
+	extensionTs = strings.Replace(extensionTs, "$$UNINSTALL_EXTENSION$$", b.uninstallFunc, 1)
 	extensionTs = strings.Replace(extensionTs, "$ADD_INSTANCE$", b.addInstanceFunc, 1)
 	extensionTs = strings.Replace(extensionTs, "$FIND_INSTANCES$", b.findInstancesFunc, 1)
 	extensionTs = strings.Replace(extensionTs, "$DELETE_INSTANCE$", b.deleteInstanceFunc, 1)
