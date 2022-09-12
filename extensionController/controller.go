@@ -168,7 +168,7 @@ func (c *controllerImpl) DeleteInstance(tx *sql.Tx, extensionId string, instance
 	if err != nil {
 		return extensionLoadingFailed(extensionId, err)
 	}
-	return extension.DeleteInstance(c.createExtensionContext(tx), extensionId)
+	return extension.DeleteInstance(c.createExtensionContext(tx), instanceId)
 }
 
 func (c *controllerImpl) FindInstances(tx *sql.Tx, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error) {

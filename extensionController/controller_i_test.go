@@ -230,7 +230,7 @@ func (suite *ControllerITestSuite) TestDeleteInstances_failsWithInvalidQuery() {
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
 	err := controller.DeleteInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "instId")
-	suite.ErrorContains(err, `failed to delete instance "testing-extension.js" for extension "testing-extension.js": error executing statement "drop instance"`)
+	suite.ErrorContains(err, `failed to delete instance "instId" for extension "testing-extension.js": error executing statement "drop instance"`)
 }
 
 func (suite *ControllerITestSuite) TestDeleteInstances_succeeds() {
