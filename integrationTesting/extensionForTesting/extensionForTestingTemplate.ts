@@ -29,7 +29,7 @@ function createExtension(): ExasolExtension {
         deleteInstance(context: Context, instanceId: string): void {
             $DELETE_INSTANCE$
         },
-        readInstanceParameters(context: Context, metadata: ExaMetadata, instanceId: string): ParameterValues {
+        readInstanceParameters(context: Context, instanceId: string): ParameterValues {
             return undefined;
         }
     }
