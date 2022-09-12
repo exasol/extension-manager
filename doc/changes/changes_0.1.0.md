@@ -41,16 +41,16 @@ Code name:
 
 * Added `golang:1.19`
 * Added `github.com/stretchr/testify:v1.8.0`
-* Added `github.com/dop251/goja:v0.0.0-20220815083517-0c74f9139fd6`
+* Added `github.com/dop251/goja:v0.0.0-20220906144433-c4d370b87b45`
 * Added `github.com/sirupsen/logrus:v1.9.0`
-* Added `github.com/dop251/goja_nodejs:v0.0.0-20220808115320-bac29516aae9`
+* Added `github.com/dop251/goja_nodejs:v0.0.0-20220905124449-678b33ca5009`
 * Added `github.com/swaggo/http-swagger:v1.3.3`
 * Added `github.com/exasol/exasol-driver-go:v0.4.5`
-* Added `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.2.3`
-* Added `github.com/go-chi/chi/v5:v5.0.4`
+* Added `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.2.4`
+* Added `github.com/go-chi/chi/v5:v5.0.7`
 
 ### Test Dependency Updates
 
-* Added `github.com/Nightapes/go-rest:v0.0.1`
-* Added `github.com/kinbiko/jsonassert:v1.1.0`
+* Added `github.com/Nightapes/go-rest:v0.2.1`
+* Added `github.com/kinbiko/jsonassert:v1.1.1`
 * Added `github.com/DATA-DOG/go-sqlmock:v1.5.0`
