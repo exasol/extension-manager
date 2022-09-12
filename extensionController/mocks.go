@@ -28,7 +28,7 @@ func (m *bucketFsMock) ListBuckets(ctx context.Context, db *sql.DB) ([]string, e
 	if buckets, ok := args.Get(0).([]string); ok {
 		return buckets, args.Error(1)
 	}
-	return args.Get(0).([]string), args.Error(1)
+	return nil, args.Error(1)
 }
 
 func (mock *bucketFsMock) ListFiles(ctx context.Context, db *sql.DB, bucket string) ([]BfsFile, error) {
