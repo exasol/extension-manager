@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// BucketFs
+
 type bucketFsMock struct {
 	mock.Mock
 }
@@ -39,6 +41,8 @@ func (mock *bucketFsMock) ListFiles(ctx context.Context, db *sql.DB, bucket stri
 	}
 }
 
+// Exa metadata reader
+
 type exaMetaDataReaderMock struct {
 	mock.Mock
 	extensionSchema string
@@ -65,7 +69,7 @@ func (mock *exaMetaDataReaderMock) ReadMetadataTables(tx *sql.Tx, schemaName str
 	}
 }
 
-// ---------
+// controller
 
 type mockControllerImpl struct {
 	mock.Mock

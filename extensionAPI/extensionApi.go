@@ -132,10 +132,3 @@ type SimpleSQLClient interface {
 	// Query runs a query that returns rows, typically a SELECT.
 	Query(query string, args ...any) backend.QueryResult
 }
-
-type LoggingSimpleSQLClient struct {
-}
-
-func (client LoggingSimpleSQLClient) Execute(query string) {
-	fmt.Printf("sql: %v\n", query)
-}
