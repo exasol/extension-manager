@@ -37,17 +37,23 @@ func (c *ExasolSqlClient) Query(query string, args ...any) QueryResult {
 	if err != nil {
 		reportError(fmt.Errorf("error executing statement %q: %v", query, err))
 	}
-	defer func() {
-		err := rows.Close()
-		if err != nil {
-			reportError(fmt.Errorf("error closing result: %v", err))
-		}
-	}()
+	defer closeRows(rows)
 	result, err := c.extractResult(rows)
 	if err != nil || result == nil {
 		reportError(fmt.Errorf("error reading result from statement %q: %v", query, err))
 	}
 	return *result
+}
+
+func closeRows(rows *sql.Rows) {
+	err := rows.Close()
+	if err != nil {
+		reportError(fmt.Errorf("error closing result: %v", err))
+	}
+	err = rows.Err()
+	if err != nil {
+		reportError(fmt.Errorf("error while iterating result: %v", err))
+	}
 }
 
 func (c ExasolSqlClient) extractResult(rows *sql.Rows) (*QueryResult, error) {

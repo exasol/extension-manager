@@ -46,6 +46,10 @@ func (suite *ExasolSqlClientITestSuite) TestExecute_Succeeds() {
 	suite.NotPanics(func() { suite.client.Execute("select 1") })
 }
 
+func (suite *ExasolSqlClientITestSuite) TestExecute_WithArgumentSucceeds() {
+	suite.NotPanics(func() { suite.client.Execute("select 1 from dual where 1 = ?", 1) })
+}
+
 func (suite *ExasolSqlClientITestSuite) TestExecute_WithArgsSucceeds() {
 	suite.NotPanics(func() { suite.client.Execute("select 1 from dual where 1 = ?", 1) })
 }
@@ -63,8 +67,13 @@ func (suite *ExasolSqlClientITestSuite) TestQuery_Succeeds() {
 	suite.Equal(QueryResult{Columns: []Column{{Name: "COL", TypeName: "DECIMAL"}}, Rows: []Row{{(float64(1))}}}, result)
 }
 
+func (suite *ExasolSqlClientITestSuite) TestQuery_WithArgument() {
+	result := suite.client.Query("select 1 as col from dual where 1 = ?", 1)
+	suite.Equal(QueryResult{Columns: []Column{{Name: "COL", TypeName: "DECIMAL"}}, Rows: []Row{{(float64(1))}}}, result)
+}
+
 func (suite *ExasolSqlClientITestSuite) TestQuery_NoRow() {
-	result := suite.client.Query("select 1 as col from dual where 1=?", 2)
+	result := suite.client.Query("select 1 as col from dual where 1=2")
 	suite.Equal(QueryResult{Columns: []Column{{Name: "COL", TypeName: "DECIMAL"}}, Rows: []Row{}}, result)
 }
 
