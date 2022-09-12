@@ -28,7 +28,13 @@ type TransactionController interface {
 
 	// CreateInstance creates a new instance of an extension, e.g. a virtual schema and returns it's name.
 	// db is a connection to the Exasol DB
-	CreateInstance(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error)
+	CreateInstance(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error)
+
+	// FindInstances returns a list of all instances for the given version.
+	FindInstances(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error)
+
+	// DeleteInstance deletes instance with the given ID.
+	DeleteInstance(ctx context.Context, db *sql.DB, extensionId string, instanceId string) error
 }
 
 type Extension struct {
@@ -108,20 +114,45 @@ func (c *transactionControllerImpl) GetInstalledExtensions(ctx context.Context, 
 	return c.controller.GetAllInstallations(tx)
 }
 
-func (c *transactionControllerImpl) CreateInstance(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error) {
+func (c *transactionControllerImpl) CreateInstance(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {
 	tx, err := beginTransaction(ctx, db)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer rollback(tx)
-	instanceName, err := c.controller.CreateInstance(tx, extensionId, extensionVersion, parameterValues)
+	instance, err := c.controller.CreateInstance(tx, extensionId, extensionVersion, parameterValues)
 	if err == nil {
 		err = tx.Commit()
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 	}
-	return instanceName, err
+	return instance, err
+}
+
+func (c *transactionControllerImpl) FindInstances(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error) {
+	tx, err := beginTransaction(ctx, db)
+	if err != nil {
+		return nil, err
+	}
+	defer rollback(tx)
+	return c.controller.FindInstances(tx, extensionId, extensionVersion)
+}
+
+func (c *transactionControllerImpl) DeleteInstance(ctx context.Context, db *sql.DB, extensionId string, instanceId string) error {
+	tx, err := beginTransaction(ctx, db)
+	if err != nil {
+		return err
+	}
+	defer rollback(tx)
+	err = c.controller.DeleteInstance(tx, extensionId, instanceId)
+	if err == nil {
+		err = tx.Commit()
+		if err != nil {
+			return err
+		}
+	}
+	return err
 }
 
 func beginTransaction(ctx context.Context, db *sql.DB) (*sql.Tx, error) {

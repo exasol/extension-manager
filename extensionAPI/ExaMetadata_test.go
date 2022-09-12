@@ -1,42 +1,43 @@
 package extensionAPI
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/exasol/extension-manager/integrationTesting"
 	"github.com/stretchr/testify/suite"
 )
 
-type ExaAllScriptsTableSuite struct {
+type ExaMetadataSuite struct {
 	suite.Suite
 	exasol *integrationTesting.DbTestSetup
 }
 
 func TestExaAllScriptsTableSuite(t *testing.T) {
-	suite.Run(t, new(ExaAllScriptsTableSuite))
+	suite.Run(t, new(ExaMetadataSuite))
 }
 
-func (suite *ExaAllScriptsTableSuite) SetupSuite() {
+func (suite *ExaMetadataSuite) SetupSuite() {
 	suite.exasol = integrationTesting.StartDbSetup(&suite.Suite)
 }
 
-func (suite *ExaAllScriptsTableSuite) TearDownSuite() {
+func (suite *ExaMetadataSuite) TearDownSuite() {
 	suite.exasol.StopDb()
 }
 
-func (suite *ExaAllScriptsTableSuite) BeforeTest(suiteName, testName string) {
+func (suite *ExaMetadataSuite) BeforeTest(suiteName, testName string) {
 	suite.exasol.CreateConnection()
 	suite.T().Cleanup(func() {
 		suite.exasol.CloseConnection()
 	})
 }
 
-func (suite *ExaAllScriptsTableSuite) TestReadMetadataWithAllColumnsDefined() {
+func (suite *ExaMetadataSuite) TestReadMetadataWithAllColumnsDefined() {
 	fixture := integrationTesting.CreateLuaScriptFixture(suite.exasol.GetConnection())
 	fixture.Cleanup(suite.T())
 	result := suite.readMetaDataTables(fixture.GetSchemaName())
 	suite.Equal(
-		ExaAllScriptTable{Rows: []ExaAllScriptRow{{
+		ExaScriptTable{Rows: []ExaScriptRow{{
 			Schema:     "TEST",
 			Name:       "MY_SCRIPT",
 			Type:       "UDF",
@@ -46,12 +47,12 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataWithAllColumnsDefined() {
 			Comment:    "my comment"}}}, result.AllScripts)
 }
 
-func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaAdapterScript() {
+func (suite *ExaMetadataSuite) TestReadMetadataOfJavaAdapterScript() {
 	fixture := integrationTesting.CreateJavaAdapterScriptFixture(suite.exasol.GetConnection())
 	fixture.Cleanup(suite.T())
 	result := suite.readMetaDataTables(fixture.GetSchemaName())
 	suite.Equal(
-		ExaAllScriptTable{Rows: []ExaAllScriptRow{{
+		ExaScriptTable{Rows: []ExaScriptRow{{
 			Schema:     "TEST",
 			Name:       "VS_ADAPTER",
 			Type:       "ADAPTER",
@@ -61,12 +62,12 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaAdapterScript() {
 			Comment:    ""}}}, result.AllScripts)
 }
 
-func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaSetScript() {
+func (suite *ExaMetadataSuite) TestReadMetadataOfJavaSetScript() {
 	fixture := integrationTesting.CreateJavaSetScriptFixture(suite.exasol.GetConnection())
 	fixture.Cleanup(suite.T())
 	result := suite.readMetaDataTables(fixture.GetSchemaName())
 	suite.Equal(
-		ExaAllScriptTable{Rows: []ExaAllScriptRow{{
+		ExaScriptTable{Rows: []ExaScriptRow{{
 			Schema:     "TEST",
 			Name:       "IMPORT_FROM_S3_DOCUMENT_FILES",
 			Type:       "UDF",
@@ -76,7 +77,48 @@ func (suite *ExaAllScriptsTableSuite) TestReadMetadataOfJavaSetScript() {
 			Comment:    ""}}}, result.AllScripts)
 }
 
-func (suite *ExaAllScriptsTableSuite) readMetaDataTables(schemaName string) *ExaMetadata {
+func (suite *ExaMetadataSuite) TestReadMetadataScripts_NoResult() {
+	result := suite.readMetaDataTables("dummy")
+	suite.Equal(ExaScriptTable{Rows: []ExaScriptRow{}}, result.AllScripts)
+}
+
+func (suite *ExaMetadataSuite) TestReadMetadataVirtualSchemas_Empty() {
+	result := suite.readMetaDataTables("dummy")
+	suite.Equal(ExaVirtualSchemasTable{Rows: []ExaVirtualSchemaRow{}}, result.AllVirtualSchemas)
+}
+
+func (suite *ExaMetadataSuite) TestExtractSchemaAndName() {
+	var tests = []struct {
+		input          string
+		expectedSchema string
+		expectedName   string
+		expectedError  bool
+	}{
+		{"", "", "", true},
+		{"invalid", "", "", true},
+		{"invalid_separator", "", "", true},
+		{".name", "", "name", false},
+		{"schema.", "schema", "", false},
+		{"schema.name", "schema", "name", false},
+		{"SCHEMA.NAME", "SCHEMA", "NAME", false},
+	}
+	for _, t := range tests {
+		suite.Run(t.input, func() {
+			schema, name, err := extractSchemaAndName(t.input)
+			if t.expectedError {
+				suite.EqualError(err, fmt.Sprintf("invalid format for adapter script: %q", t.input))
+				suite.Equal("", schema)
+				suite.Equal("", name)
+			} else {
+				suite.NoError(err)
+				suite.Equal(t.expectedSchema, schema)
+				suite.Equal(t.expectedName, name)
+			}
+		})
+	}
+}
+
+func (suite *ExaMetadataSuite) readMetaDataTables(schemaName string) *ExaMetadata {
 	tx, err := suite.exasol.GetConnection().Begin()
 	suite.NoError(err)
 	metaData, err := CreateExaMetaDataReader().ReadMetadataTables(tx, schemaName)

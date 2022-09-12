@@ -1,6 +1,7 @@
 package extensionController
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"path"
@@ -27,7 +28,13 @@ type controller interface {
 	InstallExtension(tx *sql.Tx, extensionId string, extensionVersion string) error
 
 	// CreateInstance creates a new instance of an extension, e.g. a virtual schema and returns it's name.
-	CreateInstance(tx *sql.Tx, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error)
+	CreateInstance(tx *sql.Tx, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error)
+
+	// FindInstances returns a list of all instances for the given version.
+	FindInstances(tx *sql.Tx, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error)
+
+	// DeleteInstance deletes instance with the given ID.
+	DeleteInstance(tx *sql.Tx, extensionId string, instanceId string) error
 }
 
 type controllerImpl struct {
@@ -111,7 +118,7 @@ func (c *controllerImpl) GetAllInstallations(tx *sql.Tx) ([]*extensionAPI.JsExtI
 func (c *controllerImpl) InstallExtension(tx *sql.Tx, extensionId string, extensionVersion string) error {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
-		return fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
+		return extensionLoadingFailed(extensionId, err)
 	}
 	err = c.ensureSchemaExists(tx)
 	if err != nil {
@@ -120,14 +127,14 @@ func (c *controllerImpl) InstallExtension(tx *sql.Tx, extensionId string, extens
 	return extension.Install(c.createExtensionContext(tx), extensionVersion)
 }
 
-func (c *controllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error) {
+func (c *controllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
-		return "", fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
+		return nil, extensionLoadingFailed(extensionId, err)
 	}
 	err = c.ensureSchemaExists(tx)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	params := extensionAPI.ParameterValues{}
 	for _, p := range parameterValues {
@@ -137,22 +144,39 @@ func (c *controllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensio
 	extensionContext := c.createExtensionContext(tx)
 	installation, err := c.findInstallationByVersion(tx, extensionContext, extension, extensionVersion)
 	if err != nil {
-		return "", fmt.Errorf("failed to find installations: %w", err)
+		return nil, fmt.Errorf("failed to find installations: %w", err)
 	}
 
 	err = validateParameters(installation.InstanceParameters, params)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	instance, err := extension.AddInstance(extensionContext, extensionVersion, &params)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if instance == nil {
-		return "", fmt.Errorf("extension did not return an instance")
+		return nil, fmt.Errorf("extension did not return an instance")
 	}
-	return instance.Name, nil
+	return instance, nil
+}
+
+func (c *controllerImpl) DeleteInstance(tx *sql.Tx, extensionId string, instanceId string) error {
+	log.Printf("ctrl delete instance %s %s\n", extensionId, instanceId)
+	extension, err := c.loadExtensionById(extensionId)
+	if err != nil {
+		return extensionLoadingFailed(extensionId, err)
+	}
+	return extension.DeleteInstance(c.createExtensionContext(tx), instanceId)
+}
+
+func (c *controllerImpl) FindInstances(tx *sql.Tx, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error) {
+	extension, err := c.loadExtensionById(extensionId)
+	if err != nil {
+		return nil, extensionLoadingFailed(extensionId, err)
+	}
+	return extension.ListInstances(c.createExtensionContext(tx), extensionVersion)
 }
 
 func (c *controllerImpl) findInstallationByVersion(tx *sql.Tx, context *extensionAPI.ExtensionContext, extension *extensionAPI.JsExtension, version string) (*extensionAPI.JsExtInstallation, error) {
@@ -176,7 +200,7 @@ func (c *controllerImpl) findInstallationByVersion(tx *sql.Tx, context *extensio
 }
 
 func (c *controllerImpl) createExtensionContext(tx *sql.Tx) *extensionAPI.ExtensionContext {
-	return extensionAPI.CreateContext(c.schema, tx)
+	return extensionAPI.CreateContext(context.TODO(), c.schema, tx)
 }
 
 func (c *controllerImpl) ensureSchemaExists(tx *sql.Tx) error {
@@ -205,4 +229,8 @@ func validateParameters(parameterDefinitions []interface{}, params extensionAPI.
 		return apiErrors.NewBadRequestErrorF("invalid parameters: %s", message)
 	}
 	return nil
+}
+
+func extensionLoadingFailed(extensionId string, err error) error {
+	return fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
 }

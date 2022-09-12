@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/exasol/extension-manager/apiErrors"
+	"github.com/exasol/extension-manager/extensionAPI"
 	"github.com/exasol/extension-manager/integrationTesting"
 
 	"github.com/stretchr/testify/suite"
@@ -159,13 +160,13 @@ func (suite *ControllerITestSuite) TestEnsureSchemaDoesNotFailIfSchemaAlreadyExi
 func (suite *ControllerITestSuite) TestAddInstance_wrongVersion() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
-		WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+		WithAddInstanceFunc("context.sqlClient.execute('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instanceName, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "wrongVersion", []ParameterValue{})
+	instance, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "wrongVersion", []ParameterValue{})
 	suite.EqualError(err, `failed to find installations: version "wrongVersion" not found for extension "testing-extension.js", available versions: ["0.1.0"]`)
-	suite.Equal("", instanceName)
+	suite.Nil(instance)
 }
 
 func (suite *ControllerITestSuite) TestAddInstance_invalidParameters() {
@@ -175,13 +176,13 @@ func (suite *ControllerITestSuite) TestAddInstance_invalidParameters() {
 		name: "My param",
 		type: "string",
 		required: true
-	}]`)).WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+	}]`)).WithAddInstanceFunc("context.sqlClient.execute('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instanceName, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0", []ParameterValue{})
+	instance, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0", []ParameterValue{})
 	suite.EqualError(err, `invalid parameters: Failed to validate parameter 'My param': This is a required parameter.`)
-	suite.Equal("", instanceName)
+	suite.Nil(instance)
 }
 
 func (suite *ControllerITestSuite) TestAddInstance_validParameters() {
@@ -190,13 +191,55 @@ func (suite *ControllerITestSuite) TestAddInstance_validParameters() {
 		id: "p1",
 		name: "My param",
 		type: "string"
-	}]`)).WithAddInstanceFunc("context.sqlClient.runQuery('select 1'); return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+	}]`)).WithAddInstanceFunc("context.sqlClient.execute('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instanceName, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p1", Value: "val"}})
+	instance, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p1", Value: "val"}})
 	suite.NoError(err)
-	suite.Equal("ext_0.1.0_p1_val", instanceName)
+	suite.Equal(&extensionAPI.JsExtInstance{Id: "instId", Name: "ext_0.1.0_p1_val"}, instance)
+}
+
+func (suite *ControllerITestSuite) TestFindInstances() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithFindInstancesFunc("context.sqlClient.execute('select 1'); return [{id: 'instId', name: 'instName_ver'+version}]").
+		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
+	instances, err := controller.FindInstances(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0")
+	suite.NoError(err)
+	suite.Equal([]*extensionAPI.JsExtInstance{{Id: "instId", Name: "instName_ver0.1.0"}}, instances)
+}
+
+func (suite *ControllerITestSuite) TestFindInstances_useSqlQueryResult() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithFindInstancesFunc(`const result=context.sqlClient.query("select 1 as c1, 'a' as c2 from dual where 1=?", 1);
+			const col1 = result.columns[0];
+			const col2 = result.columns[1];
+			const row1 = result.rows[0];` +
+			"return [{id: 'instId', name: `${col1.name}: ${col1.typeName}/${typeof(row1[0])} = ${row1[0]}, ${col2.name}: ${col2.typeName}/${typeof(row1[1])} = ${row1[1]}`}]").
+		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
+	instances, err := controller.FindInstances(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0")
+	suite.NoError(err)
+	suite.Equal([]*extensionAPI.JsExtInstance{{Id: "instId", Name: "C1: DECIMAL/number = 1, C2: CHAR/string = a"}}, instances)
+}
+
+func (suite *ControllerITestSuite) TestDeleteInstances_failsWithInvalidQuery() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithDeleteInstanceFunc("context.sqlClient.execute('drop instance')").
+		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
+	err := controller.DeleteInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "instId")
+	suite.ErrorContains(err, `failed to delete instance "instId" for extension "testing-extension.js": error executing statement "drop instance"`)
+}
+
+func (suite *ControllerITestSuite) TestDeleteInstances_succeeds() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithDeleteInstanceFunc("context.sqlClient.execute('select 1')").
+		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
+	err := controller.DeleteInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "instId")
+	suite.NoError(err)
 }
 
 func (suite *ControllerITestSuite) createSchema(schemaName string) {

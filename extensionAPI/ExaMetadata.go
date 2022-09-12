@@ -3,6 +3,7 @@ package extensionAPI
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 )
 
 type ExaMetadataReader interface {
@@ -10,7 +11,8 @@ type ExaMetadataReader interface {
 }
 
 type ExaMetadata struct {
-	AllScripts ExaAllScriptTable `json:"allScripts"`
+	AllScripts        ExaScriptTable         `json:"allScripts"`
+	AllVirtualSchemas ExaVirtualSchemasTable `json:"allVirtualSchemas"`
 }
 
 func CreateExaMetaDataReader() ExaMetadataReader {
@@ -25,40 +27,76 @@ func (r *metaDataReaderImpl) ReadMetadataTables(tx *sql.Tx, schemaName string) (
 	if err != nil {
 		return nil, err
 	}
-	return &ExaMetadata{AllScripts: *allScripts}, nil
+	allVirtualSchemas, err := readExaAllVirtualSchemasTable(tx)
+	if err != nil {
+		return nil, err
+	}
+	return &ExaMetadata{AllScripts: *allScripts, AllVirtualSchemas: *allVirtualSchemas}, nil
 }
 
-func readExaAllScriptTable(tx *sql.Tx, schemaName string) (*ExaAllScriptTable, error) {
+func readExaAllScriptTable(tx *sql.Tx, schemaName string) (*ExaScriptTable, error) {
 	result, err := tx.Query(`
 SELECT SCRIPT_SCHEMA, SCRIPT_NAME, SCRIPT_TYPE, SCRIPT_INPUT_TYPE, SCRIPT_RESULT_TYPE, SCRIPT_TEXT, SCRIPT_COMMENT
 FROM SYS.EXA_ALL_SCRIPTS
 WHERE SCRIPT_SCHEMA=?`, schemaName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read SYS.EXA_ALL_SCRIPTS. Cause: %w", err)
+		return nil, fmt.Errorf("failed to read SYS.EXA_ALL_SCRIPTS: %w", err)
 	}
-	var rows []ExaAllScriptRow
+	rows := make([]ExaScriptRow, 0)
 	for result.Next() {
-		var row ExaAllScriptRow
+		var row ExaScriptRow
 		var inputType sql.NullString
 		var resultType sql.NullString
 		var comment sql.NullString
 		err := result.Scan(&row.Schema, &row.Name, &row.Type, &inputType, &resultType, &row.Text, &comment)
 		if err != nil {
-			return nil, fmt.Errorf("failed to read row of SYS.EXA_ALL_SCRIPTS. Cause: %w", err)
+			return nil, fmt.Errorf("failed to read row of SYS.EXA_ALL_SCRIPTS: %w", err)
 		}
 		row.InputType = inputType.String
 		row.ResultType = resultType.String
 		row.Comment = comment.String
 		rows = append(rows, row)
 	}
-	return &ExaAllScriptTable{Rows: rows}, nil
+	return &ExaScriptTable{Rows: rows}, nil
 }
 
-type ExaAllScriptTable struct {
-	Rows []ExaAllScriptRow `json:"rows"`
+func readExaAllVirtualSchemasTable(tx *sql.Tx) (*ExaVirtualSchemasTable, error) {
+	result, err := tx.Query(`
+SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT, ADAPTER_NOTES
+FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS`)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
+	}
+	rows := make([]ExaVirtualSchemaRow, 0)
+	for result.Next() {
+		var row ExaVirtualSchemaRow
+		var adapterScriptSchemaAndName string
+		err := result.Scan(&row.Name, &row.Owner, &adapterScriptSchemaAndName, &row.AdapterNotes)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read row of SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
+		}
+		row.AdapterScriptSchema, row.AdapterScriptName, err = extractSchemaAndName(adapterScriptSchemaAndName)
+		if err != nil {
+			return nil, err
+		}
+		rows = append(rows, row)
+	}
+	return &ExaVirtualSchemasTable{Rows: rows}, nil
 }
 
-type ExaAllScriptRow struct {
+func extractSchemaAndName(schemaAndName string) (schema, name string, err error) {
+	i := strings.Index(schemaAndName, ".")
+	if i < 0 {
+		return "", "", fmt.Errorf("invalid format for adapter script: %q", schemaAndName)
+	}
+	return schemaAndName[:i], schemaAndName[i+1:], nil
+}
+
+type ExaScriptTable struct {
+	Rows []ExaScriptRow `json:"rows"`
+}
+
+type ExaScriptRow struct {
 	Schema     string `json:"schema"`
 	Name       string `json:"name"`
 	Type       string `json:"type"`
@@ -66,4 +104,16 @@ type ExaAllScriptRow struct {
 	ResultType string `json:"resultType"`
 	Text       string `json:"text"`
 	Comment    string `json:"comment"`
+}
+
+type ExaVirtualSchemasTable struct {
+	Rows []ExaVirtualSchemaRow `json:"rows"`
+}
+
+type ExaVirtualSchemaRow struct {
+	Name                string `json:"name"`
+	Owner               string `json:"owner"`
+	AdapterScriptSchema string `json:"adapterScriptSchema"`
+	AdapterScriptName   string `json:"adapterScriptName"`
+	AdapterNotes        string `json:"adapterNotes"`
 }

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/exasol/extension-manager/backend"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/dop251/goja"
@@ -12,7 +13,7 @@ import (
 	"github.com/dop251/goja_nodejs/require"
 )
 
-const SupportedApiVersion = "0.1.12"
+const SupportedApiVersion = "0.1.13"
 
 // GetExtensionFromFile loads an extension from a .js file.
 func GetExtensionFromFile(extensionPath string) (*JsExtension, error) {
@@ -80,6 +81,8 @@ type rawJsExtension struct {
 	Install             func(context *ExtensionContext, version string)                                         `json:"install"`
 	FindInstallations   func(context *ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation             `json:"findInstallations"`
 	AddInstance         func(context *ExtensionContext, version string, params *ParameterValues) *JsExtInstance `json:"addInstance"`
+	FindInstances       func(context *ExtensionContext, version string) []*JsExtInstance                        `json:"findInstances"`
+	DeleteInstance      func(context *ExtensionContext, instanceId string)                                      `json:"deleteInstance"`
 }
 
 type BucketFsUpload struct {
@@ -98,6 +101,7 @@ type JsExtInstallation struct {
 }
 
 type JsExtInstance struct {
+	Id   string `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -120,13 +124,11 @@ type ParameterValue struct {
 	Value string `json:"value"`
 }
 
+// Extensions use this SQL client to execute queries.
 type SimpleSQLClient interface {
-	RunQuery(query string)
-}
+	// Execute runs a query that does not return rows, e.g. INSERT or UPDATE.
+	Execute(query string, args ...any)
 
-type LoggingSimpleSQLClient struct {
-}
-
-func (client LoggingSimpleSQLClient) RunQuery(query string) {
-	fmt.Printf("sql: %v\n", query)
+	// Query runs a query that returns rows, typically a SELECT.
+	Query(query string, args ...any) backend.QueryResult
 }

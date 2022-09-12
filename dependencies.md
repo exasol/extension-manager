@@ -22,14 +22,14 @@
 | github.com/Nightapes/go-rest   | [MIT][9]     |
 | github.com/kinbiko/jsonassert  | [MIT][10]    |
 
-[0]: https://github.com/dop251/goja/blob/0c74f9139fd6/LICENSE
-[1]: https://github.com/dop251/goja_nodejs/blob/bac29516aae9/LICENSE
+[0]: https://github.com/dop251/goja/blob/c4d370b87b45/LICENSE
+[1]: https://github.com/dop251/goja_nodejs/blob/678b33ca5009/LICENSE
 [2]: https://github.com/exasol/exasol-driver-go/blob/v0.4.5/LICENSE
-[3]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/main/LICENSE
-[4]: https://github.com/go-chi/chi/blob/v5.0.4/LICENSE
+[3]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.2.4/go-client/LICENSE
+[4]: https://github.com/go-chi/chi/blob/v5.0.7/LICENSE
 [5]: https://github.com/sirupsen/logrus/blob/v1.9.0/LICENSE
 [6]: https://github.com/stretchr/testify/blob/v1.8.0/LICENSE
 [7]: https://github.com/swaggo/http-swagger/blob/v1.3.3/LICENSE
 [8]: https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE
-[9]: https://github.com/Nightapes/go-rest/blob/v0.0.1/LICENSE
+[9]: https://github.com/Nightapes/go-rest/blob/v0.2.1/LICENSE
 [10]: https://github.com/kinbiko/jsonassert/blob/HEAD/LICENSE

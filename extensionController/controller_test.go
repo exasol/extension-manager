@@ -98,10 +98,44 @@ func (suite *ControllerUTestSuite) TestGetAllInstallationsFails() {
 			suite.metaDataMock.simulateExaMetaData(extensionAPI.ExaMetadata{})
 			suite.initDbMock()
 			suite.dbMock.ExpectBegin()
+			suite.dbMock.ExpectRollback()
 			extensions, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
-
 			suite.assertError(t, err)
 			suite.Nil(extensions)
+		})
+	}
+}
+
+func (suite *ControllerUTestSuite) TestFindInstancesFails() {
+	for _, t := range errorTests {
+		suite.Run(t.testName, func() {
+			integrationTesting.CreateTestExtensionBuilder(suite.T()).
+				WithFindInstancesFunc(t.throwCommand).
+				Build().
+				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+			suite.metaDataMock.simulateExaMetaData(extensionAPI.ExaMetadata{})
+			suite.initDbMock()
+			suite.dbMock.ExpectBegin()
+			suite.dbMock.ExpectRollback()
+			extensions, err := suite.controller.FindInstances(mockContext(), suite.db, EXTENSION_ID, "ver")
+			suite.assertError(t, err)
+			suite.Nil(extensions)
+		})
+	}
+}
+
+func (suite *ControllerUTestSuite) TestDeleteInstancesFails() {
+	for _, t := range errorTests {
+		suite.Run(t.testName, func() {
+			integrationTesting.CreateTestExtensionBuilder(suite.T()).
+				WithDeleteInstanceFunc(t.throwCommand).
+				Build().
+				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+			suite.initDbMock()
+			suite.dbMock.ExpectBegin()
+			suite.dbMock.ExpectRollback()
+			err := suite.controller.DeleteInstance(mockContext(), suite.db, EXTENSION_ID, "instId")
+			suite.assertError(t, err)
 		})
 	}
 }
@@ -120,7 +154,7 @@ func (suite *ControllerUTestSuite) assertError(t errorTest, actualError error) {
 
 func (suite *ControllerUTestSuite) TestGetAllInstallations() {
 	suite.writeDefaultExtension()
-	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{{Schema: "schema", Name: "script"}})
+	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{{Schema: "schema", Name: "script"}})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
 	installations, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
@@ -138,7 +172,7 @@ func (suite *ControllerUTestSuite) TestInstallFailsForUnknownExtensionId() {
 
 func (suite *ControllerUTestSuite) TestInstallSucceeds() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithInstallFunc("context.sqlClient.runQuery('install extension')").
+		WithInstallFunc("context.sqlClient.execute('install extension')").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.dbMock.ExpectBegin()
@@ -151,7 +185,7 @@ func (suite *ControllerUTestSuite) TestInstallSucceeds() {
 
 func (suite *ControllerUTestSuite) TestInstall_QueryFails() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithInstallFunc("context.sqlClient.runQuery('install extension')").
+		WithInstallFunc("context.sqlClient.execute('install extension')").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.dbMock.ExpectBegin()
@@ -184,13 +218,13 @@ func (suite *ControllerUTestSuite) TestAddInstance_wrongVersion() {
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{{Schema: "schema", Name: "script"}})
+	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{{Schema: "schema", Name: "script"}})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectRollback()
-	instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "wrongVersion", []ParameterValue{})
+	instance, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "wrongVersion", []ParameterValue{})
 	suite.EqualError(err, `failed to find installations: version "wrongVersion" not found for extension "testing-extension.js", available versions: ["0.1.0"]`)
-	suite.Equal("", instanceName)
+	suite.Nil(instance)
 }
 
 func (suite *ControllerUTestSuite) TestAddInstance_invalidParameters() {
@@ -200,16 +234,16 @@ func (suite *ControllerUTestSuite) TestAddInstance_invalidParameters() {
 		name: "My param",
 		type: "string",
 		required: true
-	}]`)).WithAddInstanceFunc("return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+	}]`)).WithAddInstanceFunc("return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{})
+	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectRollback()
-	instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{})
+	instance, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{})
 	suite.EqualError(err, `invalid parameters: Failed to validate parameter 'My param': This is a required parameter.`)
-	suite.Equal("", instanceName)
+	suite.Nil(instance)
 }
 
 func (suite *ControllerUTestSuite) TestAddInstanceFails() {
@@ -220,13 +254,13 @@ func (suite *ControllerUTestSuite) TestAddInstanceFails() {
 				WithAddInstanceFunc(t.throwCommand).
 				Build().
 				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-			suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{})
+			suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
 			suite.dbMock.ExpectBegin()
 			suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 			suite.dbMock.ExpectRollback()
-			instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{})
+			instance, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{})
 			suite.assertError(t, err)
-			suite.Equal("", instanceName)
+			suite.Nil(instance)
 		})
 	}
 }
@@ -237,16 +271,16 @@ func (suite *ControllerUTestSuite) TestAddInstance_validParameters() {
 		id: "p1",
 		name: "My param",
 		type: "string"
-	}]`)).WithAddInstanceFunc("return {name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+	}]`)).WithAddInstanceFunc("return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaAllScriptRow{})
+	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()
-	instanceName, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p1", Value: "val"}})
+	instance, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p1", Value: "val"}})
 	suite.NoError(err)
-	suite.Equal("ext_0.1.0_p1_val", instanceName)
+	suite.Equal(&extensionAPI.JsExtInstance{Id: "instId", Name: "ext_0.1.0_p1_val"}, instance)
 }
 
 func (suite *ControllerUTestSuite) writeDefaultExtension() {
@@ -256,7 +290,7 @@ func (suite *ControllerUTestSuite) writeDefaultExtension() {
 		return metadata.allScripts.rows.map(row => {
 			return {name: row.schema + "." + row.name, version: "0.1.0", instanceParameters: [{id:"p1", name:"param1", type:"string"}]}
 		});`).
-		WithInstallFunc("context.sqlClient.runQuery('install extension')").
+		WithInstallFunc("context.sqlClient.execute('install extension')").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 }

@@ -1,7 +1,6 @@
 package extensionController
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"testing"
@@ -13,63 +12,13 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type mockControllerImpl struct {
-	mock.Mock
-}
-
-func (mock *mockControllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, error) {
-	args := mock.Called(bfsFiles)
-	if ext, ok := args.Get(0).([]*Extension); ok {
-		return ext, args.Error(1)
-	} else {
-		return nil, args.Error(1)
-	}
-}
-func (mock *mockControllerImpl) GetAllInstallations(tx *sql.Tx) ([]*extensionAPI.JsExtInstallation, error) {
-	args := mock.Called(tx)
-	if result, ok := args.Get(0).([]*extensionAPI.JsExtInstallation); ok {
-		return result, args.Error(1)
-	} else {
-		return nil, args.Error(1)
-	}
-}
-func (mock *mockControllerImpl) InstallExtension(tx *sql.Tx, extensionId string, extensionVersion string) error {
-	args := mock.Called(tx, extensionId, extensionVersion)
-	return args.Error(0)
-}
-func (mock *mockControllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensionVersion string, parameterValues []ParameterValue) (string, error) {
-	args := mock.Called(tx, extensionId, extensionVersion, parameterValues)
-	return args.String(0), args.Error(1)
-}
-
-type mockBucketFs struct {
-	mock.Mock
-}
-
-func (mock *mockBucketFs) ListBuckets(ctx context.Context, db *sql.DB) ([]string, error) {
-	args := mock.Called(ctx, db)
-	if buckets, ok := args.Get(0).([]string); ok {
-		return buckets, args.Error(1)
-	} else {
-		return args.Get(0).([]string), args.Error(1)
-	}
-}
-func (mock *mockBucketFs) ListFiles(ctx context.Context, db *sql.DB, bucket string) ([]BfsFile, error) {
-	args := mock.Called(ctx, db, bucket)
-	if files, ok := args.Get(0).([]BfsFile); ok {
-		return files, args.Error(1)
-	} else {
-		return nil, args.Error(1)
-	}
-}
-
 type extCtrlUnitTestSuite struct {
 	suite.Suite
 	ctrl     TransactionController
 	db       *sql.DB
 	dbMock   sqlmock.Sqlmock
 	mockCtrl mockControllerImpl
-	mockBfs  mockBucketFs
+	mockBfs  bucketFsMock
 }
 
 func TestExtensionControllerUnitTestSuite(t *testing.T) {
@@ -78,7 +27,7 @@ func TestExtensionControllerUnitTestSuite(t *testing.T) {
 
 func (suite *extCtrlUnitTestSuite) SetupTest() {
 	suite.mockCtrl = mockControllerImpl{}
-	suite.mockBfs = mockBucketFs{}
+	suite.mockBfs = bucketFsMock{}
 	suite.ctrl = &transactionControllerImpl{controller: &suite.mockCtrl, bucketFs: &suite.mockBfs}
 	db, dbMock, err := sqlmock.New()
 	if err != nil {
@@ -91,9 +40,11 @@ func (suite *extCtrlUnitTestSuite) SetupTest() {
 
 func (suite *extCtrlUnitTestSuite) AfterTest(suiteName, testName string) {
 	if err := suite.dbMock.ExpectationsWereMet(); err != nil {
-		suite.Failf("there were unfulfilled expectations: %v", err.Error())
+		suite.Failf("unfulfilled expectations", err.Error())
 	}
 }
+
+// GetAllExtensions
 
 func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_Success() {
 	suite.mockBfs.On("ListFiles", mock.Anything, mock.Anything, "default").Return([]BfsFile{}, nil)
@@ -125,7 +76,9 @@ func (suite *extCtrlUnitTestSuite) TestGetAllInstallations_BeginTransactionFailu
 	suite.Nil(installations)
 }
 
-func (suite *extCtrlUnitTestSuite) TestGetAllInstallations_Success() {
+// GetInstalledExtensions
+
+func (suite *extCtrlUnitTestSuite) TestGetInstalledExtensions_Success() {
 	suite.dbMock.ExpectBegin()
 	mockResult := []*extensionAPI.JsExtInstallation{{Name: "ext"}}
 	suite.mockCtrl.On("GetAllInstallations", mock.Anything).Return(mockResult, nil)
@@ -135,7 +88,7 @@ func (suite *extCtrlUnitTestSuite) TestGetAllInstallations_Success() {
 	suite.Equal(mockResult, installations)
 }
 
-func (suite *extCtrlUnitTestSuite) TestGetAllInstallations_Failure() {
+func (suite *extCtrlUnitTestSuite) TestGetInstalledExtensions_Failure() {
 	suite.dbMock.ExpectBegin()
 	suite.mockCtrl.On("GetAllInstallations", mock.Anything).Return(nil, fmt.Errorf("mock"))
 	suite.dbMock.ExpectRollback()
@@ -143,6 +96,8 @@ func (suite *extCtrlUnitTestSuite) TestGetAllInstallations_Failure() {
 	suite.EqualError(err, "mock")
 	suite.Nil(installations)
 }
+
+// InstallExtension
 
 func (suite *extCtrlUnitTestSuite) TestInstallExtension_BeginTransactionFailure() {
 	suite.dbMock.ExpectBegin().WillReturnError(fmt.Errorf("mock"))
@@ -174,36 +129,97 @@ func (suite *extCtrlUnitTestSuite) TestInstallExtension_CommitFailure() {
 	suite.EqualError(err, "commit failed")
 }
 
+// CreateInstance
+
 func (suite *extCtrlUnitTestSuite) TestCreateInstance_BeginTransactionFailure() {
 	suite.dbMock.ExpectBegin().WillReturnError(fmt.Errorf("mock"))
-	instanceName, err := suite.ctrl.CreateInstance(mockContext(), suite.db, "extId", "extVer", []ParameterValue{})
+	instance, err := suite.ctrl.CreateInstance(mockContext(), suite.db, "extId", "extVer", []ParameterValue{})
 	suite.EqualError(err, "failed to begin transaction: mock")
-	suite.Equal("", instanceName)
+	suite.Nil(instance)
 }
 
 func (suite *extCtrlUnitTestSuite) TestCreateInstance_Success() {
 	suite.dbMock.ExpectBegin()
-	suite.mockCtrl.On("CreateInstance", mock.Anything, "extId", "extVer", mock.Anything).Return("newInst", nil)
+	suite.mockCtrl.On("CreateInstance", mock.Anything, "extId", "extVer", mock.Anything).Return(&extensionAPI.JsExtInstance{Id: "instId", Name: "newInst"}, nil)
 	suite.dbMock.ExpectCommit()
-	instanceName, err := suite.ctrl.CreateInstance(mockContext(), suite.db, "extId", "extVer", []ParameterValue{})
+	instance, err := suite.ctrl.CreateInstance(mockContext(), suite.db, "extId", "extVer", []ParameterValue{})
 	suite.NoError(err)
-	suite.Equal("newInst", instanceName)
+	suite.Equal(&extensionAPI.JsExtInstance{Id: "instId", Name: "newInst"}, instance)
 }
 
 func (suite *extCtrlUnitTestSuite) TestCreateInstance_Failure() {
 	suite.dbMock.ExpectBegin()
-	suite.mockCtrl.On("CreateInstance", mock.Anything, "extId", "extVer", mock.Anything).Return("", fmt.Errorf("mock"))
+	suite.mockCtrl.On("CreateInstance", mock.Anything, "extId", "extVer", mock.Anything).Return(nil, fmt.Errorf("mock"))
 	suite.dbMock.ExpectRollback()
-	instanceName, err := suite.ctrl.CreateInstance(mockContext(), suite.db, "extId", "extVer", []ParameterValue{})
+	instance, err := suite.ctrl.CreateInstance(mockContext(), suite.db, "extId", "extVer", []ParameterValue{})
 	suite.EqualError(err, "mock")
-	suite.Equal("", instanceName)
+	suite.Nil(instance)
 }
 
 func (suite *extCtrlUnitTestSuite) TestCreateInstance_CommitFailure() {
 	suite.dbMock.ExpectBegin()
-	suite.mockCtrl.On("CreateInstance", mock.Anything, "extId", "extVer", mock.Anything).Return("newInst", nil)
+	suite.mockCtrl.On("CreateInstance", mock.Anything, "extId", "extVer", mock.Anything).Return(&extensionAPI.JsExtInstance{Id: "instId", Name: "newInst"}, nil)
 	suite.dbMock.ExpectCommit().WillReturnError(fmt.Errorf("mock"))
-	instanceName, err := suite.ctrl.CreateInstance(mockContext(), suite.db, "extId", "extVer", []ParameterValue{})
+	instance, err := suite.ctrl.CreateInstance(mockContext(), suite.db, "extId", "extVer", []ParameterValue{})
 	suite.EqualError(err, "mock")
-	suite.Equal("", instanceName)
+	suite.Nil(instance)
+}
+
+// FindInstances
+
+func (suite *extCtrlUnitTestSuite) TestFindInstances_BeginTransactionFailure() {
+	suite.dbMock.ExpectBegin().WillReturnError(fmt.Errorf("mock"))
+	instances, err := suite.ctrl.FindInstances(mockContext(), suite.db, "extId", "extVer")
+	suite.EqualError(err, "failed to begin transaction: mock")
+	suite.Nil(instances)
+}
+
+func (suite *extCtrlUnitTestSuite) TestFindInstances_Success() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("FindInstances", mock.Anything, "extId", "extVer").Return([]*extensionAPI.JsExtInstance{{Id: "instId", Name: "newInst"}}, nil)
+	suite.dbMock.ExpectRollback()
+	instances, err := suite.ctrl.FindInstances(mockContext(), suite.db, "extId", "extVer")
+	suite.NoError(err)
+	suite.Equal([]*extensionAPI.JsExtInstance{{Id: "instId", Name: "newInst"}}, instances)
+}
+
+func (suite *extCtrlUnitTestSuite) TestFindInstances_Failure() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("FindInstances", mock.Anything, "extId", "extVer").Return(nil, fmt.Errorf("mock"))
+	suite.dbMock.ExpectRollback()
+	instances, err := suite.ctrl.FindInstances(mockContext(), suite.db, "extId", "extVer")
+	suite.EqualError(err, "mock")
+	suite.Nil(instances)
+}
+
+// DeleteInstance
+
+func (suite *extCtrlUnitTestSuite) TestDeleteInstance_BeginTransactionFailure() {
+	suite.dbMock.ExpectBegin().WillReturnError(fmt.Errorf("mock"))
+	err := suite.ctrl.DeleteInstance(mockContext(), suite.db, "extId", "instId")
+	suite.EqualError(err, "failed to begin transaction: mock")
+}
+
+func (suite *extCtrlUnitTestSuite) TestDeleteInstance_Success() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("DeleteInstance", mock.Anything, "extId", "instId", mock.Anything).Return(nil)
+	suite.dbMock.ExpectCommit()
+	err := suite.ctrl.DeleteInstance(mockContext(), suite.db, "extId", "instId")
+	suite.NoError(err)
+}
+
+func (suite *extCtrlUnitTestSuite) TestDeleteInstance_Failure() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("DeleteInstance", mock.Anything, "extId", "instId", mock.Anything).Return(fmt.Errorf("mock"))
+	suite.dbMock.ExpectRollback()
+	err := suite.ctrl.DeleteInstance(mockContext(), suite.db, "extId", "instId")
+	suite.EqualError(err, "mock")
+}
+
+func (suite *extCtrlUnitTestSuite) TestDeleteInstance_CommitFailure() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("DeleteInstance", mock.Anything, "extId", "instId", mock.Anything).Return(nil)
+	suite.dbMock.ExpectCommit().WillReturnError(fmt.Errorf("mock"))
+	err := suite.ctrl.DeleteInstance(mockContext(), suite.db, "extId", "instId")
+	suite.EqualError(err, "mock")
 }

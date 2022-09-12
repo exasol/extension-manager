@@ -19,7 +19,7 @@ func CreateInstance(apiContext *ApiContext) *openapi.Put {
 		Authentication: authentication,
 		RequestBody:    CreateInstanceRequest{ExtensionId: "s3-vs", ExtensionVersion: "1.1.0", ParameterValues: []ParameterValue{{Name: "param1", Value: "value1"}}},
 		Response: map[string]openapi.MethodResponse{
-			"200": {Description: "OK", Value: CreateInstanceResponse{InstanceName: "new-instance-name"}},
+			"200": {Description: "OK", Value: CreateInstanceResponse{InstanceId: "id", InstanceName: "new-instance-name"}},
 		},
 		Path:        newPathWithDbQueryParams().Add("instances"),
 		HandlerFunc: adaptDbHandler(handleCreateInstance(apiContext)),
@@ -38,13 +38,13 @@ func handleCreateInstance(apiContext *ApiContext) dbHandler {
 		for _, p := range requestBody.ParameterValues {
 			parameters = append(parameters, extensionController.ParameterValue{Name: p.Name, Value: p.Value})
 		}
-		instanceName, err := apiContext.Controller.CreateInstance(request.Context(), db, requestBody.ExtensionId, requestBody.ExtensionVersion, parameters)
+		instance, err := apiContext.Controller.CreateInstance(request.Context(), db, requestBody.ExtensionId, requestBody.ExtensionVersion, parameters)
 		if err != nil {
 			HandleError(request.Context(), writer, err)
 			return
 		}
-		logrus.Debugf("Created instance %q", instanceName)
-		SendJSON(request.Context(), writer, CreateInstanceResponse{InstanceName: instanceName})
+		logrus.Debugf("Created instance %q", instance)
+		SendJSON(request.Context(), writer, CreateInstanceResponse{InstanceId: instance.Id, InstanceName: instance.Name})
 	}
 }
 
@@ -63,5 +63,6 @@ type ParameterValue struct {
 
 // Response data for creating a new instance of an extension.
 type CreateInstanceResponse struct {
+	InstanceId   string `json:"instanceId"`   // The ID of the newly created instance
 	InstanceName string `json:"instanceName"` // The name of the newly created instance
 }
