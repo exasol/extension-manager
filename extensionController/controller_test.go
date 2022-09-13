@@ -347,7 +347,7 @@ func (suite *ControllerUTestSuite) TestDeleteInstanceSucceeds() {
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
 	suite.dbMock.ExpectBegin()
-	suite.dbMock.ExpectExec("delete instance instId")
+	suite.dbMock.ExpectExec("delete instance instId").WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()
 	err := suite.controller.DeleteInstance(mockContext(), suite.db, EXTENSION_ID, "instId")
 	suite.NoError(err)
