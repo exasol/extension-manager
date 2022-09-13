@@ -129,6 +129,38 @@ func (suite *extCtrlUnitTestSuite) TestInstallExtension_CommitFailure() {
 	suite.EqualError(err, "commit failed")
 }
 
+// UninstallExtension
+
+func (suite *extCtrlUnitTestSuite) TestUninstallExtension_BeginTransactionFailure() {
+	suite.dbMock.ExpectBegin().WillReturnError(fmt.Errorf("mock"))
+	err := suite.ctrl.UninstallExtension(mockContext(), suite.db, "extId", "extVer")
+	suite.EqualError(err, "failed to begin transaction: mock")
+}
+
+func (suite *extCtrlUnitTestSuite) TestUninstallExtension_Success() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("UninstallExtension", mock.Anything, "extId", "extVer").Return(nil)
+	suite.dbMock.ExpectCommit()
+	err := suite.ctrl.UninstallExtension(mockContext(), suite.db, "extId", "extVer")
+	suite.NoError(err)
+}
+
+func (suite *extCtrlUnitTestSuite) TestUninstallExtension_FailureRollback() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("UninstallExtension", mock.Anything, "extId", "extVer").Return(fmt.Errorf("mock"))
+	suite.dbMock.ExpectRollback()
+	err := suite.ctrl.UninstallExtension(mockContext(), suite.db, "extId", "extVer")
+	suite.EqualError(err, "mock")
+}
+
+func (suite *extCtrlUnitTestSuite) TestUninstallExtension_CommitFailure() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("UninstallExtension", mock.Anything, "extId", "extVer").Return(nil)
+	suite.dbMock.ExpectCommit().WillReturnError(fmt.Errorf("commit failed"))
+	err := suite.ctrl.UninstallExtension(mockContext(), suite.db, "extId", "extVer")
+	suite.EqualError(err, "commit failed")
+}
+
 // CreateInstance
 
 func (suite *extCtrlUnitTestSuite) TestCreateInstance_BeginTransactionFailure() {

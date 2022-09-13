@@ -111,7 +111,7 @@ func (b TestExtensionBuilder) Build() *BuiltExtension {
 	extensionTs := strings.Replace(template, "$UPLOADS$", string(bfsUploadsJson), 1)
 	extensionTs = strings.Replace(extensionTs, "$FIND_INSTALLATIONS$", b.findInstallationsFunc, 1)
 	extensionTs = strings.Replace(extensionTs, "$INSTALL_EXTENSION$", b.installFunc, 1)
-	extensionTs = strings.Replace(extensionTs, "$$UNINSTALL_EXTENSION$$", b.uninstallFunc, 1)
+	extensionTs = strings.Replace(extensionTs, "$UNINSTALL_EXTENSION$", b.uninstallFunc, 1)
 	extensionTs = strings.Replace(extensionTs, "$ADD_INSTANCE$", b.addInstanceFunc, 1)
 	extensionTs = strings.Replace(extensionTs, "$FIND_INSTANCES$", b.findInstancesFunc, 1)
 	extensionTs = strings.Replace(extensionTs, "$DELETE_INSTANCE$", b.deleteInstanceFunc, 1)

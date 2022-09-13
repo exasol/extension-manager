@@ -39,6 +39,16 @@ func (e *JsExtension) Install(context *ExtensionContext, version string) (errorR
 	return nil
 }
 
+func (e *JsExtension) Uninstall(context *ExtensionContext, version string) (errorResult error) {
+	defer func() {
+		if err := recover(); err != nil {
+			errorResult = e.convertError(fmt.Sprintf("failed to uninstall extension %q", e.Id), err)
+		}
+	}()
+	e.extension.Uninstall(context, version)
+	return nil
+}
+
 func (e *JsExtension) FindInstallations(context *ExtensionContext, metadata *ExaMetadata) (installations []*JsExtInstallation, errorResult error) {
 	defer func() {
 		if err := recover(); err != nil {

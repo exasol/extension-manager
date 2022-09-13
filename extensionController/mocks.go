@@ -94,6 +94,11 @@ func (mock *mockControllerImpl) InstallExtension(tx *sql.Tx, extensionId string,
 	return args.Error(0)
 }
 
+func (mock *mockControllerImpl) UninstallExtension(tx *sql.Tx, extensionId string, extensionVersion string) error {
+	args := mock.Called(tx, extensionId, extensionVersion)
+	return args.Error(0)
+}
+
 func (mock *mockControllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {
 	args := mock.Called(tx, extensionId, extensionVersion, parameterValues)
 	if result, ok := args.Get(0).(*extensionAPI.JsExtInstance); ok {
