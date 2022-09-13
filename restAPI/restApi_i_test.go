@@ -99,6 +99,22 @@ func (suite *RestAPIIntegrationTestSuite) TestDeleteInstanceFails() {
 	suite.Contains(response, `{"code":500,"message":"Internal server error"`)
 }
 
+func (suite *RestAPIIntegrationTestSuite) TestDeleteExtensionSuccessfully() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithUninstallFunc("context.sqlClient.execute('select 1')").
+		Build().WriteToFile(path.Join(suite.tempExtensionRepo, "ext-id"))
+	response := suite.makeRequest("DELETE", "/api/v1/extension/ext-id/version/version?"+suite.getValidDbArgs(), "", 204)
+	suite.Equal("", response)
+}
+
+func (suite *RestAPIIntegrationTestSuite) TestExtensionInstanceFails() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithUninstallFunc("context.sqlClient.execute('invalid query')").
+		Build().WriteToFile(path.Join(suite.tempExtensionRepo, "ext-id"))
+	response := suite.makeRequest("DELETE", "/api/v1/extension/ext-id/version/version?"+suite.getValidDbArgs(), "", 500)
+	suite.Contains(response, `{"code":500,"message":"Internal server error"`)
+}
+
 func (suite *RestAPIIntegrationTestSuite) TestGetOpenApiHtml() {
 	response := suite.makeGetRequest("/openapi/index.html")
 	suite.Regexp("\n<!DOCTYPE html>.*", response)
