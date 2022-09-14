@@ -57,3 +57,7 @@ func createBasicAuthHeader(user, password string) string {
 	basicAuth := base64.StdEncoding.EncodeToString([]byte(user + ":" + password))
 	return "Basic " + basicAuth
 }
+
+func createBearerAuthHeader(token string) string {
+	return "Bearer " + token
+}
