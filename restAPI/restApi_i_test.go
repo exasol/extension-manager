@@ -64,7 +64,6 @@ func (suite *RestAPIIntegrationTestSuite) deleteInstance(extensionId, extensionV
 }
 
 func (suite *RestAPIIntegrationTestSuite) uninstallExtension(extensionId, extensionVersion string) string {
-	//BASE_URL + "/installations/ext-id/ext-version"
 	return fmt.Sprintf("%s/installations/%s/%s?%s", BASE_URL, extensionId, extensionVersion, suite.getValidDbArgs())
 }
 
