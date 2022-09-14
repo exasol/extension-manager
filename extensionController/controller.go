@@ -27,6 +27,11 @@ type controller interface {
 	// extensionVersion is the version of the extension to install
 	InstallExtension(tx *sql.Tx, extensionId string, extensionVersion string) error
 
+	// UninstallExtension removes an extension.
+	// extensionId is the ID of the extension to uninstall
+	// extensionVersion is the version of the extension to uninstall
+	UninstallExtension(tx *sql.Tx, extensionId string, extensionVersion string) error
+
 	// CreateInstance creates a new instance of an extension, e.g. a virtual schema and returns it's name.
 	CreateInstance(tx *sql.Tx, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error)
 
@@ -125,6 +130,14 @@ func (c *controllerImpl) InstallExtension(tx *sql.Tx, extensionId string, extens
 		return err
 	}
 	return extension.Install(c.createExtensionContext(tx), extensionVersion)
+}
+
+func (c *controllerImpl) UninstallExtension(tx *sql.Tx, extensionId string, extensionVersion string) error {
+	extension, err := c.loadExtensionById(extensionId)
+	if err != nil {
+		return extensionLoadingFailed(extensionId, err)
+	}
+	return extension.Uninstall(c.createExtensionContext(tx), extensionVersion)
 }
 
 func (c *controllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {

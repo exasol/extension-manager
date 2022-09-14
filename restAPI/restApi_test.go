@@ -96,6 +96,24 @@ func (suite *RestAPISuite) TestInstallExtensionsFailed() {
 	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
 }
 
+// Uninstall extension
+
+func (suite *RestAPISuite) TestUninstallExtensionsSuccessfully() {
+	suite.controller.On("UninstallExtension", mock.Anything, mock.Anything, "ext-id", "ver").Return(nil)
+	for _, test := range authSuccessTests {
+		suite.Run(test.authHeader, func() {
+			responseString := suite.restApi.makeRequestWithAuthHeader("DELETE", "/api/v1/extension/ext-id/version/ver?dbHost=host&dbPort=8563&", test.authHeader, "", 204)
+			suite.Equal("", responseString)
+		})
+	}
+}
+
+func (suite *RestAPISuite) TestUninstallExtensionsFailed() {
+	suite.controller.On("UninstallExtension", mock.Anything, mock.Anything, "ext-id", "ver").Return(fmt.Errorf("mock error"))
+	responseString := suite.makeRequest("DELETE", "/api/v1/extension/ext-id/version/ver?extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563", "", 500)
+	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
+}
+
 // Create instance
 
 func (suite *RestAPISuite) TestCreateInstanceSuccessfully() {
@@ -201,6 +219,10 @@ func (suite *RestAPISuite) TestRequestsFailForMissingParameters() {
 		{"DELETE", "/api/v1/extension/extId/instance/inst-id", "dbPort=8563", "missing parameter dbHost"},
 		{"DELETE", "/api/v1/extension/extId/instance/inst-id", "dbHost=host", "missing parameter dbPort"},
 		{"DELETE", "/api/v1/extension/extId/instance/inst-id", "dbHost=host&dbPort=invalidPort", "invalid value 'invalidPort' for parameter dbPort"},
+
+		{"DELETE", "/api/v1/extension/extId/version/ver", "dbPort=8563", "missing parameter dbHost"},
+		{"DELETE", "/api/v1/extension/extId/version/ver", "dbHost=host", "missing parameter dbPort"},
+		{"DELETE", "/api/v1/extension/extId/version/ver", "dbHost=host&dbPort=invalidPort", "invalid value 'invalidPort' for parameter dbPort"},
 	}
 	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return([]*extensionController.Extension{{Name: "my-extension", Description: "a cool extension", InstallableVersions: []string{"0.1.0"}}}, nil)
 	suite.controller.On("GetInstalledExtensions", mock.Anything, mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0", InstanceParameters: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}}, nil)

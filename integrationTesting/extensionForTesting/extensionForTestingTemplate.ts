@@ -12,7 +12,7 @@ function createExtension(): ExasolExtension {
         installableVersions: ["0.1.0"],
         bucketFsUploads: $UPLOADS$,
         install(context: Context, version: string) {
-            $INSTALL$
+            $INSTALL_EXTENSION$
         },
         addInstance(context: Context, version: string, params: ParameterValues): Instance {
             $ADD_INSTANCE$
@@ -23,8 +23,8 @@ function createExtension(): ExasolExtension {
         findInstances(context: Context, version: string): Instance[] {
             $FIND_INSTANCES$
         },
-        uninstall(context: Context, installation: Installation): void {
-            //empty on purpose
+        uninstall(context: Context, version: string): void {
+            $UNINSTALL_EXTENSION$
         },
         deleteInstance(context: Context, instanceId: string): void {
             $DELETE_INSTANCE$

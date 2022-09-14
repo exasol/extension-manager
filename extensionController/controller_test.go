@@ -57,6 +57,8 @@ func (suite *ControllerUTestSuite) AfterTest(suiteName, testName string) {
 	suite.NoError(suite.dbMock.ExpectationsWereMet())
 }
 
+// GetAllExtensions
+
 func (suite *ControllerUTestSuite) TestGetAllExtensions() {
 	suite.writeDefaultExtension()
 	suite.bucketFsMock.simulateFiles([]BfsFile{{Name: "my-extension.1.2.3.jar", Size: 3}})
@@ -124,22 +126,6 @@ func (suite *ControllerUTestSuite) TestFindInstancesFails() {
 	}
 }
 
-func (suite *ControllerUTestSuite) TestDeleteInstancesFails() {
-	for _, t := range errorTests {
-		suite.Run(t.testName, func() {
-			integrationTesting.CreateTestExtensionBuilder(suite.T()).
-				WithDeleteInstanceFunc(t.throwCommand).
-				Build().
-				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-			suite.initDbMock()
-			suite.dbMock.ExpectBegin()
-			suite.dbMock.ExpectRollback()
-			err := suite.controller.DeleteInstance(mockContext(), suite.db, EXTENSION_ID, "instId")
-			suite.assertError(t, err)
-		})
-	}
-}
-
 func (suite *ControllerUTestSuite) assertError(t errorTest, actualError error) {
 	expectedErrorMessage := "mock error from js"
 	if t.expectedMessage != "" {
@@ -162,6 +148,8 @@ func (suite *ControllerUTestSuite) TestGetAllInstallations() {
 	suite.Equal([]*extensionAPI.JsExtInstallation{{Name: "schema.script", Version: "0.1.0",
 		InstanceParameters: []interface{}{map[string]interface{}{"id": "p1", "name": "param1", "type": "string"}}}}, installations)
 }
+
+// InstallExtension
 
 func (suite *ControllerUTestSuite) TestInstallFailsForUnknownExtensionId() {
 	suite.dbMock.ExpectBegin()
@@ -213,7 +201,58 @@ func (suite *ControllerUTestSuite) TestInstallFails() {
 	}
 }
 
-func (suite *ControllerUTestSuite) TestAddInstance_wrongVersion() {
+// UninstallExtension
+
+func (suite *ControllerUTestSuite) TestUninstallFailsForUnknownExtensionId() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectRollback()
+	err := suite.controller.UninstallExtension(mockContext(), suite.db, "unknown-extension-id", "ver")
+	suite.ErrorContains(err, "failed to load extension with id \"unknown-extension-id\": failed to load extension from file")
+}
+
+func (suite *ControllerUTestSuite) TestUninstallSucceeds() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithUninstallFunc("context.sqlClient.execute(`uninstall extension version ${version}`)").
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("uninstall extension version ver").WillReturnResult(sqlmock.NewResult(0, 0))
+	suite.dbMock.ExpectCommit()
+	err := suite.controller.UninstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
+	suite.NoError(err)
+}
+
+func (suite *ControllerUTestSuite) TestUninstall_QueryFails() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithUninstallFunc("context.sqlClient.execute(`uninstall extension version ${version}`)").
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("uninstall extension version ver").WillReturnError(fmt.Errorf("mock"))
+	suite.dbMock.ExpectRollback()
+	err := suite.controller.UninstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
+	suite.EqualError(err, "failed to uninstall extension \"testing-extension.js\": error executing statement \"uninstall extension version ver\": mock")
+}
+
+func (suite *ControllerUTestSuite) TestUninstallFails() {
+	for _, t := range errorTests {
+		suite.Run(t.testName, func() {
+			integrationTesting.CreateTestExtensionBuilder(suite.T()).
+				WithUninstallFunc(t.throwCommand).
+				Build().
+				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+			suite.initDbMock()
+			suite.dbMock.ExpectBegin()
+			suite.dbMock.ExpectRollback()
+			err := suite.controller.UninstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
+			suite.assertError(t, err)
+		})
+	}
+}
+
+// CreateInstance
+
+func (suite *ControllerUTestSuite) TestCreateInstance_wrongVersion() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
 		Build().
@@ -227,7 +266,7 @@ func (suite *ControllerUTestSuite) TestAddInstance_wrongVersion() {
 	suite.Nil(instance)
 }
 
-func (suite *ControllerUTestSuite) TestAddInstance_invalidParameters() {
+func (suite *ControllerUTestSuite) TestCreateInstance_invalidParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
 		id: "p1",
@@ -246,7 +285,7 @@ func (suite *ControllerUTestSuite) TestAddInstance_invalidParameters() {
 	suite.Nil(instance)
 }
 
-func (suite *ControllerUTestSuite) TestAddInstanceFails() {
+func (suite *ControllerUTestSuite) TestCreateInstanceFails() {
 	for _, t := range errorTests {
 		suite.Run(t.testName, func() {
 			integrationTesting.CreateTestExtensionBuilder(suite.T()).
@@ -265,7 +304,7 @@ func (suite *ControllerUTestSuite) TestAddInstanceFails() {
 	}
 }
 
-func (suite *ControllerUTestSuite) TestAddInstance_validParameters() {
+func (suite *ControllerUTestSuite) TestCreateInstance_validParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
 		id: "p1",
@@ -281,6 +320,37 @@ func (suite *ControllerUTestSuite) TestAddInstance_validParameters() {
 	instance, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p1", Value: "val"}})
 	suite.NoError(err)
 	suite.Equal(&extensionAPI.JsExtInstance{Id: "instId", Name: "ext_0.1.0_p1_val"}, instance)
+}
+
+// DeleteInstance
+
+func (suite *ControllerUTestSuite) TestDeleteInstancesFails() {
+	for _, t := range errorTests {
+		suite.Run(t.testName, func() {
+			integrationTesting.CreateTestExtensionBuilder(suite.T()).
+				WithDeleteInstanceFunc(t.throwCommand).
+				Build().
+				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+			suite.initDbMock()
+			suite.dbMock.ExpectBegin()
+			suite.dbMock.ExpectRollback()
+			err := suite.controller.DeleteInstance(mockContext(), suite.db, EXTENSION_ID, "instId")
+			suite.assertError(t, err)
+		})
+	}
+}
+
+func (suite *ControllerUTestSuite) TestDeleteInstanceSucceeds() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithDeleteInstanceFunc("context.sqlClient.execute(`delete instance ${instanceId}`)").
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("delete instance instId").WillReturnResult(sqlmock.NewResult(0, 0))
+	suite.dbMock.ExpectCommit()
+	err := suite.controller.DeleteInstance(mockContext(), suite.db, EXTENSION_ID, "instId")
+	suite.NoError(err)
 }
 
 func (suite *ControllerUTestSuite) writeDefaultExtension() {

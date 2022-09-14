@@ -134,6 +134,19 @@ func (suite *ControllerITestSuite) TestInstallSucceeds() {
 	suite.NoError(err)
 }
 
+func (suite *ControllerITestSuite) TestUninstallFailsForUnknownExtensionId() {
+	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
+	err := controller.UninstallExtension(mockContext(), suite.exasol.GetConnection(), "unknown-extension-id", "ver")
+	suite.ErrorContains(err, "failed to load extension with id \"unknown-extension-id\": failed to load extension from file")
+}
+
+func (suite *ControllerITestSuite) TestUninstallSucceeds() {
+	suite.writeDefaultExtension()
+	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
+	err := controller.UninstallExtension(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "ver")
+	suite.NoError(err)
+}
+
 func (suite *ControllerITestSuite) TestEnsureSchemaExistsCreatesSchemaIfItDoesNotExist() {
 	suite.writeDefaultExtension()
 	const schemaName = "my_testing_schema"

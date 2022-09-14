@@ -79,6 +79,21 @@ func (suite *ErrorHandlingExtensionSuite) TestInstallFailure() {
 	suite.EqualError(err, "failed to install extension \"id\": mock error")
 }
 
+func (suite *ErrorHandlingExtensionSuite) TestUninstallSuccessful() {
+	suite.rawExtension.Uninstall = func(context *ExtensionContext, version string) {
+	}
+	err := suite.extension.Uninstall(createMockContext(), "version")
+	suite.NoError(err)
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestUninstallFailure() {
+	suite.rawExtension.Uninstall = func(context *ExtensionContext, version string) {
+		panic("mock error")
+	}
+	err := suite.extension.Uninstall(createMockContext(), "version")
+	suite.EqualError(err, "failed to uninstall extension \"id\": mock error")
+}
+
 func (suite *ErrorHandlingExtensionSuite) TestAddInstanceSuccessful() {
 	suite.rawExtension.AddInstance = func(context *ExtensionContext, version string, params *ParameterValues) *JsExtInstance {
 		return &JsExtInstance{Name: "newInstance"}

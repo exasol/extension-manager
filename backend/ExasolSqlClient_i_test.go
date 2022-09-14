@@ -50,10 +50,6 @@ func (suite *ExasolSqlClientITestSuite) TestExecute_WithArgumentSucceeds() {
 	suite.NotPanics(func() { suite.client.Execute("select 1 from dual where 1 = ?", 1) })
 }
 
-func (suite *ExasolSqlClientITestSuite) TestExecute_WithArgsSucceeds() {
-	suite.NotPanics(func() { suite.client.Execute("select 1 from dual where 1 = ?", 1) })
-}
-
 func (suite *ExasolSqlClientITestSuite) TestExecute_fails() {
 	suite.Panics(func() { suite.client.Execute("invalid") })
 }

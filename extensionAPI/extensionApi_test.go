@@ -69,6 +69,16 @@ func (suite *ExtensionApiSuite) Test_Install_ResolveBucketFsPath() {
 	suite.NoError(err)
 }
 
+func (suite *ExtensionApiSuite) Test_Uninstall() {
+	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithUninstallFunc("context.sqlClient.execute(`uninstall version ${version}`)").
+		Build().WriteToTmpFile()
+	extension := suite.loadExtension(extensionFile)
+	suite.mockSQLClient.On("Execute", "uninstall version extVersion", []any{}).Return()
+	err := extension.Uninstall(suite.mockContext(), "extVersion")
+	suite.NoError(err)
+}
+
 func (suite *ExtensionApiSuite) Test_AddInstance_validParameters() {
 	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithAddInstanceFunc("context.sqlClient.execute('create vs');\n" +

@@ -13,7 +13,7 @@ import (
 	"github.com/dop251/goja_nodejs/require"
 )
 
-const SupportedApiVersion = "0.1.13"
+const SupportedApiVersion = "0.1.14"
 
 // GetExtensionFromFile loads an extension from a .js file.
 func GetExtensionFromFile(extensionPath string) (*JsExtension, error) {
@@ -79,6 +79,7 @@ type rawJsExtension struct {
 	BucketFsUploads     []BucketFsUpload                                                                        `json:"bucketFsUploads"`
 	InstallableVersions []string                                                                                `json:"installableVersions"`
 	Install             func(context *ExtensionContext, version string)                                         `json:"install"`
+	Uninstall           func(context *ExtensionContext, version string)                                         `json:"uninstall"`
 	FindInstallations   func(context *ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation             `json:"findInstallations"`
 	AddInstance         func(context *ExtensionContext, version string, params *ParameterValues) *JsExtInstance `json:"addInstance"`
 	FindInstances       func(context *ExtensionContext, version string) []*JsExtInstance                        `json:"findInstances"`

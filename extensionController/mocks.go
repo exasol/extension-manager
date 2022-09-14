@@ -28,7 +28,7 @@ func (m *bucketFsMock) ListBuckets(ctx context.Context, db *sql.DB) ([]string, e
 	if buckets, ok := args.Get(0).([]string); ok {
 		return buckets, args.Error(1)
 	}
-	return args.Get(0).([]string), args.Error(1)
+	return nil, args.Error(1)
 }
 
 func (mock *bucketFsMock) ListFiles(ctx context.Context, db *sql.DB, bucket string) ([]BfsFile, error) {
@@ -90,6 +90,11 @@ func (mock *mockControllerImpl) GetAllInstallations(tx *sql.Tx) ([]*extensionAPI
 }
 
 func (mock *mockControllerImpl) InstallExtension(tx *sql.Tx, extensionId string, extensionVersion string) error {
+	args := mock.Called(tx, extensionId, extensionVersion)
+	return args.Error(0)
+}
+
+func (mock *mockControllerImpl) UninstallExtension(tx *sql.Tx, extensionId string, extensionVersion string) error {
 	args := mock.Called(tx, extensionId, extensionVersion)
 	return args.Error(0)
 }
