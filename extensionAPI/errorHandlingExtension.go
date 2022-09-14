@@ -76,7 +76,7 @@ func (e *JsExtension) ListInstances(context *ExtensionContext, version string) (
 	return e.extension.FindInstances(context, version), nil
 }
 
-func (e *JsExtension) DeleteInstance(context *ExtensionContext, instanceId string) (errorResult error) {
+func (e *JsExtension) DeleteInstance(context *ExtensionContext, extensionVersion, instanceId string) (errorResult error) {
 	defer func() {
 		if err := recover(); err != nil {
 			errorResult = e.convertError(fmt.Sprintf("failed to delete instance %q for extension %q", instanceId, e.Id), err)

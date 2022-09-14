@@ -28,6 +28,7 @@ type baseRestAPITest struct {
 }
 
 func (t *baseRestAPITest) makeRequestWithAuthHeader(method string, path string, authHeader string, body string, expectedStatusCode int) string {
+	t.suite.T().Helper()
 	url := t.baseUrl + path
 	request, err := http.NewRequest(method, url, strings.NewReader(body))
 	if err != nil {

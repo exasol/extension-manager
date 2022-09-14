@@ -228,30 +228,30 @@ func (suite *extCtrlUnitTestSuite) TestFindInstances_Failure() {
 
 func (suite *extCtrlUnitTestSuite) TestDeleteInstance_BeginTransactionFailure() {
 	suite.dbMock.ExpectBegin().WillReturnError(fmt.Errorf("mock"))
-	err := suite.ctrl.DeleteInstance(mockContext(), suite.db, "extId", "instId")
+	err := suite.ctrl.DeleteInstance(mockContext(), suite.db, "extId", "extVers", "instId")
 	suite.EqualError(err, "failed to begin transaction: mock")
 }
 
 func (suite *extCtrlUnitTestSuite) TestDeleteInstance_Success() {
 	suite.dbMock.ExpectBegin()
-	suite.mockCtrl.On("DeleteInstance", mock.Anything, "extId", "instId", mock.Anything).Return(nil)
+	suite.mockCtrl.On("DeleteInstance", mock.Anything, "extId", "extVers", "instId", mock.Anything).Return(nil)
 	suite.dbMock.ExpectCommit()
-	err := suite.ctrl.DeleteInstance(mockContext(), suite.db, "extId", "instId")
+	err := suite.ctrl.DeleteInstance(mockContext(), suite.db, "extId", "extVers", "instId")
 	suite.NoError(err)
 }
 
 func (suite *extCtrlUnitTestSuite) TestDeleteInstance_Failure() {
 	suite.dbMock.ExpectBegin()
-	suite.mockCtrl.On("DeleteInstance", mock.Anything, "extId", "instId", mock.Anything).Return(fmt.Errorf("mock"))
+	suite.mockCtrl.On("DeleteInstance", mock.Anything, "extId", "extVers", "instId", mock.Anything).Return(fmt.Errorf("mock"))
 	suite.dbMock.ExpectRollback()
-	err := suite.ctrl.DeleteInstance(mockContext(), suite.db, "extId", "instId")
+	err := suite.ctrl.DeleteInstance(mockContext(), suite.db, "extId", "extVers", "instId")
 	suite.EqualError(err, "mock")
 }
 
 func (suite *extCtrlUnitTestSuite) TestDeleteInstance_CommitFailure() {
 	suite.dbMock.ExpectBegin()
-	suite.mockCtrl.On("DeleteInstance", mock.Anything, "extId", "instId", mock.Anything).Return(nil)
+	suite.mockCtrl.On("DeleteInstance", mock.Anything, "extId", "extVers", "instId", mock.Anything).Return(nil)
 	suite.dbMock.ExpectCommit().WillReturnError(fmt.Errorf("mock"))
-	err := suite.ctrl.DeleteInstance(mockContext(), suite.db, "extId", "instId")
+	err := suite.ctrl.DeleteInstance(mockContext(), suite.db, "extId", "extVers", "instId")
 	suite.EqualError(err, "mock")
 }

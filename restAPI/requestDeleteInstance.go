@@ -18,9 +18,10 @@ func DeleteInstance(apiContext *ApiContext) *openapi.Delete {
 		Response: map[string]openapi.MethodResponse{
 			"204": {Description: "OK"},
 		},
-		Path: newPathWithDbQueryParams().Add("extension").
+		Path: newPathWithDbQueryParams().Add("installations").
 			AddParameter("extensionId", openapi.STRING, "The ID of the extension for which to delete an instance").
-			Add("instance").
+			AddParameter("extensionVersion", openapi.STRING, "The version of the extension for which to delete an instance").
+			Add("instances").
 			AddParameter("instanceId", openapi.STRING, "The ID of the instance to delete"),
 		HandlerFunc: adaptDbHandler(handleDeleteInstance(apiContext)),
 	}
@@ -29,8 +30,9 @@ func DeleteInstance(apiContext *ApiContext) *openapi.Delete {
 func handleDeleteInstance(apiContext *ApiContext) dbHandler {
 	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) {
 		extensionId := chi.URLParam(request, "extensionId")
+		extensionVersion := chi.URLParam(request, "extensionVersion")
 		instanceId := chi.URLParam(request, "instanceId")
-		err := apiContext.Controller.DeleteInstance(request.Context(), db, extensionId, instanceId)
+		err := apiContext.Controller.DeleteInstance(request.Context(), db, extensionId, extensionVersion, instanceId)
 		if err != nil {
 			HandleError(request.Context(), writer, err)
 			return

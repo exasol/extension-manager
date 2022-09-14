@@ -39,7 +39,7 @@ type controller interface {
 	FindInstances(tx *sql.Tx, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error)
 
 	// DeleteInstance deletes instance with the given ID.
-	DeleteInstance(tx *sql.Tx, extensionId string, instanceId string) error
+	DeleteInstance(tx *sql.Tx, extensionId, extensionVersion, instanceId string) error
 }
 
 type controllerImpl struct {
@@ -175,13 +175,12 @@ func (c *controllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensio
 	return instance, nil
 }
 
-func (c *controllerImpl) DeleteInstance(tx *sql.Tx, extensionId string, instanceId string) error {
-	log.Printf("ctrl delete instance %s %s\n", extensionId, instanceId)
+func (c *controllerImpl) DeleteInstance(tx *sql.Tx, extensionId, extensionVersion, instanceId string) error {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
 		return extensionLoadingFailed(extensionId, err)
 	}
-	return extension.DeleteInstance(c.createExtensionContext(tx), instanceId)
+	return extension.DeleteInstance(c.createExtensionContext(tx), extensionVersion, instanceId)
 }
 
 func (c *controllerImpl) FindInstances(tx *sql.Tx, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error) {
