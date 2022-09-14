@@ -15,6 +15,7 @@ func InstallExtension(apiContext *ApiContext) *openapi.Put {
 		OperationID:    "InstallExtension",
 		Tags:           []string{TagExtension},
 		Authentication: authentication,
+		RequestBody:    InstallExtensionRequest{},
 		Response: map[string]openapi.MethodResponse{
 			"204": {Description: "OK"},
 		},
@@ -39,4 +40,8 @@ func handleInstallExtension(apiContext *ApiContext) dbHandler {
 		}
 		SendNoContent(request.Context(), writer)
 	}
+}
+
+type InstallExtensionRequest struct {
+	IgnoredProperty string // Some code generators like swagger-codegen fail when the request body is empty.
 }
