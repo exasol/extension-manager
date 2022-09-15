@@ -29,8 +29,8 @@ func AddPublicEndpoints(api *openapi.API, config ExtensionManagerConfig) error {
 }
 
 func addPublicEndpointsWithController(api *openapi.API, controller extensionController.TransactionController) error {
-	api.AddTag(TagExtension, "Calls to list extensions that are available for installation")
-	api.AddTag(TagInstallation, "Calls to install, uninstall and list installed extensions")
+	api.AddTag(TagExtension, "List and install extensions")
+	api.AddTag(TagInstallation, "List and uninstall installed extensions")
 	api.AddTag(TagInstance, "Calls to list, create and remove instances of an extension")
 
 	apiContext := NewApiContext(controller)
