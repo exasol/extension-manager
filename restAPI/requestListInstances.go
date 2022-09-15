@@ -19,8 +19,8 @@ func ListInstances(apiContext *ApiContext) *openapi.Get {
 			"200": {Description: "OK", Value: ListInstancesResponse{Instances: []Instance{{Id: "s3-vs-1", Name: "SALES_S3_VS"}}}},
 		},
 		Path: newPathWithDbQueryParams().Add("installations").
-			AddParameter("extensionId", openapi.STRING, "The ID of the extension for which to get the instances").
-			AddParameter("extensionVersion", openapi.STRING, "The version of the extension for which to get the instances").
+			AddParameter("extensionId", openapi.STRING, "The ID of the installed extension for which to get the instances").
+			AddParameter("extensionVersion", openapi.STRING, "The version of the installed extension for which to get the instances").
 			Add("instances"),
 		HandlerFunc: adaptDbHandler(handleListInstances(apiContext)),
 	}

@@ -20,8 +20,8 @@ func UninstallExtension(apiContext *ApiContext) *openapi.Delete {
 		},
 		Path: newPathWithDbQueryParams().
 			Add("installations").
-			AddParameter("extensionId", openapi.STRING, "The ID of the extension to uninstall").
-			AddParameter("extensionVersion", openapi.STRING, "The version of the extension to uninstall"),
+			AddParameter("extensionId", openapi.STRING, "The ID of the installed extension to uninstall").
+			AddParameter("extensionVersion", openapi.STRING, "The version of the installed extension to uninstall"),
 		HandlerFunc: adaptDbHandler(handleUninstallExtension(apiContext)),
 	}
 }
