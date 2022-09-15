@@ -40,7 +40,7 @@ type TransactionController interface {
 	FindInstances(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error)
 
 	// DeleteInstance deletes instance with the given ID.
-	DeleteInstance(ctx context.Context, db *sql.DB, extensionId string, instanceId string) error
+	DeleteInstance(ctx context.Context, db *sql.DB, extensionId, extensionVersion, instanceId string) error
 }
 
 type Extension struct {
@@ -161,13 +161,13 @@ func (c *transactionControllerImpl) FindInstances(ctx context.Context, db *sql.D
 	return c.controller.FindInstances(tx, extensionId, extensionVersion)
 }
 
-func (c *transactionControllerImpl) DeleteInstance(ctx context.Context, db *sql.DB, extensionId string, instanceId string) error {
+func (c *transactionControllerImpl) DeleteInstance(ctx context.Context, db *sql.DB, extensionId, extensionVersion, instanceId string) error {
 	tx, err := beginTransaction(ctx, db)
 	if err != nil {
 		return err
 	}
 	defer rollback(tx)
-	err = c.controller.DeleteInstance(tx, extensionId, instanceId)
+	err = c.controller.DeleteInstance(tx, extensionId, extensionVersion, instanceId)
 	if err == nil {
 		err = tx.Commit()
 		if err != nil {

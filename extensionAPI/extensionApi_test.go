@@ -115,7 +115,7 @@ func (suite *ExtensionApiSuite) Test_DeleteInstance() {
 		Build().WriteToTmpFile()
 	extension := suite.loadExtension(extensionFile)
 	suite.mockSQLClient.On("Execute", "drop instance instId", []any{}).Return()
-	err := extension.DeleteInstance(suite.mockContext(), "instId")
+	err := extension.DeleteInstance(suite.mockContext(), "extVersion", "instId")
 	suite.NoError(err)
 }
 

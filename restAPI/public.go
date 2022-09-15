@@ -8,8 +8,9 @@ import (
 const (
 	EXTENSION_SCHEMA_NAME = "EXA_EXTENSIONS"
 
-	TagExtension = "Extension"
-	TagInstance  = "Instance"
+	TagExtension    = "Extension"
+	TagInstallation = "Installation"
+	TagInstance     = "Instance"
 
 	BearerAuth = "DbAccessToken"
 	BasicAuth  = "DbUsernamePassword"
@@ -28,7 +29,8 @@ func AddPublicEndpoints(api *openapi.API, config ExtensionManagerConfig) error {
 }
 
 func addPublicEndpointsWithController(api *openapi.API, controller extensionController.TransactionController) error {
-	api.AddTag(TagExtension, "Calls to list, install and uninstall extensions")
+	api.AddTag(TagExtension, "List and install extensions")
+	api.AddTag(TagInstallation, "List and uninstall installed extensions")
 	api.AddTag(TagInstance, "Calls to list, create and remove instances of an extension")
 
 	apiContext := NewApiContext(controller)
@@ -45,7 +47,7 @@ func addPublicEndpointsWithController(api *openapi.API, controller extensionCont
 	if err := api.Delete(UninstallExtension(apiContext)); err != nil {
 		return err
 	}
-	if err := api.Put(CreateInstance(apiContext)); err != nil {
+	if err := api.Post(CreateInstance(apiContext)); err != nil {
 		return err
 	}
 	if err := api.Get(ListInstances(apiContext)); err != nil {

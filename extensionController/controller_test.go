@@ -334,7 +334,7 @@ func (suite *ControllerUTestSuite) TestDeleteInstancesFails() {
 			suite.initDbMock()
 			suite.dbMock.ExpectBegin()
 			suite.dbMock.ExpectRollback()
-			err := suite.controller.DeleteInstance(mockContext(), suite.db, EXTENSION_ID, "instId")
+			err := suite.controller.DeleteInstance(mockContext(), suite.db, EXTENSION_ID, "extVersion", "instId")
 			suite.assertError(t, err)
 		})
 	}
@@ -349,7 +349,7 @@ func (suite *ControllerUTestSuite) TestDeleteInstanceSucceeds() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec("delete instance instId").WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()
-	err := suite.controller.DeleteInstance(mockContext(), suite.db, EXTENSION_ID, "instId")
+	err := suite.controller.DeleteInstance(mockContext(), suite.db, EXTENSION_ID, "extVersion", "instId")
 	suite.NoError(err)
 }
 

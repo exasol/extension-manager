@@ -15,7 +15,7 @@ func ListInstalledExtensions(apiContext *ApiContext) *openapi.Get {
 		Summary:        "List installed extensions",
 		Description:    "Get a list of all installed extensions.",
 		OperationID:    "ListInstalledExtensions",
-		Tags:           []string{TagExtension},
+		Tags:           []string{TagInstallation},
 		Authentication: authentication,
 		Response: map[string]openapi.MethodResponse{
 			"200": {Description: "List of extensions", Value: InstallationsResponse{

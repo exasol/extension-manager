@@ -115,7 +115,7 @@ func (mock *mockControllerImpl) FindInstances(tx *sql.Tx, extensionId string, ex
 	return nil, args.Error(1)
 }
 
-func (mock *mockControllerImpl) DeleteInstance(tx *sql.Tx, extensionId string, instanceId string) error {
-	args := mock.Called(tx, extensionId, instanceId)
+func (mock *mockControllerImpl) DeleteInstance(tx *sql.Tx, extensionId, extensionVersion, instanceId string) error {
+	args := mock.Called(tx, extensionId, extensionVersion, instanceId)
 	return args.Error(0)
 }

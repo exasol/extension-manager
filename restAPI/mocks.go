@@ -55,7 +55,7 @@ func (m *mockExtensionController) FindInstances(ctx context.Context, db *sql.DB,
 	return nil, args.Error(1)
 }
 
-func (m *mockExtensionController) DeleteInstance(ctx context.Context, db *sql.DB, extensionId string, instanceId string) error {
-	args := m.Called(ctx, db, extensionId, instanceId)
+func (m *mockExtensionController) DeleteInstance(ctx context.Context, db *sql.DB, extensionId, extensionVersion, instanceId string) error {
+	args := m.Called(ctx, db, extensionId, extensionVersion, instanceId)
 	return args.Error(0)
 }
