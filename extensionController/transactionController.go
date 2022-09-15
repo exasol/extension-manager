@@ -47,7 +47,7 @@ type Extension struct {
 	Id                  string
 	Name                string
 	Description         string
-	InstallableVersions []string
+	InstallableVersions []extensionAPI.JsExtensionVersion
 }
 
 type ParameterValue struct {

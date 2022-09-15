@@ -155,12 +155,13 @@ func (c *controllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensio
 	}
 
 	extensionContext := c.createExtensionContext(tx)
-	installation, err := c.findInstallationByVersion(tx, extensionContext, extension, extensionVersion)
+	_, err = c.findInstallationByVersion(tx, extensionContext, extension, extensionVersion)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find installations: %w", err)
 	}
 
-	err = validateParameters(installation.InstanceParameters, params)
+	// TODO
+	err = validateParameters( /*installation.InstanceParameters*/ []interface{}{}, params)
 	if err != nil {
 		return nil, err
 	}

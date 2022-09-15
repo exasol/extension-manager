@@ -9,7 +9,7 @@ function createExtension(): ExasolExtension {
     return {
         name: "MyDemoExtension",
         description: "An extension for testing.",
-        installableVersions: ["0.1.0"],
+        installableVersions: [{name:"0.1.0", latest:true, deprecated:false}],
         bucketFsUploads: $UPLOADS$,
         install(context: Context, version: string) {
             $INSTALL_EXTENSION$
@@ -26,10 +26,13 @@ function createExtension(): ExasolExtension {
         uninstall(context: Context, version: string): void {
             $UNINSTALL_EXTENSION$
         },
-        deleteInstance(context: Context, instanceId: string): void {
+        deleteInstance(context: Context, extensionVersion: string, instanceId: string): void {
             $DELETE_INSTANCE$
         },
-        readInstanceParameters(context: Context, instanceId: string): ParameterValues {
+        getInstanceParameters(context: Context, version: string) {
+            $GET_INSTANCE_PARAMTER_DEFINITIONS$
+        },
+        readInstanceParameterValues(context: Context, extensionVersion: string, instanceId: string): ParameterValues {
             return undefined;
         }
     }

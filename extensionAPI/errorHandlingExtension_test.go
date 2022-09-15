@@ -20,7 +20,9 @@ func TestJsExtensionSuite(t *testing.T) {
 }
 
 func (suite *ErrorHandlingExtensionSuite) SetupSuite() {
-	suite.rawExtension = &rawJsExtension{Name: "name", Description: "desc", InstallableVersions: []string{"v1", "v2"}, BucketFsUploads: []BucketFsUpload{{Name: "uploadName"}}}
+	suite.rawExtension = &rawJsExtension{Name: "name", Description: "desc",
+		InstallableVersions: []rawJsExtensionVersion{{Name: "v1", Deprecated: true, Latest: false}, {Name: "v2", Deprecated: false, Latest: true}},
+		BucketFsUploads:     []BucketFsUpload{{Name: "uploadName"}}}
 	suite.extension = wrapExtension(suite.rawExtension, "id", newJavaScriptVm())
 }
 
@@ -29,7 +31,7 @@ func (suite *ErrorHandlingExtensionSuite) TestProperties() {
 		Id:                  "id",
 		Name:                "name",
 		Description:         "desc",
-		InstallableVersions: []string{"v1", "v2"},
+		InstallableVersions: []JsExtensionVersion{{Name: "v1", Deprecated: true, Latest: false}, {Name: "v2", Deprecated: false, Latest: true}},
 		BucketFsUploads:     []BucketFsUpload{{Name: "uploadName"}},
 		extension:           suite.rawExtension,
 		vm:                  suite.extension.vm},

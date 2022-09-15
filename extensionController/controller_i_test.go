@@ -60,7 +60,7 @@ func (suite *ControllerITestSuite) writeDefaultExtension() {
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "my-extension.1.2.3.jar", FileSize: 3}).
 		WithFindInstallationsFunc(`
 		return metadata.allScripts.rows.map(row => {
-			return {name: row.schema + "." + row.name, version: "0.1.0", instanceParameters: []}
+			return {name: row.schema + "." + row.name, version: "0.1.0"}
 		});`).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
@@ -172,7 +172,7 @@ func (suite *ControllerITestSuite) TestEnsureSchemaDoesNotFailIfSchemaAlreadyExi
 
 func (suite *ControllerITestSuite) TestAddInstance_wrongVersion() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
+		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
 		WithAddInstanceFunc("context.sqlClient.execute('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
@@ -184,12 +184,8 @@ func (suite *ControllerITestSuite) TestAddInstance_wrongVersion() {
 
 func (suite *ControllerITestSuite) TestAddInstance_invalidParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
-		id: "p1",
-		name: "My param",
-		type: "string",
-		required: true
-	}]`)).WithAddInstanceFunc("context.sqlClient.execute('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
+		WithAddInstanceFunc("context.sqlClient.execute('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
@@ -200,11 +196,8 @@ func (suite *ControllerITestSuite) TestAddInstance_invalidParameters() {
 
 func (suite *ControllerITestSuite) TestAddInstance_validParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
-		id: "p1",
-		name: "My param",
-		type: "string"
-	}]`)).WithAddInstanceFunc("context.sqlClient.execute('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
+		WithAddInstanceFunc("context.sqlClient.execute('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)

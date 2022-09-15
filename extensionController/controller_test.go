@@ -65,7 +65,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensions() {
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
 	suite.NoError(err)
 	suite.Equal([]*Extension{{Name: "MyDemoExtension", Id: "testing-extension.js", Description: "An extension for testing.",
-		InstallableVersions: []string{"0.1.0"}}}, extensions)
+		InstallableVersions: []extensionAPI.JsExtensionVersion{{Name: "0.1.0", Latest: true, Deprecated: false}}}}, extensions)
 }
 
 func (suite *ControllerUTestSuite) TestGetAllExtensionsWithMissingJar() {
@@ -145,8 +145,7 @@ func (suite *ControllerUTestSuite) TestGetAllInstallations() {
 	suite.dbMock.ExpectRollback()
 	installations, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
 	suite.NoError(err)
-	suite.Equal([]*extensionAPI.JsExtInstallation{{Name: "schema.script", Version: "0.1.0",
-		InstanceParameters: []interface{}{map[string]interface{}{"id": "p1", "name": "param1", "type": "string"}}}}, installations)
+	suite.Equal([]*extensionAPI.JsExtInstallation{{Name: "schema.script", Version: "0.1.0"}}, installations)
 }
 
 // InstallExtension
@@ -254,7 +253,7 @@ func (suite *ControllerUTestSuite) TestUninstallFails() {
 
 func (suite *ControllerUTestSuite) TestCreateInstance_wrongVersion() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
+		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{{Schema: "schema", Name: "script"}})
@@ -268,12 +267,8 @@ func (suite *ControllerUTestSuite) TestCreateInstance_wrongVersion() {
 
 func (suite *ControllerUTestSuite) TestCreateInstance_invalidParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
-		id: "p1",
-		name: "My param",
-		type: "string",
-		required: true
-	}]`)).WithAddInstanceFunc("return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
+		WithAddInstanceFunc("return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
@@ -289,7 +284,7 @@ func (suite *ControllerUTestSuite) TestCreateInstanceFails() {
 	for _, t := range errorTests {
 		suite.Run(t.testName, func() {
 			integrationTesting.CreateTestExtensionBuilder(suite.T()).
-				WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
+				WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
 				WithAddInstanceFunc(t.throwCommand).
 				Build().
 				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
@@ -306,11 +301,8 @@ func (suite *ControllerUTestSuite) TestCreateInstanceFails() {
 
 func (suite *ControllerUTestSuite) TestCreateInstance_validParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
-		id: "p1",
-		name: "My param",
-		type: "string"
-	}]`)).WithAddInstanceFunc("return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
+		WithAddInstanceFunc("return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
@@ -358,7 +350,7 @@ func (suite *ControllerUTestSuite) writeDefaultExtension() {
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "my-extension.1.2.3.jar", FileSize: 3}).
 		WithFindInstallationsFunc(`
 		return metadata.allScripts.rows.map(row => {
-			return {name: row.schema + "." + row.name, version: "0.1.0", instanceParameters: [{id:"p1", name:"param1", type:"string"}]}
+			return {name: row.schema + "." + row.name, version: "0.1.0"}
 		});`).
 		WithInstallFunc("context.sqlClient.execute('install extension')").
 		Build().
