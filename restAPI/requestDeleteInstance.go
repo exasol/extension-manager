@@ -20,7 +20,7 @@ func DeleteInstance(apiContext *ApiContext) *openapi.Delete {
 		},
 		Path: newPathWithDbQueryParams().Add("installations").
 			AddParameter("extensionId", openapi.STRING, "The ID of the extension for which to delete an instance").
-			AddParameter("extensionVersion", openapi.STRING, "The version of the extension for which to delete an instance").
+			AddParameter("extensionVersion", openapi.STRING, "The version of the installed extension for which to delete an instance").
 			Add("instances").
 			AddParameter("instanceId", openapi.STRING, "The ID of the instance to delete"),
 		HandlerFunc: adaptDbHandler(handleDeleteInstance(apiContext)),

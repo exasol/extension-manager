@@ -23,8 +23,8 @@ func CreateInstance(apiContext *ApiContext) *openapi.Post {
 			"200": {Description: "OK", Value: CreateInstanceResponse{InstanceId: "id", InstanceName: "new-instance-name"}},
 		},
 		Path: newPathWithDbQueryParams().Add("installations").
-			AddParameter("extensionId", openapi.STRING, "ID of the extension for which to create an instance").
-			AddParameter("extensionVersion", openapi.STRING, "Version of the extension for which to create an instance").
+			AddParameter("extensionId", openapi.STRING, "ID of the installed extension for which to create an instance").
+			AddParameter("extensionVersion", openapi.STRING, "Version of the installed extension for which to create an instance").
 			Add("instances"),
 		HandlerFunc: adaptDbHandler(handleCreateInstance(apiContext)),
 	}
