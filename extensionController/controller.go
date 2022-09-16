@@ -22,6 +22,9 @@ type controller interface {
 	// GetAllInstallations searches for installations of any extensions.
 	GetAllInstallations(tx *sql.Tx) ([]*extensionAPI.JsExtInstallation, error)
 
+	// GetParameterDefinitions returns the parameter definitions required for installing a given extension version.
+	GetParameterDefinitions(extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error)
+
 	// InstallExtension installs an extension.
 	// extensionId is the ID of the extension to install
 	// extensionVersion is the version of the extension to install
@@ -120,6 +123,22 @@ func (c *controllerImpl) GetAllInstallations(tx *sql.Tx) ([]*extensionAPI.JsExtI
 	return allInstallations, nil
 }
 
+func (c *controllerImpl) GetParameterDefinitions(extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
+	extension, err := c.loadExtensionById(extensionId)
+	if err != nil {
+		return nil, extensionLoadingFailed(extensionId, err)
+	}
+	rawDefinitions, err := extension.GetParameterDefinitions(extensionVersion)
+	if err != nil {
+		return nil, err
+	}
+	definitions, err := parameterValidator.ConvertDefinitions(rawDefinitions)
+	if err != nil {
+		return nil, err
+	}
+	return definitions, nil
+}
+
 func (c *controllerImpl) InstallExtension(tx *sql.Tx, extensionId string, extensionVersion string) error {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
@@ -154,18 +173,17 @@ func (c *controllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensio
 		params.Values = append(params.Values, extensionAPI.ParameterValue{Name: p.Name, Value: p.Value})
 	}
 
-	extensionContext := c.createExtensionContext(tx)
-	_, err = c.findInstallationByVersion(tx, extensionContext, extension, extensionVersion)
+	paramDefinitions, err := c.GetParameterDefinitions(extensionId, extensionId)
 	if err != nil {
-		return nil, fmt.Errorf("failed to find installations: %w", err)
+		return nil, fmt.Errorf("failed to get parameter definitions: %w", err)
 	}
 
-	// TODO
-	err = validateParameters( /*installation.InstanceParameters*/ []interface{}{}, params)
+	err = validateParameters(paramDefinitions, params)
 	if err != nil {
 		return nil, err
 	}
 
+	extensionContext := c.createExtensionContext(tx)
 	instance, err := extension.AddInstance(extensionContext, extensionVersion, &params)
 	if err != nil {
 		return nil, err
@@ -192,26 +210,6 @@ func (c *controllerImpl) FindInstances(tx *sql.Tx, extensionId string, extension
 	return extension.ListInstances(c.createExtensionContext(tx), extensionVersion)
 }
 
-func (c *controllerImpl) findInstallationByVersion(tx *sql.Tx, context *extensionAPI.ExtensionContext, extension *extensionAPI.JsExtension, version string) (*extensionAPI.JsExtInstallation, error) {
-	metadata, err := c.metaDataReader.ReadMetadataTables(tx, c.schema)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
-	}
-
-	installations, err := extension.FindInstallations(context, metadata)
-	if err != nil {
-		return nil, apiErrors.NewAPIErrorWithCause(fmt.Sprintf("failed to find installations for extension %q", extension.Name), err)
-	}
-	var availableVersions []string
-	for _, i := range installations {
-		if i.Version == version {
-			return i, nil
-		}
-		availableVersions = append(availableVersions, i.Version)
-	}
-	return nil, fmt.Errorf("version %q not found for extension %q, available versions: %q", version, extension.Id, availableVersions)
-}
-
 func (c *controllerImpl) createExtensionContext(tx *sql.Tx) *extensionAPI.ExtensionContext {
 	return extensionAPI.CreateContext(context.TODO(), c.schema, tx)
 }
@@ -224,7 +222,7 @@ func (c *controllerImpl) ensureSchemaExists(tx *sql.Tx) error {
 	return nil
 }
 
-func validateParameters(parameterDefinitions []interface{}, params extensionAPI.ParameterValues) error {
+func validateParameters(parameterDefinitions []parameterValidator.ParameterDefinition, params extensionAPI.ParameterValues) error {
 	validator, err := parameterValidator.New()
 	if err != nil {
 		return fmt.Errorf("failed to create parameter validator: %w", err)

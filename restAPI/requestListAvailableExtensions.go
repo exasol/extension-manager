@@ -60,7 +60,7 @@ func convertResponse(extensions []*extensionController.Extension) ExtensionsResp
 
 func convertVersions(versions []extensionAPI.JsExtensionVersion) []ExtensionVersion {
 	result := make([]ExtensionVersion, 0, len(versions))
-	for _, v := range result {
+	for _, v := range versions {
 		result = append(result, ExtensionVersion{Name: v.Name, Latest: v.Latest, Deprecated: v.Deprecated})
 	}
 	return result

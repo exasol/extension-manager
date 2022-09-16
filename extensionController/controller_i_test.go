@@ -170,22 +170,11 @@ func (suite *ControllerITestSuite) TestEnsureSchemaDoesNotFailIfSchemaAlreadyExi
 	suite.Contains(suite.getAllSchemaNames(), schemaName)
 }
 
-func (suite *ControllerITestSuite) TestAddInstance_wrongVersion() {
-	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
-		WithAddInstanceFunc("context.sqlClient.execute('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
-		Build().
-		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instance, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "wrongVersion", []ParameterValue{})
-	suite.EqualError(err, `failed to find installations: version "wrongVersion" not found for extension "testing-extension.js", available versions: ["0.1.0"]`)
-	suite.Nil(instance)
-}
-
 func (suite *ControllerITestSuite) TestAddInstance_invalidParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
 		WithAddInstanceFunc("context.sqlClient.execute('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string", required: true}]`).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)

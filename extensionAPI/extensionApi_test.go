@@ -51,6 +51,24 @@ func (mock *sqlClientMock) Query(query string, args ...any) backend.QueryResult 
 	return mockArgs.Get(0).(backend.QueryResult)
 }
 
+func (suite *ExtensionApiSuite) Test_GetParameterDefinitions_EmptyResult() {
+	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithGetInstanceParameterDefinitionFunc(`return []`).
+		Build().WriteToTmpFile()
+	extension := suite.loadExtension(extensionFile)
+	definitions := extension.extension.GetParameterDefinitions("extVersion")
+	suite.Equal([]interface{}{}, definitions)
+}
+
+func (suite *ExtensionApiSuite) Test_GetParameterDefinitions() {
+	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string"}]`).
+		Build().WriteToTmpFile()
+	extension := suite.loadExtension(extensionFile)
+	definitions := extension.extension.GetParameterDefinitions("extVersion")
+	suite.Equal([]interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}, definitions)
+}
+
 func (suite *ExtensionApiSuite) Test_Install() {
 	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).Build().WriteToTmpFile()
 	extension := suite.loadExtension(extensionFile)

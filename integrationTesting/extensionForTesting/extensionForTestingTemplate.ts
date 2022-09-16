@@ -1,7 +1,7 @@
 import {
     BadRequestError, Context, ExaMetadata, ExasolExtension,
     Installation,
-    Instance, InternalServerError, ParameterValues,
+    Instance, InternalServerError, Parameter, ParameterValues,
     registerExtension
 } from "@exasol/extension-manager-interface";
 
@@ -29,7 +29,7 @@ function createExtension(): ExasolExtension {
         deleteInstance(context: Context, extensionVersion: string, instanceId: string): void {
             $DELETE_INSTANCE$
         },
-        getInstanceParameters(context: Context, version: string) {
+        getInstanceParameters(context: Context, version: string): Parameter[] {
             $GET_INSTANCE_PARAMTER_DEFINITIONS$
         },
         readInstanceParameterValues(context: Context, extensionVersion: string, instanceId: string): ParameterValues {

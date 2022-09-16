@@ -29,14 +29,14 @@ func (suite *ParameterValidatorSuite) TestValidateParameter() {
 		definition map[string]interface{}
 		expected   ValidationResult
 	}{
-		{definition: map[string]interface{}{"type": "string", "id": "my-value", "required": true, "regex": ".*"},
+		{definition: map[string]interface{}{"name": "name", "type": "string", "id": "my-value", "required": true, "regex": ".*"},
 			expected: ValidationResult{Success: true, Message: ""}},
-		{definition: map[string]interface{}{"type": "string", "id": "my-value", "required": true, "regex": "a+"},
+		{definition: map[string]interface{}{"name": "name", "type": "string", "id": "my-value", "required": true, "regex": "a+"},
 			expected: ValidationResult{Success: false, Message: "The value has an invalid format."}},
 	}
 
 	for _, testCase := range cases {
-		result, err := suite.validator.ValidateParameter(testCase.definition, "test")
+		result, err := suite.validator.ValidateParameter(suite.convertParam(testCase.definition), "test")
 		suite.NoError(err)
 		suite.Equal(testCase.expected, *result)
 	}
@@ -89,7 +89,7 @@ func (suite *ParameterValidatorSuite) TestValidateParameters() {
 
 	for _, t := range tests {
 		suite.Run(t.name, func() {
-			result, err := suite.validator.ValidateParameters(t.definitions, extensionAPI.ParameterValues{Values: t.params})
+			result, err := suite.validator.ValidateParameters(suite.convert(t.definitions), extensionAPI.ParameterValues{Values: t.params})
 			suite.NoError(err)
 			suite.Len(result, len(t.expected))
 			suite.Equal(t.expected, result)
@@ -98,7 +98,26 @@ func (suite *ParameterValidatorSuite) TestValidateParameters() {
 }
 
 func (suite *ParameterValidatorSuite) TestInvalidDefinitionIgnored() {
-	result, err := suite.validator.ValidateParameters([]interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}}, extensionAPI.ParameterValues{})
+	rawDefinition := []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}}
+	result, err := suite.validator.ValidateParameters(suite.convert(rawDefinition), extensionAPI.ParameterValues{})
 	suite.NoError(err)
 	suite.Empty(result)
+}
+
+func (suite *ParameterValidatorSuite) convertParam(definition interface{}) ParameterDefinition {
+	suite.T().Helper()
+	parsedDefinition, err := convertDefinition(definition)
+	if err != nil {
+		suite.T().Fatalf("failed to convert definition %v: %v", definition, err)
+	}
+	return parsedDefinition
+}
+
+func (suite *ParameterValidatorSuite) convert(definitions []interface{}) []ParameterDefinition {
+	suite.T().Helper()
+	parsedDefinitions, err := ConvertDefinitions(definitions)
+	if err != nil {
+		suite.T().Fatalf("failed to convert definitions %v: %v", definitions, err)
+	}
+	return parsedDefinitions
 }

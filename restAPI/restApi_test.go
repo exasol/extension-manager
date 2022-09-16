@@ -78,11 +78,13 @@ func (suite *RestAPISuite) TestGetInstallationsFailed() {
 // GetAllExtensions
 
 func (suite *RestAPISuite) TestGetAllExtensionsSuccessfully() {
-	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return([]*extensionController.Extension{{Id: "ext-id", Name: "my-extension", Description: "a cool extension", InstallableVersions: []extensionAPI.JsExtensionVersion{{Name: "0.1.0", Latest: true, Deprecated: false}}}}, nil)
+	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return([]*extensionController.Extension{{
+		Id: "ext-id", Name: "my-extension", Description: "a cool extension",
+		InstallableVersions: []extensionAPI.JsExtensionVersion{{Name: "0.1.0", Latest: true, Deprecated: false}}}}, nil)
 	for _, test := range authSuccessTests {
 		suite.Run(test.authHeader, func() {
 			responseString := suite.restApi.makeRequestWithAuthHeader("GET", LIST_AVAILABLE_EXTENSIONS+"?dbHost=host&dbPort=8563&", test.authHeader, "", 200)
-			suite.assertJSON.Assertf(responseString, `{"extensions":[{"id": "ext-id", "name":"my-extension","description":"a cool extension","installableVersions":[{name:"0.1.0", latest:true, deprecated:false}]}]}`)
+			suite.assertJSON.Assertf(responseString, `{"extensions":[{"id": "ext-id", "name":"my-extension","description":"a cool extension","installableVersions":[{"name":"0.1.0", "latest":true, "deprecated":false}]}]}`)
 		})
 	}
 }

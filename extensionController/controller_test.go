@@ -11,6 +11,7 @@ import (
 	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/extensionAPI"
 	"github.com/exasol/extension-manager/integrationTesting"
+	"github.com/exasol/extension-manager/parameterValidator"
 
 	"github.com/stretchr/testify/suite"
 )
@@ -124,6 +125,34 @@ func (suite *ControllerUTestSuite) TestFindInstancesFails() {
 			suite.Nil(extensions)
 		})
 	}
+}
+
+// GetParameterDefinitions
+
+func (suite *ControllerUTestSuite) TestGetParameterDefinitionsFails() {
+	for _, t := range errorTests {
+		suite.Run(t.testName, func() {
+			integrationTesting.CreateTestExtensionBuilder(suite.T()).
+				WithGetInstanceParameterDefinitionFunc(t.throwCommand).
+				Build().
+				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+			suite.initDbMock()
+			extensions, err := suite.controller.GetParameterDefinitions(EXTENSION_ID, "ver")
+			suite.assertError(t, err)
+			suite.Nil(extensions)
+		})
+	}
+}
+
+func (suite *ControllerUTestSuite) TestGetParameterDefinitionsSucceeds() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string"}]`).
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	definitions, err := suite.controller.GetParameterDefinitions(EXTENSION_ID, "ext-version")
+	suite.NoError(err)
+	suite.Equal([]parameterValidator.ParameterDefinition{{Id: "param1", Name: "My param", Type: "string",
+		RawDefinition: map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}, definitions)
 }
 
 func (suite *ControllerUTestSuite) assertError(t errorTest, actualError error) {
@@ -251,24 +280,11 @@ func (suite *ControllerUTestSuite) TestUninstallFails() {
 
 // CreateInstance
 
-func (suite *ControllerUTestSuite) TestCreateInstance_wrongVersion() {
-	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
-		Build().
-		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{{Schema: "schema", Name: "script"}})
-	suite.dbMock.ExpectBegin()
-	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
-	suite.dbMock.ExpectRollback()
-	instance, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "wrongVersion", []ParameterValue{})
-	suite.EqualError(err, `failed to find installations: version "wrongVersion" not found for extension "testing-extension.js", available versions: ["0.1.0"]`)
-	suite.Nil(instance)
-}
-
 func (suite *ControllerUTestSuite) TestCreateInstance_invalidParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
 		WithAddInstanceFunc("return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string", required: true}]`).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
