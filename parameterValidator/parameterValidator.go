@@ -18,8 +18,6 @@ var dependencyValidatorJs string
 type ParameterDefinition struct {
 	Id            string
 	Name          string
-	Type          string
-	Required      bool
 	RawDefinition interface{}
 }
 
@@ -36,22 +34,22 @@ func ConvertDefinitions(rawDefinitions []interface{}) ([]ParameterDefinition, er
 }
 
 func convertDefinition(rawDefinition interface{}) (ParameterDefinition, error) {
-	id, name, paramType, required, err := extractFromDefinition(rawDefinition)
+	id, name, err := extractFromDefinition(rawDefinition)
 	if err != nil {
 		return ParameterDefinition{}, err
 	}
-	return ParameterDefinition{Id: id, Name: name, Type: paramType, Required: required, RawDefinition: rawDefinition}, nil
+	return ParameterDefinition{Id: id, Name: name, RawDefinition: rawDefinition}, nil
 }
 
-func extractFromDefinition(d interface{}) (id, name, paramType string, required bool, err error) {
+func extractFromDefinition(d interface{}) (id, name string, err error) {
 	if def, ok := d.(map[string]interface{}); ok {
 		return extractValues(def)
 	} else {
-		return "", "", "", false, fmt.Errorf("unexpected type of definition: %t", d)
+		return "", "", fmt.Errorf("unexpected type of definition: %t", d)
 	}
 }
 
-func extractValues(def map[string]interface{}) (id, name, paramType string, required bool, err error) {
+func extractValues(def map[string]interface{}) (id, name string, err error) {
 	id, err = extractStringValue(def, "id")
 	if err != nil {
 		return
@@ -60,11 +58,6 @@ func extractValues(def map[string]interface{}) (id, name, paramType string, requ
 	if err != nil {
 		return
 	}
-	paramType, err = extractStringValue(def, "type")
-	if err != nil {
-		return
-	}
-	required, err = extractBoolValue(def, "required", false)
 	return
 }
 
@@ -75,16 +68,6 @@ func extractStringValue(def map[string]interface{}, key string) (string, error) 
 		return value, nil
 	} else {
 		return "", fmt.Errorf("unexpected type of key %q in parameter definition: %t, expected string", key, def[key])
-	}
-}
-
-func extractBoolValue(def map[string]interface{}, key string, defaultValue bool) (bool, error) {
-	if _, ok := def[key]; !ok {
-		return defaultValue, nil
-	} else if value, ok := def[key].(bool); ok {
-		return value, nil
-	} else {
-		return false, fmt.Errorf("unexpected type of key %q in parameter definition: %t, expected bool", key, def[key])
 	}
 }
 

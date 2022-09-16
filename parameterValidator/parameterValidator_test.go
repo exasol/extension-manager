@@ -104,6 +104,49 @@ func (suite *ParameterValidatorSuite) TestInvalidDefinitionIgnored() {
 	suite.Empty(result)
 }
 
+func (suite *ParameterValidatorSuite) TestConvertDefinitionsSucceeds() {
+	var tests = []struct {
+		name           string
+		rawDefinitions []interface{}
+		expected       []ParameterDefinition
+	}{
+		{"empty input", []interface{}{}, []ParameterDefinition{}},
+		{"single entry", []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}}, []ParameterDefinition{{Id: "param1", Name: "My param",
+			RawDefinition: map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}}}},
+		{"missing type", []interface{}{map[string]interface{}{"id": "param1", "name": "My param"}}, []ParameterDefinition{{Id: "param1", Name: "My param",
+			RawDefinition: map[string]interface{}{"id": "param1", "name": "My param"}}}},
+		{"two entries", []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}, map[string]interface{}{"id": "param2", "name": "My param2", "type": "string"}},
+			[]ParameterDefinition{{Id: "param1", Name: "My param", RawDefinition: map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}},
+				{Id: "param2", Name: "My param2", RawDefinition: map[string]interface{}{"id": "param2", "name": "My param2", "type": "string"}}}},
+	}
+	for _, test := range tests {
+		suite.T().Run(test.name, func(t *testing.T) {
+			converted, err := ConvertDefinitions(test.rawDefinitions)
+			suite.NoError(err)
+			suite.Equal(test.expected, converted)
+		})
+	}
+}
+
+func (suite *ParameterValidatorSuite) TestConvertDefinitionsFails() {
+	var tests = []struct {
+		name           string
+		rawDefinitions []interface{}
+		expectedError  string
+	}{
+		{"empty map", []interface{}{map[string]interface{}{}}, "entry \"id\" missing in parameter definition map[]"},
+		{"missing id", []interface{}{map[string]interface{}{"name": "My param", "type": "invalidType"}}, "entry \"id\" missing in parameter definition map[name:My param type:invalidType]"},
+		{"missing name", []interface{}{map[string]interface{}{"id": "param2", "type": "invalidType"}}, "entry \"name\" missing in parameter definition map[id:param2 type:invalidType]"},
+	}
+	for _, test := range tests {
+		suite.T().Run(test.name, func(t *testing.T) {
+			converted, err := ConvertDefinitions(test.rawDefinitions)
+			suite.EqualError(err, test.expectedError)
+			suite.Nil(converted)
+		})
+	}
+}
+
 func (suite *ParameterValidatorSuite) convertParam(definition interface{}) ParameterDefinition {
 	suite.T().Helper()
 	parsedDefinition, err := convertDefinition(definition)

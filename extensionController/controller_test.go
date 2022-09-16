@@ -151,7 +151,7 @@ func (suite *ControllerUTestSuite) TestGetParameterDefinitionsSucceeds() {
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	definitions, err := suite.controller.GetParameterDefinitions(EXTENSION_ID, "ext-version")
 	suite.NoError(err)
-	suite.Equal([]parameterValidator.ParameterDefinition{{Id: "param1", Name: "My param", Type: "string",
+	suite.Equal([]parameterValidator.ParameterDefinition{{Id: "param1", Name: "My param",
 		RawDefinition: map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}, definitions)
 }
 
