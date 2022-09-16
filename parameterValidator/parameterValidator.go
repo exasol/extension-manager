@@ -18,35 +18,31 @@ var dependencyValidatorJs string
 type ParameterDefinition struct {
 	Id            string
 	Name          string
-	RawDefinition interface{}
+	RawDefinition map[string]interface{}
 }
 
 func ConvertDefinitions(rawDefinitions []interface{}) ([]ParameterDefinition, error) {
 	definitions := make([]ParameterDefinition, 0, len(rawDefinitions))
 	for _, d := range rawDefinitions {
-		convertedDef, err := convertDefinition(d)
-		if err != nil {
-			return nil, err
+		if def, ok := d.(map[string]interface{}); ok {
+			convertedDef, err := convertDefinition(def)
+			if err != nil {
+				return nil, err
+			}
+			definitions = append(definitions, convertedDef)
+		} else {
+			return nil, fmt.Errorf("unexpected type %T of definition: %v, expected map[string]interface{}", d, d)
 		}
-		definitions = append(definitions, convertedDef)
 	}
 	return definitions, nil
 }
 
-func convertDefinition(rawDefinition interface{}) (ParameterDefinition, error) {
-	id, name, err := extractFromDefinition(rawDefinition)
+func convertDefinition(rawDefinition map[string]interface{}) (ParameterDefinition, error) {
+	id, name, err := extractValues(rawDefinition)
 	if err != nil {
 		return ParameterDefinition{}, err
 	}
 	return ParameterDefinition{Id: id, Name: name, RawDefinition: rawDefinition}, nil
-}
-
-func extractFromDefinition(d interface{}) (id, name string, err error) {
-	if def, ok := d.(map[string]interface{}); ok {
-		return extractValues(def)
-	} else {
-		return "", "", fmt.Errorf("unexpected type of definition: %t", d)
-	}
 }
 
 func extractValues(def map[string]interface{}) (id, name string, err error) {

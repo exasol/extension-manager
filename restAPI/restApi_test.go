@@ -7,6 +7,7 @@ import (
 	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/extensionAPI"
 	"github.com/exasol/extension-manager/extensionController"
+	"github.com/exasol/extension-manager/parameterValidator"
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -24,6 +25,7 @@ const (
 	LIST_AVAILABLE_EXTENSIONS = BASE_URL + "/extensions"
 	LIST_INSTALLED_EXTENSIONS = BASE_URL + "/installations"
 	INSTALL_EXT_URL           = BASE_URL + "/extensions/ext-id/ext-version/install"
+	GET_EXTENSION_DETAILS     = BASE_URL + "/extensions/ext-id/ext-version"
 	UNINSTALL_EXT_URL         = BASE_URL + "/installations/ext-id/ext-version"
 	DELETE_INSTANCE_URL       = BASE_URL + "/installations/ext-id/ext-version/instances/inst-id"
 	LIST_INSTANCES_URL        = BASE_URL + "/installations/ext-id/ext-version/instances"
@@ -92,6 +94,27 @@ func (suite *RestAPISuite) TestGetAllExtensionsSuccessfully() {
 func (suite *RestAPISuite) TestGetAllExtensionsFails() {
 	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("mock error"))
 	responseString := suite.makeRequest("GET", LIST_AVAILABLE_EXTENSIONS+"?dbHost=host&dbPort=8563", "", 500)
+	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
+}
+
+// GetExtensionDetails
+
+func (suite *RestAPISuite) TestGetExtensionDetailsSuccessfully() {
+	suite.controller.On("GetParameterDefinitions", "ext-id", "ext-version").Return([]parameterValidator.ParameterDefinition{{Id: "param1", Name: "My param",
+		RawDefinition: map[string]interface{}{"id": "raw-param1", "name": "raw-My param", "type": "invalidType"}}}, nil)
+	for _, test := range authSuccessTests {
+		suite.Run(test.authHeader, func() {
+			responseString := suite.restApi.makeRequestWithAuthHeader("GET", GET_EXTENSION_DETAILS, test.authHeader, "", 200)
+			suite.assertJSON.Assertf(responseString, `{"id": "ext-id", "version":"ext-version", "parameterDefinitions": [
+				{"id":"param1","name":"My param","definition":{"id": "raw-param1", "name": "raw-My param", "type": "invalidType"}}
+			]}`)
+		})
+	}
+}
+
+func (suite *RestAPISuite) TestGetExtensionDetailsFails() {
+	suite.controller.On("GetParameterDefinitions", "ext-id", "ext-version").Return(nil, fmt.Errorf("mock error"))
+	responseString := suite.makeRequest("GET", GET_EXTENSION_DETAILS, "", 500)
 	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
 }
 

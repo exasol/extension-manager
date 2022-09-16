@@ -147,7 +147,7 @@ func (suite *ParameterValidatorSuite) TestConvertDefinitionsFails() {
 	}
 }
 
-func (suite *ParameterValidatorSuite) convertParam(definition interface{}) ParameterDefinition {
+func (suite *ParameterValidatorSuite) convertParam(definition map[string]interface{}) ParameterDefinition {
 	suite.T().Helper()
 	parsedDefinition, err := convertDefinition(definition)
 	if err != nil {
