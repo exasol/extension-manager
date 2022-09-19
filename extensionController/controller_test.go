@@ -11,6 +11,7 @@ import (
 	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/extensionAPI"
 	"github.com/exasol/extension-manager/integrationTesting"
+	"github.com/exasol/extension-manager/parameterValidator"
 
 	"github.com/stretchr/testify/suite"
 )
@@ -65,7 +66,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensions() {
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
 	suite.NoError(err)
 	suite.Equal([]*Extension{{Name: "MyDemoExtension", Id: "testing-extension.js", Description: "An extension for testing.",
-		InstallableVersions: []string{"0.1.0"}}}, extensions)
+		InstallableVersions: []extensionAPI.JsExtensionVersion{{Name: "0.1.0", Latest: true, Deprecated: false}}}}, extensions)
 }
 
 func (suite *ControllerUTestSuite) TestGetAllExtensionsWithMissingJar() {
@@ -126,7 +127,41 @@ func (suite *ControllerUTestSuite) TestFindInstancesFails() {
 	}
 }
 
+// GetParameterDefinitions
+
+func (suite *ControllerUTestSuite) TestGetParameterDefinitionsFails() {
+	for _, t := range errorTests {
+		suite.Run(t.testName, func() {
+			integrationTesting.CreateTestExtensionBuilder(suite.T()).
+				WithGetInstanceParameterDefinitionFunc(t.throwCommand).
+				Build().
+				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+			suite.initDbMock()
+			suite.dbMock.ExpectBegin()
+			suite.dbMock.ExpectRollback()
+			extensions, err := suite.controller.GetParameterDefinitions(mockContext(), suite.db, EXTENSION_ID, "ver")
+			suite.assertError(t, err)
+			suite.Nil(extensions)
+		})
+	}
+}
+
+func (suite *ControllerUTestSuite) TestGetParameterDefinitionsSucceeds() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithGetInstanceParameterDefinitionFunc(`context.sqlClient.query('get param definitions'); return [{id: "param1", name: "My param:"+version, type: "string"}]`).
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectQuery("param definitions").WillReturnRows(sqlmock.NewRows([]string{"col1"}))
+	suite.dbMock.ExpectRollback()
+	definitions, err := suite.controller.GetParameterDefinitions(mockContext(), suite.db, EXTENSION_ID, "ext-version")
+	suite.NoError(err)
+	suite.Equal([]parameterValidator.ParameterDefinition{{Id: "param1", Name: "My param:ext-version",
+		RawDefinition: map[string]interface{}{"id": "param1", "name": "My param:ext-version", "type": "string"}}}, definitions)
+}
+
 func (suite *ControllerUTestSuite) assertError(t errorTest, actualError error) {
+	suite.T().Helper()
 	expectedErrorMessage := "mock error from js"
 	if t.expectedMessage != "" {
 		expectedErrorMessage = t.expectedMessage
@@ -145,8 +180,7 @@ func (suite *ControllerUTestSuite) TestGetAllInstallations() {
 	suite.dbMock.ExpectRollback()
 	installations, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
 	suite.NoError(err)
-	suite.Equal([]*extensionAPI.JsExtInstallation{{Name: "schema.script", Version: "0.1.0",
-		InstanceParameters: []interface{}{map[string]interface{}{"id": "p1", "name": "param1", "type": "string"}}}}, installations)
+	suite.Equal([]*extensionAPI.JsExtInstallation{{Name: "schema.script", Version: "0.1.0"}}, installations)
 }
 
 // InstallExtension
@@ -252,28 +286,11 @@ func (suite *ControllerUTestSuite) TestUninstallFails() {
 
 // CreateInstance
 
-func (suite *ControllerUTestSuite) TestCreateInstance_wrongVersion() {
-	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
-		Build().
-		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{{Schema: "schema", Name: "script"}})
-	suite.dbMock.ExpectBegin()
-	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
-	suite.dbMock.ExpectRollback()
-	instance, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "wrongVersion", []ParameterValue{})
-	suite.EqualError(err, `failed to find installations: version "wrongVersion" not found for extension "testing-extension.js", available versions: ["0.1.0"]`)
-	suite.Nil(instance)
-}
-
 func (suite *ControllerUTestSuite) TestCreateInstance_invalidParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
-		id: "p1",
-		name: "My param",
-		type: "string",
-		required: true
-	}]`)).WithAddInstanceFunc("return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
+		WithAddInstanceFunc("throw new Error('This should not be called.')").
+		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string", required: true}]`).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
@@ -289,7 +306,7 @@ func (suite *ControllerUTestSuite) TestCreateInstanceFails() {
 	for _, t := range errorTests {
 		suite.Run(t.testName, func() {
 			integrationTesting.CreateTestExtensionBuilder(suite.T()).
-				WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[]`)).
+				WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
 				WithAddInstanceFunc(t.throwCommand).
 				Build().
 				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
@@ -306,11 +323,8 @@ func (suite *ControllerUTestSuite) TestCreateInstanceFails() {
 
 func (suite *ControllerUTestSuite) TestCreateInstance_validParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0", `[{
-		id: "p1",
-		name: "My param",
-		type: "string"
-	}]`)).WithAddInstanceFunc("return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
+		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
+		WithAddInstanceFunc("return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
@@ -358,7 +372,7 @@ func (suite *ControllerUTestSuite) writeDefaultExtension() {
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "my-extension.1.2.3.jar", FileSize: 3}).
 		WithFindInstallationsFunc(`
 		return metadata.allScripts.rows.map(row => {
-			return {name: row.schema + "." + row.name, version: "0.1.0", instanceParameters: [{id:"p1", name:"param1", type:"string"}]}
+			return {name: row.schema + "." + row.name, version: "0.1.0"}
 		});`).
 		WithInstallFunc("context.sqlClient.execute('install extension')").
 		Build().
@@ -370,6 +384,7 @@ func mockContext() context.Context {
 }
 
 func (suite *ControllerUTestSuite) assertApiError(err error, expectedStatus int, expectedMessage string) {
+	suite.T().Helper()
 	if apiError, ok := err.(*apiErrors.APIError); ok {
 		suite.ErrorContains(apiError, expectedMessage)
 		suite.Contains(apiError.Message, expectedMessage)
@@ -380,6 +395,7 @@ func (suite *ControllerUTestSuite) assertApiError(err error, expectedStatus int,
 }
 
 func (suite *ControllerUTestSuite) assertNonApiError(err error, expectedMessage string) {
+	suite.T().Helper()
 	if _, ok := err.(*apiErrors.APIError); ok {
 		suite.Fail("wrong error type", "Expected non-APIError but got %T: %v", err, err)
 	} else {

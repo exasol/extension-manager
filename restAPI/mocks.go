@@ -6,6 +6,7 @@ import (
 
 	"github.com/exasol/extension-manager/extensionAPI"
 	"github.com/exasol/extension-manager/extensionController"
+	"github.com/exasol/extension-manager/parameterValidator"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -27,6 +28,14 @@ func (m *mockExtensionController) GetInstalledExtensions(ctx context.Context, db
 	args := m.Called(ctx, db)
 	if installations, ok := args.Get(0).([]*extensionAPI.JsExtInstallation); ok {
 		return installations, args.Error(1)
+	}
+	return nil, args.Error(1)
+}
+
+func (m *mockExtensionController) GetParameterDefinitions(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
+	args := m.Called(ctx, db, extensionId, extensionVersion)
+	if paramDefinitions, ok := args.Get(0).([]parameterValidator.ParameterDefinition); ok {
+		return paramDefinitions, args.Error(1)
 	}
 	return nil, args.Error(1)
 }

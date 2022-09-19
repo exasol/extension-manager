@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -113,6 +114,6 @@ func closedbRequest(db *sql.DB) {
 	err := db.Close()
 	if err != nil {
 		// Strange but not critical. So we just log it and go on.
-		fmt.Printf("failed to close db connection. Cause %v", err)
+		log.Printf("failed to close db connection. Cause %v", err)
 	}
 }

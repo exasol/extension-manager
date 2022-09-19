@@ -13,8 +13,14 @@ type JsExtension struct {
 	Id                  string
 	Name                string
 	Description         string
-	InstallableVersions []string
+	InstallableVersions []JsExtensionVersion
 	BucketFsUploads     []BucketFsUpload
+}
+
+type JsExtensionVersion struct {
+	Name       string
+	Latest     bool
+	Deprecated bool
 }
 
 func wrapExtension(ext *rawJsExtension, id string, vm *goja.Runtime) *JsExtension {
@@ -24,9 +30,27 @@ func wrapExtension(ext *rawJsExtension, id string, vm *goja.Runtime) *JsExtensio
 		vm:                  vm,
 		Name:                ext.Name,
 		Description:         ext.Description,
-		InstallableVersions: ext.InstallableVersions,
+		InstallableVersions: convertVersions(ext.InstallableVersions),
 		BucketFsUploads:     ext.BucketFsUploads,
 	}
+}
+
+func convertVersions(versions []rawJsExtensionVersion) []JsExtensionVersion {
+	result := make([]JsExtensionVersion, 0, len(versions))
+	for _, v := range versions {
+		result = append(result, JsExtensionVersion(v))
+
+	}
+	return result
+}
+
+func (e *JsExtension) GetParameterDefinitions(context *ExtensionContext, version string) (definitions []interface{}, errorResult error) {
+	defer func() {
+		if err := recover(); err != nil {
+			errorResult = e.convertError(fmt.Sprintf("failed to get parameter definitions for extension %q", e.Id), err)
+		}
+	}()
+	return e.extension.GetParameterDefinitions(context, version), nil
 }
 
 func (e *JsExtension) Install(context *ExtensionContext, version string) (errorResult error) {
@@ -82,7 +106,7 @@ func (e *JsExtension) DeleteInstance(context *ExtensionContext, extensionVersion
 			errorResult = e.convertError(fmt.Sprintf("failed to delete instance %q for extension %q", instanceId, e.Id), err)
 		}
 	}()
-	e.extension.DeleteInstance(context, instanceId)
+	e.extension.DeleteInstance(context, extensionVersion, instanceId)
 	return
 }
 

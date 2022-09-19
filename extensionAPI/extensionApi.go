@@ -13,7 +13,7 @@ import (
 	"github.com/dop251/goja_nodejs/require"
 )
 
-const SupportedApiVersion = "0.1.14"
+const SupportedApiVersion = "0.1.15"
 
 // GetExtensionFromFile loads an extension from a .js file.
 func GetExtensionFromFile(extensionPath string) (*JsExtension, error) {
@@ -74,16 +74,23 @@ type installedExtension struct {
 }
 
 type rawJsExtension struct {
-	Name                string                                                                                  `json:"name"`
-	Description         string                                                                                  `json:"description"`
-	BucketFsUploads     []BucketFsUpload                                                                        `json:"bucketFsUploads"`
-	InstallableVersions []string                                                                                `json:"installableVersions"`
-	Install             func(context *ExtensionContext, version string)                                         `json:"install"`
-	Uninstall           func(context *ExtensionContext, version string)                                         `json:"uninstall"`
-	FindInstallations   func(context *ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation             `json:"findInstallations"`
-	AddInstance         func(context *ExtensionContext, version string, params *ParameterValues) *JsExtInstance `json:"addInstance"`
-	FindInstances       func(context *ExtensionContext, version string) []*JsExtInstance                        `json:"findInstances"`
-	DeleteInstance      func(context *ExtensionContext, instanceId string)                                      `json:"deleteInstance"`
+	Name                    string                                                                                  `json:"name"`
+	Description             string                                                                                  `json:"description"`
+	BucketFsUploads         []BucketFsUpload                                                                        `json:"bucketFsUploads"`
+	InstallableVersions     []rawJsExtensionVersion                                                                 `json:"installableVersions"`
+	GetParameterDefinitions func(context *ExtensionContext, version string) []interface{}                           `json:"getInstanceParameters"`
+	Install                 func(context *ExtensionContext, version string)                                         `json:"install"`
+	Uninstall               func(context *ExtensionContext, version string)                                         `json:"uninstall"`
+	FindInstallations       func(context *ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation             `json:"findInstallations"`
+	AddInstance             func(context *ExtensionContext, version string, params *ParameterValues) *JsExtInstance `json:"addInstance"`
+	FindInstances           func(context *ExtensionContext, version string) []*JsExtInstance                        `json:"findInstances"`
+	DeleteInstance          func(context *ExtensionContext, version, instanceId string)                             `json:"deleteInstance"`
+}
+
+type rawJsExtensionVersion struct {
+	Name       string `json:"name"`
+	Latest     bool   `json:"latest"`
+	Deprecated bool   `json:"deprecated"`
 }
 
 type BucketFsUpload struct {
@@ -97,8 +104,6 @@ type BucketFsUpload struct {
 type JsExtInstallation struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
-	// InstanceParameters is deserialized to a structure of []interface{} and maps.
-	InstanceParameters []interface{} `json:"instanceParameters"`
 }
 
 type JsExtInstance struct {

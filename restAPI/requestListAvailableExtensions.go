@@ -8,6 +8,7 @@ import (
 
 	"github.com/Nightapes/go-rest/pkg/openapi"
 
+	"github.com/exasol/extension-manager/extensionAPI"
 	"github.com/exasol/extension-manager/extensionController"
 )
 
@@ -24,7 +25,7 @@ func ListAvailableExtensions(apiContext *ApiContext) *openapi.Get {
 					Id:                  "s3-vs",
 					Name:                "S3 Virtual Schema",
 					Description:         "...",
-					InstallableVersions: []string{"1.0.0", "1.2.0"},
+					InstallableVersions: []ExtensionVersion{{Name: "1.2.3", Deprecated: true, Latest: false}, {Name: "1.3.0", Latest: true, Deprecated: false}},
 				}},
 			}},
 		},
@@ -49,12 +50,20 @@ func handleListAvailableExtensions(apiContext *ApiContext) dbHandler {
 func convertResponse(extensions []*extensionController.Extension) ExtensionsResponse {
 	convertedExtensions := make([]ExtensionsResponseExtension, 0, len(extensions))
 	for _, extension := range extensions {
-		ext := ExtensionsResponseExtension{Id: extension.Id, Name: extension.Name, Description: extension.Description, InstallableVersions: extension.InstallableVersions}
+		ext := ExtensionsResponseExtension{Id: extension.Id, Name: extension.Name, Description: extension.Description, InstallableVersions: convertVersions(extension.InstallableVersions)}
 		convertedExtensions = append(convertedExtensions, ext)
 	}
 	return ExtensionsResponse{
 		Extensions: convertedExtensions,
 	}
+}
+
+func convertVersions(versions []extensionAPI.JsExtensionVersion) []ExtensionVersion {
+	result := make([]ExtensionVersion, 0, len(versions))
+	for _, v := range versions {
+		result = append(result, ExtensionVersion{Name: v.Name, Latest: v.Latest, Deprecated: v.Deprecated})
+	}
+	return result
 }
 
 // ExtensionsResponse contains all available extensions.
@@ -64,8 +73,14 @@ type ExtensionsResponse struct {
 
 // ExtensionsResponseExtension contains information about an available extension that can be installed.
 type ExtensionsResponseExtension struct {
-	Id                  string   `json:"id"`                  // ID of the extension. Don't store this as it may change when restarting the server.
-	Name                string   `json:"name"`                // The name of the extension to be displayed to the user.
-	Description         string   `json:"description"`         // The description of the extension to be displayed to the user.
-	InstallableVersions []string `json:"installableVersions"` // A list of versions of this extension available for installation.
+	Id                  string             `json:"id"`                  // ID of the extension. Don't store this as it may change when restarting the server.
+	Name                string             `json:"name"`                // The name of the extension to be displayed to the user.
+	Description         string             `json:"description"`         // The description of the extension to be displayed to the user.
+	InstallableVersions []ExtensionVersion `json:"installableVersions"` // A list of versions of this extension available for installation.
+}
+
+type ExtensionVersion struct {
+	Name       string `json:"name"`
+	Latest     bool   `json:"latest"`
+	Deprecated bool   `json:"deprecated"`
 }

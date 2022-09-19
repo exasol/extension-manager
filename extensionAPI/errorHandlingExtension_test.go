@@ -20,7 +20,9 @@ func TestJsExtensionSuite(t *testing.T) {
 }
 
 func (suite *ErrorHandlingExtensionSuite) SetupSuite() {
-	suite.rawExtension = &rawJsExtension{Name: "name", Description: "desc", InstallableVersions: []string{"v1", "v2"}, BucketFsUploads: []BucketFsUpload{{Name: "uploadName"}}}
+	suite.rawExtension = &rawJsExtension{Name: "name", Description: "desc",
+		InstallableVersions: []rawJsExtensionVersion{{Name: "v1", Deprecated: true, Latest: false}, {Name: "v2", Deprecated: false, Latest: true}},
+		BucketFsUploads:     []BucketFsUpload{{Name: "uploadName"}}}
 	suite.extension = wrapExtension(suite.rawExtension, "id", newJavaScriptVm())
 }
 
@@ -29,7 +31,7 @@ func (suite *ErrorHandlingExtensionSuite) TestProperties() {
 		Id:                  "id",
 		Name:                "name",
 		Description:         "desc",
-		InstallableVersions: []string{"v1", "v2"},
+		InstallableVersions: []JsExtensionVersion{{Name: "v1", Deprecated: true, Latest: false}, {Name: "v2", Deprecated: false, Latest: true}},
 		BucketFsUploads:     []BucketFsUpload{{Name: "uploadName"}},
 		extension:           suite.rawExtension,
 		vm:                  suite.extension.vm},
@@ -44,6 +46,8 @@ func createMockContext() *ExtensionContext {
 	var client SimpleSQLClient = &sqlClientMock{}
 	return CreateContextWithClient("extension_schema", client)
 }
+
+// FindInstallations
 
 func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsSuccessful() {
 	expectedInstallations := []*JsExtInstallation{{Name: "instName"}}
@@ -64,6 +68,29 @@ func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsFailure() {
 	suite.Nil(installations)
 }
 
+// GetParameterDefinitions
+
+func (suite *ErrorHandlingExtensionSuite) GetParameterDefinitionsSuccessful() {
+	expectedDefinitions := []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}
+	suite.rawExtension.GetParameterDefinitions = func(context *ExtensionContext, version string) []interface{} {
+		return expectedDefinitions
+	}
+	definitions, err := suite.extension.GetParameterDefinitions(createMockContext(), "ext-version")
+	suite.NoError(err)
+	suite.Equal(expectedDefinitions, definitions)
+}
+
+func (suite *ErrorHandlingExtensionSuite) GetParameterDefinitionsFailure() {
+	suite.rawExtension.GetParameterDefinitions = func(context *ExtensionContext, version string) []interface{} {
+		panic("mock error")
+	}
+	installations, err := suite.extension.GetParameterDefinitions(createMockContext(), "ext-version")
+	suite.EqualError(err, "failed to get parameter definitions for extension \"id\": mock error")
+	suite.Nil(installations)
+}
+
+// Install
+
 func (suite *ErrorHandlingExtensionSuite) TestInstallSuccessful() {
 	suite.rawExtension.Install = func(context *ExtensionContext, version string) {
 	}
@@ -79,6 +106,8 @@ func (suite *ErrorHandlingExtensionSuite) TestInstallFailure() {
 	suite.EqualError(err, "failed to install extension \"id\": mock error")
 }
 
+// Uninstall
+
 func (suite *ErrorHandlingExtensionSuite) TestUninstallSuccessful() {
 	suite.rawExtension.Uninstall = func(context *ExtensionContext, version string) {
 	}
@@ -93,6 +122,8 @@ func (suite *ErrorHandlingExtensionSuite) TestUninstallFailure() {
 	err := suite.extension.Uninstall(createMockContext(), "version")
 	suite.EqualError(err, "failed to uninstall extension \"id\": mock error")
 }
+
+// AddInstance
 
 func (suite *ErrorHandlingExtensionSuite) TestAddInstanceSuccessful() {
 	suite.rawExtension.AddInstance = func(context *ExtensionContext, version string, params *ParameterValues) *JsExtInstance {
@@ -111,6 +142,8 @@ func (suite *ErrorHandlingExtensionSuite) TestAddInstanceFails() {
 	suite.EqualError(err, "failed to add instance for extension \"id\": mock error")
 	suite.Nil(instance)
 }
+
+// convertError
 
 func (suite *ErrorHandlingExtensionSuite) TestConvertError_nonErrorObject() {
 	err := suite.extension.convertError("msg", "dummyError")

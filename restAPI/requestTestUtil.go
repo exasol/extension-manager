@@ -43,7 +43,7 @@ func (t *baseRestAPITest) makeRequestWithAuthHeader(method string, path string, 
 	if err != nil {
 		t.suite.FailNowf("Request %s %s failed: %v", method, url, err)
 	}
-	t.suite.Equal(expectedStatusCode, response.StatusCode)
+	t.suite.Equal(expectedStatusCode, response.StatusCode, "Got response status %q", response.Status)
 	defer func() { t.suite.NoError(response.Body.Close()) }()
 	bytes, err := io.ReadAll(response.Body)
 	if err != nil {

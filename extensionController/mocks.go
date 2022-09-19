@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/exasol/extension-manager/extensionAPI"
+	"github.com/exasol/extension-manager/parameterValidator"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -77,6 +78,14 @@ func (mock *mockControllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extensi
 	args := mock.Called(bfsFiles)
 	if ext, ok := args.Get(0).([]*Extension); ok {
 		return ext, args.Error(1)
+	}
+	return nil, args.Error(1)
+}
+
+func (mock *mockControllerImpl) GetParameterDefinitions(tx *sql.Tx, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
+	args := mock.Called(extensionId, extensionVersion)
+	if result, ok := args.Get(0).([]parameterValidator.ParameterDefinition); ok {
+		return result, args.Error(1)
 	}
 	return nil, args.Error(1)
 }

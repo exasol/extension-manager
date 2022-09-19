@@ -24,18 +24,20 @@ func CreateTestExtensionBuilder(t *testing.T) *TestExtensionBuilder {
 	builder.addInstanceFunc = "return undefined"
 	builder.findInstancesFunc = "return []"
 	builder.deleteInstanceFunc = "context.sqlClient.execute(`drop instance ${instanceId}`)"
+	builder.getInstanceParameterDefinitionsFunc = "return []"
 	return &builder
 }
 
 type TestExtensionBuilder struct {
-	testing               *testing.T
-	bucketFsUploads       []BucketFsUploadParams
-	findInstallationsFunc string
-	installFunc           string
-	uninstallFunc         string
-	addInstanceFunc       string
-	findInstancesFunc     string
-	deleteInstanceFunc    string
+	testing                             *testing.T
+	bucketFsUploads                     []BucketFsUploadParams
+	findInstallationsFunc               string
+	installFunc                         string
+	uninstallFunc                       string
+	addInstanceFunc                     string
+	findInstancesFunc                   string
+	deleteInstanceFunc                  string
+	getInstanceParameterDefinitionsFunc string
 }
 
 type BucketFsUploadParams struct {
@@ -77,16 +79,17 @@ func (b *TestExtensionBuilder) WithDeleteInstanceFunc(tsFunctionCode string) *Te
 	return b
 }
 
-// MockFindInstallationsFunction creates a JS findInstallations function that returns one installation with given JSON array of parameter definitions.
-func MockFindInstallationsFunction(extensionName string, version string, parametersJSON string) string {
-	template := `return [{
-                name: "$NAME$",
-                version: "$VERSION$",
-                instanceParameters: $PARAMS$
-            }]`
+func (b *TestExtensionBuilder) WithGetInstanceParameterDefinitionFunc(tsFunctionCode string) *TestExtensionBuilder {
+	b.getInstanceParameterDefinitionsFunc = tsFunctionCode
+	return b
+}
+
+// MockFindInstallationsFunction creates a JS findInstallations function with extension name and version
+func MockFindInstallationsFunction(extensionName string, version string) string {
+	template := `return [{name: "$NAME$", version: "$VERSION$"}]`
 	filledTemplate := strings.Replace(template, "$NAME$", extensionName, 1)
 	filledTemplate = strings.Replace(filledTemplate, "$VERSION$", version, 1)
-	return strings.Replace(filledTemplate, "$PARAMS$", parametersJSON, 1)
+	return filledTemplate
 }
 
 func (b *TestExtensionBuilder) WithBucketFsUpload(upload BucketFsUploadParams) *TestExtensionBuilder {
@@ -115,6 +118,7 @@ func (b TestExtensionBuilder) Build() *BuiltExtension {
 	extensionTs = strings.Replace(extensionTs, "$ADD_INSTANCE$", b.addInstanceFunc, 1)
 	extensionTs = strings.Replace(extensionTs, "$FIND_INSTANCES$", b.findInstancesFunc, 1)
 	extensionTs = strings.Replace(extensionTs, "$DELETE_INSTANCE$", b.deleteInstanceFunc, 1)
+	extensionTs = strings.Replace(extensionTs, "$GET_INSTANCE_PARAMTER_DEFINITIONS$", b.getInstanceParameterDefinitionsFunc, 1)
 	workDir := path.Join(os.TempDir(), "extension-manager-test-extension-build-dir")
 	if _, err := os.Stat(workDir); errors.Is(err, os.ErrNotExist) {
 		err := os.Mkdir(workDir, os.ModePerm)

@@ -29,14 +29,14 @@ func (suite *ParameterValidatorSuite) TestValidateParameter() {
 		definition map[string]interface{}
 		expected   ValidationResult
 	}{
-		{definition: map[string]interface{}{"type": "string", "id": "my-value", "required": true, "regex": ".*"},
+		{definition: map[string]interface{}{"name": "name", "type": "string", "id": "my-value", "required": true, "regex": ".*"},
 			expected: ValidationResult{Success: true, Message: ""}},
-		{definition: map[string]interface{}{"type": "string", "id": "my-value", "required": true, "regex": "a+"},
+		{definition: map[string]interface{}{"name": "name", "type": "string", "id": "my-value", "required": true, "regex": "a+"},
 			expected: ValidationResult{Success: false, Message: "The value has an invalid format."}},
 	}
 
 	for _, testCase := range cases {
-		result, err := suite.validator.ValidateParameter(testCase.definition, "test")
+		result, err := suite.validator.ValidateParameter(suite.convertParam(testCase.definition), "test")
 		suite.NoError(err)
 		suite.Equal(testCase.expected, *result)
 	}
@@ -89,7 +89,7 @@ func (suite *ParameterValidatorSuite) TestValidateParameters() {
 
 	for _, t := range tests {
 		suite.Run(t.name, func() {
-			result, err := suite.validator.ValidateParameters(t.definitions, extensionAPI.ParameterValues{Values: t.params})
+			result, err := suite.validator.ValidateParameters(suite.convert(t.definitions), extensionAPI.ParameterValues{Values: t.params})
 			suite.NoError(err)
 			suite.Len(result, len(t.expected))
 			suite.Equal(t.expected, result)
@@ -98,7 +98,69 @@ func (suite *ParameterValidatorSuite) TestValidateParameters() {
 }
 
 func (suite *ParameterValidatorSuite) TestInvalidDefinitionIgnored() {
-	result, err := suite.validator.ValidateParameters([]interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}}, extensionAPI.ParameterValues{})
+	rawDefinition := []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}}
+	result, err := suite.validator.ValidateParameters(suite.convert(rawDefinition), extensionAPI.ParameterValues{})
 	suite.NoError(err)
 	suite.Empty(result)
+}
+
+func (suite *ParameterValidatorSuite) TestConvertDefinitionsSucceeds() {
+	var tests = []struct {
+		name           string
+		rawDefinitions []interface{}
+		expected       []ParameterDefinition
+	}{
+		{"empty input", []interface{}{}, []ParameterDefinition{}},
+		{"single entry", []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}}, []ParameterDefinition{{Id: "param1", Name: "My param",
+			RawDefinition: map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}}}},
+		{"missing type", []interface{}{map[string]interface{}{"id": "param1", "name": "My param"}}, []ParameterDefinition{{Id: "param1", Name: "My param",
+			RawDefinition: map[string]interface{}{"id": "param1", "name": "My param"}}}},
+		{"two entries", []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}, map[string]interface{}{"id": "param2", "name": "My param2", "type": "string"}},
+			[]ParameterDefinition{{Id: "param1", Name: "My param", RawDefinition: map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}},
+				{Id: "param2", Name: "My param2", RawDefinition: map[string]interface{}{"id": "param2", "name": "My param2", "type": "string"}}}},
+	}
+	for _, test := range tests {
+		suite.T().Run(test.name, func(t *testing.T) {
+			converted, err := ConvertDefinitions(test.rawDefinitions)
+			suite.NoError(err)
+			suite.Equal(test.expected, converted)
+		})
+	}
+}
+
+func (suite *ParameterValidatorSuite) TestConvertDefinitionsFails() {
+	var tests = []struct {
+		name           string
+		rawDefinitions []interface{}
+		expectedError  string
+	}{
+		{"empty map", []interface{}{map[string]interface{}{}}, "entry \"id\" missing in parameter definition map[]"},
+		{"missing id", []interface{}{map[string]interface{}{"name": "My param", "type": "invalidType"}}, "entry \"id\" missing in parameter definition map[name:My param type:invalidType]"},
+		{"missing name", []interface{}{map[string]interface{}{"id": "param2", "type": "invalidType"}}, "entry \"name\" missing in parameter definition map[id:param2 type:invalidType]"},
+	}
+	for _, test := range tests {
+		suite.T().Run(test.name, func(t *testing.T) {
+			converted, err := ConvertDefinitions(test.rawDefinitions)
+			suite.EqualError(err, test.expectedError)
+			suite.Nil(converted)
+		})
+	}
+}
+
+func (suite *ParameterValidatorSuite) convertParam(definition map[string]interface{}) ParameterDefinition {
+	suite.T().Helper()
+	parsedDefinition, err := convertDefinition(definition)
+	if err != nil {
+		suite.T().Fatalf("failed to convert definition %v: %v", definition, err)
+	}
+	return parsedDefinition
+}
+
+func (suite *ParameterValidatorSuite) convert(definitions []interface{}) []ParameterDefinition {
+	suite.T().Helper()
+	parsedDefinitions, err := ConvertDefinitions(definitions)
+	if err != nil {
+		suite.T().Fatalf("failed to convert definitions %v: %v", definitions, err)
+	}
+	return parsedDefinitions
 }

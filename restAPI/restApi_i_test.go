@@ -55,6 +55,10 @@ func (suite *RestAPIIntegrationTestSuite) listInstalledExtensions() string {
 	return LIST_INSTALLED_EXTENSIONS + "?" + suite.getValidDbArgs()
 }
 
+func (suite *RestAPIIntegrationTestSuite) getExtensionDetails(extensionId, extensionVersion string) string {
+	return fmt.Sprintf("%s/extensions/%s/%s?%s", BASE_URL, extensionId, extensionVersion, suite.getValidDbArgs())
+}
+
 func (suite *RestAPIIntegrationTestSuite) listInstances(extensionId, extensionVersion string) string {
 	return fmt.Sprintf("%s/installations/%s/%s/instances?%s", BASE_URL, extensionId, extensionVersion, suite.getValidDbArgs())
 }
@@ -72,6 +76,8 @@ func (suite *RestAPIIntegrationTestSuite) TestGetAllExtensionsSuccessfully() {
 	suite.assertJSON.Assertf(response, `{"extensions":[]}`)
 }
 
+// List installed extensions
+
 func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsSuccessfully() {
 	response := suite.makeGetRequest(suite.listInstalledExtensions())
 	suite.assertJSON.Assertf(response, `{"installations":[]}`)
@@ -86,6 +92,25 @@ func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsFails_InvalidBeare
 	response := suite.restApi.makeRequestWithAuthHeader("GET", suite.listInstalledExtensions(), createBearerAuthHeader("invalid-token"), "", 401)
 	suite.Regexp(`{"code":401,"message":"invalid database credentials".*`, response)
 }
+
+// Get extension details
+
+func (suite *RestAPIIntegrationTestSuite) TestGetExtensionDetailsFailsForUnknownExtension() {
+	response := suite.makeRequest("GET", suite.getExtensionDetails("unknown-extension", "version"), "", 500)
+	suite.Regexp(`{"code":500,"message":"Internal server error".*`, response)
+}
+
+func (suite *RestAPIIntegrationTestSuite) TestGetExtensionDetailsSucceeds() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param:"+version, type: "string"}]`).
+		Build().WriteToFile(path.Join(suite.tempExtensionRepo, "ext-id"))
+	response := suite.makeRequest("GET", suite.getExtensionDetails("ext-id", "ext-version"), "", 200)
+	suite.assertJSON.Assertf(response, `{"id": "ext-id", "version":"ext-version", "parameterDefinitions": [
+		{"id":"param1","name":"My param:ext-version","definition":{"id": "param1", "name": "My param:ext-version", "type": "string"}}
+	]}`)
+}
+
+// List instances
 
 func (suite *RestAPIIntegrationTestSuite) TestListInstancesSuccessfully() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
@@ -102,6 +127,8 @@ func (suite *RestAPIIntegrationTestSuite) TestListInstancesQueryFails() {
 	response := suite.makeRequest("GET", suite.listInstances("ext-id", "ext-version"), "", 500)
 	suite.Contains(response, `{"code":500,"message":"Internal server error"`)
 }
+
+// Delete instance
 
 func (suite *RestAPIIntegrationTestSuite) TestDeleteInstanceSuccessfully() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
@@ -159,6 +186,7 @@ func (suite *RestAPIIntegrationTestSuite) makeGetRequest(path string) string {
 }
 
 func (suite *RestAPIIntegrationTestSuite) makeRequest(method string, path string, body string, expectedStatusCode int) string {
+	suite.T().Helper()
 	info := suite.exasol.ConnectionInfo
 	return suite.restApi.makeRequestWithAuthHeader(method, path, createBasicAuthHeader(info.User, info.Password), body, expectedStatusCode)
 }
