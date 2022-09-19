@@ -137,6 +137,8 @@ func (suite *ControllerUTestSuite) TestGetParameterDefinitionsFails() {
 				Build().
 				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 			suite.initDbMock()
+			suite.dbMock.ExpectBegin()
+			suite.dbMock.ExpectRollback()
 			extensions, err := suite.controller.GetParameterDefinitions(mockContext(), suite.db, EXTENSION_ID, "ver")
 			suite.assertError(t, err)
 			suite.Nil(extensions)
@@ -146,9 +148,12 @@ func (suite *ControllerUTestSuite) TestGetParameterDefinitionsFails() {
 
 func (suite *ControllerUTestSuite) TestGetParameterDefinitionsSucceeds() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string"}]`).
+		WithGetInstanceParameterDefinitionFunc(`context.sqlClient.query('get param definitions'); return [{id: "param1", name: "My param", type: "string"}]`).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectQuery("param definitions").WillReturnRows(sqlmock.NewRows([]string{"col1"}))
+	suite.dbMock.ExpectRollback()
 	definitions, err := suite.controller.GetParameterDefinitions(mockContext(), suite.db, EXTENSION_ID, "ext-version")
 	suite.NoError(err)
 	suite.Equal([]parameterValidator.ParameterDefinition{{Id: "param1", Name: "My param",
@@ -156,6 +161,7 @@ func (suite *ControllerUTestSuite) TestGetParameterDefinitionsSucceeds() {
 }
 
 func (suite *ControllerUTestSuite) assertError(t errorTest, actualError error) {
+	suite.T().Helper()
 	expectedErrorMessage := "mock error from js"
 	if t.expectedMessage != "" {
 		expectedErrorMessage = t.expectedMessage
@@ -378,6 +384,7 @@ func mockContext() context.Context {
 }
 
 func (suite *ControllerUTestSuite) assertApiError(err error, expectedStatus int, expectedMessage string) {
+	suite.T().Helper()
 	if apiError, ok := err.(*apiErrors.APIError); ok {
 		suite.ErrorContains(apiError, expectedMessage)
 		suite.Contains(apiError.Message, expectedMessage)
@@ -388,6 +395,7 @@ func (suite *ControllerUTestSuite) assertApiError(err error, expectedStatus int,
 }
 
 func (suite *ControllerUTestSuite) assertNonApiError(err error, expectedMessage string) {
+	suite.T().Helper()
 	if _, ok := err.(*apiErrors.APIError); ok {
 		suite.Fail("wrong error type", "Expected non-APIError but got %T: %v", err, err)
 	} else {

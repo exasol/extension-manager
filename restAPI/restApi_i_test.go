@@ -56,7 +56,7 @@ func (suite *RestAPIIntegrationTestSuite) listInstalledExtensions() string {
 }
 
 func (suite *RestAPIIntegrationTestSuite) getExtensionDetails(extensionId, extensionVersion string) string {
-	return fmt.Sprintf("%s/extensions/%s/%s", BASE_URL, extensionId, extensionVersion)
+	return fmt.Sprintf("%s/extensions/%s/%s?%s", BASE_URL, extensionId, extensionVersion, suite.getValidDbArgs())
 }
 
 func (suite *RestAPIIntegrationTestSuite) listInstances(extensionId, extensionVersion string) string {
@@ -94,8 +94,9 @@ func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsFails_InvalidBeare
 }
 
 // Get extension details
+
 func (suite *RestAPIIntegrationTestSuite) TestGetExtensionDetailsFailsForUnknownExtension() {
-	response := suite.restApi.makeRequestWithAuthHeader("GET", suite.getExtensionDetails("unknown-extension", "version"), createBasicAuthHeader("wrong", "user"), "", 500)
+	response := suite.makeRequest("GET", suite.getExtensionDetails("unknown-extension", "version"), "", 500)
 	suite.Regexp(`{"code":500,"message":"Internal server error".*`, response)
 }
 
@@ -103,7 +104,7 @@ func (suite *RestAPIIntegrationTestSuite) TestGetExtensionDetailsSucceeds() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string"}]`).
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, "ext-id"))
-	response := suite.restApi.makeRequestWithAuthHeader("GET", suite.getExtensionDetails("ext-id", "ext-version"), createBasicAuthHeader("ignored-user", "ignored-password"), "", 200)
+	response := suite.makeRequest("GET", suite.getExtensionDetails("ext-id", "ext-version"), "", 200)
 	suite.assertJSON.Assertf(response, `{"id": "ext-id", "version":"ext-version", "parameterDefinitions": [
 		{"id":"param1","name":"My param","definition":{"id": "param1", "name": "My param", "type": "string"}}
 	]}`)
@@ -185,6 +186,7 @@ func (suite *RestAPIIntegrationTestSuite) makeGetRequest(path string) string {
 }
 
 func (suite *RestAPIIntegrationTestSuite) makeRequest(method string, path string, body string, expectedStatusCode int) string {
+	suite.T().Helper()
 	info := suite.exasol.ConnectionInfo
 	return suite.restApi.makeRequestWithAuthHeader(method, path, createBasicAuthHeader(info.User, info.Password), body, expectedStatusCode)
 }

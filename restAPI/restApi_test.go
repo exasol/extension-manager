@@ -30,6 +30,7 @@ const (
 	DELETE_INSTANCE_URL       = BASE_URL + "/installations/ext-id/ext-version/instances/inst-id"
 	LIST_INSTANCES_URL        = BASE_URL + "/installations/ext-id/ext-version/instances"
 	CREATE_INSTANCE_URL       = BASE_URL + "/installations/ext-id/ext-version/instances"
+	VALID_DB_ARGS             = "?dbHost=host&dbPort=8563"
 )
 
 func TestRestApiSuite(t *testing.T) {
@@ -65,7 +66,7 @@ func (suite *RestAPISuite) TestGetInstallationsSuccessfully() {
 	suite.controller.On("GetInstalledExtensions", mock.Anything, mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0"}}, nil)
 	for _, test := range authSuccessTests {
 		suite.Run(test.authHeader, func() {
-			responseString := suite.restApi.makeRequestWithAuthHeader("GET", LIST_INSTALLED_EXTENSIONS+"?dbHost=host&dbPort=8563&", test.authHeader, "", 200)
+			responseString := suite.restApi.makeRequestWithAuthHeader("GET", LIST_INSTALLED_EXTENSIONS+VALID_DB_ARGS, test.authHeader, "", 200)
 			suite.assertJSON.Assertf(responseString, `{"installations":[{"name":"test","version":"0.1.0"}]}`)
 		})
 	}
@@ -73,7 +74,7 @@ func (suite *RestAPISuite) TestGetInstallationsSuccessfully() {
 
 func (suite *RestAPISuite) TestGetInstallationsFailed() {
 	suite.controller.On("GetInstalledExtensions", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("mock error"))
-	responseString := suite.makeRequest("GET", LIST_INSTALLED_EXTENSIONS+"?dbHost=host&dbPort=8563", "", 500)
+	responseString := suite.makeRequest("GET", LIST_INSTALLED_EXTENSIONS+VALID_DB_ARGS, "", 500)
 	suite.Regexp(`{"code":500,"message":"Internal server error",`, responseString)
 }
 
@@ -85,7 +86,7 @@ func (suite *RestAPISuite) TestGetAllExtensionsSuccessfully() {
 		InstallableVersions: []extensionAPI.JsExtensionVersion{{Name: "0.1.0", Latest: true, Deprecated: false}}}}, nil)
 	for _, test := range authSuccessTests {
 		suite.Run(test.authHeader, func() {
-			responseString := suite.restApi.makeRequestWithAuthHeader("GET", LIST_AVAILABLE_EXTENSIONS+"?dbHost=host&dbPort=8563&", test.authHeader, "", 200)
+			responseString := suite.restApi.makeRequestWithAuthHeader("GET", LIST_AVAILABLE_EXTENSIONS+VALID_DB_ARGS, test.authHeader, "", 200)
 			suite.assertJSON.Assertf(responseString, `{"extensions":[{"id": "ext-id", "name":"my-extension","description":"a cool extension","installableVersions":[{"name":"0.1.0", "latest":true, "deprecated":false}]}]}`)
 		})
 	}
@@ -93,18 +94,18 @@ func (suite *RestAPISuite) TestGetAllExtensionsSuccessfully() {
 
 func (suite *RestAPISuite) TestGetAllExtensionsFails() {
 	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("mock error"))
-	responseString := suite.makeRequest("GET", LIST_AVAILABLE_EXTENSIONS+"?dbHost=host&dbPort=8563", "", 500)
+	responseString := suite.makeRequest("GET", LIST_AVAILABLE_EXTENSIONS+VALID_DB_ARGS, "", 500)
 	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
 }
 
 // GetExtensionDetails
 
 func (suite *RestAPISuite) TestGetExtensionDetailsSuccessfully() {
-	suite.controller.On("GetParameterDefinitions", mock.Anything, "ext-id", "ext-version").Return([]parameterValidator.ParameterDefinition{{Id: "param1", Name: "My param",
+	suite.controller.On("GetParameterDefinitions", mock.Anything, mock.Anything, "ext-id", "ext-version").Return([]parameterValidator.ParameterDefinition{{Id: "param1", Name: "My param",
 		RawDefinition: map[string]interface{}{"id": "raw-param1", "name": "raw-My param", "type": "invalidType"}}}, nil)
 	for _, test := range authSuccessTests {
 		suite.Run(test.authHeader, func() {
-			responseString := suite.restApi.makeRequestWithAuthHeader("GET", GET_EXTENSION_DETAILS, test.authHeader, "", 200)
+			responseString := suite.restApi.makeRequestWithAuthHeader("GET", GET_EXTENSION_DETAILS+VALID_DB_ARGS, test.authHeader, "", 200)
 			suite.assertJSON.Assertf(responseString, `{"id": "ext-id", "version":"ext-version", "parameterDefinitions": [
 				{"id":"param1","name":"My param","definition":{"id": "raw-param1", "name": "raw-My param", "type": "invalidType"}}
 			]}`)
@@ -113,8 +114,8 @@ func (suite *RestAPISuite) TestGetExtensionDetailsSuccessfully() {
 }
 
 func (suite *RestAPISuite) TestGetExtensionDetailsFails() {
-	suite.controller.On("GetParameterDefinitions", mock.Anything, "ext-id", "ext-version").Return(nil, fmt.Errorf("mock error"))
-	responseString := suite.makeRequest("GET", GET_EXTENSION_DETAILS, "", 500)
+	suite.controller.On("GetParameterDefinitions", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(nil, fmt.Errorf("mock error"))
+	responseString := suite.makeRequest("GET", GET_EXTENSION_DETAILS+VALID_DB_ARGS, "", 500)
 	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
 }
 
@@ -124,7 +125,7 @@ func (suite *RestAPISuite) TestInstallExtensionsSuccessfully() {
 	suite.controller.On("InstallExtension", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(nil)
 	for _, test := range authSuccessTests {
 		suite.Run(test.authHeader, func() {
-			responseString := suite.restApi.makeRequestWithAuthHeader("PUT", INSTALL_EXT_URL+"?dbHost=host&dbPort=8563&", test.authHeader, `{}`, 204)
+			responseString := suite.restApi.makeRequestWithAuthHeader("PUT", INSTALL_EXT_URL+VALID_DB_ARGS, test.authHeader, `{}`, 204)
 			suite.Equal("", responseString)
 		})
 	}
@@ -132,7 +133,7 @@ func (suite *RestAPISuite) TestInstallExtensionsSuccessfully() {
 
 func (suite *RestAPISuite) TestInstallExtensionsFailed() {
 	suite.controller.On("InstallExtension", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(fmt.Errorf("mock error"))
-	responseString := suite.makeRequest("PUT", INSTALL_EXT_URL+"?dbHost=host&dbPort=8563", `{}`, 500)
+	responseString := suite.makeRequest("PUT", INSTALL_EXT_URL+VALID_DB_ARGS, `{}`, 500)
 	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
 }
 
@@ -142,7 +143,7 @@ func (suite *RestAPISuite) TestUninstallExtensionsSuccessfully() {
 	suite.controller.On("UninstallExtension", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(nil)
 	for _, test := range authSuccessTests {
 		suite.Run(test.authHeader, func() {
-			responseString := suite.restApi.makeRequestWithAuthHeader("DELETE", UNINSTALL_EXT_URL+"?dbHost=host&dbPort=8563&", test.authHeader, "", 204)
+			responseString := suite.restApi.makeRequestWithAuthHeader("DELETE", UNINSTALL_EXT_URL+VALID_DB_ARGS, test.authHeader, "", 204)
 			suite.Equal("", responseString)
 		})
 	}
@@ -161,7 +162,7 @@ func (suite *RestAPISuite) TestCreateInstanceSuccessfully() {
 		Return(&extensionAPI.JsExtInstance{Id: "instId", Name: "instName"}, nil)
 	for _, test := range authSuccessTests {
 		suite.Run(test.authHeader, func() {
-			responseString := suite.restApi.makeRequestWithAuthHeader("POST", CREATE_INSTANCE_URL+"?dbHost=host&dbPort=8563&", test.authHeader,
+			responseString := suite.restApi.makeRequestWithAuthHeader("POST", CREATE_INSTANCE_URL+VALID_DB_ARGS, test.authHeader,
 				`{"parameterValues": [{"name":"p1", "value":"v1"}]}`, 200)
 			suite.Equal(`{"instanceId":"instId","instanceName":"instName"}`+"\n", responseString)
 		})
@@ -170,14 +171,14 @@ func (suite *RestAPISuite) TestCreateInstanceSuccessfully() {
 
 func (suite *RestAPISuite) TestCreateInstanceFailed_invalidPayload() {
 	suite.controller.On("CreateInstance", mock.Anything, mock.Anything, "ext-id", "ext-version", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return(&extensionAPI.JsExtInstance{Id: "instId", Name: "instName"}, nil)
-	responseString := suite.makeRequest("POST", CREATE_INSTANCE_URL+"?dbHost=host&dbPort=8563",
+	responseString := suite.makeRequest("POST", CREATE_INSTANCE_URL+VALID_DB_ARGS,
 		`invalid payload`, 400)
 	suite.Regexp("{\"code\":400,\"message\":\"Request body contains badly-formed JSON \\(at position 1\\)\".*", responseString)
 }
 
 func (suite *RestAPISuite) TestCreateInstanceFailed() {
 	suite.controller.On("CreateInstance", mock.Anything, mock.Anything, "ext-id", "ext-version", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return(nil, fmt.Errorf("mock error"))
-	responseString := suite.makeRequest("POST", CREATE_INSTANCE_URL+"?dbHost=host&dbPort=8563",
+	responseString := suite.makeRequest("POST", CREATE_INSTANCE_URL+VALID_DB_ARGS,
 		`{"parameterValues": [{"name":"p1", "value":"v1"}]}`, 500)
 	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
 }
@@ -188,7 +189,7 @@ func (suite *RestAPISuite) TestListInstancesSuccessfully() {
 	suite.controller.On("FindInstances", mock.Anything, mock.Anything, "ext-id", "ext-version").Return([]*extensionAPI.JsExtInstance{{Id: "instId", Name: "instName"}}, nil)
 	for _, test := range authSuccessTests {
 		suite.Run(test.authHeader, func() {
-			responseString := suite.restApi.makeRequestWithAuthHeader("GET", LIST_INSTANCES_URL+"?dbHost=host&dbPort=8563&", test.authHeader, "", 200)
+			responseString := suite.restApi.makeRequestWithAuthHeader("GET", LIST_INSTANCES_URL+VALID_DB_ARGS, test.authHeader, "", 200)
 			suite.Equal(`{"instances":[{"id":"instId","name":"instName"}]}`+"\n", responseString)
 		})
 	}
@@ -196,13 +197,13 @@ func (suite *RestAPISuite) TestListInstancesSuccessfully() {
 
 func (suite *RestAPISuite) TestListInstancesFailed_genericError() {
 	suite.controller.On("FindInstances", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(nil, fmt.Errorf("mock"))
-	responseString := suite.restApi.makeRequestWithAuthHeader("GET", LIST_INSTANCES_URL+"?dbHost=host&dbPort=8563&", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "", 500)
+	responseString := suite.restApi.makeRequestWithAuthHeader("GET", LIST_INSTANCES_URL+VALID_DB_ARGS, "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "", 500)
 	suite.Contains(responseString, "{\"code\":500,\"message\":\"Internal server error\"")
 }
 
 func (suite *RestAPISuite) TestListInstancesFailed_apiError() {
 	suite.controller.On("FindInstances", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(nil, apiErrors.NewAPIError(432, "mock"))
-	responseString := suite.restApi.makeRequestWithAuthHeader("GET", LIST_INSTANCES_URL+"?dbHost=host&dbPort=8563&", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "", 432)
+	responseString := suite.restApi.makeRequestWithAuthHeader("GET", LIST_INSTANCES_URL+VALID_DB_ARGS, "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "", 432)
 	suite.Contains(responseString, "{\"code\":432,\"message\":\"mock\",")
 }
 
@@ -212,7 +213,7 @@ func (suite *RestAPISuite) TestDeleteInstanceSuccessfully() {
 	suite.controller.On("DeleteInstance", mock.Anything, mock.Anything, "ext-id", "ext-version", "inst-id").Return(nil)
 	for _, test := range authSuccessTests {
 		suite.Run(test.authHeader, func() {
-			responseString := suite.restApi.makeRequestWithAuthHeader("DELETE", DELETE_INSTANCE_URL+"?dbHost=host&dbPort=8563&", test.authHeader, "", 204)
+			responseString := suite.restApi.makeRequestWithAuthHeader("DELETE", DELETE_INSTANCE_URL+VALID_DB_ARGS, test.authHeader, "", 204)
 			suite.Equal("", responseString)
 		})
 	}
@@ -220,13 +221,13 @@ func (suite *RestAPISuite) TestDeleteInstanceSuccessfully() {
 
 func (suite *RestAPISuite) TestDeleteInstanceFailed_genericError() {
 	suite.controller.On("DeleteInstance", mock.Anything, mock.Anything, "ext-id", "ext-version", "inst-id").Return(fmt.Errorf("mock"))
-	responseString := suite.restApi.makeRequestWithAuthHeader("DELETE", DELETE_INSTANCE_URL+"?dbHost=host&dbPort=8563&", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "", 500)
+	responseString := suite.restApi.makeRequestWithAuthHeader("DELETE", DELETE_INSTANCE_URL+VALID_DB_ARGS, "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "", 500)
 	suite.Contains(responseString, "{\"code\":500,\"message\":\"Internal server error\"")
 }
 
 func (suite *RestAPISuite) TestDeleteInstanceFailed_apiError() {
 	suite.controller.On("DeleteInstance", mock.Anything, mock.Anything, "ext-id", "ext-version", "inst-id").Return(apiErrors.NewAPIError(432, "mock"))
-	responseString := suite.restApi.makeRequestWithAuthHeader("DELETE", DELETE_INSTANCE_URL+"?dbHost=host&dbPort=8563&", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "", 432)
+	responseString := suite.restApi.makeRequestWithAuthHeader("DELETE", DELETE_INSTANCE_URL+VALID_DB_ARGS, "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "", 432)
 	suite.Contains(responseString, "{\"code\":432,\"message\":\"mock\",")
 }
 
