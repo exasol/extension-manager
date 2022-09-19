@@ -148,7 +148,7 @@ func (suite *ControllerUTestSuite) TestGetParameterDefinitionsFails() {
 
 func (suite *ControllerUTestSuite) TestGetParameterDefinitionsSucceeds() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithGetInstanceParameterDefinitionFunc(`context.sqlClient.query('get param definitions'); return [{id: "param1", name: "My param", type: "string"}]`).
+		WithGetInstanceParameterDefinitionFunc(`context.sqlClient.query('get param definitions'); return [{id: "param1", name: "My param:"+version, type: "string"}]`).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.dbMock.ExpectBegin()
@@ -156,8 +156,8 @@ func (suite *ControllerUTestSuite) TestGetParameterDefinitionsSucceeds() {
 	suite.dbMock.ExpectRollback()
 	definitions, err := suite.controller.GetParameterDefinitions(mockContext(), suite.db, EXTENSION_ID, "ext-version")
 	suite.NoError(err)
-	suite.Equal([]parameterValidator.ParameterDefinition{{Id: "param1", Name: "My param",
-		RawDefinition: map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}, definitions)
+	suite.Equal([]parameterValidator.ParameterDefinition{{Id: "param1", Name: "My param:ext-version",
+		RawDefinition: map[string]interface{}{"id": "param1", "name": "My param:ext-version", "type": "string"}}}, definitions)
 }
 
 func (suite *ControllerUTestSuite) assertError(t errorTest, actualError error) {

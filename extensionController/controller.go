@@ -173,7 +173,7 @@ func (c *controllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensio
 		params.Values = append(params.Values, extensionAPI.ParameterValue{Name: p.Name, Value: p.Value})
 	}
 
-	paramDefinitions, err := c.GetParameterDefinitions(tx, extensionId, extensionId)
+	paramDefinitions, err := c.GetParameterDefinitions(tx, extensionId, extensionVersion)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get parameter definitions: %w", err)
 	}

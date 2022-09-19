@@ -102,11 +102,11 @@ func (suite *RestAPIIntegrationTestSuite) TestGetExtensionDetailsFailsForUnknown
 
 func (suite *RestAPIIntegrationTestSuite) TestGetExtensionDetailsSucceeds() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string"}]`).
+		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param:"+version, type: "string"}]`).
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, "ext-id"))
 	response := suite.makeRequest("GET", suite.getExtensionDetails("ext-id", "ext-version"), "", 200)
 	suite.assertJSON.Assertf(response, `{"id": "ext-id", "version":"ext-version", "parameterDefinitions": [
-		{"id":"param1","name":"My param","definition":{"id": "param1", "name": "My param", "type": "string"}}
+		{"id":"param1","name":"My param:ext-version","definition":{"id": "param1", "name": "My param:ext-version", "type": "string"}}
 	]}`)
 }
 
