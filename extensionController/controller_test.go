@@ -137,7 +137,7 @@ func (suite *ControllerUTestSuite) TestGetParameterDefinitionsFails() {
 				Build().
 				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 			suite.initDbMock()
-			extensions, err := suite.controller.GetParameterDefinitions(EXTENSION_ID, "ver")
+			extensions, err := suite.controller.GetParameterDefinitions(mockContext(), suite.db, EXTENSION_ID, "ver")
 			suite.assertError(t, err)
 			suite.Nil(extensions)
 		})
@@ -149,7 +149,7 @@ func (suite *ControllerUTestSuite) TestGetParameterDefinitionsSucceeds() {
 		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string"}]`).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	definitions, err := suite.controller.GetParameterDefinitions(EXTENSION_ID, "ext-version")
+	definitions, err := suite.controller.GetParameterDefinitions(mockContext(), suite.db, EXTENSION_ID, "ext-version")
 	suite.NoError(err)
 	suite.Equal([]parameterValidator.ParameterDefinition{{Id: "param1", Name: "My param",
 		RawDefinition: map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}}, definitions)

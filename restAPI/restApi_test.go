@@ -100,7 +100,7 @@ func (suite *RestAPISuite) TestGetAllExtensionsFails() {
 // GetExtensionDetails
 
 func (suite *RestAPISuite) TestGetExtensionDetailsSuccessfully() {
-	suite.controller.On("GetParameterDefinitions", "ext-id", "ext-version").Return([]parameterValidator.ParameterDefinition{{Id: "param1", Name: "My param",
+	suite.controller.On("GetParameterDefinitions", mock.Anything, "ext-id", "ext-version").Return([]parameterValidator.ParameterDefinition{{Id: "param1", Name: "My param",
 		RawDefinition: map[string]interface{}{"id": "raw-param1", "name": "raw-My param", "type": "invalidType"}}}, nil)
 	for _, test := range authSuccessTests {
 		suite.Run(test.authHeader, func() {
@@ -113,7 +113,7 @@ func (suite *RestAPISuite) TestGetExtensionDetailsSuccessfully() {
 }
 
 func (suite *RestAPISuite) TestGetExtensionDetailsFails() {
-	suite.controller.On("GetParameterDefinitions", "ext-id", "ext-version").Return(nil, fmt.Errorf("mock error"))
+	suite.controller.On("GetParameterDefinitions", mock.Anything, "ext-id", "ext-version").Return(nil, fmt.Errorf("mock error"))
 	responseString := suite.makeRequest("GET", GET_EXTENSION_DETAILS, "", 500)
 	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
 }

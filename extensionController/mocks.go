@@ -82,7 +82,7 @@ func (mock *mockControllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extensi
 	return nil, args.Error(1)
 }
 
-func (mock *mockControllerImpl) GetParameterDefinitions(extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
+func (mock *mockControllerImpl) GetParameterDefinitions(tx *sql.Tx, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
 	args := mock.Called(extensionId, extensionVersion)
 	if result, ok := args.Get(0).([]parameterValidator.ParameterDefinition); ok {
 		return result, args.Error(1)

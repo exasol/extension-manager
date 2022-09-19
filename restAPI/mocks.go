@@ -32,8 +32,8 @@ func (m *mockExtensionController) GetInstalledExtensions(ctx context.Context, db
 	return nil, args.Error(1)
 }
 
-func (m *mockExtensionController) GetParameterDefinitions(extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
-	args := m.Called(extensionId, extensionVersion)
+func (m *mockExtensionController) GetParameterDefinitions(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
+	args := m.Called(ctx, db, extensionId, extensionVersion)
 	if paramDefinitions, ok := args.Get(0).([]parameterValidator.ParameterDefinition); ok {
 		return paramDefinitions, args.Error(1)
 	}

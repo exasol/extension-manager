@@ -56,7 +56,7 @@ func (suite *ExtensionApiSuite) Test_GetParameterDefinitions_EmptyResult() {
 		WithGetInstanceParameterDefinitionFunc(`return []`).
 		Build().WriteToTmpFile()
 	extension := suite.loadExtension(extensionFile)
-	definitions := extension.extension.GetParameterDefinitions("extVersion")
+	definitions := extension.extension.GetParameterDefinitions(suite.mockContext(), "extVersion")
 	suite.Equal([]interface{}{}, definitions)
 }
 
@@ -65,7 +65,7 @@ func (suite *ExtensionApiSuite) Test_GetParameterDefinitions() {
 		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string"}]`).
 		Build().WriteToTmpFile()
 	extension := suite.loadExtension(extensionFile)
-	definitions := extension.extension.GetParameterDefinitions("extVersion")
+	definitions := extension.extension.GetParameterDefinitions(suite.mockContext(), "extVersion")
 	suite.Equal([]interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}, definitions)
 }
 

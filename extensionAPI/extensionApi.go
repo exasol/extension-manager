@@ -78,7 +78,7 @@ type rawJsExtension struct {
 	Description             string                                                                                  `json:"description"`
 	BucketFsUploads         []BucketFsUpload                                                                        `json:"bucketFsUploads"`
 	InstallableVersions     []rawJsExtensionVersion                                                                 `json:"installableVersions"`
-	GetParameterDefinitions func(version string) []interface{}                                                      `json:"getInstanceParameters"`
+	GetParameterDefinitions func(context *ExtensionContext, version string) []interface{}                           `json:"getInstanceParameters"`
 	Install                 func(context *ExtensionContext, version string)                                         `json:"install"`
 	Uninstall               func(context *ExtensionContext, version string)                                         `json:"uninstall"`
 	FindInstallations       func(context *ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation             `json:"findInstallations"`

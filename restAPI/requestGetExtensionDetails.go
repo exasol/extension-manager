@@ -1,7 +1,7 @@
 package restAPI
 
 import (
-	"fmt"
+	"database/sql"
 	"net/http"
 
 	"github.com/Nightapes/go-rest/pkg/openapi"
@@ -25,15 +25,15 @@ func GetExtensionDetails(apiContext *ApiContext) *openapi.Get {
 			Add("extensions").
 			AddParameter("extensionId", openapi.STRING, "ID of the extension").
 			AddParameter("extensionVersion", openapi.STRING, "Version of the extension"),
-		HandlerFunc: handleGetParameterDefinitions(apiContext),
+		HandlerFunc: adaptDbHandler(handleGetParameterDefinitions(apiContext)),
 	}
 }
 
-func handleGetParameterDefinitions(apiContext *ApiContext) generalHandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
+func handleGetParameterDefinitions(apiContext *ApiContext) dbHandler {
+	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) {
 		extensionId := chi.URLParam(request, "extensionId")
 		extensionVersion := chi.URLParam(request, "extensionVersion")
-		definitions, err := apiContext.Controller.GetParameterDefinitions(extensionId, extensionVersion)
+		definitions, err := apiContext.Controller.GetParameterDefinitions(request.Context(), db, extensionId, extensionVersion)
 		if err != nil {
 			HandleError(request.Context(), writer, err)
 			return
@@ -52,7 +52,6 @@ func convertParamDefinitions(definitions []parameterValidator.ParameterDefinitio
 }
 
 func convertParamDefinition(d parameterValidator.ParameterDefinition) ParamDefinition {
-	fmt.Printf("param id %q, name %q\n", d.Id, d.Name)
 	return ParamDefinition{
 		Id: d.Id, Name: d.Name, RawDefinition: d.RawDefinition,
 	}

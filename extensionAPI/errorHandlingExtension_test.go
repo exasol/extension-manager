@@ -72,19 +72,19 @@ func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsFailure() {
 
 func (suite *ErrorHandlingExtensionSuite) GetParameterDefinitionsSuccessful() {
 	expectedDefinitions := []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}
-	suite.rawExtension.GetParameterDefinitions = func(version string) []interface{} {
+	suite.rawExtension.GetParameterDefinitions = func(context *ExtensionContext, version string) []interface{} {
 		return expectedDefinitions
 	}
-	definitions, err := suite.extension.GetParameterDefinitions("ext-version")
+	definitions, err := suite.extension.GetParameterDefinitions(createMockContext(), "ext-version")
 	suite.NoError(err)
 	suite.Equal(expectedDefinitions, definitions)
 }
 
 func (suite *ErrorHandlingExtensionSuite) GetParameterDefinitionsFailure() {
-	suite.rawExtension.GetParameterDefinitions = func(version string) []interface{} {
+	suite.rawExtension.GetParameterDefinitions = func(context *ExtensionContext, version string) []interface{} {
 		panic("mock error")
 	}
-	installations, err := suite.extension.GetParameterDefinitions("ext-version")
+	installations, err := suite.extension.GetParameterDefinitions(createMockContext(), "ext-version")
 	suite.EqualError(err, "failed to get parameter definitions for extension \"id\": mock error")
 	suite.Nil(installations)
 }

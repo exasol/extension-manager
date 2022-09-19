@@ -22,7 +22,7 @@ type TransactionController interface {
 	GetInstalledExtensions(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error)
 
 	// GetParameterDefinitions returns the parameter definitions required for installing a given extension version.
-	GetParameterDefinitions(extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error)
+	GetParameterDefinitions(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error)
 
 	// InstallExtension installs an extension.
 	// db is a connection to the Exasol DB
@@ -140,8 +140,13 @@ func (c *transactionControllerImpl) GetInstalledExtensions(ctx context.Context, 
 	return c.controller.GetAllInstallations(tx)
 }
 
-func (c *transactionControllerImpl) GetParameterDefinitions(extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
-	return c.controller.GetParameterDefinitions(extensionId, extensionVersion)
+func (c *transactionControllerImpl) GetParameterDefinitions(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
+	tx, err := beginTransaction(ctx, db)
+	if err != nil {
+		return nil, err
+	}
+	defer rollback(tx)
+	return c.controller.GetParameterDefinitions(tx, extensionId, extensionVersion)
 }
 
 func (c *transactionControllerImpl) CreateInstance(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {
