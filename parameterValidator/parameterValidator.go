@@ -61,10 +61,10 @@ func extractStringValue(def map[string]interface{}, key string) (string, error) 
 	if _, ok := def[key]; !ok {
 		return "", fmt.Errorf("entry %q missing in parameter definition %v", key, def)
 	}
-	 if value, ok := def[key].(string); !ok {
+	if value, ok := def[key].(string); ok {
 		return value, nil
-	} 
-        return "", fmt.Errorf("unexpected type of key %q in parameter definition: %t, expected string", key, def[key])
+	}
+	return "", fmt.Errorf("unexpected type of key %q in parameter definition: %T, expected string", key, def[key])
 }
 
 type ValidationResult struct {
