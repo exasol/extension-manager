@@ -66,7 +66,7 @@ type ExtensionDetailsResponse struct {
 
 // This represents a parameter required for creating a new instance of an extension.
 type ParamDefinition struct {
-	Id            string                 `json:"id"`         // ID of this parameter
-	Name          string                 `json:"name"`       // Name of this parameter
-	RawDefinition map[string]interface{} `json:"definition"` // Raw parameter definition to be used as input for the Parameter Validator (https://github.com/exasol/extension-parameter-validator)
+	Id            string      `json:"id"`         // ID of this parameter
+	Name          string      `json:"name"`       // Name of this parameter
+	RawDefinition interface{} `json:"definition"` // Raw parameter definition to be used as input for the Parameter Validator (https://github.com/exasol/extension-parameter-validator)
 }
