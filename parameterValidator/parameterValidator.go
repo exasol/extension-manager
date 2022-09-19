@@ -48,13 +48,13 @@ func convertDefinition(rawDefinition map[string]interface{}) (ParameterDefinitio
 func extractValues(def map[string]interface{}) (id, name string, err error) {
 	id, err = extractStringValue(def, "id")
 	if err != nil {
-		return
+		return "", "", err
 	}
 	name, err = extractStringValue(def, "name")
 	if err != nil {
-		return
+		return "", "", err
 	}
-	return
+	return id, name, nil
 }
 
 func extractStringValue(def map[string]interface{}, key string) (string, error) {
