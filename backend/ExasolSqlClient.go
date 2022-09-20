@@ -24,7 +24,7 @@ func (c *ExasolSqlClient) Execute(query string, args ...any) {
 
 	_, err = c.transaction.ExecContext(c.ctx, query, args...)
 	if err != nil {
-		reportError(fmt.Errorf("error executing statement %q: %v", query, err))
+		reportError(fmt.Errorf("error executing statement %q: %w", query, err))
 	}
 }
 
@@ -35,12 +35,12 @@ func (c *ExasolSqlClient) Query(query string, args ...any) QueryResult {
 	}
 	rows, err := c.transaction.QueryContext(c.ctx, query, args...)
 	if err != nil {
-		reportError(fmt.Errorf("error executing statement %q: %v", query, err))
+		reportError(fmt.Errorf("error executing statement %q: %w", query, err))
 	}
 	defer closeRows(rows)
 	result, err := c.extractResult(rows)
 	if err != nil || result == nil {
-		reportError(fmt.Errorf("error reading result from statement %q: %v", query, err))
+		reportError(fmt.Errorf("error reading result from statement %q: %w", query, err))
 	}
 	return *result
 }
@@ -48,10 +48,10 @@ func (c *ExasolSqlClient) Query(query string, args ...any) QueryResult {
 func closeRows(rows *sql.Rows) {
 	err := rows.Close()
 	if err != nil {
-		reportError(fmt.Errorf("error closing result: %v", err))
+		reportError(fmt.Errorf("error closing result: %w", err))
 	}
 	if err = rows.Err(); err != nil {
-		reportError(fmt.Errorf("error while iterating result: %v", err))
+		reportError(fmt.Errorf("error while iterating result: %w", err))
 	}
 }
 

@@ -85,19 +85,19 @@ func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsSuccessfully() {
 
 func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsFails_InvalidUsernamePassword() {
 	response := suite.restApi.makeRequestWithAuthHeader("GET", suite.listInstalledExtensions(), createBasicAuthHeader("wrong", "user"), "", 401)
-	suite.Regexp(`{"code":401,"message":"invalid database credentials".*`, response)
+	suite.Contains(response, `{"code":401,"message":"invalid database credentials"`)
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsFails_InvalidBearerToken() {
 	response := suite.restApi.makeRequestWithAuthHeader("GET", suite.listInstalledExtensions(), createBearerAuthHeader("invalid-token"), "", 401)
-	suite.Regexp(`{"code":401,"message":"invalid database credentials".*`, response)
+	suite.Contains(response, `{"code":401,"message":"invalid database credentials"`)
 }
 
 // Get extension details
 
 func (suite *RestAPIIntegrationTestSuite) TestGetExtensionDetailsFailsForUnknownExtension() {
-	response := suite.makeRequest("GET", suite.getExtensionDetails("unknown-extension", "version"), "", 500)
-	suite.Regexp(`{"code":500,"message":"Internal server error".*`, response)
+	response := suite.makeRequest("GET", suite.getExtensionDetails("unknown-ext-id", "version"), "", 404)
+	suite.Contains(response, `{"code":404,"message":"extension \"unknown-ext-id\" not found",`)
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestGetExtensionDetailsSucceeds() {
@@ -128,6 +128,11 @@ func (suite *RestAPIIntegrationTestSuite) TestListInstancesQueryFails() {
 	suite.Contains(response, `{"code":500,"message":"Internal server error"`)
 }
 
+func (suite *RestAPIIntegrationTestSuite) TestListInstancesQueryFailsForUnknownExtension() {
+	response := suite.makeRequest("GET", suite.listInstances("unknown-ext-id", "ext-version"), "", 404)
+	suite.Contains(response, `{"code":404,"message":"extension \"unknown-ext-id\" not found"`)
+}
+
 // Delete instance
 
 func (suite *RestAPIIntegrationTestSuite) TestDeleteInstanceSuccessfully() {
@@ -146,6 +151,13 @@ func (suite *RestAPIIntegrationTestSuite) TestDeleteInstanceFails() {
 	suite.Contains(response, `{"code":500,"message":"Internal server error"`)
 }
 
+func (suite *RestAPIIntegrationTestSuite) TestDeleteInstanceFailsForUnknownExtension() {
+	response := suite.makeRequest("DELETE", suite.deleteInstance("unknown-ext-id", "ext-version", "inst-id"), "", 404)
+	suite.Contains(response, `{"code":404,"message":"extension \"unknown-ext-id\" not found"`)
+}
+
+// Uninstall extension
+
 func (suite *RestAPIIntegrationTestSuite) TestUninstallExtensionSuccessfully() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUninstallFunc("context.sqlClient.execute('select 1')").
@@ -162,14 +174,19 @@ func (suite *RestAPIIntegrationTestSuite) TestExtensionInstanceFails() {
 	suite.Contains(response, `{"code":500,"message":"Internal server error"`)
 }
 
+func (suite *RestAPIIntegrationTestSuite) TestExtensionInstanceFailsForUnknownExtension() {
+	response := suite.makeRequest("DELETE", suite.uninstallExtension("unknown-ext-id", "ext-version"), "", 404)
+	suite.Contains(response, `{"code":404,"message":"extension \"unknown-ext-id\" not found"`)
+}
+
 func (suite *RestAPIIntegrationTestSuite) TestGetOpenApiHtml() {
 	response := suite.makeGetRequest("/openapi/index.html")
-	suite.Regexp("\n<!DOCTYPE html>.*", response)
+	suite.Contains(response, "\n<!DOCTYPE html>")
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestGetOpenApiJson() {
 	response := suite.makeGetRequest("/openapi.json")
-	suite.Regexp(".*\"openapi\": \"3\\.0\\.0\",.*", response)
+	suite.Contains(response, `"openapi": "3.0.0",`)
 }
 
 func (suite *RestAPIIntegrationTestSuite) getValidDbArgs() string {

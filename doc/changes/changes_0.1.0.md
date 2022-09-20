@@ -31,6 +31,7 @@ Code name:
 ## Bugfixes
 
 * #42: Added error handling for exceptions in JavaScript code
+* #70: Return status 404 instead of 500 for unknown extension IDs
 
 ## Documentation
 
