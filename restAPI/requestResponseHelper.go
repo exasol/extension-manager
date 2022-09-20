@@ -50,24 +50,8 @@ func SendJSONWithStatus(ctx context.Context, status int, writer http.ResponseWri
 }
 
 func HandleError(context context.Context, writer http.ResponseWriter, err error) {
-	errorToSend := convertToApiError(err)
+	errorToSend := apiErrors.UnwrapAPIError(err)
 	sendError(errorToSend, context, writer)
-}
-
-func convertToApiError(err error) *apiErrors.APIError {
-	switch apiError := err.(type) {
-	default:
-		log.Errorf("Internal error: %s", err.Error())
-		return apiErrors.NewInternalServerError(err).(*apiErrors.APIError)
-
-	case *apiErrors.APIError:
-		if apiError.OriginalError != nil {
-			log.Errorf("Error: %s (original: %s)", err.Error(), apiError.OriginalError.Error())
-		} else {
-			log.Errorf("Error: %s", err.Error())
-		}
-		return err.(*apiErrors.APIError)
-	}
 }
 
 func sendError(a *apiErrors.APIError, context context.Context, writer http.ResponseWriter) {

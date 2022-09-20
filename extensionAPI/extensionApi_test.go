@@ -5,6 +5,7 @@ import (
 	"path"
 	"testing"
 
+	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/backend"
 	"github.com/exasol/extension-manager/integrationTesting"
 
@@ -196,7 +197,7 @@ func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_invalidJavaScript() {
 
 func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_invalidFileName() {
 	extension, err := GetExtensionFromFile("no-such-file")
-	suite.ErrorContains(err, "failed to open extension file no-such-file")
+	suite.Equal(apiErrors.NewAPIError(404, "extension \"no-such-file\" not found"), err)
 	suite.Nil(extension)
 }
 

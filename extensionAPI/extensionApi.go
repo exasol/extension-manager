@@ -1,10 +1,12 @@
 package extensionAPI
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path"
 
+	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/backend"
 	log "github.com/sirupsen/logrus"
 
@@ -47,7 +49,11 @@ func loadExtension(vm *goja.Runtime, fileName string) (*installedExtension, erro
 		return nil, fmt.Errorf("failed to set global to a new object. Cause: %w", err)
 	}
 	bytes, err := os.ReadFile(fileName)
+
 	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, apiErrors.NewNotFoundErrorF("extension %q not found", fileName)
+		}
 		return nil, fmt.Errorf("failed to open extension file %v. Cause: %w", fileName, err)
 	}
 	_, err = vm.RunScript(fileName, string(bytes))

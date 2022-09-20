@@ -1,16 +1,21 @@
 package apiErrors
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 )
 
-func NewInternalServerError(originalError error) error {
+func NewInternalServerError(originalError error) *APIError {
 	return &APIError{
 		Status:        http.StatusInternalServerError,
 		Message:       "Internal server error",
 		OriginalError: originalError,
 	}
+}
+
+func NewNotFoundErrorF(format string, a ...interface{}) error {
+	return NewAPIErrorF(http.StatusNotFound, format, a...)
 }
 
 func NewBadRequestErrorF(format string, a ...interface{}) error {
@@ -44,6 +49,19 @@ func NewAPIErrorWithCause(message string, cause error) error {
 		}
 	}
 	return fmt.Errorf("%s: %w", message, cause)
+}
+
+// UnwrapAPIError returns an API Error if one exists in the given error's chain or nil if no API Error exists in the chain.
+func UnwrapAPIError(orgErr error) *APIError {
+	err := orgErr
+	for {
+		if apiErr, ok := err.(*APIError); ok {
+			return apiErr
+		}
+		if err = errors.Unwrap(err); err == nil {
+			return NewInternalServerError(orgErr)
+		}
+	}
 }
 
 type APIError struct {
