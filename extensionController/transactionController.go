@@ -196,7 +196,7 @@ func beginTransaction(ctx context.Context, db *sql.DB) (*sql.Tx, error) {
 		if strings.Contains(err.Error(), "Connection exception - authentication failed") {
 			return nil, apiErrors.NewUnauthorizedErrorF("invalid database credentials")
 		}
-		return nil, fmt.Errorf("failed to begin transaction: %v", err)
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	return tx, nil
 }
