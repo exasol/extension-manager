@@ -46,15 +46,43 @@ func TestNewAPIErrorWithCause_nonApiErrorCause(t *testing.T) {
 	assert.EqualError(t, err, "msg: cause")
 }
 
+func TestUnwrapAPIError_normalError(t *testing.T) {
+	orgErr := fmt.Errorf("mock")
+	err := apiErrors.UnwrapAPIError(orgErr)
+	assertApiError(t, err, "Internal server error", 500, orgErr)
+}
+
+func TestUnwrapAPIError_APIError(t *testing.T) {
+	orgErr := apiErrors.NewNotFoundErrorF("extension not found")
+	err := apiErrors.UnwrapAPIError(orgErr)
+	assertApiError(t, err, "extension not found", 404, nil)
+}
+
+func TestUnwrapAPIError_wrappedAPIError(t *testing.T) {
+	orgErr := apiErrors.NewNotFoundErrorF("extension not found")
+	orgErr = fmt.Errorf("wrapper %w", orgErr)
+	err := apiErrors.UnwrapAPIError(orgErr)
+	assertApiError(t, err, "extension not found", 404, nil)
+}
+
+func TestUnwrapAPIError_multipleWrapperAPIError(t *testing.T) {
+	orgErr := apiErrors.NewNotFoundErrorF("extension not found")
+	orgErr = fmt.Errorf("wrapper1 %w", orgErr)
+	orgErr = fmt.Errorf("wrapper2 %w", orgErr)
+	orgErr = fmt.Errorf("wrapper3 %w", orgErr)
+	err := apiErrors.UnwrapAPIError(orgErr)
+	assertApiError(t, err, "extension not found", 404, nil)
+}
+
 func assertApiError(t *testing.T, err error, expectedMsg string, expectedStatus int, expectedOrgError error) {
 	t.Helper()
 	if apiErr, ok := err.(*apiErrors.APIError); ok {
 		assert.Equal(t, expectedMsg, apiErr.Message)
 		assert.Equal(t, expectedStatus, apiErr.Status)
 		if expectedOrgError == nil {
-			assert.Nil(t, apiErr.OriginalError)
+			assert.Nil(t, apiErr.OriginalError, "original error")
 		} else {
-			assert.Same(t, expectedOrgError, apiErr.OriginalError)
+			assert.Same(t, expectedOrgError, apiErr.OriginalError, "original error")
 		}
 	} else {
 		t.Errorf("Expected an ApiError but got %T", err)
