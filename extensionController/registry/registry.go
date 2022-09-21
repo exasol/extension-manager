@@ -1,14 +1,7 @@
 package registry
 
 import (
-	"errors"
-	"fmt"
-	"os"
-	"path"
-	"path/filepath"
 	"strings"
-
-	"github.com/exasol/extension-manager/apiErrors"
 )
 
 // Registry allows listing and loading extension files
@@ -20,37 +13,17 @@ type Registry interface {
 	ReadExtension(id string) (string, error)
 }
 
-func NewLocalDirRegistry(dir string) Registry {
-	return &localDirRegistry{dir: dir}
-}
-
-type localDirRegistry struct {
-	dir string
-}
-
-// FindExtensions searches for .js files in the given directory
-func (l *localDirRegistry) FindExtensions() ([]string, error) {
-	var files []string
-	err := filepath.Walk(l.dir, func(path string, info os.FileInfo, err error) error {
-		if info != nil && strings.HasSuffix(info.Name(), ".js") {
-			files = append(files, info.Name())
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to find extensions in %q: %w", l.dir, err)
+// NewRegistry creates a new extension registry.
+// The argument can be an HTTP(S) URL or the path of a local directory.
+// This returns a matching registry implementation depending on the argument.
+func NewRegistry(urlOrPath string) Registry {
+	if isHttpUrl(urlOrPath) {
+		return newHttpRegistry(urlOrPath)
 	}
-	return files, nil
+	return newLocalDirRegistry(urlOrPath)
 }
 
-func (l *localDirRegistry) ReadExtension(id string) (string, error) {
-	fileName := path.Join(l.dir, id)
-	bytes, err := os.ReadFile(fileName)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return "", apiErrors.NewNotFoundErrorF("extension %q not found", fileName)
-		}
-		return "", fmt.Errorf("failed to open extension file %q: %w", fileName, err)
-	}
-	return string(bytes), nil
+func isHttpUrl(urlOrPath string) bool {
+	lowerCaseUrlOrPath := strings.ToLower(urlOrPath)
+	return strings.HasPrefix(lowerCaseUrlOrPath, "http://") || strings.HasPrefix(lowerCaseUrlOrPath, "https://")
 }

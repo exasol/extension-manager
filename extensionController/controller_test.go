@@ -43,7 +43,7 @@ func (suite *ControllerUTestSuite) createController() {
 	suite.bucketFsMock = createBucketFsMock()
 	suite.metaDataMock = createExaMetaDataReaderMock(EXTENSION_SCHEMA)
 	ctrl := &controllerImpl{
-		registry:       registry.NewLocalDirRegistry(suite.tempExtensionRepo),
+		registry:       registry.NewRegistry(suite.tempExtensionRepo),
 		schema:         EXTENSION_SCHEMA,
 		metaDataReader: &suite.metaDataMock,
 	}

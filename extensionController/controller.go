@@ -53,7 +53,7 @@ type controllerImpl struct {
 
 func createImpl(extensionFolder string, schema string) controller {
 	return &controllerImpl{
-		registry:       registry.NewLocalDirRegistry(extensionFolder),
+		registry:       registry.NewRegistry(extensionFolder),
 		metaDataReader: extensionAPI.CreateExaMetaDataReader(),
 		schema:         schema,
 	}
