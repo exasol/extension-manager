@@ -60,14 +60,14 @@ func (h *httpRegistry) ReadExtension(id string) (string, error) {
 	if !ok {
 		return "", apiErrors.NewNotFoundErrorF("extension %q not found", id)
 	}
-	extContent, err := getUrl(ext.URL)
+	extContent, err := getUrlContent(ext.URL)
 	if err != nil {
 		return "", fmt.Errorf("failed to load extension %q: %w", id, err)
 	}
 	return extContent, nil
 }
 
-func getUrl(url string) (string, error) {
+func getUrlContent(url string) (string, error) {
 	response, err := getResponse(url)
 	if err != nil {
 		return "", err

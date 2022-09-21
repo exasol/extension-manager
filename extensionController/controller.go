@@ -85,11 +85,11 @@ func (c *controllerImpl) requiredFilesAvailable(extension *extensionAPI.JsExtens
 }
 
 func (c *controllerImpl) getAllExtensions() ([]*extensionAPI.JsExtension, error) {
-	var extensions []*extensionAPI.JsExtension
 	extensionIds, err := c.registry.FindExtensions()
 	if err != nil {
 		return nil, err
 	}
+	var extensions []*extensionAPI.JsExtension
 	for _, id := range extensionIds {
 		extension, err := c.loadExtensionById(id)
 		if err != nil {
