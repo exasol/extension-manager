@@ -36,3 +36,10 @@ func (suite *HttpRegistrySuite) TestFindExtensions_noExtensionsAvailable() {
 	suite.NoError(err)
 	suite.Empty(extensions)
 }
+
+func (suite *HttpRegistrySuite) TestFindExtensions() {
+	suite.server.setRegistryContent(`{"extensions":[{"id": "ext1"},{"id": "ext2"},{"id": "ext3"}]}`)
+	extensions, err := suite.registry.FindExtensions()
+	suite.NoError(err)
+	suite.Equal([]string{"ext1", "ext2", "ext3"}, extensions)
+}
