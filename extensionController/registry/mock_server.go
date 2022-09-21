@@ -52,12 +52,20 @@ func (s *mockRegistryServer) setRegistryContent(content string) {
 	s.registryContent = content
 }
 
+func (s *mockRegistryServer) setPathContent(path, content string) {
+	s.files[path] = content
+}
+
 func (s *mockRegistryServer) reset() {
 	s.registryContent = ""
 	s.files = make(map[string]string)
 }
 
-func (s *mockRegistryServer) url() string {
+func (s *mockRegistryServer) baseUrl() string {
+	return s.server.URL
+}
+
+func (s *mockRegistryServer) indexUrl() string {
 	return s.server.URL + REGISTRY_PATH
 }
 
