@@ -6,4 +6,8 @@
     "go.coverOnSingleTest": true,
     "go.coverOnSingleTestFile": true,
     "go.coverOnTestPackage": true,
+    "sonarlint.connectedMode.project": {
+        "connectionId": "exasol",
+        "projectKey": "com.exasol:extension-manager"
+    },
 }
