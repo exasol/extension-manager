@@ -118,7 +118,7 @@ func (b TestExtensionBuilder) Build() *BuiltExtension {
 	extensionTs = strings.Replace(extensionTs, "$ADD_INSTANCE$", b.addInstanceFunc, 1)
 	extensionTs = strings.Replace(extensionTs, "$FIND_INSTANCES$", b.findInstancesFunc, 1)
 	extensionTs = strings.Replace(extensionTs, "$DELETE_INSTANCE$", b.deleteInstanceFunc, 1)
-	extensionTs = strings.Replace(extensionTs, "$GET_INSTANCE_PARAMTER_DEFINITIONS$", b.getInstanceParameterDefinitionsFunc, 1)
+	extensionTs = strings.Replace(extensionTs, "$GET_INSTANCE_PARAMETER_DEFINITIONS$", b.getInstanceParameterDefinitionsFunc, 1)
 	workDir := path.Join(os.TempDir(), "extension-manager-test-extension-build-dir")
 	if _, err := os.Stat(workDir); errors.Is(err, os.ErrNotExist) {
 		err := os.Mkdir(workDir, os.ModePerm)
