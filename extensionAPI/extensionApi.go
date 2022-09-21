@@ -1,12 +1,8 @@
 package extensionAPI
 
 import (
-	"errors"
 	"fmt"
-	"os"
-	"path"
 
-	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/backend"
 	log "github.com/sirupsen/logrus"
 
@@ -17,19 +13,18 @@ import (
 
 const SupportedApiVersion = "0.1.15"
 
-// GetExtensionFromFile loads an extension from a .js file.
-func GetExtensionFromFile(extensionPath string) (*JsExtension, error) {
+// LoadExtension loads an extension from the given file content.
+func LoadExtension(id, content string) (*JsExtension, error) {
 	vm := newJavaScriptVm()
-	extensionJs, err := loadExtension(vm, extensionPath)
+	extensionJs, err := loadExtension(vm, id, content)
 	if err != nil {
 		return nil, err
 	}
 	if extensionJs.APIVersion != SupportedApiVersion {
 		return nil, fmt.Errorf("incompatible extension API version %q. Please update the extension to use supported version %q", extensionJs.APIVersion, SupportedApiVersion)
 	}
-	_, fileName := path.Split(extensionPath)
-	wrappedExtension := wrapExtension(&extensionJs.Extension, fileName, vm)
-	log.Debugf("Extension %q with id %q loaded from file %q", wrappedExtension.Name, wrappedExtension.Id, extensionPath)
+	wrappedExtension := wrapExtension(&extensionJs.Extension, id, vm)
+	log.Debugf("Extension %q with id %q loaded", wrappedExtension.Name, wrappedExtension.Id)
 	return wrappedExtension, nil
 }
 
@@ -42,34 +37,26 @@ func newJavaScriptVm() *goja.Runtime {
 	return vm
 }
 
-func loadExtension(vm *goja.Runtime, fileName string) (*installedExtension, error) {
+func loadExtension(vm *goja.Runtime, id, content string) (*installedExtension, error) {
 	globalJsObj := vm.NewObject()
 	err := vm.Set("global", globalJsObj)
 	if err != nil {
 		return nil, fmt.Errorf("failed to set global to a new object. Cause: %w", err)
 	}
-	bytes, err := os.ReadFile(fileName)
-
+	_, err = vm.RunScript(id, content)
 	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return nil, apiErrors.NewNotFoundErrorF("extension %q not found", fileName)
-		}
-		return nil, fmt.Errorf("failed to open extension file %v. Cause: %w", fileName, err)
-	}
-	_, err = vm.RunScript(fileName, string(bytes))
-	if err != nil {
-		return nil, fmt.Errorf("failed to run extension file %v. Cause %w", fileName, err)
+		return nil, fmt.Errorf("failed to run extension %q with content %q: %w", id, content, err)
 	}
 
 	const extensionVariableName = "installedExtension"
 	extensionVariable := globalJsObj.Get(extensionVariableName)
 	if extensionVariable == nil {
-		return nil, fmt.Errorf("extension did not set global.%s", extensionVariableName)
+		return nil, fmt.Errorf("extension %q did not set global.%s", id, extensionVariableName)
 	}
 	var extension installedExtension
 	err = vm.ExportTo(extensionVariable, &extension)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read installedExtension variable. Cause: %w", err)
+		return nil, fmt.Errorf("failed to read installedExtension variable for extension %q. Cause: %w", id, err)
 	}
 	return &extension, nil
 }

@@ -4,13 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"path"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 
 	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/extensionAPI"
+	"github.com/exasol/extension-manager/extensionController/registry"
 	"github.com/exasol/extension-manager/parameterValidator"
 )
 
@@ -46,17 +46,24 @@ type controller interface {
 }
 
 type controllerImpl struct {
-	extensionFolder string
-	schema          string
-	metaDataReader  extensionAPI.ExaMetadataReader
+	registry       registry.Registry
+	schema         string
+	metaDataReader extensionAPI.ExaMetadataReader
 }
 
 func createImpl(extensionFolder string, schema string) controller {
-	return &controllerImpl{extensionFolder: extensionFolder, schema: schema, metaDataReader: extensionAPI.CreateExaMetaDataReader()}
+	return &controllerImpl{
+		registry:       registry.NewLocalDirRegistry(extensionFolder),
+		metaDataReader: extensionAPI.CreateExaMetaDataReader(),
+		schema:         schema,
+	}
 }
 
 func (c *controllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, error) {
-	jsExtensions := c.getAllExtensions()
+	jsExtensions, err := c.getAllExtensions()
+	if err != nil {
+		return nil, err
+	}
 	var extensions []*Extension
 	for _, jsExtension := range jsExtensions {
 		if c.requiredFilesAvailable(jsExtension, bfsFiles) {
@@ -77,29 +84,30 @@ func (c *controllerImpl) requiredFilesAvailable(extension *extensionAPI.JsExtens
 	return true
 }
 
-func (c *controllerImpl) getAllExtensions() []*extensionAPI.JsExtension {
+func (c *controllerImpl) getAllExtensions() ([]*extensionAPI.JsExtension, error) {
 	var extensions []*extensionAPI.JsExtension
-	extensionPaths := FindJSFilesInDir(c.extensionFolder)
-	for _, path := range extensionPaths {
-		extension, err := c.loadExtensionFromFile(path)
-		if err == nil {
-			extensions = append(extensions, extension)
-		} else {
-			log.Printf("error: Failed to load extension. This extension will be ignored. Cause: %v\n", err)
-		}
+	extensionIds, err := c.registry.FindExtensions()
+	if err != nil {
+		return nil, err
 	}
-	return extensions
+	for _, id := range extensionIds {
+		extension, err := c.loadExtensionById(id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load extension %q: %w", id, err)
+		}
+		extensions = append(extensions, extension)
+	}
+	return extensions, nil
 }
 
 func (c *controllerImpl) loadExtensionById(id string) (*extensionAPI.JsExtension, error) {
-	extensionPath := path.Join(c.extensionFolder, id)
-	return c.loadExtensionFromFile(extensionPath)
-}
-
-func (c *controllerImpl) loadExtensionFromFile(extensionPath string) (*extensionAPI.JsExtension, error) {
-	extension, err := extensionAPI.GetExtensionFromFile(extensionPath)
+	content, err := c.registry.ReadExtension(id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load extension from file %q: %w", extensionPath, err)
+		return nil, err
+	}
+	extension, err := extensionAPI.LoadExtension(id, content)
+	if err != nil {
+		return nil, err
 	}
 	return extension, nil
 }
@@ -109,7 +117,10 @@ func (c *controllerImpl) GetAllInstallations(tx *sql.Tx) ([]*extensionAPI.JsExtI
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
-	extensions := c.getAllExtensions()
+	extensions, err := c.getAllExtensions()
+	if err != nil {
+		return nil, err
+	}
 	extensionContext := c.createExtensionContext(tx)
 	var allInstallations []*extensionAPI.JsExtInstallation
 	for _, extension := range extensions {
@@ -243,5 +254,5 @@ func validateParameters(parameterDefinitions []parameterValidator.ParameterDefin
 }
 
 func extensionLoadingFailed(extensionId string, err error) error {
-	return fmt.Errorf("failed to load extension with id %q: %w", extensionId, err)
+	return fmt.Errorf("failed to load extension %q: %w", extensionId, err)
 }

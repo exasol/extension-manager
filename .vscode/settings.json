@@ -1,7 +1,7 @@
 {
     "go.testTimeout": "240s",
     "go.testFlags": [
-        "-p", "1"
+        "-p", "1", "-v"
     ],
     "go.coverOnSingleTest": true,
     "go.coverOnSingleTestFile": true,
