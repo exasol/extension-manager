@@ -64,8 +64,8 @@ type ExtInstallation struct {
 }
 
 // Create an instance of TransactionController
-func Create(extensionFolder string, schema string) TransactionController {
-	controller := createImpl(extensionFolder, schema)
+func Create(extensionRegistryURL string, schema string) TransactionController {
+	controller := createImpl(extensionRegistryURL, schema)
 	return &transactionControllerImpl{controller: controller, bucketFs: CreateBucketFsAPI()}
 }
 

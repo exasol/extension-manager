@@ -16,11 +16,11 @@ type Registry interface {
 // NewRegistry creates a new extension registry.
 // The argument can be an HTTP(S) URL or the path of a local directory.
 // This returns a matching registry implementation depending on the argument.
-func NewRegistry(urlOrPath string) Registry {
-	if isHttpUrl(urlOrPath) {
-		return newHttpRegistry(urlOrPath)
+func NewRegistry(extensionRegistryURL string) Registry {
+	if isHttpUrl(extensionRegistryURL) {
+		return newHttpRegistry(extensionRegistryURL)
 	}
-	return newLocalDirRegistry(urlOrPath)
+	return newLocalDirRegistry(extensionRegistryURL)
 }
 
 func isHttpUrl(urlOrPath string) bool {
