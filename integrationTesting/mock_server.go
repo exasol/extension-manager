@@ -1,4 +1,4 @@
-package registry
+package integrationTesting
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type mockRegistryServer struct {
+type MockRegistryServer struct {
 	server          *httptest.Server
 	suite           *suite.Suite
 	registryContent string
@@ -18,11 +18,11 @@ type mockRegistryServer struct {
 
 const REGISTRY_PATH = "/registry.json"
 
-func newMockRegistryServer(suite *suite.Suite) *mockRegistryServer {
-	return &mockRegistryServer{suite: suite, registryContent: ""}
+func NewMockRegistryServer(suite *suite.Suite) *MockRegistryServer {
+	return &MockRegistryServer{suite: suite, registryContent: ""}
 }
 
-func (s *mockRegistryServer) start() {
+func (s *MockRegistryServer) Start() {
 	router := chi.NewRouter()
 	router.MethodFunc(http.MethodGet, REGISTRY_PATH, func(w http.ResponseWriter, r *http.Request) {
 		if s.registryContent != "" {
@@ -42,33 +42,33 @@ func (s *mockRegistryServer) start() {
 	s.server = httptest.NewServer(router)
 }
 
-func (s *mockRegistryServer) sendResponse(w http.ResponseWriter, content string, status int) {
+func (s *MockRegistryServer) sendResponse(w http.ResponseWriter, content string, status int) {
 	w.WriteHeader(status)
 	_, err := w.Write([]byte(content))
 	s.suite.NoError(err)
 }
 
-func (s *mockRegistryServer) setRegistryContent(content string) {
+func (s *MockRegistryServer) SetRegistryContent(content string) {
 	s.registryContent = content
 }
 
-func (s *mockRegistryServer) setPathContent(path, content string) {
+func (s *MockRegistryServer) SetPathContent(path, content string) {
 	s.files[path] = content
 }
 
-func (s *mockRegistryServer) reset() {
+func (s *MockRegistryServer) Reset() {
 	s.registryContent = ""
 	s.files = make(map[string]string)
 }
 
-func (s *mockRegistryServer) baseUrl() string {
+func (s *MockRegistryServer) BaseUrl() string {
 	return s.server.URL
 }
 
-func (s *mockRegistryServer) indexUrl() string {
+func (s *MockRegistryServer) IndexUrl() string {
 	return s.server.URL + REGISTRY_PATH
 }
 
-func (s *mockRegistryServer) close() {
+func (s *MockRegistryServer) Close() {
 	s.server.Close()
 }

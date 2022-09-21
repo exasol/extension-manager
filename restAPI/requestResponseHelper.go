@@ -50,6 +50,7 @@ func SendJSONWithStatus(ctx context.Context, status int, writer http.ResponseWri
 }
 
 func HandleError(context context.Context, writer http.ResponseWriter, err error) {
+	log.Errorf("Error processing request: %v", err)
 	errorToSend := apiErrors.UnwrapAPIError(err)
 	sendError(errorToSend, context, writer)
 }

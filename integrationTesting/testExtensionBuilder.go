@@ -181,6 +181,13 @@ func (e BuiltExtension) WriteToFile(fileName string) {
 	cleanupFile(e.testing, fileName)
 }
 
+func (e BuiltExtension) Publish(server *MockRegistryServer, id string) {
+	path := "/" + id + ".js"
+	extensionUrl := server.BaseUrl() + path
+	server.SetRegistryContent(fmt.Sprintf(`{"extensions":[{"id": "%s", "url": "%s"}]}`, id, extensionUrl))
+	server.SetPathContent(path, e.AsString())
+}
+
 func cleanupFile(t *testing.T, fileName string) {
 	t.Cleanup(func() {
 		if _, err := os.Stat(fileName); errors.Is(err, os.ErrNotExist) {
