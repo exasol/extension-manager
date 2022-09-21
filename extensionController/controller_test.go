@@ -84,11 +84,19 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsWithMissingJar() {
 }
 
 func (suite *ControllerUTestSuite) TestGetAllExtensionsFailsForInvalidExtension() {
-	os.WriteFile(path.Join(suite.tempExtensionRepo, "broken-extension.js"), []byte("invalid javascript"), 0600)
+	suite.writeFile("broken-extension.js", "invalid javascript")
 	suite.bucketFsMock.simulateFiles([]BfsFile{})
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
 	suite.ErrorContains(err, `failed to load extension "broken-extension.js": failed to run extension "broken-extension.js" with content "invalid javascript": SyntaxError`)
 	suite.Empty(extensions)
+}
+
+func (suite *ControllerUTestSuite) writeFile(fileName, content string) {
+	filePath := path.Join(suite.tempExtensionRepo, fileName)
+	err := os.WriteFile(filePath, []byte(content), 0600)
+	if err != nil {
+		suite.T().Errorf("failed to write to %q: %v", filePath, err)
+	}
 }
 
 type errorTest struct {
