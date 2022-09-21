@@ -200,7 +200,7 @@ func (c *controllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensio
 		return nil, err
 	}
 	if instance == nil {
-		return nil, fmt.Errorf("extension did not return an instance")
+		return nil, fmt.Errorf("extension %q did not return an instance", extensionId)
 	}
 	return instance, nil
 }
