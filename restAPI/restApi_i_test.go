@@ -2,7 +2,6 @@ package restAPI
 
 import (
 	"fmt"
-	"path"
 	"testing"
 
 	"github.com/exasol/extension-manager/extensionController"
@@ -13,16 +12,16 @@ import (
 )
 
 const (
-	EXTENSION_SCHEMA     = "test"
-	DEFAULT_EXTENSION_ID = "testing-extension.js"
+	EXTENSION_SCHEMA = "test"
+	EXTENSION_ID     = "ext-id"
 )
 
 type RestAPIIntegrationTestSuite struct {
 	suite.Suite
-	restApi           *baseRestAPITest
-	exasol            *integrationTesting.DbTestSetup
-	tempExtensionRepo string
-	assertJSON        *jsonassert.Asserter
+	restApi        *baseRestAPITest
+	exasol         *integrationTesting.DbTestSetup
+	registryServer *integrationTesting.MockRegistryServer
+	assertJSON     *jsonassert.Asserter
 }
 
 func TestRestAPIIntegrationTestSuite(t *testing.T) {
@@ -30,17 +29,22 @@ func TestRestAPIIntegrationTestSuite(t *testing.T) {
 }
 
 func (suite *RestAPIIntegrationTestSuite) SetupSuite() {
+	suite.registryServer = integrationTesting.NewMockRegistryServer(&suite.Suite)
+	suite.registryServer.Start()
 	suite.exasol = integrationTesting.StartDbSetup(&suite.Suite)
 	suite.assertJSON = jsonassert.New(suite.T())
 }
 
 func (suite *RestAPIIntegrationTestSuite) TearDownSuite() {
+	suite.registryServer.Close()
 	suite.exasol.StopDb()
 }
 
 func (suite *RestAPIIntegrationTestSuite) SetupTest() {
-	ctrl := extensionController.Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
+	ctrl := extensionController.Create(suite.registryServer.IndexUrl(), EXTENSION_SCHEMA)
 	suite.restApi = startRestApi(&suite.Suite, ctrl)
+	suite.registryServer.Reset()
+	suite.registryServer.SetRegistryContent(`{"extensions":[]}`)
 }
 
 func (suite *RestAPIIntegrationTestSuite) TearDownTest() {
@@ -103,8 +107,8 @@ func (suite *RestAPIIntegrationTestSuite) TestGetExtensionDetailsFailsForUnknown
 func (suite *RestAPIIntegrationTestSuite) TestGetExtensionDetailsSucceeds() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param:"+version, type: "string"}]`).
-		Build().WriteToFile(path.Join(suite.tempExtensionRepo, "ext-id"))
-	response := suite.makeRequest("GET", suite.getExtensionDetails("ext-id", "ext-version"), "", 200)
+		Build().Publish(suite.registryServer, EXTENSION_ID)
+	response := suite.makeRequest("GET", suite.getExtensionDetails(EXTENSION_ID, "ext-version"), "", 200)
 	suite.assertJSON.Assertf(response, `{"id": "ext-id", "version":"ext-version", "parameterDefinitions": [
 		{"id":"param1","name":"My param:ext-version","definition":{"id": "param1", "name": "My param:ext-version", "type": "string"}}
 	]}`)
@@ -115,16 +119,16 @@ func (suite *RestAPIIntegrationTestSuite) TestGetExtensionDetailsSucceeds() {
 func (suite *RestAPIIntegrationTestSuite) TestListInstancesSuccessfully() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstancesFunc("context.sqlClient.execute('select 1'); return [{id: 'instId', name: 'instName_ver_'+version}]").
-		Build().WriteToFile(path.Join(suite.tempExtensionRepo, "ext-id"))
-	response := suite.makeGetRequest(suite.listInstances("ext-id", "ext-version"))
+		Build().Publish(suite.registryServer, EXTENSION_ID)
+	response := suite.makeGetRequest(suite.listInstances(EXTENSION_ID, "ext-version"))
 	suite.assertJSON.Assertf(response, `{"instances":[{"id":"instId","name":"instName_ver_ext-version"}]}`)
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestListInstancesQueryFails() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstancesFunc("context.sqlClient.execute('invalid query'); return [{id: 'instId', name: 'instName_ver'+version}]").
-		Build().WriteToFile(path.Join(suite.tempExtensionRepo, "ext-id"))
-	response := suite.makeRequest("GET", suite.listInstances("ext-id", "ext-version"), "", 500)
+		Build().Publish(suite.registryServer, EXTENSION_ID)
+	response := suite.makeRequest("GET", suite.listInstances(EXTENSION_ID, "ext-version"), "", 500)
 	suite.Contains(response, `{"code":500,"message":"Internal server error"`)
 }
 
@@ -138,16 +142,16 @@ func (suite *RestAPIIntegrationTestSuite) TestListInstancesQueryFailsForUnknownE
 func (suite *RestAPIIntegrationTestSuite) TestDeleteInstanceSuccessfully() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithDeleteInstanceFunc("context.sqlClient.execute('select 1')").
-		Build().WriteToFile(path.Join(suite.tempExtensionRepo, "ext-id"))
-	response := suite.makeRequest("DELETE", suite.deleteInstance("ext-id", "ext-version", "inst-id"), "", 204)
+		Build().Publish(suite.registryServer, EXTENSION_ID)
+	response := suite.makeRequest("DELETE", suite.deleteInstance(EXTENSION_ID, "ext-version", "inst-id"), "", 204)
 	suite.Equal("", response)
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestDeleteInstanceFails() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithDeleteInstanceFunc("context.sqlClient.execute('invalid query')").
-		Build().WriteToFile(path.Join(suite.tempExtensionRepo, "ext-id"))
-	response := suite.makeRequest("DELETE", suite.deleteInstance("ext-id", "ext-version", "inst-id"), "", 500)
+		Build().Publish(suite.registryServer, EXTENSION_ID)
+	response := suite.makeRequest("DELETE", suite.deleteInstance(EXTENSION_ID, "ext-version", "inst-id"), "", 500)
 	suite.Contains(response, `{"code":500,"message":"Internal server error"`)
 }
 
@@ -161,16 +165,16 @@ func (suite *RestAPIIntegrationTestSuite) TestDeleteInstanceFailsForUnknownExten
 func (suite *RestAPIIntegrationTestSuite) TestUninstallExtensionSuccessfully() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUninstallFunc("context.sqlClient.execute('select 1')").
-		Build().WriteToFile(path.Join(suite.tempExtensionRepo, "ext-id"))
-	response := suite.makeRequest("DELETE", suite.uninstallExtension("ext-id", "ext-version"), "", 204)
+		Build().Publish(suite.registryServer, EXTENSION_ID)
+	response := suite.makeRequest("DELETE", suite.uninstallExtension(EXTENSION_ID, "ext-version"), "", 204)
 	suite.Equal("", response)
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestExtensionInstanceFails() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUninstallFunc("context.sqlClient.execute('invalid query')").
-		Build().WriteToFile(path.Join(suite.tempExtensionRepo, "ext-id"))
-	response := suite.makeRequest("DELETE", suite.uninstallExtension("ext-id", "ext-version"), "", 500)
+		Build().Publish(suite.registryServer, EXTENSION_ID)
+	response := suite.makeRequest("DELETE", suite.uninstallExtension(EXTENSION_ID, "ext-version"), "", 500)
 	suite.Contains(response, `{"code":500,"message":"Internal server error"`)
 }
 

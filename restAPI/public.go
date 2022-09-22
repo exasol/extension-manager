@@ -18,13 +18,13 @@ const (
 
 // Configuration options for the extension manager.
 type ExtensionManagerConfig struct {
-	ExtensionFolder string // Path to the local folder containing the extensions as .js files.
+	ExtensionRegistryURL string // URL of the extension registry index used to find available extensions. This can also be the path of a local directory.
 }
 
 // AddPublicEndpoints adds the extension manager endpoints to the API.
 // The config struct contains configuration options for the extension manager.
 func AddPublicEndpoints(api *openapi.API, config ExtensionManagerConfig) error {
-	controller := extensionController.Create(config.ExtensionFolder, EXTENSION_SCHEMA_NAME)
+	controller := extensionController.Create(config.ExtensionRegistryURL, EXTENSION_SCHEMA_NAME)
 	return addPublicEndpointsWithController(api, controller)
 }
 

@@ -30,7 +30,7 @@ function createExtension(): ExasolExtension {
             $DELETE_INSTANCE$
         },
         getInstanceParameters(context: Context, version: string): Parameter[] {
-            $GET_INSTANCE_PARAMTER_DEFINITIONS$
+            $GET_INSTANCE_PARAMETER_DEFINITIONS$
         },
         readInstanceParameterValues(context: Context, extensionVersion: string, instanceId: string): ParameterValues {
             return undefined;

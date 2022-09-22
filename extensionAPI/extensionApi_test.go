@@ -1,11 +1,8 @@
 package extensionAPI
 
 import (
-	"os"
-	"path"
 	"testing"
 
-	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/backend"
 	"github.com/exasol/extension-manager/integrationTesting"
 
@@ -33,9 +30,9 @@ func (suite *ExtensionApiSuite) TearDownTest() {
 	suite.mockSQLClient.AssertExpectations(suite.T())
 }
 
-func (suite *ExtensionApiSuite) Test_GetExtensionFromFile() {
-	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).Build().WriteToTmpFile()
-	extension := suite.loadExtension(extensionFile)
+func (suite *ExtensionApiSuite) Test_LoadExtension() {
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).Build().AsString()
+	extension := suite.loadExtension(extensionContent)
 	suite.Equal("MyDemoExtension", extension.Name)
 }
 
@@ -53,57 +50,57 @@ func (mock *sqlClientMock) Query(query string, args ...any) backend.QueryResult 
 }
 
 func (suite *ExtensionApiSuite) Test_GetParameterDefinitions_EmptyResult() {
-	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithGetInstanceParameterDefinitionFunc(`return []`).
-		Build().WriteToTmpFile()
-	extension := suite.loadExtension(extensionFile)
+		Build().AsString()
+	extension := suite.loadExtension(extensionContent)
 	definitions := extension.extension.GetParameterDefinitions(suite.mockContext(), "extVersion")
 	suite.Equal([]interface{}{}, definitions)
 }
 
 func (suite *ExtensionApiSuite) Test_GetParameterDefinitions() {
-	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string"}]`).
-		Build().WriteToTmpFile()
-	extension := suite.loadExtension(extensionFile)
+		Build().AsString()
+	extension := suite.loadExtension(extensionContent)
 	definitions := extension.extension.GetParameterDefinitions(suite.mockContext(), "extVersion")
 	suite.Equal([]interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}, definitions)
 }
 
 func (suite *ExtensionApiSuite) Test_Install() {
-	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).Build().WriteToTmpFile()
-	extension := suite.loadExtension(extensionFile)
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).Build().AsString()
+	extension := suite.loadExtension(extensionContent)
 	suite.mockSQLClient.On("Execute", "select 1", []any{}).Return()
 	err := extension.Install(suite.mockContext(), "extVersion")
 	suite.NoError(err)
 }
 
 func (suite *ExtensionApiSuite) Test_Install_ResolveBucketFsPath() {
-	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithInstallFunc("context.sqlClient.execute(`create script path ${context.bucketFs.resolvePath('my-adapter-'+version+'.jar')}`)").
-		Build().WriteToTmpFile()
-	extension := suite.loadExtension(extensionFile)
+		Build().AsString()
+	extension := suite.loadExtension(extensionContent)
 	suite.mockSQLClient.On("Execute", "create script path /buckets/bfsdefault/default/my-adapter-extensionVersion.jar", []any{}).Return()
 	err := extension.Install(suite.mockContext(), "extensionVersion")
 	suite.NoError(err)
 }
 
 func (suite *ExtensionApiSuite) Test_Uninstall() {
-	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUninstallFunc("context.sqlClient.execute(`uninstall version ${version}`)").
-		Build().WriteToTmpFile()
-	extension := suite.loadExtension(extensionFile)
+		Build().AsString()
+	extension := suite.loadExtension(extensionContent)
 	suite.mockSQLClient.On("Execute", "uninstall version extVersion", []any{}).Return()
 	err := extension.Uninstall(suite.mockContext(), "extVersion")
 	suite.NoError(err)
 }
 
 func (suite *ExtensionApiSuite) Test_AddInstance_validParameters() {
-	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithAddInstanceFunc("context.sqlClient.execute('create vs');\n" +
 			"return {id: 'instId', name: `instance_${version}_${params.values[0].name}_${params.values[0].value}`};").
-		Build().WriteToTmpFile()
-	extension := suite.loadExtension(extensionFile)
+		Build().AsString()
+	extension := suite.loadExtension(extensionContent)
 	suite.mockSQLClient.On("Execute", "create vs", []any{}).Return()
 	instance, err := extension.AddInstance(suite.mockContext(), "extensionVersion", &ParameterValues{Values: []ParameterValue{{Name: "p1", Value: "v1"}}})
 	suite.NoError(err)
@@ -111,29 +108,29 @@ func (suite *ExtensionApiSuite) Test_AddInstance_validParameters() {
 }
 
 func (suite *ExtensionApiSuite) Test_ListInstances_EmptyResult() {
-	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		Build().WriteToTmpFile()
-	extension := suite.loadExtension(extensionFile)
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		Build().AsString()
+	extension := suite.loadExtension(extensionContent)
 	instances, err := extension.ListInstances(suite.mockContext(), "ver")
 	suite.NoError(err)
 	suite.Empty(instances)
 }
 
 func (suite *ExtensionApiSuite) Test_ListInstances_NonEmptyResult() {
-	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstancesFunc(`return [{id: "instId", name: "instName"}]`).
-		Build().WriteToTmpFile()
-	extension := suite.loadExtension(extensionFile)
+		Build().AsString()
+	extension := suite.loadExtension(extensionContent)
 	instances, err := extension.ListInstances(suite.mockContext(), "ver")
 	suite.NoError(err)
 	suite.Equal([]*JsExtInstance{{Id: "instId", Name: "instName"}}, instances)
 }
 
 func (suite *ExtensionApiSuite) Test_DeleteInstance() {
-	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithDeleteInstanceFunc("context.sqlClient.execute(`drop instance ${instanceId}`)").
-		Build().WriteToTmpFile()
-	extension := suite.loadExtension(extensionFile)
+		Build().AsString()
+	extension := suite.loadExtension(extensionContent)
 	suite.mockSQLClient.On("Execute", "drop instance instId", []any{}).Return()
 	err := extension.DeleteInstance(suite.mockContext(), "extVersion", "instId")
 	suite.NoError(err)
@@ -145,74 +142,60 @@ func createMockMetadata() *ExaMetadata {
 }
 
 func (suite *ExtensionApiSuite) Test_FindInstallationsCanReadAllScriptsTable() {
-	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(`
 		return metadata.allScripts.rows.map(row => {
 			return {name: row.name, version: "0.1.0"}
-		});`).Build().WriteToTmpFile()
-	extension := suite.loadExtension(extensionFile)
+		});`).Build().AsString()
+	extension := suite.loadExtension(extensionContent)
 	result, err := extension.FindInstallations(createMockContext(), createMockMetadata())
 	suite.Equal([]*JsExtInstallation{{Name: "test", Version: "0.1.0"}}, result)
 	suite.NoError(err)
 }
 
 func (suite *ExtensionApiSuite) Test_FindInstallationsReturningParameters() {
-	extensionFile := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.
-			MockFindInstallationsFunction("test", "0.1.0")).Build().WriteToTmpFile()
-	extension := suite.loadExtension(extensionFile)
+			MockFindInstallationsFunction("test", "0.1.0")).Build().AsString()
+	extension := suite.loadExtension(extensionContent)
 	result, err := extension.FindInstallations(createMockContext(), createMockMetadata())
 	suite.Equal([]*JsExtInstallation{{Name: "test", Version: "0.1.0"}}, result)
 	suite.NoError(err)
 }
 
-func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_withOutdatedApiVersion() {
-	extensionFile := suite.writeExtension(`
+func (suite *ExtensionApiSuite) Test_LoadExtension_withOutdatedApiVersion() {
+	extensionContent := `
 	(function(){
 		global.installedExtension = {
 			extension: {},
 			apiVersion: "0.0.0"
 		}
-	})()`)
-	extension, err := GetExtensionFromFile(extensionFile)
+	})()`
+	extension, err := LoadExtension("ext-id", extensionContent)
 	suite.ErrorContains(err, `incompatible extension API version "0.0.0". Please update the extension to use supported version "`+SupportedApiVersion+`"`)
 	suite.Nil(extension)
 }
 
-func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_withoutSettingGlobalVariable() {
-	extensionFile := suite.writeExtension(`(function(){ })()`)
-	extension, err := GetExtensionFromFile(extensionFile)
-	suite.EqualError(err, "extension did not set global.installedExtension")
+func (suite *ExtensionApiSuite) Test_LoadExtension_withoutSettingGlobalVariable() {
+	extension, err := LoadExtension("ext-id", `(function(){ })()`)
+	suite.EqualError(err, `extension "ext-id" did not set global.installedExtension`)
 	suite.Nil(extension)
 }
 
-func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_invalidJavaScript() {
-	extensionFile := suite.writeExtension(`invalid javascript`)
-	extension, err := GetExtensionFromFile(extensionFile)
-	suite.ErrorContains(err, "failed to run extension file")
+func (suite *ExtensionApiSuite) Test_LoadExtension_invalidJavaScript() {
+	extension, err := LoadExtension("ext-id", `invalid javascript`)
+	suite.ErrorContains(err, `failed to run extension "ext-id"`)
 	suite.ErrorContains(err, "SyntaxError")
 	suite.ErrorContains(err, "Unexpected identifier")
 	suite.Nil(extension)
-}
-
-func (suite *ExtensionApiSuite) Test_GetExtensionFromFile_invalidFileName() {
-	extension, err := GetExtensionFromFile("no-such-file")
-	suite.Equal(apiErrors.NewAPIError(404, "extension \"no-such-file\" not found"), err)
-	suite.Nil(extension)
-}
-
-func (suite *ExtensionApiSuite) writeExtension(extensionJs string) string {
-	extensionFile := path.Join(suite.T().TempDir(), "extension.js")
-	suite.NoError(os.WriteFile(extensionFile, []byte(extensionJs), 0600))
-	return extensionFile
 }
 
 func (suite *ExtensionApiSuite) mockContext() *ExtensionContext {
 	return createMockContextWithSqlClient(&suite.mockSQLClient)
 }
 
-func (suite *ExtensionApiSuite) loadExtension(extensionFile string) *JsExtension {
-	extension, err := GetExtensionFromFile(extensionFile)
+func (suite *ExtensionApiSuite) loadExtension(content string) *JsExtension {
+	extension, err := LoadExtension("ext-id", content)
 	if err != nil {
 		suite.T().Fatalf("loading extension failed: %v", err)
 	}

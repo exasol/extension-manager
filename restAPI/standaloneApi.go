@@ -39,7 +39,7 @@ func setupStandaloneAPI(controller extensionController.TransactionController) (h
 	}
 	r.Group(func(r chi.Router) {
 		r.MethodFunc(http.MethodGet, "/openapi.json", openApiHandler)
-		r.Method("GET", "/openapi/*", httpswagger.Handler(
+		r.Method(http.MethodGet, "/openapi/*", httpswagger.Handler(
 			httpswagger.URL("/openapi.json"),
 		))
 	})

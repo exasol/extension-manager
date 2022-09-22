@@ -1,9 +1,16 @@
 {
     "go.testTimeout": "240s",
     "go.testFlags": [
-        "-p", "1"
+        "-p", "1", "-v"
     ],
     "go.coverOnSingleTest": true,
     "go.coverOnSingleTestFile": true,
     "go.coverOnTestPackage": true,
+    "go.lintOnSave": "workspace",
+    "go.lintTool": "golangci-lint",
+    //"go.lintFlags": ["--enable-all"],
+    "sonarlint.connectedMode.project": {
+        "connectionId": "exasol",
+        "projectKey": "com.exasol:extension-manager"
+    },
 }

@@ -4,12 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"os"
 	"path"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/extensionAPI"
+	"github.com/exasol/extension-manager/extensionController/registry"
 	"github.com/exasol/extension-manager/integrationTesting"
 	"github.com/exasol/extension-manager/parameterValidator"
 
@@ -40,7 +42,11 @@ func (suite *ControllerUTestSuite) BeforeTest(suiteName, testName string) {
 func (suite *ControllerUTestSuite) createController() {
 	suite.bucketFsMock = createBucketFsMock()
 	suite.metaDataMock = createExaMetaDataReaderMock(EXTENSION_SCHEMA)
-	ctrl := &controllerImpl{extensionFolder: suite.tempExtensionRepo, schema: EXTENSION_SCHEMA, metaDataReader: &suite.metaDataMock}
+	ctrl := &controllerImpl{
+		registry:       registry.NewRegistry(suite.tempExtensionRepo),
+		schema:         EXTENSION_SCHEMA,
+		metaDataReader: &suite.metaDataMock,
+	}
 	suite.controller = &transactionControllerImpl{controller: ctrl, bucketFs: &suite.bucketFsMock}
 }
 
@@ -75,6 +81,22 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsWithMissingJar() {
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
 	suite.NoError(err)
 	suite.Empty(extensions)
+}
+
+func (suite *ControllerUTestSuite) TestGetAllExtensionsFailsForInvalidExtension() {
+	suite.writeFile("broken-extension.js", "invalid javascript")
+	suite.bucketFsMock.simulateFiles([]BfsFile{})
+	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
+	suite.ErrorContains(err, `failed to load extension "broken-extension.js": failed to run extension "broken-extension.js" with content "invalid javascript": SyntaxError`)
+	suite.Empty(extensions)
+}
+
+func (suite *ControllerUTestSuite) writeFile(fileName, content string) {
+	filePath := path.Join(suite.tempExtensionRepo, fileName)
+	err := os.WriteFile(filePath, []byte(content), 0600)
+	if err != nil {
+		suite.T().Errorf("failed to write to %q: %v", filePath, err)
+	}
 }
 
 type errorTest struct {
@@ -189,7 +211,8 @@ func (suite *ControllerUTestSuite) TestInstallFailsForUnknownExtensionId() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
 	err := suite.controller.InstallExtension(mockContext(), suite.db, "unknown-extension-id", "ver")
-	suite.ErrorContains(err, "failed to load extension with id \"unknown-extension-id\": failed to load extension from file")
+	suite.ErrorContains(err, `failed to load extension "unknown-extension-id"`)
+	suite.ErrorContains(err, `unknown-extension-id" not found`)
 }
 
 func (suite *ControllerUTestSuite) TestInstallSucceeds() {
@@ -241,7 +264,8 @@ func (suite *ControllerUTestSuite) TestUninstallFailsForUnknownExtensionId() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
 	err := suite.controller.UninstallExtension(mockContext(), suite.db, "unknown-extension-id", "ver")
-	suite.ErrorContains(err, "failed to load extension with id \"unknown-extension-id\": failed to load extension from file")
+	suite.ErrorContains(err, `failed to load extension "unknown-extension-id"`)
+	suite.ErrorContains(err, `unknown-extension-id" not found`)
 }
 
 func (suite *ControllerUTestSuite) TestUninstallSucceeds() {

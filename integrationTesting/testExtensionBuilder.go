@@ -118,7 +118,7 @@ func (b TestExtensionBuilder) Build() *BuiltExtension {
 	extensionTs = strings.Replace(extensionTs, "$ADD_INSTANCE$", b.addInstanceFunc, 1)
 	extensionTs = strings.Replace(extensionTs, "$FIND_INSTANCES$", b.findInstancesFunc, 1)
 	extensionTs = strings.Replace(extensionTs, "$DELETE_INSTANCE$", b.deleteInstanceFunc, 1)
-	extensionTs = strings.Replace(extensionTs, "$GET_INSTANCE_PARAMTER_DEFINITIONS$", b.getInstanceParameterDefinitionsFunc, 1)
+	extensionTs = strings.Replace(extensionTs, "$GET_INSTANCE_PARAMETER_DEFINITIONS$", b.getInstanceParameterDefinitionsFunc, 1)
 	workDir := path.Join(os.TempDir(), "extension-manager-test-extension-build-dir")
 	if _, err := os.Stat(workDir); errors.Is(err, os.ErrNotExist) {
 		err := os.Mkdir(workDir, os.ModePerm)
@@ -179,6 +179,13 @@ func (e BuiltExtension) WriteToFile(fileName string) {
 		panic(err)
 	}
 	cleanupFile(e.testing, fileName)
+}
+
+func (e BuiltExtension) Publish(server *MockRegistryServer, id string) {
+	path := "/" + id + ".js"
+	extensionUrl := server.BaseUrl() + path
+	server.SetRegistryContent(fmt.Sprintf(`{"extensions":[{"id": "%s", "url": "%s"}]}`, id, extensionUrl))
+	server.SetPathContent(path, e.AsString())
 }
 
 func cleanupFile(t *testing.T, fileName string) {
