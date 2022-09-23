@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.util.List;
 
 import org.junit.jupiter.api.*;
 
@@ -14,14 +16,17 @@ import com.exasol.dbbuilder.dialects.exasol.ExasolObjectConfiguration;
 import com.exasol.dbbuilder.dialects.exasol.ExasolObjectFactory;
 import com.exasol.exasoltestsetup.ExasolTestSetup;
 import com.exasol.exasoltestsetup.ExasolTestSetupFactory;
+import com.exasol.extensionmanager.itest.process.SimpleProcess;
 import com.exasol.udfdebugging.UdfTestSetup;
 
 class ExtensionManagerSetupIT {
+    private static final Path TESTING_EXTENSION_SOURCE_DIR = Paths.get("testing-extension");
     private static ExasolTestSetup exasolTestSetup;
 
     @BeforeAll
     static void setupExasol() {
         exasolTestSetup = new ExasolTestSetupFactory(Path.of("dummy-config")).getTestSetup();
+        SimpleProcess.start(TESTING_EXTENSION_SOURCE_DIR, List.of("npm", "install"), Duration.ofSeconds(60));
     }
 
     @AfterAll
@@ -40,7 +45,7 @@ class ExtensionManagerSetupIT {
         final ExasolObjectFactory exasolObjectFactory = new ExasolObjectFactory(connection,
                 ExasolObjectConfiguration.builder().withJvmOptions(udfTestSetup.getJvmOptions()).build());
         extensionManager = ExtensionManagerSetup.create(exasolTestSetup, exasolObjectFactory,
-                Paths.get("testing-extension"));
+                TESTING_EXTENSION_SOURCE_DIR);
     }
 
     @Test
