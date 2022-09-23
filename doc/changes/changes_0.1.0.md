@@ -60,9 +60,9 @@ Code name:
 * Added `github.com/kinbiko/jsonassert:v1.1.1`
 * Added `github.com/DATA-DOG/go-sqlmock:v1.5.0`
 
-### Extension Integration Tests Library
+### Extension Manager Java Client
 
-#### Test Dependency Updates
+#### Compile Dependency Updates
 
 * Added `com.brsanthu:migbase64:2.2`
 * Added `com.fasterxml.jackson.core:jackson-annotations:2.13.4`
@@ -94,6 +94,36 @@ Code name:
 * Added `org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M5`
 * Added `org.codehaus.mojo:build-helper-maven-plugin:3.3.0`
 * Added `org.codehaus.mojo:exec-maven-plugin:3.0.0`
+* Added `org.codehaus.mojo:flatten-maven-plugin:1.2.7`
+* Added `org.codehaus.mojo:versions-maven-plugin:2.10.0`
+* Added `org.jacoco:jacoco-maven-plugin:0.8.8`
+* Added `org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1.2184`
+* Added `org.sonatype.ossindex.maven:ossindex-maven-plugin:3.2.0`
+* Added `org.sonatype.plugins:nexus-staging-maven-plugin:1.6.13`
+
+### Extension Integration Tests Library
+
+#### Compile Dependency Updates
+
+* Added `com.exasol:extension-manager-client-java:0.1.0`
+
+#### Plugin Dependency Updates
+
+* Added `com.exasol:error-code-crawler-maven-plugin:1.1.2`
+* Added `com.exasol:project-keeper-maven-plugin:2.8.0`
+* Added `io.github.zlika:reproducible-build-maven-plugin:0.15`
+* Added `org.apache.maven.plugins:maven-clean-plugin:2.5`
+* Added `org.apache.maven.plugins:maven-compiler-plugin:3.10.1`
+* Added `org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1`
+* Added `org.apache.maven.plugins:maven-enforcer-plugin:3.1.0`
+* Added `org.apache.maven.plugins:maven-gpg-plugin:3.0.1`
+* Added `org.apache.maven.plugins:maven-install-plugin:2.4`
+* Added `org.apache.maven.plugins:maven-jar-plugin:2.4`
+* Added `org.apache.maven.plugins:maven-javadoc-plugin:3.4.0`
+* Added `org.apache.maven.plugins:maven-resources-plugin:2.6`
+* Added `org.apache.maven.plugins:maven-site-plugin:3.3`
+* Added `org.apache.maven.plugins:maven-source-plugin:3.2.1`
+* Added `org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M5`
 * Added `org.codehaus.mojo:flatten-maven-plugin:1.2.7`
 * Added `org.codehaus.mojo:versions-maven-plugin:2.10.0`
 * Added `org.jacoco:jacoco-maven-plugin:0.8.8`
