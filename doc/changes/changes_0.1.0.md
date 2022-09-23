@@ -105,7 +105,17 @@ Code name:
 
 #### Compile Dependency Updates
 
+* Added `com.exasol:exasol-test-setup-abstraction-java:0.3.2`
 * Added `com.exasol:extension-manager-client-java:0.1.0`
+* Added `com.exasol:hamcrest-resultset-matcher:1.5.2`
+* Added `com.exasol:test-db-builder-java:3.3.4`
+* Added `org.junit.jupiter:junit-jupiter-api:5.9.0`
+
+#### Test Dependency Updates
+
+* Added `com.exasol:udf-debugging-java:0.6.4`
+* Added `org.junit.jupiter:junit-jupiter-params:5.9.0`
+* Added `org.mockito:mockito-core:4.7.0`
 
 #### Plugin Dependency Updates
 
@@ -116,6 +126,7 @@ Code name:
 * Added `org.apache.maven.plugins:maven-compiler-plugin:3.10.1`
 * Added `org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1`
 * Added `org.apache.maven.plugins:maven-enforcer-plugin:3.1.0`
+* Added `org.apache.maven.plugins:maven-failsafe-plugin:3.0.0-M5`
 * Added `org.apache.maven.plugins:maven-gpg-plugin:3.0.1`
 * Added `org.apache.maven.plugins:maven-install-plugin:2.4`
 * Added `org.apache.maven.plugins:maven-jar-plugin:2.4`

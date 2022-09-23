@@ -73,9 +73,21 @@
 
 ### Compile Dependencies
 
-| Dependency                          | License           |
-| ----------------------------------- | ----------------- |
-| [Extension Manager Java Client][62] | [MIT License][63] |
+| Dependency                               | License                           |
+| ---------------------------------------- | --------------------------------- |
+| [Extension Manager Java Client][62]      | [MIT License][63]                 |
+| [exasol-test-setup-abstraction-java][64] | [MIT License][65]                 |
+| [Test Database Builder for Java][66]     | [MIT License][67]                 |
+| [Matcher for SQL Result Sets][68]        | [MIT License][69]                 |
+| [JUnit Jupiter API][70]                  | [Eclipse Public License v2.0][71] |
+
+### Test Dependencies
+
+| Dependency                 | License                           |
+| -------------------------- | --------------------------------- |
+| [JUnit Jupiter Params][70] | [Eclipse Public License v2.0][71] |
+| [mockito-core][72]         | [The MIT License][73]             |
+| [udf-debugging-java][74]   | [MIT][75]                         |
 
 ### Plugin Dependencies
 
@@ -93,6 +105,7 @@
 | [Apache Maven Source Plugin][42]                        | [Apache License, Version 2.0][34]              |
 | [Apache Maven Javadoc Plugin][49]                       | [Apache License, Version 2.0][34]              |
 | [Nexus Staging Maven Plugin][50]                        | [Eclipse Public License][51]                   |
+| [Maven Failsafe Plugin][76]                             | [Apache License, Version 2.0][34]              |
 | [JaCoCo :: Maven Plugin][52]                            | [Eclipse Public License 2.0][53]               |
 | [error-code-crawler-maven-plugin][54]                   | [MIT License][55]                              |
 | [Reproducible Build Maven Plugin][56]                   | [Apache 2.0][27]                               |
@@ -167,3 +180,16 @@
 [61]: http://maven.apache.org/plugins/maven-site-plugin/
 [62]: https://github.com/exasol/extension-manager/
 [63]: https://github.com/exasol/extension-manager/blob/main/LICENSE
+[64]: https://github.com/exasol/exasol-test-setup-abstraction-java/
+[65]: https://github.com/exasol/exasol-test-setup-abstraction-java/blob/main/LICENSE
+[66]: https://github.com/exasol/test-db-builder-java/
+[67]: https://github.com/exasol/test-db-builder-java/blob/main/LICENSE
+[68]: https://github.com/exasol/hamcrest-resultset-matcher/
+[69]: https://github.com/exasol/hamcrest-resultset-matcher/blob/main/LICENSE
+[70]: https://junit.org/junit5/
+[71]: https://www.eclipse.org/legal/epl-v20.html
+[72]: https://github.com/mockito/mockito
+[73]: https://github.com/mockito/mockito/blob/main/LICENSE
+[74]: https://github.com/exasol/udf-debugging-java/
+[75]: https://opensource.org/licenses/MIT
+[76]: https://maven.apache.org/surefire/maven-failsafe-plugin/

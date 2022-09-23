@@ -13,6 +13,7 @@ sources:
   - type: maven
     path: extension-manager-integration-test-java/pom.xml
     modules:
+      - integration_tests
       - maven_central
     parentPom:
       groupId: "com.exasol"
