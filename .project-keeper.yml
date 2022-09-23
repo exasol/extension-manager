@@ -1,6 +1,11 @@
 sources:
   - type: golang
     path: go.mod
+  - type: maven
+    path: extension-manager-integration-test-java/pom.xml
+    modules:
+      - maven_central
+      - integration_tests
 version: 0.1.0
 linkReplacements:
   - "https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.2.3/go-client/LICENSE|https://github.com/exasol/exasol-test-setup-abstraction-server/blob/main/LICENSE"
