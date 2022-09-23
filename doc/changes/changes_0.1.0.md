@@ -62,6 +62,18 @@ Code name:
 
 ### Extension Integration Tests Library
 
+#### Test Dependency Updates
+
+* Added `com.brsanthu:migbase64:2.2`
+* Added `com.fasterxml.jackson.core:jackson-annotations:2.13.4`
+* Added `com.fasterxml.jackson.core:jackson-core:2.13.4`
+* Added `com.fasterxml.jackson.core:jackson-databind:2.13.4`
+* Added `io.swagger.core.v3:swagger-annotations:2.2.2`
+* Added `org.glassfish.jersey.core:jersey-client:2.36`
+* Added `org.glassfish.jersey.inject:jersey-hk2:2.36`
+* Added `org.glassfish.jersey.media:jersey-media-json-jackson:2.36`
+* Added `org.glassfish.jersey.media:jersey-media-multipart:2.36`
+
 #### Plugin Dependency Updates
 
 * Added `com.exasol:error-code-crawler-maven-plugin:1.1.2`
@@ -72,7 +84,6 @@ Code name:
 * Added `org.apache.maven.plugins:maven-compiler-plugin:3.10.1`
 * Added `org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1`
 * Added `org.apache.maven.plugins:maven-enforcer-plugin:3.1.0`
-* Added `org.apache.maven.plugins:maven-failsafe-plugin:3.0.0-M5`
 * Added `org.apache.maven.plugins:maven-gpg-plugin:3.0.1`
 * Added `org.apache.maven.plugins:maven-install-plugin:2.4`
 * Added `org.apache.maven.plugins:maven-jar-plugin:2.4`
@@ -82,6 +93,7 @@ Code name:
 * Added `org.apache.maven.plugins:maven-source-plugin:3.2.1`
 * Added `org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M5`
 * Added `org.codehaus.mojo:build-helper-maven-plugin:3.3.0`
+* Added `org.codehaus.mojo:exec-maven-plugin:3.0.0`
 * Added `org.codehaus.mojo:flatten-maven-plugin:1.2.7`
 * Added `org.codehaus.mojo:versions-maven-plugin:2.10.0`
 * Added `org.jacoco:jacoco-maven-plugin:0.8.8`

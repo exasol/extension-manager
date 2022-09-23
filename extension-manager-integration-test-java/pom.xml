@@ -9,6 +9,13 @@
     <url>https://github.com/exasol/extension-manager/</url>
     <properties>
         <junit.version>5.9.0</junit.version>
+        <openapi.spec.path>${project.basedir}/target/extension-manager-swagger.json</openapi.spec.path>
+        <!-- ProjectKeeper already included in root project -->
+        <project-keeper.skip>true</project-keeper.skip>
+        <!-- Generated code dependencies -->
+        <swagger-core-version>2.2.2</swagger-core-version>
+        <jersey-version>2.36</jersey-version>
+        <jackson-version>2.13.4</jackson-version>
     </properties>
     <distributionManagement>
         <snapshotRepository>
@@ -20,7 +27,56 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
-    <dependencies/>
+    <dependencies>
+        <!-- Dependencies for generated extension-manager client -->
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>${swagger-core-version}</version>
+        </dependency>
+        <!-- HTTP client: jersey-client -->
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>${jersey-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
+            <version>${jersey-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>${jersey-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>${jersey-version}</version>
+        </dependency>
+        <!-- JSON processing: jackson -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.brsanthu</groupId>
+            <artifactId>migbase64</artifactId>
+            <version>2.2</version>
+        </dependency>
+    </dependencies>
     <build>
         <plugins>
             <plugin>
@@ -36,6 +92,26 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>generate-openapi-spec</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>${project.basedir}/..</workingDirectory>
+                            <executable>go</executable>
+                            <commandlineArgs>run cmd/main.go -openAPIOutputPath ${openapi.spec.path}</commandlineArgs>
+                            <useMavenLogger>false</useMavenLogger>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>io.swagger.codegen.v3</groupId>
                 <artifactId>swagger-codegen-maven-plugin</artifactId>
                 <version>3.0.34</version>
@@ -45,7 +121,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/test/resources/extension-manager-swagger.yaml</inputSpec>
+                            <inputSpec>${openapi.spec.path}</inputSpec>
                             <language>java</language>
                             <addCompileSourceRoot>false</addCompileSourceRoot>
                             <apiPackage>com.exasol.extensionmanager.client.api</apiPackage>
@@ -74,10 +150,10 @@
                 <version>3.3.0</version>
                 <executions>
                     <execution>
-                        <id>add-generated-test-source</id>
-                        <phase>generate-test-sources</phase>
+                        <id>add-generated-source</id>
+                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>add-test-source</goal>
+                            <goal>add-source</goal>
                         </goals>
                         <configuration>
                             <sources>

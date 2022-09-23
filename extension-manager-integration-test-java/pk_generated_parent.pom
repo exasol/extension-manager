@@ -218,27 +218,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.0.0-M5</version>
-                <configuration>
-                    <!-- Set the highest log level for coverage testing, so that we have a chance to reach branches
-          <property>	                      in the logging lambdas too. -->
-                    <argLine>-Djava.util.logging.config.file=src/test/resources/logging.properties ${argLine}</argLine>
-                    <systemPropertyVariables/>
-                    <excludedGroups>${test.excludeTags}</excludedGroups>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>verify</id>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.8</version>
