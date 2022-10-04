@@ -134,7 +134,7 @@
 [8]: https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE
 [9]: https://github.com/Nightapes/go-rest/blob/v0.2.1/LICENSE
 [10]: https://github.com/kinbiko/jsonassert/blob/HEAD/LICENSE
-[11]: https://github.com/swagger-api/swagger-core/modules/swagger-annotations
+[11]: https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-annotations
 [12]: http://www.apache.org/licenses/LICENSE-2.0.html
 [13]: https://projects.eclipse.org/projects/ee4j.jersey/jersey-client
 [14]: http://www.eclipse.org/legal/epl-2.0
@@ -143,7 +143,7 @@
 [17]: https://opensource.org/licenses/BSD-2-Clause
 [18]: https://creativecommons.org/publicdomain/zero/1.0/
 [19]: https://asm.ow2.io/license.html
-[20]: jquery.org/license
+[20]: https://jquery.org/license/
 [21]: http://www.opensource.org/licenses/mit-license.php
 [22]: https://www.w3.org/Consortium/Legal/copyright-documents-19990405
 [23]: https://projects.eclipse.org/projects/ee4j.jersey/project/jersey-media-multipart
@@ -172,7 +172,7 @@
 [46]: https://github.com/exasol/project-keeper/
 [47]: https://github.com/exasol/project-keeper/blob/main/LICENSE
 [48]: http://www.mojohaus.org/exec-maven-plugin
-[49]: https://github.com/swagger-api/swagger-codegen/modules/swagger-codegen-maven-plugin
+[49]: https://github.com/swagger-api/swagger-codegen/tree/master/modules/swagger-codegen-maven-plugin
 [50]: http://www.mojohaus.org/build-helper-maven-plugin/
 [51]: https://opensource.org/licenses/mit-license.php
 [52]: https://maven.apache.org/plugins/maven-javadoc-plugin/
