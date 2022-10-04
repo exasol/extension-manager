@@ -12,13 +12,15 @@ import com.exasol.dbbuilder.dialects.exasol.ExasolObjectFactory;
 import com.exasol.dbbuilder.dialects.exasol.ExasolSchema;
 import com.exasol.errorreporting.ExaError;
 import com.exasol.exasoltestsetup.ExasolTestSetup;
-import com.exasol.exasoltestsetup.ServiceAddress;
 import com.exasol.extensionmanager.itest.builder.ExtensionBuilder;
 import com.exasol.extensionmanager.itest.installer.ExtensionManagerInstaller;
 
+/**
+ * Main class responsible for setting up the environment required for testing extensions using the extension manager.
+ */
 public class ExtensionManagerSetup implements AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(ExtensionManagerSetup.class.getName());
-    public static final String EXTENSION_SCHEMA_NAME = "EXA_EXTENSIONS";
+    private static final String EXTENSION_SCHEMA_NAME = "EXA_EXTENSIONS";
     private final ExtensionManagerProcess extensionManager;
     private final ExasolTestSetup exasolTestSetup;
     private final ExasolObjectFactory exasolObjectFactory;
@@ -41,6 +43,16 @@ public class ExtensionManagerSetup implements AutoCloseable {
         }
     }
 
+    /**
+     * Prepare and create a new instance of {@link ExtensionManagerSetup}. Usually you call this in a
+     * {@link org.junit.jupiter.api.BeforeAll} method. Make sure to close this by calling {@link #close()} in an
+     * {@link org.junit.jupiter.api.AfterAll} method.
+     * 
+     * @param exasolTestSetup     exasol test setup to use for the tests
+     * @param exasolObjectFactory object factory for creating exasol objects
+     * @param extensionBuilder    builder for building the extension under test
+     * @return a new instance
+     */
     public static ExtensionManagerSetup create(final ExasolTestSetup exasolTestSetup,
             final ExasolObjectFactory exasolObjectFactory, final ExtensionBuilder extensionBuilder) {
         final Path tempDir = createTempDir();
@@ -89,24 +101,43 @@ public class ExtensionManagerSetup implements AutoCloseable {
         }
     }
 
+    /**
+     * Get the client for accessing the extension manager via its REST API. Use this for calling and testing methods of
+     * the extension under test.
+     * 
+     * @return extension manager client
+     */
     public ExtensionManagerClient client() {
         return this.client;
     }
 
+    /**
+     * Get access to Exasol's metadata tables. This is useful for verifying that the extension under test created
+     * expected objects like {@code SCRIPT}s or {@code CONNECTION}s.
+     * 
+     * @return exasol metadata
+     */
     public ExasolMetadata exasolMetadata() {
         return new ExasolMetadata(this.connection, EXTENSION_SCHEMA_NAME);
     }
 
+    /**
+     * Create the extension schema used by extension manager. This is useful for testing if the extension under test can
+     * handle existing database objects.
+     * 
+     * @return new extension schema.
+     */
     public ExasolSchema createExtensionSchema() {
         return this.exasolObjectFactory.createSchema(EXTENSION_SCHEMA_NAME);
     }
 
-    public void addVirtualSchemaToDrop(final String name) {
+    /**
+     * Drop the virtual schema with the given name when calling {@link #close()}.
+     * 
+     * @param name the virtual schema to drop
+     */
+    public void addVirtualSchemaToCleanupQueue(final String name) {
         this.cleanupCallbacks.add(dropVirtualSchema(name));
-    }
-
-    public void addConnectionToDrop(final String name) {
-        this.cleanupCallbacks.add(dropConnection(name));
     }
 
     private Runnable dropVirtualSchema(final String name) {
@@ -119,6 +150,15 @@ public class ExtensionManagerSetup implements AutoCloseable {
         };
     }
 
+    /**
+     * Drop the connection with the given name when calling {@link #close()}.
+     * 
+     * @param name the connection to drop
+     */
+    public void addConnectionToCleanupQueue(final String name) {
+        this.cleanupCallbacks.add(dropConnection(name));
+    }
+
     private Runnable dropConnection(final String name) {
         return () -> {
             try {
@@ -129,10 +169,13 @@ public class ExtensionManagerSetup implements AutoCloseable {
         };
     }
 
-    public Statement createStatement() throws SQLException {
+    private Statement createStatement() throws SQLException {
         return this.connection.createStatement();
     }
 
+    /**
+     * Cleanup resources after running tests. Call this in a {@link org.junit.jupiter.api.AfterAll} method.
+     */
     @Override
     public void close() {
         dropExtensionSchema();
@@ -145,7 +188,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
         }
     }
 
-    void deleteTempDir() {
+    private void deleteTempDir() {
         try (Stream<Path> files = Files.walk(this.tempDir)) {
             files.sorted(Comparator.reverseOrder()) //
                     .map(Path::toFile) //
@@ -155,7 +198,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
         }
     }
 
-    void dropExtensionSchema() {
+    private void dropExtensionSchema() {
         this.extensionManager.close();
         this.cleanupCallbacks.forEach(Runnable::run);
         this.cleanupCallbacks.clear();
@@ -164,9 +207,5 @@ public class ExtensionManagerSetup implements AutoCloseable {
         } catch (final SQLException exception) {
             throw new IllegalStateException("Failed to delete extension schema " + EXTENSION_SCHEMA_NAME, exception);
         }
-    }
-
-    public ServiceAddress makeTcpServiceAccessibleFromDatabase(final ServiceAddress serviceAddress) {
-        return this.exasolTestSetup.makeTcpServiceAccessibleFromDatabase(serviceAddress);
     }
 }

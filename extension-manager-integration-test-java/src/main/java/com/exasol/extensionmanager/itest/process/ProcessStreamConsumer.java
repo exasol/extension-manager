@@ -6,6 +6,7 @@ import java.io.IOException;
  * Callback interface used by {@link AsyncStreamReader}.
  */
 public interface ProcessStreamConsumer {
+
     /**
      * Called when a new line was read from the input stream.
      *

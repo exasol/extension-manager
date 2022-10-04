@@ -5,10 +5,18 @@ import static java.util.Arrays.asList;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * This {@link ProcessStreamConsumer} forwards all events to the given delegates.
+ */
 public class DelegatingStreamConsumer implements ProcessStreamConsumer {
 
     private final List<ProcessStreamConsumer> delegates;
 
+    /**
+     * Create a new {@link DelegatingStreamConsumer}.
+     * 
+     * @param delegates delegates to which events should be forwarded
+     */
     public DelegatingStreamConsumer(final ProcessStreamConsumer... delegates) {
         this.delegates = asList(delegates);
     }

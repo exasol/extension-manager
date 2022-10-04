@@ -14,7 +14,10 @@ import java.util.regex.Pattern;
 
 import com.exasol.extensionmanager.itest.process.*;
 
-public class ExtensionManagerProcess implements AutoCloseable {
+/**
+ * This class allows starting and stopping an extension manager process.
+ */
+class ExtensionManagerProcess implements AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(ExtensionManagerProcess.class.getName());
     private static final Duration SERVER_STARTUP_TIMEOUT = Duration.ofSeconds(5);
     private final SimpleProcess process;
@@ -25,7 +28,7 @@ public class ExtensionManagerProcess implements AutoCloseable {
         this.port = port;
     }
 
-    public static ExtensionManagerProcess start(final Path extensionManagerBinary, final Path extensionFolder) {
+    static ExtensionManagerProcess start(final Path extensionManagerBinary, final Path extensionFolder) {
         final int port = findOpenPort();
         LOGGER.info(() -> "Starting extension manager " + extensionManagerBinary + " on port " + port
                 + " with extension folder " + extensionFolder + "...");
@@ -59,7 +62,7 @@ public class ExtensionManagerProcess implements AutoCloseable {
         this.process.stop();
     }
 
-    public String getServerBasePath() {
+    String getServerBasePath() {
         return "http://localhost:" + this.port;
     }
 

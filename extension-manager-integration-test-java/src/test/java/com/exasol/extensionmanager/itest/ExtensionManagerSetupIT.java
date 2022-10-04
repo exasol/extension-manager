@@ -58,6 +58,13 @@ class ExtensionManagerSetupIT {
         client = extensionManager.client();
     }
 
+    @AfterEach
+    void teardown() throws SQLException {
+        extensionManager.close();
+        udfTestSetup.close();
+        connection.close();
+    }
+
     @Test
     void listExtensions() {
         final ExtensionsResponseExtension expected = new ExtensionsResponseExtension().id("testing-extension.js")
@@ -125,11 +132,5 @@ class ExtensionManagerSetupIT {
     @Test
     void deleteInstanceWithVersion() {
         assertDoesNotThrow(() -> client.deleteInstance("version", "instance-id"));
-    }
-
-    @AfterEach
-    void teardown() throws SQLException {
-        udfTestSetup.close();
-        connection.close();
     }
 }

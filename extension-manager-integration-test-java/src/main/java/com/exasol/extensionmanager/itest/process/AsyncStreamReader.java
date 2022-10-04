@@ -55,7 +55,7 @@ class AsyncStreamReader {
             }
             consumer.readFinished();
         } catch (final IOException exception) {
-            LOGGER.log(Level.WARNING, "Failed to read input stream: " + exception.getMessage(), exception);
+            LOGGER.log(Level.WARNING, exception, () -> "Failed to read input stream: " + exception.getMessage());
             consumer.readFailed(exception);
         }
     }
@@ -63,7 +63,7 @@ class AsyncStreamReader {
     private static class LoggingExceptionHandler implements UncaughtExceptionHandler {
         @Override
         public void uncaughtException(final Thread thread, final Throwable throwable) {
-            LOGGER.log(Level.SEVERE, "Failed to read input stream: " + throwable.getMessage(), throwable);
+            LOGGER.log(Level.SEVERE, throwable, () -> "Failed to read input stream: " + throwable.getMessage());
         }
     }
 }

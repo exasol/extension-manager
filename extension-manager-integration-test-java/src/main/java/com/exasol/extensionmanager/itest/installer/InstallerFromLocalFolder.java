@@ -20,7 +20,7 @@ class InstallerFromLocalFolder implements ExtensionManagerInstaller {
 
     @Override
     public Path install() {
-        final Path extensionManagerProjectDir = this.config.getLocalExtensionManagerProject().get();
+        final Path extensionManagerProjectDir = this.config.getLocalExtensionManagerProject().orElseThrow();
         buildExtensionManager(extensionManagerProjectDir);
         final Path executable = extensionManagerProjectDir.resolve(EXECUTABLE_NAME);
         if (!Files.exists(executable)) {

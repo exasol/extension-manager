@@ -30,9 +30,9 @@ public class SimpleProcess {
      * Starts a new process using the working directory of the current Java process and waits until it terminates
      * successfully.
      *
-     * @param command          the command to execute
-     * @param executionTimeout the execution timeout for the process
-     * @return the combined stdout and stderr from the process
+     * @param command          command to execute
+     * @param executionTimeout execution timeout for the process
+     * @return combined stdout and stderr from the process
      */
     public static String start(final List<String> command, final Duration executionTimeout) {
         return start(null, command, executionTimeout);
@@ -41,11 +41,11 @@ public class SimpleProcess {
     /**
      * Starts a new process using the given working directory and waits until it terminates successfully.
      *
-     * @param workingDirectory the directory in which to start the process. Use the working directory of the current
-     *                         Java process if {@code null}.
-     * @param command          the command to execute
-     * @param executionTimeout the execution timeout for the process
-     * @return the combined stdout and stderr from the process
+     * @param workingDirectory directory in which to start the process. Use the working directory of the current Java
+     *                         process if {@code null}.
+     * @param command          command to execute
+     * @param executionTimeout execution timeout for the process
+     * @return combined stdout and stderr from the process
      */
     public static String start(final Path workingDirectory, final List<String> command,
             final Duration executionTimeout) {
@@ -67,7 +67,9 @@ public class SimpleProcess {
     /**
      * Starts a new process using the working directory of the current Java process.
      *
-     * @param command the command to execute
+     * @param command              command to execute
+     * @param outputStreamConsumer {@link ProcessStreamConsumer} for the output stream
+     * @param errorStreamConsumer  {@link ProcessStreamConsumer} for the error stream
      * @return a new {@link SimpleProcess} you can use to wait for the process to finish and retrieve its output
      */
     public static SimpleProcess start(final List<String> command, final ProcessStreamConsumer outputStreamConsumer,
@@ -78,9 +80,11 @@ public class SimpleProcess {
     /**
      * Starts a new process.
      *
-     * @param workingDirectory the directory in which to start the process. Use the working directory of the current
-     *                         Java process if {@code null}.
-     * @param command          the command to execute
+     * @param workingDirectory     directory in which to start the process. Use the working directory of the current
+     *                             Java process if {@code null}
+     * @param command              command to execute
+     * @param outputStreamConsumer {@link ProcessStreamConsumer} for the output stream
+     * @param errorStreamConsumer  {@link ProcessStreamConsumer} for the error stream
      * @return a new {@link SimpleProcess} you can use to wait for the process to finish and retrieve its output
      */
     public static SimpleProcess start(final Path workingDirectory, final List<String> command,
@@ -104,7 +108,7 @@ public class SimpleProcess {
     /**
      * Wait for the process to terminate successfully.
      *
-     * @param executionTimeout the maximum time to wait until the process finishes
+     * @param executionTimeout maximum time to wait until the process finishes
      * @throws IllegalStateException if the process did not finish within the given timeout or returned an exit code
      *                               other than 0
      */
@@ -119,10 +123,9 @@ public class SimpleProcess {
         LOGGER.fine(() -> "Command '" + formatCommand() + "' finished successfully after " + duration);
     }
 
-    public boolean isAlive() {
-        return this.process.isAlive();
-    }
-
+    /**
+     * Destroy a running process.
+     */
     public void stop() {
         this.process.destroy();
     }
