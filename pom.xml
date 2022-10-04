@@ -14,4 +14,16 @@
         <module>extension-manager-integration-test-java</module>
         <module>extension-manager-client-java</module>
     </modules>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.exasol</groupId>
+                <artifactId>error-code-crawler-maven-plugin</artifactId>
+                <configuration>
+                    <!-- No error codes defined in root project -->
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

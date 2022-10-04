@@ -84,10 +84,10 @@ public class ExtensionManagerSetup implements AutoCloseable {
         }
         final Path extensionFile = extensionBuilder.getExtensionFile();
         if (!Files.exists(extensionFile)) {
-            throw new IllegalStateException(
-                    ExaError.messageBuilder("").message("Extension file {{extension file}} not found.", extensionFile)
-                            .mitigation("Set buildExtension to true in {{config file}}.", config.getConfigFile())
-                            .mitigation("Ensure that extension was built successfully.").toString());
+            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-1")
+                    .message("Extension file {{extension file}} not found.", extensionFile)
+                    .mitigation("Set buildExtension to true in {{config file}}.", config.getConfigFile())
+                    .mitigation("Ensure that extension was built successfully.").toString());
         }
         LOGGER.info(() -> "Extension " + extensionFile + " was built successfully");
         copy(extensionFile, extensionRegistryDir.resolve(extensionFile.getFileName()));

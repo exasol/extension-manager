@@ -185,6 +185,14 @@
                     <failOnWarnings>false</failOnWarnings>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.exasol</groupId>
+                <artifactId>error-code-crawler-maven-plugin</artifactId>
+                <configuration>
+                    <!-- No error codes available in generated code -->
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <parent>
