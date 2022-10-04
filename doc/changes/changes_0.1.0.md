@@ -65,9 +65,9 @@ Code name:
 #### Compile Dependency Updates
 
 * Added `com.brsanthu:migbase64:2.2`
-* Added `com.fasterxml.jackson.core:jackson-annotations:2.13.4`
-* Added `com.fasterxml.jackson.core:jackson-core:2.13.4`
-* Added `com.fasterxml.jackson.core:jackson-databind:2.13.4`
+* Added `com.fasterxml.jackson.core:jackson-annotations:2.14.0-rc1`
+* Added `com.fasterxml.jackson.core:jackson-core:2.14.0-rc1`
+* Added `com.fasterxml.jackson.core:jackson-databind:2.14.0-rc1`
 * Added `io.swagger.core.v3:swagger-annotations:2.2.2`
 * Added `org.glassfish.jersey.core:jersey-client:2.36`
 * Added `org.glassfish.jersey.inject:jersey-hk2:2.36`

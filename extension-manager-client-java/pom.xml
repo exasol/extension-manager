@@ -15,7 +15,7 @@
         <!-- Generated code dependencies -->
         <swagger-core-version>2.2.2</swagger-core-version>
         <jersey-version>2.36</jersey-version>
-        <jackson-version>2.13.4</jackson-version>
+        <jackson-version>2.14.0-rc1</jackson-version> <!-- Use release candidate to fix CVE-2022-42003 -->
     </properties>
     <distributionManagement>
         <snapshotRepository>
@@ -186,60 +186,6 @@
                 </configuration>
             </plugin>
         </plugins>
-        <pluginManagement>
-            <plugins>
-                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>
-                                            org.codehaus.mojo
-                                        </groupId>
-                                        <artifactId>
-                                            exec-maven-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [3.0.0,)
-                                        </versionRange>
-                                        <goals>
-                                            <goal>exec</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore></ignore>
-                                    </action>
-                                </pluginExecution>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>
-                                            io.swagger.codegen.v3
-                                        </groupId>
-                                        <artifactId>
-                                            swagger-codegen-maven-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [3.0.34,)
-                                        </versionRange>
-                                        <goals>
-                                            <goal>generate</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore></ignore>
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
     </build>
     <parent>
         <artifactId>extension-manager-client-java-generated-parent</artifactId>

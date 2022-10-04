@@ -33,6 +33,13 @@
             <groupId>com.exasol</groupId>
             <artifactId>exasol-test-setup-abstraction-java</artifactId>
             <version>0.3.2</version>
+            <exclusions>
+                <!-- Exclude transitive dependency to fix https://ossindex.sonatype.org/vulnerability/sonatype-2020-0026 -->
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-handler</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
