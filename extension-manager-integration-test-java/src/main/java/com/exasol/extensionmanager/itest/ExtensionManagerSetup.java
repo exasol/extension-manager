@@ -1,19 +1,20 @@
 package com.exasol.extensionmanager.itest;
 
 import java.io.*;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.*;
-import java.time.Duration;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import com.exasol.dbbuilder.dialects.exasol.ExasolObjectFactory;
 import com.exasol.dbbuilder.dialects.exasol.ExasolSchema;
+import com.exasol.errorreporting.ExaError;
 import com.exasol.exasoltestsetup.ExasolTestSetup;
 import com.exasol.exasoltestsetup.ServiceAddress;
+import com.exasol.extensionmanager.itest.builder.ExtensionBuilder;
 import com.exasol.extensionmanager.itest.installer.ExtensionManagerInstaller;
-import com.exasol.extensionmanager.itest.process.SimpleProcess;
 
 public class ExtensionManagerSetup implements AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(ExtensionManagerSetup.class.getName());
@@ -41,10 +42,10 @@ public class ExtensionManagerSetup implements AutoCloseable {
     }
 
     public static ExtensionManagerSetup create(final ExasolTestSetup exasolTestSetup,
-            final ExasolObjectFactory exasolObjectFactory, final Path extensionSourceDir) {
+            final ExasolObjectFactory exasolObjectFactory, final ExtensionBuilder extensionBuilder) {
         final Path tempDir = createTempDir();
         final ExtensionTestConfig config = ExtensionTestConfig.read();
-        prepareExtension(config, extensionSourceDir, tempDir);
+        prepareExtension(config, extensionBuilder, tempDir);
         final ExtensionManagerInstaller installer = ExtensionManagerInstaller.forConfig(config);
         final Path extensionManagerExecutable = installer.install();
         final ExtensionManagerProcess extensionManager = ExtensionManagerProcess.start(extensionManagerExecutable,
@@ -62,22 +63,22 @@ public class ExtensionManagerSetup implements AutoCloseable {
         }
     }
 
-    private static void prepareExtension(final ExtensionTestConfig config, final Path extensionSourceDir,
+    private static void prepareExtension(final ExtensionTestConfig config, final ExtensionBuilder extensionBuilder,
             final Path extensionRegistryDir) {
-        if (!Files.exists(extensionSourceDir)) {
-            throw new IllegalArgumentException("Extension source dir " + extensionSourceDir + " does not exist");
-        }
         if (config.buildExtension()) {
-            SimpleProcess.start(extensionSourceDir, List.of("npm", "run", "build"), Duration.ofSeconds(30));
+            extensionBuilder.build();
         } else {
             LOGGER.warning("Skip building extension");
         }
-        final Path extension = Paths.get("extension/dist/s3-vs-extension.js").toAbsolutePath();
-        if (!Files.exists(extension)) {
-            throw new IllegalStateException("Extension file " + extension + " not found. Build it by executing: cd "
-                    + extension.getParent().getParent() + " && npm install && npm run build");
+        final Path extensionFile = extensionBuilder.getExtensionFile();
+        if (!Files.exists(extensionFile)) {
+            throw new IllegalStateException(
+                    ExaError.messageBuilder("").message("Extension file {{extension file}} not found.", extensionFile)
+                            .mitigation("Set buildExtension to true in {{config file}}.", config.getConfigFile())
+                            .mitigation("Ensure that extension was built successfully.").toString());
         }
-        copy(extension, extensionRegistryDir.resolve(extension.getFileName()));
+        LOGGER.info(() -> "Extension " + extensionFile + " was built successfully");
+        copy(extensionFile, extensionRegistryDir.resolve(extensionFile.getFileName()));
     }
 
     private static void copy(final Path sourceFile, final Path targetFile) {

@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 public class ExtensionTestConfig {
     private static final Logger LOGGER = Logger.getLogger(ExtensionTestConfig.class.getName());
-    private static final Path CONFIG_FILE = Paths.get("extension-test.properties");
+    private static final Path CONFIG_FILE = Paths.get("extension-test.properties").toAbsolutePath();
     private final Properties properties;
 
     private ExtensionTestConfig(final Properties properties) {
@@ -16,7 +16,7 @@ public class ExtensionTestConfig {
     }
 
     static ExtensionTestConfig read() {
-        final Path file = CONFIG_FILE.toAbsolutePath();
+        final Path file = CONFIG_FILE;
         if (!Files.exists(file)) {
             LOGGER.info(() -> "Extension test config file " + file + " not found. Using defaults.");
             return new ExtensionTestConfig(new Properties());
@@ -62,4 +62,7 @@ public class ExtensionTestConfig {
         return Optional.ofNullable(this.properties.getProperty(param));
     }
 
+    public Path getConfigFile() {
+        return CONFIG_FILE;
+    }
 }

@@ -5,7 +5,7 @@
     "description": "Extension for testing Extension Manager test setup",
     "license": "MIT",
     "scripts": {
-        "build": "tsc --build && esbuild dist/extension.js --bundle --outfile=dist/s3-vs-extension.js --target=es6",
+        "build": "tsc --build && esbuild dist/extension.js --bundle --outfile=dist/testing-extension.js --target=es6",
         "clean": "rm -rf dist/"
     },
     "dependencies": {

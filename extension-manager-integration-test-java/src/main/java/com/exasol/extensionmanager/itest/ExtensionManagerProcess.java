@@ -29,7 +29,7 @@ public class ExtensionManagerProcess implements AutoCloseable {
         final int port = findOpenPort();
         LOGGER.info(() -> "Starting extension manager " + extensionManagerBinary + " on port " + port
                 + " with extension folder " + extensionFolder + "...");
-        final List<String> command = List.of(extensionManagerBinary.toString(), "-pathToExtensionFolder",
+        final List<String> command = List.of(extensionManagerBinary.toString(), "-extensionRegistryURL",
                 extensionFolder.toString(), "-serverAddress", "localhost:" + port);
 
         final ServerPortConsumer serverPortConsumer = new ServerPortConsumer();

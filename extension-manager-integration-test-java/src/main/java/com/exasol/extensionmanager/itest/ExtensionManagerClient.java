@@ -17,6 +17,7 @@ import com.exasol.extensionmanager.client.invoker.ApiException;
 import com.exasol.extensionmanager.client.model.*;
 
 import jakarta.json.JsonObject;
+import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 
 public class ExtensionManagerClient {
@@ -63,27 +64,27 @@ public class ExtensionManagerClient {
         return this.extensionClient.getExtensionDetails(extensionId, extensionVersion, getDbHost(), getDbPort());
     }
 
-    public void installExtension(final String version) {
+    public void install(final String version) {
         final Extension extension = getExtension();
         LOGGER.fine(() -> "Installing extension " + extension.getId() + " in version " + version);
         install(extension.getId(), version);
     }
 
-    public void installExtension() {
-        installExtension(getExtension().getCurrentVersion());
+    public void install() {
+        install(getExtension().getCurrentVersion());
     }
 
-    public void install(final String extensionId, final String extensionVersion) {
+    private void install(final String extensionId, final String extensionVersion) {
         this.extensionClient.installExtension(new InstallExtensionRequest(), getDbHost(), getDbPort(), extensionId,
                 extensionVersion);
     }
 
-    public void uninstallExtension() {
+    public void uninstall() {
         final Extension extension = getExtension();
         this.uninstall(extension.getId(), extension.getCurrentVersion());
     }
 
-    public void uninstallExtension(final String extensionVersion) {
+    public void uninstall(final String extensionVersion) {
         this.uninstall(getExtension().getId(), extensionVersion);
     }
 
@@ -94,6 +95,12 @@ public class ExtensionManagerClient {
     public String createInstance(final List<ParameterValue> parameterValues) {
         final Extension extension = getExtension();
         return createInstance(extension.getId(), extension.getCurrentVersion(), parameterValues).getInstanceName();
+    }
+
+    private CreateInstanceResponse createInstance(final String extensionId, final String extensionVersion,
+            final List<ParameterValue> parameterValues) {
+        final CreateInstanceRequest request = new CreateInstanceRequest().parameterValues(parameterValues);
+        return this.instanceClient.createInstance(request, getDbHost(), getDbPort(), extensionId, extensionVersion);
     }
 
     public List<Instance> listInstances() {
@@ -127,15 +134,13 @@ public class ExtensionManagerClient {
     public void assertRequestFails(final Executable executable, final Matcher<String> messageMatcher,
             final Matcher<Integer> statusMatcher) {
         final ApiException exception = assertThrows(ApiException.class, executable);
-        final JsonObject error = JsonbBuilder.create().fromJson(exception.getMessage(), JsonObject.class);
-        assertAll(() -> assertThat(error.getJsonString("message").getString(), messageMatcher),
-                () -> assertThat(error.getJsonNumber("code").intValue(), statusMatcher));
-    }
-
-    private CreateInstanceResponse createInstance(final String extensionId, final String extensionVersion,
-            final List<ParameterValue> parameterValues) {
-        final CreateInstanceRequest request = new CreateInstanceRequest().parameterValues(parameterValues);
-        return this.instanceClient.createInstance(request, getDbHost(), getDbPort(), extensionId, extensionVersion);
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+            final JsonObject error = jsonb.fromJson(exception.getMessage(), JsonObject.class);
+            assertAll(() -> assertThat(error.getJsonString("message").getString(), messageMatcher),
+                    () -> assertThat(error.getJsonNumber("code").intValue(), statusMatcher));
+        } catch (final Exception jsonbCloseException) {
+            throw new IllegalStateException("Failed to close jsonb", exception);
+        }
     }
 
     private ExtensionsResponseExtension getSingleExtension() {
