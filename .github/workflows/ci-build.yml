@@ -69,6 +69,17 @@ jobs:
           # -p 1 tells go not to run the tests in parallel. See the developers_guide.
           go test -v -p 1 -count 1 -coverprofile=coverage.out ./...
 
+      - name: Run tests and build with Maven
+        run: mvn --batch-mode clean verify --file pom.xml -DtrimStackTrace=false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Prepare SonarCloud scan
+        # Without this step, Sonar will fail with this error:
+        # Maven project detected. You should run the goal 'org.sonarsource.scanner.maven:sonar' during build rather than using this GitHub Action."
+        run: rm ./pom.xml
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
