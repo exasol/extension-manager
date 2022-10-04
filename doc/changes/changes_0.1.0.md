@@ -74,6 +74,11 @@ Code name:
 * Added `org.glassfish.jersey.media:jersey-media-json-jackson:2.36`
 * Added `org.glassfish.jersey.media:jersey-media-multipart:2.36`
 
+#### Test Dependency Updates
+
+* Added `nl.jqno.equalsverifier:equalsverifier:3.10.1`
+* Added `org.junit.jupiter:junit-jupiter-api:5.9.1`
+
 #### Plugin Dependency Updates
 
 * Added `com.exasol:error-code-crawler-maven-plugin:1.1.2`
