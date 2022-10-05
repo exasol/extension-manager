@@ -19,6 +19,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>error-code-crawler-maven-plugin</artifactId>
+                <version>1.2.0</version>
                 <configuration>
                     <!-- No error codes defined in root project -->
                     <skip>true</skip>
