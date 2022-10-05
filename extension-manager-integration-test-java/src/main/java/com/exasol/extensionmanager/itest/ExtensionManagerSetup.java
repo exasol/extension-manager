@@ -67,6 +67,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
         return new ExtensionManagerSetup(extensionManager, exasolTestSetup, exasolObjectFactory, client, tempDir);
     }
 
+    @SuppressWarnings("java:S5443") // Publicly writable directory is used safely here
     private static Path createTempDir() {
         try {
             return Files.createTempDirectory("extension-manager-itest");
@@ -140,6 +141,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
         this.cleanupCallbacks.add(dropVirtualSchema(name));
     }
 
+    @SuppressWarnings("java:S2077") // Dynamically formatted SQL is only used in tests
     private Runnable dropVirtualSchema(final String name) {
         return () -> {
             try {
@@ -159,6 +161,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
         this.cleanupCallbacks.add(dropConnection(name));
     }
 
+    @SuppressWarnings("java:S2077") // Dynamically formatted SQL is only used in tests
     private Runnable dropConnection(final String name) {
         return () -> {
             try {

@@ -67,6 +67,7 @@ class ExtensionManagerProcess implements AutoCloseable {
     }
 
     private static class ServerPortConsumer implements ProcessStreamConsumer {
+        @SuppressWarnings("java:S5852") // Regex can't lead to denial of service here
         private static final Pattern STARTUP_FINISHED = Pattern.compile(".*Starting server on localhost:\\d+.*");
         private final CountDownLatch startupFinishedLatch = new CountDownLatch(1);
 
