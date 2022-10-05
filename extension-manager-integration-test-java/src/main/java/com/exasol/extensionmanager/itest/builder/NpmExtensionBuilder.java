@@ -22,6 +22,7 @@ class NpmExtensionBuilder implements ExtensionBuilder {
         if (!Files.exists(sourceDir)) {
             throw new IllegalArgumentException("Extension source dir " + sourceDir + " does not exist");
         }
+        SimpleProcess.start(sourceDir, List.of("npm", "ci"), Duration.ofSeconds(60));
         SimpleProcess.start(sourceDir, List.of("npm", "run", "build"), Duration.ofSeconds(30));
     }
 

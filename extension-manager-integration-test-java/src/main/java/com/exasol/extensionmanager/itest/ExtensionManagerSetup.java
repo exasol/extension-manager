@@ -8,8 +8,7 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import com.exasol.dbbuilder.dialects.exasol.ExasolObjectFactory;
-import com.exasol.dbbuilder.dialects.exasol.ExasolSchema;
+import com.exasol.dbbuilder.dialects.exasol.*;
 import com.exasol.errorreporting.ExaError;
 import com.exasol.exasoltestsetup.ExasolTestSetup;
 import com.exasol.extensionmanager.itest.builder.ExtensionBuilder;
@@ -27,20 +26,17 @@ public class ExtensionManagerSetup implements AutoCloseable {
     private final Connection connection;
     private final List<Runnable> cleanupCallbacks = new ArrayList<>();
     private final ExtensionManagerClient client;
-    private final Path tempDir;
+    private final Path extensionFolder;
 
     private ExtensionManagerSetup(final ExtensionManagerProcess extensionManager, final ExasolTestSetup exasolTestSetup,
-            final ExasolObjectFactory exasolObjectFactory, final ExtensionManagerClient client, final Path tempDir) {
+            final Connection connection, final ExasolObjectFactory exasolObjectFactory,
+            final ExtensionManagerClient client, final Path extensionFolder) {
         this.extensionManager = extensionManager;
         this.exasolTestSetup = exasolTestSetup;
+        this.connection = connection;
         this.exasolObjectFactory = exasolObjectFactory;
         this.client = client;
-        this.tempDir = tempDir;
-        try {
-            this.connection = this.exasolTestSetup.createConnection();
-        } catch (final SQLException exception) {
-            throw new AssertionError("Failed to create db connection", exception);
-        }
+        this.extensionFolder = extensionFolder;
     }
 
     /**
@@ -48,23 +44,44 @@ public class ExtensionManagerSetup implements AutoCloseable {
      * {@link org.junit.jupiter.api.BeforeAll} method. Make sure to close this by calling {@link #close()} in an
      * {@link org.junit.jupiter.api.AfterAll} method.
      * 
-     * @param exasolTestSetup     exasol test setup to use for the tests
-     * @param exasolObjectFactory object factory for creating exasol objects
-     * @param extensionBuilder    builder for building the extension under test
+     * @param exasolTestSetup  exasol test setup to use for the tests
+     * @param extensionBuilder builder for building the extension under test
      * @return a new instance
      */
     public static ExtensionManagerSetup create(final ExasolTestSetup exasolTestSetup,
-            final ExasolObjectFactory exasolObjectFactory, final ExtensionBuilder extensionBuilder) {
-        final Path tempDir = createTempDir();
+            final ExtensionBuilder extensionBuilder) {
+        final Path extensionFolder = createTempDir();
         final ExtensionTestConfig config = ExtensionTestConfig.read();
-        prepareExtension(config, extensionBuilder, tempDir);
+        final ExtensionManagerProcess extensionManager = startExtensionManager(extensionBuilder, extensionFolder,
+                config);
+        return create(exasolTestSetup, extensionFolder, extensionManager);
+    }
+
+    private static ExtensionManagerProcess startExtensionManager(final ExtensionBuilder extensionBuilder,
+            final Path extensionFolder, final ExtensionTestConfig config) {
+        prepareExtension(config, extensionBuilder, extensionFolder);
         final ExtensionManagerInstaller installer = ExtensionManagerInstaller.forConfig(config);
         final Path extensionManagerExecutable = installer.install();
-        final ExtensionManagerProcess extensionManager = ExtensionManagerProcess.start(extensionManagerExecutable,
-                tempDir);
+        return ExtensionManagerProcess.start(extensionManagerExecutable, extensionFolder);
+    }
+
+    private static ExtensionManagerSetup create(final ExasolTestSetup exasolTestSetup, final Path extensionFolder,
+            final ExtensionManagerProcess extensionManager) {
         final ExtensionManagerClient client = ExtensionManagerClient.create(extensionManager.getServerBasePath(),
                 exasolTestSetup.getConnectionInfo());
-        return new ExtensionManagerSetup(extensionManager, exasolTestSetup, exasolObjectFactory, client, tempDir);
+        final Connection connection = createConnection(exasolTestSetup);
+        final ExasolObjectFactory exasolObjectFactory = new ExasolObjectFactory(connection,
+                ExasolObjectConfiguration.builder().build());
+        return new ExtensionManagerSetup(extensionManager, exasolTestSetup, connection, exasolObjectFactory, client,
+                extensionFolder);
+    }
+
+    private static Connection createConnection(final ExasolTestSetup exasolTestSetup) {
+        try {
+            return exasolTestSetup.createConnection();
+        } catch (final SQLException exception) {
+            throw new AssertionError("Failed to create db connection", exception);
+        }
     }
 
     @SuppressWarnings("java:S5443") // Publicly writable directory is used safely here
@@ -192,12 +209,12 @@ public class ExtensionManagerSetup implements AutoCloseable {
     }
 
     private void deleteTempDir() {
-        try (Stream<Path> files = Files.walk(this.tempDir)) {
+        try (Stream<Path> files = Files.walk(this.extensionFolder)) {
             files.sorted(Comparator.reverseOrder()) //
                     .map(Path::toFile) //
                     .forEach(File::delete);
         } catch (final IOException exception) {
-            throw new UncheckedIOException("Failed to delete temp dir " + tempDir, exception);
+            throw new UncheckedIOException("Failed to extension folder " + extensionFolder, exception);
         }
     }
 
