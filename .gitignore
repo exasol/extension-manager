@@ -49,7 +49,6 @@ vendor/
 /extension-manager-client-java/.settings/org.eclipse.m2e.core.prefs
 /extension-manager-integration-test-java/.settings/org.eclipse.core.resources.prefs
 /extension-manager-integration-test-java/.settings/org.eclipse.m2e.core.prefs
-/extension-manager-integration-test-java/testing-extension/package-lock.json
 /extension-manager-integration-test-java/testing-extension/node_modules/
 /extension-manager-integration-test-java/testing-extension/dist/
 /.scannerwork/
