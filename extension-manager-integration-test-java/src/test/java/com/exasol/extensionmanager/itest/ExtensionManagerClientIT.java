@@ -24,34 +24,24 @@ import com.exasol.extensionmanager.itest.builder.ExtensionBuilder;
 class ExtensionManagerClientIT {
 
     private static ExasolTestSetup exasolTestSetup;
+    private static Connection connection;
+    private static ExtensionManagerClient client;
+    private static ExtensionManagerSetup extensionManager;
 
     @BeforeAll
-    static void setupExasol() {
+    static void setupExasol() throws SQLException {
         exasolTestSetup = new ExasolTestSetupFactory(Path.of("dummy-config")).getTestSetup();
-    }
-
-    @AfterAll
-    static void tearDownExasol() throws Exception {
-        exasolTestSetup.close();
-    }
-
-    private Connection connection;
-    private ExtensionManagerClient client;
-    private ExtensionManagerSetup extensionManager;
-
-    @BeforeEach
-    void setup() throws SQLException {
-        this.connection = exasolTestSetup.createConnection();
-
+        connection = exasolTestSetup.createConnection();
         extensionManager = ExtensionManagerSetup.create(exasolTestSetup, ExtensionBuilder.createDefaultNpmBuilder(
                 TESTING_EXTENSION_SOURCE_DIR, TESTING_EXTENSION_SOURCE_DIR.resolve("dist/testing-extension.js")));
         client = extensionManager.client();
     }
 
-    @AfterEach
-    void teardown() throws SQLException {
-        extensionManager.close();
+    @AfterAll
+    static void tearDownExasol() throws Exception {
         connection.close();
+        extensionManager.close();
+        exasolTestSetup.close();
     }
 
     @Test

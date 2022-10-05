@@ -155,18 +155,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
      * @param name the virtual schema to drop
      */
     public void addVirtualSchemaToCleanupQueue(final String name) {
-        this.cleanupCallbacks.add(dropVirtualSchema(name));
-    }
-
-    @SuppressWarnings("java:S2077") // Dynamically formatted SQL is only used in tests
-    private Runnable dropVirtualSchema(final String name) {
-        return () -> {
-            try {
-                createStatement().execute("DROP VIRTUAL SCHEMA IF EXISTS \"" + name + "\" CASCADE");
-            } catch (final SQLException exception) {
-                throw new IllegalStateException("Failed to drop virtual schema " + name, exception);
-            }
-        };
+        this.cleanupCallbacks.add(runnableStatement("DROP VIRTUAL SCHEMA IF EXISTS \"" + name + "\" CASCADE"));
     }
 
     /**
@@ -175,16 +164,16 @@ public class ExtensionManagerSetup implements AutoCloseable {
      * @param name the connection to drop
      */
     public void addConnectionToCleanupQueue(final String name) {
-        this.cleanupCallbacks.add(dropConnection(name));
+        this.cleanupCallbacks.add(runnableStatement("DROP CONNECTION IF EXISTS \"" + name + "\""));
     }
 
-    @SuppressWarnings("java:S2077") // Dynamically formatted SQL is only used in tests
-    private Runnable dropConnection(final String name) {
+    private Runnable runnableStatement(final String statement) {
         return () -> {
             try {
-                createStatement().execute("DROP CONNECTION IF EXISTS \"" + name + "\"");
+                LOGGER.fine(() -> "Executing statement '" + statement + "'");
+                createStatement().execute(statement);
             } catch (final SQLException exception) {
-                throw new IllegalStateException("Failed to drop connection " + name, exception);
+                throw new IllegalStateException("Failed to execute statement " + statement, exception);
             }
         };
     }
