@@ -188,6 +188,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
      */
     @Override
     public void close() {
+        LOGGER.fine("Closing extension manager setup");
         cleanup();
         deleteTempDir();
         extensionManager.close();
@@ -213,7 +214,6 @@ public class ExtensionManagerSetup implements AutoCloseable {
      * {@link org.junit.jupiter.api.AfterEach} method.
      */
     public void cleanup() {
-        this.extensionManager.close();
         this.cleanupCallbacks.forEach(Runnable::run);
         this.cleanupCallbacks.clear();
         try {
