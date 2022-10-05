@@ -52,3 +52,4 @@ vendor/
 /extension-manager-integration-test-java/testing-extension/package-lock.json
 /extension-manager-integration-test-java/testing-extension/node_modules/
 /extension-manager-integration-test-java/testing-extension/dist/
+/.scannerwork/
