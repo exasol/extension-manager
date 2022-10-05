@@ -45,13 +45,13 @@ class ExtensionManagerSetupIT {
     @Test
     void cleanupConnections() {
         extensionManager.addConnectionToCleanupQueue("connectionToDelete");
-        assertDoesNotThrow(extensionManager::close);
+        assertDoesNotThrow(extensionManager::cleanup);
     }
 
     @Test
     void cleanupVirtualSchema() {
         extensionManager.addVirtualSchemaToCleanupQueue("virtualSchemaToDelete");
-        assertDoesNotThrow(extensionManager::close);
+        assertDoesNotThrow(extensionManager::cleanup);
     }
 
     @Test

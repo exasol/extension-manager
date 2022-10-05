@@ -19,7 +19,8 @@ import com.exasol.extensionmanager.itest.installer.ExtensionManagerInstaller;
  */
 public class ExtensionManagerSetup implements AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(ExtensionManagerSetup.class.getName());
-    private static final String EXTENSION_SCHEMA_NAME = "EXA_EXTENSIONS";
+    /** The name of the schema containing all extensions. */
+    public static final String EXTENSION_SCHEMA_NAME = "EXA_EXTENSIONS";
     private final ExtensionManagerProcess extensionManager;
     private final ExasolTestSetup exasolTestSetup;
     private final ExasolObjectFactory exasolObjectFactory;
@@ -187,7 +188,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
      */
     @Override
     public void close() {
-        dropExtensionSchema();
+        cleanup();
         deleteTempDir();
         extensionManager.close();
         try {
@@ -207,7 +208,11 @@ public class ExtensionManagerSetup implements AutoCloseable {
         }
     }
 
-    private void dropExtensionSchema() {
+    /**
+     * Cleanup resources after a test in order to have a clean state. Usually you call this in an
+     * {@link org.junit.jupiter.api.AfterEach} method.
+     */
+    public void cleanup() {
         this.extensionManager.close();
         this.cleanupCallbacks.forEach(Runnable::run);
         this.cleanupCallbacks.clear();
