@@ -68,7 +68,7 @@ Code name:
 * Added `com.fasterxml.jackson.core:jackson-annotations:2.14.0-rc1`
 * Added `com.fasterxml.jackson.core:jackson-core:2.14.0-rc1`
 * Added `com.fasterxml.jackson.core:jackson-databind:2.14.0-rc1`
-* Added `io.swagger.core.v3:swagger-annotations:2.2.2`
+* Added `io.swagger.core.v3:swagger-annotations:2.2.3`
 * Added `org.glassfish.jersey.core:jersey-client:2.36`
 * Added `org.glassfish.jersey.inject:jersey-hk2:2.36`
 * Added `org.glassfish.jersey.media:jersey-media-json-jackson:2.36`
@@ -84,7 +84,7 @@ Code name:
 * Added `com.exasol:error-code-crawler-maven-plugin:1.1.2`
 * Added `com.exasol:project-keeper-maven-plugin:2.8.0`
 * Added `io.github.zlika:reproducible-build-maven-plugin:0.15`
-* Added `io.swagger.codegen.v3:swagger-codegen-maven-plugin:3.0.34`
+* Added `io.swagger.codegen.v3:swagger-codegen-maven-plugin:3.0.35`
 * Added `org.apache.maven.plugins:maven-clean-plugin:2.5`
 * Added `org.apache.maven.plugins:maven-compiler-plugin:3.10.1`
 * Added `org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1`
@@ -111,16 +111,16 @@ Code name:
 #### Compile Dependency Updates
 
 * Added `com.exasol:exasol-test-setup-abstraction-java:0.3.2`
-* Added `com.exasol:extension-manager-client-java:0.1.0`
+* Added `com.exasol:extension-manager-client-java:0.0.5`
 * Added `com.exasol:hamcrest-resultset-matcher:1.5.2`
-* Added `com.exasol:test-db-builder-java:3.3.4`
-* Added `org.junit.jupiter:junit-jupiter-api:5.9.0`
+* Added `com.exasol:test-db-builder-java:3.4.0`
+* Added `org.junit.jupiter:junit-jupiter-api:5.9.1`
 
 #### Test Dependency Updates
 
 * Added `com.exasol:udf-debugging-java:0.6.4`
-* Added `org.junit.jupiter:junit-jupiter-params:5.9.0`
-* Added `org.mockito:mockito-core:4.7.0`
+* Added `org.junit.jupiter:junit-jupiter-params:5.9.1`
+* Added `org.mockito:mockito-core:4.8.0`
 
 #### Plugin Dependency Updates
 
