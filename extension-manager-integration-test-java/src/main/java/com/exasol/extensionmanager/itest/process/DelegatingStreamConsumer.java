@@ -28,7 +28,7 @@ public class DelegatingStreamConsumer implements ProcessStreamConsumer {
 
     @Override
     public void readFinished() {
-        this.delegates.forEach(delegate -> delegate.readFinished());
+        this.delegates.forEach(ProcessStreamConsumer::readFinished);
     }
 
     @Override
