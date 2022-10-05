@@ -19,10 +19,10 @@ func main() {
 	var openAPIOutputPath = flag.String("openAPIOutputPath", "", "Generate the OpenAPI spec at the given path instead of starting the server")
 	flag.Parse()
 	log.SetLevel(log.DebugLevel)
-	if openAPIOutputPath != nil {
+	if openAPIOutputPath != nil && *openAPIOutputPath != "" {
 		err := generateOpenAPISpec(*openAPIOutputPath)
 		if err != nil {
-			panic(fmt.Sprintf("failed to generate OpenAPI: %v", err))
+			panic(fmt.Sprintf("failed to generate OpenAPI to %q: %v", *openAPIOutputPath, err))
 		}
 	} else {
 		startServer(*extensionRegistryURL, *serverAddress)
