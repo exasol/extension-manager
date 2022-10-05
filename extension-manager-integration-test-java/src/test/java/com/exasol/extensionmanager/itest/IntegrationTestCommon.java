@@ -5,4 +5,8 @@ import java.nio.file.Paths;
 
 class IntegrationTestCommon {
     static final Path TESTING_EXTENSION_SOURCE_DIR = Paths.get("testing-extension").toAbsolutePath();
+    
+    private IntegrationTestCommon(){
+        // Not instantiable
+    }
 }
