@@ -1,11 +1,14 @@
 package com.exasol.extensionmanager.itest;
 
 import static com.exasol.extensionmanager.itest.IntegrationTestCommon.TESTING_EXTENSION_SOURCE_DIR;
+import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.ArgumentMatchers.notNull;
 
 import java.nio.file.Path;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.*;
@@ -57,6 +60,16 @@ class ExtensionManagerSetupIT {
     @Test
     void createExtensionSchema() {
         final ExasolSchema schema = extensionManager.createExtensionSchema();
-        assertThat(schema, notNull());
+        assertThat(schema, not(nullValue()));
+    }
+
+    @Test
+    void cleanup() throws SQLException {
+        extensionManager.createExtensionSchema();
+        extensionManager.cleanup();
+        try (PreparedStatement statement = exasolTestSetup.createConnection()
+                .prepareStatement("select schema_name from EXA_ALL_SCHEMAS")) {
+            assertThat(statement.executeQuery(), table("VARCHAR").matches());
+        }
     }
 }
