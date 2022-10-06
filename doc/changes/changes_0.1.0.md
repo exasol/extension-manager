@@ -111,7 +111,7 @@ Code name:
 #### Compile Dependency Updates
 
 * Added `com.exasol:exasol-test-setup-abstraction-java:0.3.2`
-* Added `com.exasol:extension-manager-client-java:0.0.5`
+* Added `com.exasol:extension-manager-client-java:0.1.0`
 * Added `com.exasol:hamcrest-resultset-matcher:1.5.2`
 * Added `com.exasol:test-db-builder-java:3.4.0`
 * Added `org.junit.jupiter:junit-jupiter-api:5.9.1`
