@@ -81,7 +81,9 @@ public class ExtensionManagerSetup implements AutoCloseable {
         try {
             return exasolTestSetup.createConnection();
         } catch (final SQLException exception) {
-            throw new AssertionError("Failed to create db connection", exception);
+            throw new AssertionError(ExaError.messageBuilder("E-EMIT-20")
+                    .message("Failed to create db connection: {{error message}}", exception.getMessage()).toString(),
+                    exception);
         }
     }
 
@@ -90,7 +92,9 @@ public class ExtensionManagerSetup implements AutoCloseable {
         try {
             return Files.createTempDirectory("extension-manager-itest");
         } catch (final IOException exception) {
-            throw new UncheckedIOException("Failed to create temp directory", exception);
+            throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-21")
+                    .message("Failed to create temp directory: {{error message}}", exception.getMessage()).toString(),
+                    exception);
         }
     }
 
@@ -117,7 +121,11 @@ public class ExtensionManagerSetup implements AutoCloseable {
         try {
             Files.copy(sourceFile, targetFile);
         } catch (final IOException exception) {
-            throw new UncheckedIOException("Error copying extension " + sourceFile + " to " + targetFile, exception);
+            throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-22")
+                    .message(
+                            "Error copying extension from {{source path}} to {{target path}} failed: {{error message}}",
+                            sourceFile, targetFile, exception.getMessage())
+                    .toString(), exception);
         }
     }
 
@@ -175,7 +183,10 @@ public class ExtensionManagerSetup implements AutoCloseable {
                 LOGGER.fine(() -> "Executing statement '" + statement + "'");
                 createStatement().execute(statement);
             } catch (final SQLException exception) {
-                throw new IllegalStateException("Failed to execute statement " + statement, exception);
+                throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-23")
+                        .message("Failed to execute statement {{sql statement}}: {{error message}}", statement,
+                                exception.getMessage())
+                        .toString(), exception);
             }
         };
     }
@@ -192,12 +203,6 @@ public class ExtensionManagerSetup implements AutoCloseable {
         LOGGER.fine("Closing extension manager setup");
         cleanup();
         deleteTempDir();
-        extensionManager.close();
-        try {
-            this.exasolTestSetup.close();
-        } catch (final Exception exception) {
-            throw new IllegalStateException("Error closing exasol test setup", exception);
-        }
     }
 
     private void deleteTempDir() {
@@ -206,7 +211,8 @@ public class ExtensionManagerSetup implements AutoCloseable {
                     .map(Path::toFile) //
                     .forEach(File::delete);
         } catch (final IOException exception) {
-            throw new UncheckedIOException("Failed to extension folder " + extensionFolder, exception);
+            throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-24")
+                    .message("Failed to extension folder {{folder}}", extensionFolder).toString(), exception);
         }
     }
 
@@ -220,7 +226,9 @@ public class ExtensionManagerSetup implements AutoCloseable {
         try {
             createStatement().execute("DROP SCHEMA IF EXISTS \"" + EXTENSION_SCHEMA_NAME + "\" CASCADE");
         } catch (final SQLException exception) {
-            throw new IllegalStateException("Failed to delete extension schema " + EXTENSION_SCHEMA_NAME, exception);
+            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-25")
+                    .message("Failed to delete extension schema {{schema name}}", EXTENSION_SCHEMA_NAME).toString(),
+                    exception);
         }
     }
 }

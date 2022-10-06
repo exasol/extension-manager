@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import com.exasol.errorreporting.ExaError;
+
 /**
  * Configuration for integration tests of extensions.
  */
@@ -40,7 +42,8 @@ public class ExtensionTestConfig {
             props.load(stream);
             return props;
         } catch (final IOException e) {
-            throw new UncheckedIOException("Error reading config file " + configFile, e);
+            throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-26")
+                    .message("Error reading config file {{config file path}}", configFile).toString(), e);
         }
     }
 
@@ -55,7 +58,11 @@ public class ExtensionTestConfig {
                 .map(path -> Paths.get(path).toAbsolutePath()) //
                 .map(path -> {
                     if (!Files.exists(path) || !Files.isDirectory(path)) {
-                        throw new IllegalStateException("Path to extension manager '" + path + "' must be a directory");
+                        throw new IllegalStateException(
+                                ExaError.messageBuilder("E-EMIT-27")
+                                        .message("Invalid extension manager {{path}} in config file {{config file}}.",
+                                                path, getConfigFile())
+                                        .mitigation("Specify a valid directory.").toString());
                     }
                     return path;
                 });

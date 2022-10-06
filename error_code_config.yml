@@ -1,0 +1,5 @@
+error-tags:
+  EM:
+    packages:
+      - extension-manager
+    highest-index: 1

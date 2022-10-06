@@ -8,23 +8,10 @@
     <packaging>pom</packaging>
     <url>https://github.com/exasol/extension-manager/</url>
     <properties>
-        <revision>0.0.5</revision>
+        <revision>0.0.6</revision>
     </properties>
     <modules>
         <module>extension-manager-integration-test-java</module>
         <module>extension-manager-client-java</module>
     </modules>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>com.exasol</groupId>
-                <artifactId>error-code-crawler-maven-plugin</artifactId>
-                <version>1.2.0</version>
-                <configuration>
-                    <!-- No error codes defined in root project -->
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

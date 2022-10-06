@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.exasol.errorreporting.ExaError;
+
 /**
  * This is a convenient wrapper for {@link ProcessBuilder} and {@link Process} that simplifies starting a process,
  * waiting for it to finish and getting its stdout.
@@ -100,8 +102,10 @@ public class SimpleProcess {
             new AsyncStreamReader().startCollectingConsumer(process.getErrorStream(), errorStreamConsumer);
             return new SimpleProcess(process, command, startTime);
         } catch (final IOException exception) {
-            throw new IllegalStateException("Error executing command '" + String.join(" ", command)
-                    + "'. Verify that the executable is on the PATH.", exception);
+            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-8")
+                    .message("Error executing command {{command}}.", String.join(" ", command))
+                    .mitigation("Verify that the executable {{executable}} is on the PATH.", command.get(0)).toString(),
+                    exception);
         }
     }
 
@@ -117,8 +121,11 @@ public class SimpleProcess {
         final Duration duration = Duration.between(this.startTime, Instant.now());
         final int exitCode = this.process.exitValue();
         if (exitCode != 0) {
-            throw new IllegalStateException("Command " + formatCommand() + " failed with exit code " + exitCode
-                    + " after " + duration + ". See log output for details.");
+            throw new IllegalStateException(
+                    ExaError.messageBuilder("E-EMIT-12")
+                            .message("Command {{command}} failed with exit code {{exit code|u}} after {{duration|u}}.",
+                                    formatCommand(), exitCode, duration)
+                            .mitigation("See log output for details.").toString());
         }
         LOGGER.fine(() -> "Command '" + formatCommand() + "' finished successfully after " + duration);
     }
@@ -133,8 +140,10 @@ public class SimpleProcess {
     private void waitForProcessTerminated(final Duration executionTimeout) {
         try {
             if (!this.process.waitFor(executionTimeout.toMillis(), TimeUnit.MILLISECONDS)) {
-                throw new IllegalStateException(
-                        "Timeout while waiting " + executionTimeout + " for command " + formatCommand());
+                throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-9")
+                        .message("Timeout while waiting {{timeout duration|u}} for command {{command}}",
+                                executionTimeout, formatCommand())
+                        .toString());
             }
         } catch (final InterruptedException exception) {
             throw handleInterruptedException(exception);
@@ -143,7 +152,9 @@ public class SimpleProcess {
 
     private RuntimeException handleInterruptedException(final InterruptedException exception) {
         Thread.currentThread().interrupt();
-        return new IllegalStateException("Interrupted while waiting for command " + formatCommand(), exception);
+        return new IllegalStateException(ExaError.messageBuilder("E-EMIT-10")
+                .message("Interrupted while waiting for command {{command}} to terminate.", formatCommand())
+                .ticketMitigation().toString(), exception);
     }
 
     private static String formatCommand(final List<String> command) {

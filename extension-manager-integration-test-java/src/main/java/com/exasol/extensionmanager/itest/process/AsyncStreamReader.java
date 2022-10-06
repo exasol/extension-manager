@@ -8,6 +8,8 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.exasol.errorreporting.ExaError;
+
 /**
  * This class starts a new {@link Thread} that reads from an {@link InputStream} and forwards the input line by line to
  * a given {@link Consumer}.
@@ -55,7 +57,9 @@ class AsyncStreamReader {
             }
             consumer.readFinished();
         } catch (final IOException exception) {
-            LOGGER.log(Level.WARNING, exception, () -> "Failed to read input stream: " + exception.getMessage());
+            LOGGER.log(Level.WARNING, exception, () -> ExaError.messageBuilder("W-EMIT-6")
+                    .message("Reading input stream failed with message {{error message}}.", exception.getMessage())
+                    .ticketMitigation().toString());
             consumer.readFailed(exception);
         }
     }
@@ -63,7 +67,9 @@ class AsyncStreamReader {
     private static class LoggingExceptionHandler implements UncaughtExceptionHandler {
         @Override
         public void uncaughtException(final Thread thread, final Throwable throwable) {
-            LOGGER.log(Level.SEVERE, throwable, () -> "Failed to read input stream: " + throwable.getMessage());
+            LOGGER.log(Level.SEVERE, throwable, () -> ExaError.messageBuilder("W-EMIT-7")
+                    .message("Reading input stream failed with message {{error message}}.", throwable.getMessage())
+                    .ticketMitigation().toString());
         }
     }
 }

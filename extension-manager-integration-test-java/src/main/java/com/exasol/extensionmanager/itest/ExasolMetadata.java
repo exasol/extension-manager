@@ -6,6 +6,7 @@ import java.sql.*;
 
 import org.hamcrest.Matcher;
 
+import com.exasol.errorreporting.ExaError;
 import com.exasol.matcher.ResultSetStructureMatcher;
 
 /**
@@ -36,7 +37,9 @@ public class ExasolMetadata {
             statement.setString(1, this.extensionSchemaName);
             assertThat(statement.executeQuery(), matcher);
         } catch (final SQLException exception) {
-            throw new IllegalStateException(exception);
+            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-13")
+                    .message("Failed to read EXA_ALL_SCRIPTS table: {{error message}}.", exception.getMessage())
+                    .ticketMitigation().toString(), exception);
         }
     }
 
@@ -89,7 +92,9 @@ public class ExasolMetadata {
         try (final PreparedStatement statement = this.connection.prepareStatement(sql)) {
             assertThat(statement.executeQuery(), matcher);
         } catch (final SQLException exception) {
-            throw new IllegalStateException(exception);
+            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-14")
+                    .message("Failed to execute query {{query}}: {{error message}}.", sql, exception.getMessage())
+                    .ticketMitigation().toString(), exception);
         }
     }
 }

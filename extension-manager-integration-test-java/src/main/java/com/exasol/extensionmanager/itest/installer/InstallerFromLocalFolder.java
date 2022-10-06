@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.exasol.errorreporting.ExaError;
 import com.exasol.extensionmanager.itest.ExtensionTestConfig;
 import com.exasol.extensionmanager.itest.process.SimpleProcess;
 
@@ -24,7 +25,9 @@ class InstallerFromLocalFolder implements ExtensionManagerInstaller {
         buildExtensionManager(extensionManagerProjectDir);
         final Path executable = extensionManagerProjectDir.resolve(EXECUTABLE_NAME);
         if (!Files.exists(executable)) {
-            throw new IllegalStateException("Extension manager executable " + executable + " not found after build");
+            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-5")
+                    .message("Extension manager executable not found at {{executable path}} after build.", executable)
+                    .ticketMitigation().toString());
         }
         return executable;
     }

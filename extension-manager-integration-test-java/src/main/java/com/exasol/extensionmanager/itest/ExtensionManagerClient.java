@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.function.Executable;
 
+import com.exasol.errorreporting.ExaError;
 import com.exasol.exasoltestsetup.SqlConnectionInfo;
 import com.exasol.extensionmanager.client.api.*;
 import com.exasol.extensionmanager.client.invoker.ApiClient;
@@ -216,15 +217,20 @@ public class ExtensionManagerClient {
             assertAll(() -> assertThat(error.getJsonString("message").getString(), messageMatcher),
                     () -> assertThat(error.getJsonNumber("code").intValue(), statusMatcher));
         } catch (final Exception jsonbCloseException) {
-            throw new IllegalStateException("Failed to close jsonb", exception);
+            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-15")
+                    .message("Failed to close jsonb: {{error message}}.", exception.getMessage()).ticketMitigation()
+                    .toString(), exception);
         }
     }
 
     private ExtensionsResponseExtension getSingleExtension() {
         final List<ExtensionsResponseExtension> extensions = this.getExtensions();
         if (extensions.size() != 1) {
-            throw new IllegalStateException(
-                    "Expected exactly one extension but found " + extensions.size() + ": " + extensions);
+            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-28")
+                    .message(
+                            "Expected exactly one extension but found {{actual count}}: {{actual list of extensions}}.",
+                            extensions.size(), extensions)
+                    .mitigation("Check the extension manager log for errors loading the extension.").toString());
         }
         return extensions.get(0);
     }
@@ -232,8 +238,9 @@ public class ExtensionManagerClient {
     private Extension getExtension() {
         final ExtensionsResponseExtension extension = getSingleExtension();
         if (extension.getInstallableVersions().size() != 1) {
-            throw new IllegalStateException("Expected at exactly one installable version for extensions "
-                    + extension.getId() + " but got " + extension.getInstallableVersions());
+            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-16").message(
+                    "Expected exactly one installable version for extension {{extension id}} but got {{actual list of versions}}.",
+                    extension.getId(), extension.getInstallableVersions()).toString());
         }
         return new Extension(extension.getId(), extension.getInstallableVersions().get(0).getName());
     }

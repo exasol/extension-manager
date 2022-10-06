@@ -1,7 +1,6 @@
 package com.exasol.extensionmanager.itest;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -12,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import com.exasol.errorreporting.ExaError;
 import com.exasol.extensionmanager.itest.process.*;
 
 /**
@@ -42,8 +42,9 @@ class ExtensionManagerProcess implements AutoCloseable {
                         serverPortConsumer));
         if (!serverPortConsumer.isStartupFinished(SERVER_STARTUP_TIMEOUT)) {
             process.stop();
-            throw new IllegalStateException("Extension manager did not log server port after " + SERVER_STARTUP_TIMEOUT
-                    + ". Check log output for error messages.");
+            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-17")
+                    .message("Extension manager did not log server port after {{timeout}}.", SERVER_STARTUP_TIMEOUT)
+                    .mitigation("Check log output for error messages.").toString());
         }
         return new ExtensionManagerProcess(process, port);
     }
@@ -52,7 +53,9 @@ class ExtensionManagerProcess implements AutoCloseable {
         try (ServerSocket socket = new ServerSocket(0)) {
             return socket.getLocalPort();
         } catch (final IOException exception) {
-            throw new UncheckedIOException("Failed to find an open port", exception);
+            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-18")
+                    .message("Failed to find an open port: {{error message}}", exception.getMessage()).toString(),
+                    exception);
         }
     }
 
@@ -89,7 +92,10 @@ class ExtensionManagerProcess implements AutoCloseable {
                 return this.startupFinishedLatch.await(timeout.toMillis(), TimeUnit.MILLISECONDS);
             } catch (final InterruptedException exception) {
                 Thread.currentThread().interrupt();
-                throw new IllegalStateException("Interrupted while waiting for startup to finish", exception);
+                throw new IllegalStateException(
+                        ExaError.messageBuilder("E-EMIT-19")
+                                .message("Interrupted while waiting for server startup to finish").toString(),
+                        exception);
             }
         }
 
