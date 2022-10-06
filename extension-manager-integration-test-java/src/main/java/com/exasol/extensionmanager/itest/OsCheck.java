@@ -14,7 +14,7 @@ public class OsCheck {
     /**
      * Get the suffix of native executables for the current operating system.
      *
-     * @return the suffix of native executables
+     * @return suffix of native executables
      */
     public static String getExecutableSuffix() {
         final String os = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);

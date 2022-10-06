@@ -90,15 +90,6 @@ func (c *transactionControllerImpl) listBfsFiles(ctx context.Context, db *sql.DB
 	return bfsFiles, nil
 }
 
-func existsFileInBfs(bfsFiles []BfsFile, requiredFile extensionAPI.BucketFsUpload) bool {
-	for _, existingFile := range bfsFiles {
-		if requiredFile.BucketFsFilename == existingFile.Name && requiredFile.FileSize == existingFile.Size {
-			return true
-		}
-	}
-	return false
-}
-
 func (c *transactionControllerImpl) InstallExtension(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) (returnErr error) {
 	tx, err := beginTransaction(ctx, db)
 	if err != nil {

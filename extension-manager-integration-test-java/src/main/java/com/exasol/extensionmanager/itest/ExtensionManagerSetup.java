@@ -97,9 +97,10 @@ public class ExtensionManagerSetup implements AutoCloseable {
     private static void prepareExtension(final ExtensionTestConfig config, final ExtensionBuilder extensionBuilder,
             final Path extensionRegistryDir) {
         if (config.buildExtension()) {
+            LOGGER.fine(() -> "Building extension " + extensionBuilder.getExtensionFile() + "...");
             extensionBuilder.build();
         } else {
-            LOGGER.warning("Skip building extension");
+            LOGGER.warning(() -> "Building extension skipped in " + config.getConfigFile());
         }
         final Path extensionFile = extensionBuilder.getExtensionFile();
         if (!Files.exists(extensionFile)) {
@@ -108,7 +109,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
                     .mitigation("Set buildExtension to true in {{config file}}.", config.getConfigFile())
                     .mitigation("Ensure that extension was built successfully.").toString());
         }
-        LOGGER.info(() -> "Extension " + extensionFile + " was built successfully");
+        LOGGER.info(() -> "Extension " + extensionFile + " built successfully, copy to " + extensionRegistryDir);
         copy(extensionFile, extensionRegistryDir.resolve(extensionFile.getFileName()));
     }
 

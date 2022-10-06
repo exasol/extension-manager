@@ -77,11 +77,23 @@ func (c *controllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, err
 func (c *controllerImpl) requiredFilesAvailable(extension *extensionAPI.JsExtension, bfsFiles []BfsFile) bool {
 	for _, requiredFile := range extension.BucketFsUploads {
 		if !existsFileInBfs(bfsFiles, requiredFile) {
-			log.Printf("Ignoring extension %q since the required file %q (%q) does not exist or has a wrong file size.\n", extension.Name, requiredFile.Name, requiredFile.BucketFsFilename)
+			log.Debugf("Ignoring extension %q since the required file %q (%q) does not exist or has a wrong file size.\n", extension.Name, requiredFile.Name, requiredFile.BucketFsFilename)
 			return false
 		}
 	}
 	return true
+}
+
+func existsFileInBfs(bfsFiles []BfsFile, requiredFile extensionAPI.BucketFsUpload) bool {
+	for _, existingFile := range bfsFiles {
+		if requiredFile.BucketFsFilename == existingFile.Name && requiredFile.FileSize == existingFile.Size {
+			return true
+		}
+		if requiredFile.BucketFsFilename == existingFile.Name {
+			log.Debugf("File %q exists but has wrong size %d, expected %d bytes", existingFile.Name, existingFile.Size, requiredFile.FileSize)
+		}
+	}
+	return false
 }
 
 func (c *controllerImpl) getAllExtensions() ([]*extensionAPI.JsExtension, error) {

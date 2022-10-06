@@ -35,7 +35,7 @@ class ExtensionManagerProcess implements AutoCloseable {
         final List<String> command = List.of(extensionManagerBinary.toString(), "-extensionRegistryURL",
                 extensionFolder.toString(), "-serverAddress", "localhost:" + port);
 
-        final ServerPortConsumer serverPortConsumer = new ServerPortConsumer();
+        final ServerStartupConsumer serverPortConsumer = new ServerStartupConsumer();
         final SimpleProcess process = SimpleProcess.start(command,
                 new DelegatingStreamConsumer(new LoggingStreamConsumer("server stdout>", Level.FINE)),
                 new DelegatingStreamConsumer(new LoggingStreamConsumer("server stderr>", Level.FINE),
@@ -66,8 +66,9 @@ class ExtensionManagerProcess implements AutoCloseable {
         return "http://localhost:" + this.port;
     }
 
-    private static class ServerPortConsumer implements ProcessStreamConsumer {
-        @SuppressWarnings("java:S5852") // Regex can't lead to denial of service here
+    private static class ServerStartupConsumer implements ProcessStreamConsumer {
+        @SuppressWarnings("java:S5852") // Accepting potential denial of service as this class will be used only for
+                                        // tests
         private static final Pattern STARTUP_FINISHED = Pattern.compile(".*Starting server on localhost:\\d+.*");
         private final CountDownLatch startupFinishedLatch = new CountDownLatch(1);
 
