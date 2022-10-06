@@ -39,34 +39,20 @@ jobs:
 
       - name: Build with Maven skipping tests
         run: mvn --batch-mode clean verify -DskipTests
-      - name: Generate sha256sum files
-        run: |
-          cd target
-          find . -maxdepth 1 -name *.jar -exec bash -c 'sha256sum {} > {}.sha256' \;
-      - name: Build extension-manager binary
-        run: go build -o extension-manager cmd/main.go
-      - name: Generate sha256sum files for extension-manager
-        run: find . -maxdepth 1 -name extension-manager -exec bash -c 'sha256sum {} > {}.sha256' \;
-      - name: Upload JAR assets to the GitHub release draft
-        uses: shogo82148/actions-upload-release-asset@v1
-        with:
-          upload_url: ${{ github.event.inputs.upload_url }}
-          asset_path: */target/*.jar
-      - name: Upload JAR sha256sum files
-        uses: shogo82148/actions-upload-release-asset@v1
-        with:
-          upload_url: ${{ github.event.inputs.upload_url }}
-          asset_path: */target/*.sha256
+      - name: Build extension-manager-${{ runner.os }} binary
+        run: go build -o extension-manager-${{ runner.os }} cmd/main.go
+      - name: Generate sha256sum files for extension-manager-${{ runner.os }}
+        run: find . -maxdepth 1 -name extension-manager-${{ runner.os }} -exec bash -c 'sha256sum {} > {}.sha256' \;
       - name: Upload Extension Manager binary to the GitHub release draft
         uses: shogo82148/actions-upload-release-asset@v1
         with:
           upload_url: ${{ github.event.inputs.upload_url }}
-          asset_path: ./extension-manager
+          asset_path: ./extension-manager-${{ runner.os }}
       - name: Upload Extension Manager sha256sum file
         uses: shogo82148/actions-upload-release-asset@v1
         with:
           upload_url: ${{ github.event.inputs.upload_url }}
-          asset_path: */extension-manager.sha256
+          asset_path: ./extension-manager-${{ runner.os }}.sha256
       - name: Upload error-code-report
         uses: shogo82148/actions-upload-release-asset@v1
         with:
