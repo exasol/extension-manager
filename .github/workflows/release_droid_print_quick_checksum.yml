@@ -36,4 +36,4 @@ jobs:
       - name: Build with Maven skipping tests
         run: mvn --batch-mode clean verify -DskipTests
       - name: Print checksum
-        run: echo 'checksum_start==';find target -maxdepth 1 -name *.jar -exec sha256sum "{}" + | xargs;echo '==checksum_end'
+        run: echo 'checksum_start==';find ./*/target -maxdepth 1 -name "*.jar" -exec sha256sum "{}" + | xargs;echo '==checksum_end'
