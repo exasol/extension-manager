@@ -22,18 +22,16 @@ public class ExtensionManagerSetup implements AutoCloseable {
     /** The name of the schema containing all extensions. */
     public static final String EXTENSION_SCHEMA_NAME = "EXA_EXTENSIONS";
     private final ExtensionManagerProcess extensionManager;
-    private final ExasolTestSetup exasolTestSetup;
     private final ExasolObjectFactory exasolObjectFactory;
     private final Connection connection;
     private final List<Runnable> cleanupCallbacks = new ArrayList<>();
     private final ExtensionManagerClient client;
     private final Path extensionFolder;
 
-    private ExtensionManagerSetup(final ExtensionManagerProcess extensionManager, final ExasolTestSetup exasolTestSetup,
-            final Connection connection, final ExasolObjectFactory exasolObjectFactory,
-            final ExtensionManagerClient client, final Path extensionFolder) {
+    private ExtensionManagerSetup(final ExtensionManagerProcess extensionManager, final Connection connection,
+            final ExasolObjectFactory exasolObjectFactory, final ExtensionManagerClient client,
+            final Path extensionFolder) {
         this.extensionManager = extensionManager;
-        this.exasolTestSetup = exasolTestSetup;
         this.connection = connection;
         this.exasolObjectFactory = exasolObjectFactory;
         this.client = client;
@@ -73,8 +71,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
         final Connection connection = createConnection(exasolTestSetup);
         final ExasolObjectFactory exasolObjectFactory = new ExasolObjectFactory(connection,
                 ExasolObjectConfiguration.builder().build());
-        return new ExtensionManagerSetup(extensionManager, exasolTestSetup, connection, exasolObjectFactory, client,
-                extensionFolder);
+        return new ExtensionManagerSetup(extensionManager, connection, exasolObjectFactory, client, extensionFolder);
     }
 
     private static Connection createConnection(final ExasolTestSetup exasolTestSetup) {
@@ -104,7 +101,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
             LOGGER.fine(() -> "Building extension " + extensionBuilder.getExtensionFile() + "...");
             extensionBuilder.build();
         } else {
-            LOGGER.warning(() -> "Building extension skipped in " + config.getConfigFile());
+            LOGGER.info(() -> "Building extension skipped in " + config.getConfigFile());
         }
         final Path extensionFile = extensionBuilder.getExtensionFile();
         if (!Files.exists(extensionFile)) {
@@ -202,6 +199,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
     public void close() {
         LOGGER.fine("Closing extension manager setup");
         cleanup();
+        extensionManager.close();
         deleteTempDir();
     }
 
