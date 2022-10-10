@@ -35,7 +35,7 @@ public class ExtensionTestConfig {
         return new ExtensionTestConfig(loadProperties(file));
     }
 
-    private static Properties loadProperties(final Path configFile) {
+    static Properties loadProperties(final Path configFile) {
         LOGGER.info(() -> "Reading config file " + configFile);
         try (InputStream stream = Files.newInputStream(configFile)) {
             final Properties props = new Properties();

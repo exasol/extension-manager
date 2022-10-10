@@ -90,11 +90,11 @@
 
 ### Test Dependencies
 
-| Dependency                 | License                           |
-| -------------------------- | --------------------------------- |
-| [JUnit Jupiter Params][31] | [Eclipse Public License v2.0][32] |
-| [mockito-core][73]         | [The MIT License][74]             |
-| [udf-debugging-java][75]   | [MIT][76]                         |
+| Dependency                  | License                           |
+| --------------------------- | --------------------------------- |
+| [JUnit Jupiter Params][31]  | [Eclipse Public License v2.0][32] |
+| [mockito-junit-jupiter][73] | [The MIT License][74]             |
+| [udf-debugging-java][75]    | [MIT][76]                         |
 
 ### Plugin Dependencies
 

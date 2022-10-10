@@ -121,7 +121,7 @@ Code name: Initial release
 
 * Added `com.exasol:udf-debugging-java:0.6.4`
 * Added `org.junit.jupiter:junit-jupiter-params:5.9.1`
-* Added `org.mockito:mockito-core:4.8.0`
+* Added `org.mockito:mockito-junit-jupiter:4.8.0`
 
 #### Plugin Dependency Updates
 
