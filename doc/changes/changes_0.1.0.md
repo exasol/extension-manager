@@ -1,6 +1,6 @@
-# extension-manager 0.1.0, released 2022-??-??
+# extension-manager 0.1.0, released 2022-10-10
 
-Code name:
+Code name: Initial release
 
 ## Summary
 
@@ -18,8 +18,9 @@ Code name:
 * #37: Added support for more metadata tables, use a specific schema for extensions
 * #41: Added step to create the `EXA_EXTENSION` schema before installing an extension
 * #45: Added endpoint for installing an extension
-* #54: Added database authentication via tokens
+* #53: Added database authentication via tokens
 * #55: Converted JavaScript ApiError to Go APIError to use correct response status code
+* #75: Added integration test framework for extensions
 
 ## Refactoring
 
