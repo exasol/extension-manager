@@ -19,7 +19,7 @@ import (
 )
 
 func setupStandaloneAPI(controller extensionController.TransactionController) (http.Handler, *openapi.API, error) {
-	api, err := createOpenApi()
+	api, err := CreateOpenApi()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -54,7 +54,7 @@ func setupStandaloneAPI(controller extensionController.TransactionController) (h
 	return r, api, nil
 }
 
-func createOpenApi() (*openapi.API, error) {
+func CreateOpenApi() (*openapi.API, error) {
 	api := openapi.NewOpenAPI()
 	api.Title = "Exasol Extension Manager REST-API"
 	api.Description = "Managed extensions and instances of extensions"

@@ -1,0 +1,5 @@
+error-tags:
+  EM-CLIENT-JAVA:
+    packages:
+      - com.exasol.extensionmanager.client
+    highest-index: 1

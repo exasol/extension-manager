@@ -1,6 +1,6 @@
-# extension-manager 0.1.0, released 2022-??-??
+# extension-manager 0.1.0, released 2022-10-10
 
-Code name:
+Code name: Initial release
 
 ## Summary
 
@@ -18,8 +18,9 @@ Code name:
 * #37: Added support for more metadata tables, use a specific schema for extensions
 * #41: Added step to create the `EXA_EXTENSION` schema before installing an extension
 * #45: Added endpoint for installing an extension
-* #54: Added database authentication via tokens
+* #53: Added database authentication via tokens
 * #55: Converted JavaScript ApiError to Go APIError to use correct response status code
+* #75: Added integration test framework for extensions
 
 ## Refactoring
 
@@ -40,7 +41,9 @@ Code name:
 
 ## Dependency Updates
 
-### Compile Dependency Updates
+### Extension-manager
+
+#### Compile Dependency Updates
 
 * Added `golang:1.19`
 * Added `github.com/stretchr/testify:v1.8.0`
@@ -52,8 +55,95 @@ Code name:
 * Added `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.2.4`
 * Added `github.com/go-chi/chi/v5:v5.0.7`
 
-### Test Dependency Updates
+#### Test Dependency Updates
 
 * Added `github.com/Nightapes/go-rest:v0.2.1`
 * Added `github.com/kinbiko/jsonassert:v1.1.1`
 * Added `github.com/DATA-DOG/go-sqlmock:v1.5.0`
+
+### Extension Manager Java Client
+
+#### Compile Dependency Updates
+
+* Added `com.brsanthu:migbase64:2.2`
+* Added `com.fasterxml.jackson.core:jackson-annotations:2.14.0-rc1`
+* Added `com.fasterxml.jackson.core:jackson-core:2.14.0-rc1`
+* Added `com.fasterxml.jackson.core:jackson-databind:2.14.0-rc1`
+* Added `io.swagger.core.v3:swagger-annotations:2.2.3`
+* Added `org.glassfish.jersey.core:jersey-client:2.36`
+* Added `org.glassfish.jersey.inject:jersey-hk2:2.36`
+* Added `org.glassfish.jersey.media:jersey-media-json-jackson:2.36`
+* Added `org.glassfish.jersey.media:jersey-media-multipart:2.36`
+
+#### Test Dependency Updates
+
+* Added `nl.jqno.equalsverifier:equalsverifier:3.10.1`
+* Added `org.junit.jupiter:junit-jupiter-api:5.9.1`
+
+#### Plugin Dependency Updates
+
+* Added `com.exasol:error-code-crawler-maven-plugin:1.1.2`
+* Added `com.exasol:project-keeper-maven-plugin:2.8.0`
+* Added `io.github.zlika:reproducible-build-maven-plugin:0.15`
+* Added `io.swagger.codegen.v3:swagger-codegen-maven-plugin:3.0.35`
+* Added `org.apache.maven.plugins:maven-clean-plugin:2.5`
+* Added `org.apache.maven.plugins:maven-compiler-plugin:3.10.1`
+* Added `org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1`
+* Added `org.apache.maven.plugins:maven-enforcer-plugin:3.1.0`
+* Added `org.apache.maven.plugins:maven-gpg-plugin:3.0.1`
+* Added `org.apache.maven.plugins:maven-install-plugin:2.4`
+* Added `org.apache.maven.plugins:maven-jar-plugin:2.4`
+* Added `org.apache.maven.plugins:maven-javadoc-plugin:3.4.0`
+* Added `org.apache.maven.plugins:maven-resources-plugin:2.6`
+* Added `org.apache.maven.plugins:maven-site-plugin:3.3`
+* Added `org.apache.maven.plugins:maven-source-plugin:3.2.1`
+* Added `org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M5`
+* Added `org.codehaus.mojo:build-helper-maven-plugin:3.3.0`
+* Added `org.codehaus.mojo:exec-maven-plugin:3.0.0`
+* Added `org.codehaus.mojo:flatten-maven-plugin:1.2.7`
+* Added `org.codehaus.mojo:versions-maven-plugin:2.10.0`
+* Added `org.jacoco:jacoco-maven-plugin:0.8.8`
+* Added `org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1.2184`
+* Added `org.sonatype.ossindex.maven:ossindex-maven-plugin:3.2.0`
+* Added `org.sonatype.plugins:nexus-staging-maven-plugin:1.6.13`
+
+### Extension Integration Tests Library
+
+#### Compile Dependency Updates
+
+* Added `com.exasol:exasol-test-setup-abstraction-java:0.3.2`
+* Added `com.exasol:extension-manager-client-java:0.1.0`
+* Added `com.exasol:hamcrest-resultset-matcher:1.5.2`
+* Added `com.exasol:test-db-builder-java:3.4.0`
+* Added `org.junit.jupiter:junit-jupiter-api:5.9.1`
+
+#### Test Dependency Updates
+
+* Added `com.exasol:udf-debugging-java:0.6.4`
+* Added `org.junit.jupiter:junit-jupiter-params:5.9.1`
+* Added `org.mockito:mockito-junit-jupiter:4.8.0`
+
+#### Plugin Dependency Updates
+
+* Added `com.exasol:error-code-crawler-maven-plugin:1.1.2`
+* Added `com.exasol:project-keeper-maven-plugin:2.8.0`
+* Added `io.github.zlika:reproducible-build-maven-plugin:0.15`
+* Added `org.apache.maven.plugins:maven-clean-plugin:2.5`
+* Added `org.apache.maven.plugins:maven-compiler-plugin:3.10.1`
+* Added `org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1`
+* Added `org.apache.maven.plugins:maven-enforcer-plugin:3.1.0`
+* Added `org.apache.maven.plugins:maven-failsafe-plugin:3.0.0-M5`
+* Added `org.apache.maven.plugins:maven-gpg-plugin:3.0.1`
+* Added `org.apache.maven.plugins:maven-install-plugin:2.4`
+* Added `org.apache.maven.plugins:maven-jar-plugin:2.4`
+* Added `org.apache.maven.plugins:maven-javadoc-plugin:3.4.0`
+* Added `org.apache.maven.plugins:maven-resources-plugin:2.6`
+* Added `org.apache.maven.plugins:maven-site-plugin:3.3`
+* Added `org.apache.maven.plugins:maven-source-plugin:3.2.1`
+* Added `org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M5`
+* Added `org.codehaus.mojo:flatten-maven-plugin:1.2.7`
+* Added `org.codehaus.mojo:versions-maven-plugin:2.10.0`
+* Added `org.jacoco:jacoco-maven-plugin:0.8.8`
+* Added `org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1.2184`
+* Added `org.sonatype.ossindex.maven:ossindex-maven-plugin:3.2.0`
+* Added `org.sonatype.plugins:nexus-staging-maven-plugin:1.6.13`

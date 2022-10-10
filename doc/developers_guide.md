@@ -92,12 +92,31 @@ To run only unit tests use:
 go test -short ./...
 ```
 
-## Linter
+## Static Code Analysis
+
+### Go Linter
 
 To install golangci-lint on your machine, follow [these instruction](https://golangci-lint.run/usage/install/#local-installation). Then run
 
 ```shell
 golangci-lint run
+```
+
+### Sonar
+
+Download sonar-scanner as a zip file from [sonarqube.org](https://docs.sonarqube.org/latest/analysis/scan/sonarscanner/) and unpack it.
+
+Run tests to generate code coverage information:
+
+```shell
+go test -v -p 1 -count 1 -coverprofile=coverage.out ./...
+mvn verify
+```
+
+Then run Sonar with the following command in the project root:
+
+```shell
+sonar-scanner -Dsonar.organization=exasol -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
 ```
 
 ## Using a Local Extension Interface

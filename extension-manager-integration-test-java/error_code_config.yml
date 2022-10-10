@@ -1,0 +1,5 @@
+error-tags:
+  EMIT:
+    packages:
+      - com.exasol.extensionmanager.itest
+    highest-index: 28

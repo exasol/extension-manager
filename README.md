@@ -1,7 +1,8 @@
 # Exasol Extension Manager
 
-[![Build Status](https://github.com/exasol/extension-manager/actions/workflows/ci-build.yml/badge.svg)](https://github.com/exasol/extension-manager/actions/workflows/ci-build.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/exasol/extension-manager.svg)](https://pkg.go.dev/github.com/exasol/extension-manager)
+[![Build Status](https://github.com/exasol/extension-manager/actions/workflows/ci-build.yml/badge.svg)](https://github.com/exasol/extension-manager/actions/workflows/ci-build.yml)
+Extension Manager Java Client: [![Maven Central – Extension Manager Java Client](https://img.shields.io/maven-central/v/com.exasol/extension-manager-client-java)](https://search.maven.org/artifact/com.exasol/extension-manager-client-java), Extension integration tests library: [![Maven Central – Extension integration tests library](https://img.shields.io/maven-central/v/com.exasol/extension-manager-integration-test-java)](https://search.maven.org/artifact/com.exasol/extension-manager-integration-test-java)
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Aextension-manager&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=com.exasol%3Aextension-manager)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Aextension-manager&metric=coverage)](https://sonarcloud.io/summary/new_code?id=com.exasol%3Aextension-manager)

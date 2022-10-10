@@ -1,8 +1,30 @@
 sources:
   - type: golang
     path: go.mod
+  - type: maven
+    path: extension-manager-client-java/pom.xml
+    modules:
+      - maven_central
+    parentPom:
+      groupId: "com.exasol"
+      artifactId: "extension-manager-parent-pom"
+      version: "${revision}"
+      relativePath: "../pom.xml"
+  - type: maven
+    path: extension-manager-integration-test-java/pom.xml
+    modules:
+      - integration_tests
+      - maven_central
+    parentPom:
+      groupId: "com.exasol"
+      artifactId: "extension-manager-parent-pom"
+      version: "${revision}"
+      relativePath: "../pom.xml"
 version: 0.1.0
 linkReplacements:
   - "https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.2.3/go-client/LICENSE|https://github.com/exasol/exasol-test-setup-abstraction-server/blob/main/LICENSE"
   - "Unknown|https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE"
+  - "https://github.com/swagger-api/swagger-core/modules/swagger-annotations|https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-annotations"
+  - "jquery.org/license|https://jquery.org/license/"
+  - "https://github.com/swagger-api/swagger-codegen/modules/swagger-codegen-maven-plugin|https://github.com/swagger-api/swagger-codegen/tree/master/modules/swagger-codegen-maven-plugin"
 excludes:
