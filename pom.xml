@@ -11,6 +11,16 @@
     <properties>
         <revision>0.1.0</revision>
     </properties>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
     <modules>
         <module>extension-manager-integration-test-java</module>
         <module>extension-manager-client-java</module>
