@@ -85,6 +85,15 @@ func (suite *ExtensionApiSuite) Test_Install_ResolveBucketFsPath() {
 	suite.NoError(err)
 }
 
+func (suite *ExtensionApiSuite) Test_Install_ConsoleLog() {
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithInstallFunc("console.log('test log message')").
+		Build().AsString()
+	extension := suite.loadExtension(extensionContent)
+	err := extension.Install(suite.mockContext(), "extensionVersion")
+	suite.NoError(err)
+}
+
 func (suite *ExtensionApiSuite) Test_Uninstall() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUninstallFunc("context.sqlClient.execute(`uninstall version ${version}`)").
