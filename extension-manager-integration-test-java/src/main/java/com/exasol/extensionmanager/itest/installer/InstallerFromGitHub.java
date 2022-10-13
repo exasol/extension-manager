@@ -32,7 +32,7 @@ class InstallerFromGitHub implements ExtensionManagerInstaller {
         final String version = this.config.getExtensionManagerVersion();
         LOGGER.info(() -> "Installing extension manager version '" + version + "'...");
         SimpleProcess.start(List.of("go", "install", "github.com/exasol/extension-manager/cmd@" + version),
-                Duration.ofSeconds(60));
+                Duration.ofMinutes(2));
     }
 
     private Path getExtensionManagerExecutable() {
