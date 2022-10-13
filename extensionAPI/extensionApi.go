@@ -15,7 +15,8 @@ const SupportedApiVersion = "0.1.15"
 
 // LoadExtension loads an extension from the given file content.
 func LoadExtension(id, content string) (*JsExtension, error) {
-	vm := newJavaScriptVm()
+	logPrefix := fmt.Sprintf("JS:%s>", id)
+	vm := newJavaScriptVm(logPrefix)
 	extensionJs, err := loadExtension(vm, id, content)
 	if err != nil {
 		return nil, err
@@ -28,13 +29,19 @@ func LoadExtension(id, content string) (*JsExtension, error) {
 	return wrappedExtension, nil
 }
 
-func newJavaScriptVm() *goja.Runtime {
+func newJavaScriptVm(logPrefix string) *goja.Runtime {
 	vm := goja.New()
 	vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
 	registry := new(require.Registry)
 	registry.Enable(vm)
-	console.Enable(vm)
+	configureLogging(registry, vm, logPrefix)
 	return vm
+}
+
+func configureLogging(registry *require.Registry, vm *goja.Runtime, logPrefix string) {
+	var printer console.Printer = console.PrinterFunc(func(s string) { log.Print(logPrefix + s) })
+	registry.RegisterNativeModule(console.ModuleName, console.RequireWithPrinter(printer))
+	console.Enable(vm)
 }
 
 func loadExtension(vm *goja.Runtime, id, content string) (*installedExtension, error) {

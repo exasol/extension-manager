@@ -23,7 +23,7 @@ func (suite *ErrorHandlingExtensionSuite) SetupSuite() {
 	suite.rawExtension = &rawJsExtension{Name: "name", Description: "desc",
 		InstallableVersions: []rawJsExtensionVersion{{Name: "v1", Deprecated: true, Latest: false}, {Name: "v2", Deprecated: false, Latest: true}},
 		BucketFsUploads:     []BucketFsUpload{{Name: "uploadName"}}}
-	suite.extension = wrapExtension(suite.rawExtension, "id", newJavaScriptVm())
+	suite.extension = wrapExtension(suite.rawExtension, "id", newJavaScriptVm("logPrefix>"))
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestProperties() {
