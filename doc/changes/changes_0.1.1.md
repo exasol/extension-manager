@@ -7,6 +7,7 @@ Code name:
 ## Features
 
 * #80: Added prefix to log messages from JS extensions
+* #83: Documented failure response status codes
 
 ## Dependency Updates
 

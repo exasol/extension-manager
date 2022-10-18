@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Nightapes/go-rest/pkg/openapi"
+	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -17,6 +18,9 @@ func DeleteInstance(apiContext *ApiContext) *openapi.Delete {
 		Authentication: authentication,
 		Response: map[string]openapi.MethodResponse{
 			"204": {Description: "OK"},
+			"404": {
+				Description: "Extension or instance not found",
+				Value:       apiErrors.NewNotFoundErrorF("Extension not found")},
 		},
 		Path: newPathWithDbQueryParams().Add("installations").
 			AddParameter("extensionId", openapi.STRING, "The ID of the extension for which to delete an instance").

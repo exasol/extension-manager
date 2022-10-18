@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Nightapes/go-rest/pkg/openapi"
+	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -18,6 +19,9 @@ func InstallExtension(apiContext *ApiContext) *openapi.Put {
 		RequestBody:    InstallExtensionRequest{},
 		Response: map[string]openapi.MethodResponse{
 			"204": {Description: "OK"},
+			"404": {
+				Description: "Extension not found",
+				Value:       apiErrors.NewNotFoundErrorF("Extension not found")},
 		},
 		Path: newPathWithDbQueryParams().
 			Add("extensions").
