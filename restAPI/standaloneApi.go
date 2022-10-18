@@ -58,7 +58,7 @@ func CreateOpenApi() (*openapi.API, error) {
 	api := openapi.NewOpenAPI()
 	api.Title = "Exasol Extension Manager REST-API"
 	api.Description = "Managed extensions and instances of extensions"
-	api.Version = "1.0"
+	api.Version = "dev"
 	if err := api.WithBasicAuth(BasicAuth); err != nil {
 		return nil, err
 	}
