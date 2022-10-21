@@ -7,7 +7,8 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.nio.file.Path;
+import java.io.IOException;
+import java.nio.file.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -29,9 +30,11 @@ class ExtensionManagerClientIT {
     private static ExtensionManagerSetup extensionManager;
 
     @BeforeAll
-    static void setupExasol() throws SQLException {
+    static void setupExasol() throws SQLException, IOException {
         exasolTestSetup = new ExasolTestSetupFactory(Path.of("dummy-config")).getTestSetup();
         connection = exasolTestSetup.createConnection();
+        Files.writeString(IntegrationTestCommon.CONFIG_FILE,
+                "localExtensionManager = " + Paths.get("..").toAbsolutePath().normalize() + "\n");
         extensionManager = ExtensionManagerSetup.create(exasolTestSetup, ExtensionBuilder.createDefaultNpmBuilder(
                 TESTING_EXTENSION_SOURCE_DIR, TESTING_EXTENSION_SOURCE_DIR.resolve("dist/testing-extension.js")));
         client = extensionManager.client();
@@ -42,6 +45,7 @@ class ExtensionManagerClientIT {
         connection.close();
         extensionManager.close();
         exasolTestSetup.close();
+        Files.delete(IntegrationTestCommon.CONFIG_FILE);
     }
 
     @Test

@@ -51,4 +51,5 @@ vendor/
 /extension-manager-integration-test-java/.settings/org.eclipse.m2e.core.prefs
 /extension-manager-integration-test-java/testing-extension/node_modules/
 /extension-manager-integration-test-java/testing-extension/dist/
+/extension-manager-integration-test-java/extension-test.properties
 /.scannerwork/
