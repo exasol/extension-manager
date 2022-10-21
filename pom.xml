@@ -9,7 +9,7 @@
     <packaging>pom</packaging>
     <url>https://github.com/exasol/extension-manager/</url>
     <properties>
-        <revision>0.1.1</revision>
+        <revision>0.2.0</revision>
     </properties>
     <distributionManagement>
         <snapshotRepository>

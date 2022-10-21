@@ -8,9 +8,9 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/exasol/extension-manager/restAPI"
+	"github.com/exasol/extension-manager/pkg/restAPI"
 
-	"github.com/exasol/extension-manager/extensionController"
+	"github.com/exasol/extension-manager/pkg/extensionController"
 )
 
 func main() {
