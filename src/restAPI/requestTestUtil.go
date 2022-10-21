@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/exasol/extension-manager/extensionController"
+	"github.com/exasol/extension-manager/src/extensionController"
 	"github.com/stretchr/testify/suite"
 )
 

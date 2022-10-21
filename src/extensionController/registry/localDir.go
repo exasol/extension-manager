@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/exasol/extension-manager/apiErrors"
+	"github.com/exasol/extension-manager/src/apiErrors"
 )
 
 func newLocalDirRegistry(dir string) Registry {

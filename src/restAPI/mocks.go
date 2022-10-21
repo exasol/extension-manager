@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/exasol/extension-manager/extensionAPI"
-	"github.com/exasol/extension-manager/extensionController"
-	"github.com/exasol/extension-manager/parameterValidator"
+	"github.com/exasol/extension-manager/src/extensionAPI"
+	"github.com/exasol/extension-manager/src/extensionController"
+	"github.com/exasol/extension-manager/src/parameterValidator"
 	"github.com/stretchr/testify/mock"
 )
 

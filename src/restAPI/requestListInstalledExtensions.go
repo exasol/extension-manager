@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Nightapes/go-rest/pkg/openapi"
-	"github.com/exasol/extension-manager/extensionAPI"
+	"github.com/exasol/extension-manager/src/extensionAPI"
 
 	log "github.com/sirupsen/logrus"
 )

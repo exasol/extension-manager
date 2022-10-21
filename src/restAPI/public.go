@@ -2,7 +2,7 @@ package restAPI
 
 import (
 	"github.com/Nightapes/go-rest/pkg/openapi"
-	"github.com/exasol/extension-manager/extensionController"
+	"github.com/exasol/extension-manager/src/extensionController"
 )
 
 const (

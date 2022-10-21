@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/dop251/goja"
-	"github.com/exasol/extension-manager/apiErrors"
+	"github.com/exasol/extension-manager/src/apiErrors"
 )
 
 type JsExtension struct {

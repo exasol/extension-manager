@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/sirupsen/logrus"
 
-	"github.com/exasol/extension-manager/extensionController"
+	"github.com/exasol/extension-manager/src/extensionController"
 )
 
 func CreateInstance(apiContext *ApiContext) *openapi.Post {

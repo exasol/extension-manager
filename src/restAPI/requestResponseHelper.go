@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/exasol/extension-manager/apiErrors"
+	"github.com/exasol/extension-manager/src/apiErrors"
 	"github.com/go-chi/chi/v5/middleware"
 	log "github.com/sirupsen/logrus"
 )

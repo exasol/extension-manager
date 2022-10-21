@@ -3,7 +3,7 @@ package parameterValidator
 import (
 	"testing"
 
-	"github.com/exasol/extension-manager/extensionAPI"
+	"github.com/exasol/extension-manager/src/extensionAPI"
 	"github.com/stretchr/testify/suite"
 )
 

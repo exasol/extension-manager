@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/exasol/extension-manager/apiErrors"
+	"github.com/exasol/extension-manager/src/apiErrors"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/exasol/exasol-driver-go"
-	"github.com/exasol/extension-manager/apiErrors"
+	"github.com/exasol/extension-manager/src/apiErrors"
 )
 
 type generalHandlerFunc = func(writer http.ResponseWriter, request *http.Request)

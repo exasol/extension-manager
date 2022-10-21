@@ -5,8 +5,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/exasol/extension-manager/apiErrors"
-	"github.com/exasol/extension-manager/extensionController/registry/index"
+	"github.com/exasol/extension-manager/src/apiErrors"
+	"github.com/exasol/extension-manager/src/extensionController/registry/index"
 )
 
 func newHttpRegistry(url string) Registry {

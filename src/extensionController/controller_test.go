@@ -9,11 +9,11 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/exasol/extension-manager/apiErrors"
-	"github.com/exasol/extension-manager/extensionAPI"
-	"github.com/exasol/extension-manager/extensionController/registry"
-	"github.com/exasol/extension-manager/integrationTesting"
-	"github.com/exasol/extension-manager/parameterValidator"
+	"github.com/exasol/extension-manager/src/apiErrors"
+	"github.com/exasol/extension-manager/src/extensionAPI"
+	"github.com/exasol/extension-manager/src/extensionController/registry"
+	"github.com/exasol/extension-manager/src/integrationTesting"
+	"github.com/exasol/extension-manager/src/parameterValidator"
 
 	"github.com/stretchr/testify/suite"
 )

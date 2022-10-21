@@ -1,7 +1,7 @@
 package restAPI
 
 import (
-	"github.com/exasol/extension-manager/extensionController"
+	"github.com/exasol/extension-manager/src/extensionController"
 )
 
 func NewApiContext(controller extensionController.TransactionController) *ApiContext {

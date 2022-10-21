@@ -7,7 +7,7 @@ import (
 
 	"testing"
 
-	"github.com/exasol/extension-manager/integrationTesting"
+	"github.com/exasol/extension-manager/src/integrationTesting"
 	"github.com/stretchr/testify/suite"
 )
 

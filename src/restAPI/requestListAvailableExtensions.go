@@ -8,8 +8,8 @@ import (
 
 	"github.com/Nightapes/go-rest/pkg/openapi"
 
-	"github.com/exasol/extension-manager/extensionAPI"
-	"github.com/exasol/extension-manager/extensionController"
+	"github.com/exasol/extension-manager/src/extensionAPI"
+	"github.com/exasol/extension-manager/src/extensionController"
 )
 
 func ListAvailableExtensions(apiContext *ApiContext) *openapi.Get {
