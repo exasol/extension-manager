@@ -39,10 +39,10 @@ vendor/
 /doc/tracing-report.md
 /doc/tracing-report.html
 
-/integrationTesting/extensionForTesting/node_modules/
-/integrationTesting/extensionForTesting/package-lock.json
-/parameterValidator/node_modules/
-/parameterValidator/dist/
+/src/integrationTesting/extensionForTesting/node_modules/
+/src/integrationTesting/extensionForTesting/package-lock.json
+/src/parameterValidator/node_modules/
+/src/parameterValidator/dist/
 /coverage.out
 
 /extension-manager-client-java/.settings/org.eclipse.core.resources.prefs
