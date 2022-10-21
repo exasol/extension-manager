@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Nightapes/go-rest/pkg/openapi"
+	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/parameterValidator"
 	"github.com/go-chi/chi/v5"
 )
@@ -17,9 +18,14 @@ func GetExtensionDetails(apiContext *ApiContext) *openapi.Get {
 		Tags:           []string{TagExtension},
 		Authentication: authentication,
 		Response: map[string]openapi.MethodResponse{
-			"200": {Description: "OK", Value: ExtensionDetailsResponse{Id: "s3-vs", Version: "1.2.3",
-				ParamDefinitions: []ParamDefinition{{Id: "s3Bucket", Name: "S3 Bucket Name",
-					RawDefinition: map[string]interface{}{"id": "s3Bucket", "name": "S3 Bucket Name", "type": "string", "required": true}}}}},
+			"200": {
+				Description: "OK",
+				Value: ExtensionDetailsResponse{Id: "s3-vs", Version: "1.2.3", ParamDefinitions: []ParamDefinition{
+					{Id: "s3Bucket", Name: "S3 Bucket Name",
+						RawDefinition: map[string]interface{}{"id": "s3Bucket", "name": "S3 Bucket Name", "type": "string", "required": true}}}}},
+			"404": {
+				Description: "Extension not found or creating instances not supported for this extension",
+				Value:       apiErrors.NewNotFoundErrorF("Creating instances not supported")},
 		},
 		Path: newPathWithDbQueryParams().
 			Add("extensions").

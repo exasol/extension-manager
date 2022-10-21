@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/sirupsen/logrus"
 
+	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/exasol/extension-manager/extensionController"
 )
 
@@ -21,6 +22,12 @@ func CreateInstance(apiContext *ApiContext) *openapi.Post {
 		RequestBody:    CreateInstanceRequest{ParameterValues: []ParameterValue{{Name: "param1", Value: "value1"}}},
 		Response: map[string]openapi.MethodResponse{
 			"200": {Description: "OK", Value: CreateInstanceResponse{InstanceId: "id", InstanceName: "new-instance-name"}},
+			"400": {
+				Description: "Invalid parameters specified",
+				Value:       apiErrors.NewBadRequestErrorF("Validation failed: parameter 'Virtual Schema' is missing")},
+			"404": {
+				Description: "Extension not found",
+				Value:       apiErrors.NewNotFoundErrorF("Extension not found")},
 		},
 		Path: newPathWithDbQueryParams().Add("installations").
 			AddParameter("extensionId", openapi.STRING, "ID of the installed extension for which to create an instance").
