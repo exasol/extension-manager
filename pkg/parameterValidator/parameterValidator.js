@@ -1,6 +1,6 @@
 (() => {
   // node_modules/@exasol/extension-parameter-validator/dist/extensionParameterValidator.js
-  var SUCCESS_RESULT = { success: true, message: "" };
+  const SUCCESS_RESULT = { success: true, message: "" };
   function validationError(errorMessage) {
     return { success: false, message: errorMessage };
   }
