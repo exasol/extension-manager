@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Nightapes/go-rest/pkg/openapi"
-	"github.com/exasol/extension-manager/src/parameterValidator"
+	"github.com/exasol/extension-manager/pkg/parameterValidator"
 	"github.com/go-chi/chi/v5"
 )
 

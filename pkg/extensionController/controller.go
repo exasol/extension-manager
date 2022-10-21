@@ -8,10 +8,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/exasol/extension-manager/src/apiErrors"
-	"github.com/exasol/extension-manager/src/extensionAPI"
-	"github.com/exasol/extension-manager/src/extensionController/registry"
-	"github.com/exasol/extension-manager/src/parameterValidator"
+	"github.com/exasol/extension-manager/pkg/apiErrors"
+	"github.com/exasol/extension-manager/pkg/extensionAPI"
+	"github.com/exasol/extension-manager/pkg/extensionController/registry"
+	"github.com/exasol/extension-manager/pkg/parameterValidator"
 )
 
 // controller is the core part of the extension-manager that provides the extension handling functionality.

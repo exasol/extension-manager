@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/dop251/goja"
-	"github.com/exasol/extension-manager/src/apiErrors"
+	"github.com/exasol/extension-manager/pkg/apiErrors"
 	"github.com/stretchr/testify/suite"
 )
 

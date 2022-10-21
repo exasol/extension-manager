@@ -7,7 +7,7 @@ import (
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/console"
 	"github.com/dop251/goja_nodejs/require"
-	"github.com/exasol/extension-manager/src/extensionAPI"
+	"github.com/exasol/extension-manager/pkg/extensionAPI"
 )
 
 //go:generate npm ci

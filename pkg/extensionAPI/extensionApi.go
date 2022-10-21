@@ -3,7 +3,7 @@ package extensionAPI
 import (
 	"fmt"
 
-	"github.com/exasol/extension-manager/src/backend"
+	"github.com/exasol/extension-manager/pkg/backend"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/dop251/goja"

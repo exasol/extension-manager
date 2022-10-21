@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/exasol/extension-manager/src/integrationTesting"
+	"github.com/exasol/extension-manager/pkg/integrationTesting"
 	"github.com/stretchr/testify/suite"
 )
 

@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/exasol/extension-manager/src/extensionAPI"
+	"github.com/exasol/extension-manager/pkg/extensionAPI"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"

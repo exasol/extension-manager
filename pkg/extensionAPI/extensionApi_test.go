@@ -3,8 +3,8 @@ package extensionAPI
 import (
 	"testing"
 
-	"github.com/exasol/extension-manager/src/backend"
-	"github.com/exasol/extension-manager/src/integrationTesting"
+	"github.com/exasol/extension-manager/pkg/backend"
+	"github.com/exasol/extension-manager/pkg/integrationTesting"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"

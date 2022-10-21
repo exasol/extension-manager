@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/exasol/extension-manager/src/extensionController"
+	"github.com/exasol/extension-manager/pkg/extensionController"
 	log "github.com/sirupsen/logrus"
 )
 

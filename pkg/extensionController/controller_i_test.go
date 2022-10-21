@@ -5,9 +5,9 @@ import (
 	"path"
 	"testing"
 
-	"github.com/exasol/extension-manager/src/apiErrors"
-	"github.com/exasol/extension-manager/src/extensionAPI"
-	"github.com/exasol/extension-manager/src/integrationTesting"
+	"github.com/exasol/extension-manager/pkg/apiErrors"
+	"github.com/exasol/extension-manager/pkg/extensionAPI"
+	"github.com/exasol/extension-manager/pkg/integrationTesting"
 
 	"github.com/stretchr/testify/suite"
 )

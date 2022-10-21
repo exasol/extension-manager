@@ -8,8 +8,8 @@ import (
 
 	"github.com/Nightapes/go-rest/pkg/openapi"
 
-	"github.com/exasol/extension-manager/src/apiErrors"
-	"github.com/exasol/extension-manager/src/extensionController"
+	"github.com/exasol/extension-manager/pkg/apiErrors"
+	"github.com/exasol/extension-manager/pkg/extensionController"
 
 	httpswagger "github.com/swaggo/http-swagger"
 

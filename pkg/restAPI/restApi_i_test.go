@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/exasol/extension-manager/src/extensionController"
-	"github.com/exasol/extension-manager/src/integrationTesting"
+	"github.com/exasol/extension-manager/pkg/extensionController"
+	"github.com/exasol/extension-manager/pkg/integrationTesting"
 	"github.com/kinbiko/jsonassert"
 
 	"github.com/stretchr/testify/suite"

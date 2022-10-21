@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/exasol/extension-manager/src/backend"
+	"github.com/exasol/extension-manager/pkg/backend"
 )
 
 const BUCKETFS_PATH_PREFIX = "/buckets/bfsdefault/default/"
