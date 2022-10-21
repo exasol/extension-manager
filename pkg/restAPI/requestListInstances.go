@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Nightapes/go-rest/pkg/openapi"
+	"github.com/exasol/extension-manager/apiErrors"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -17,6 +18,9 @@ func ListInstances(apiContext *ApiContext) *openapi.Get {
 		Authentication: authentication,
 		Response: map[string]openapi.MethodResponse{
 			"200": {Description: "OK", Value: ListInstancesResponse{Instances: []Instance{{Id: "s3-vs-1", Name: "SALES_S3_VS"}}}},
+			"404": {
+				Description: "Extension not found",
+				Value:       apiErrors.NewNotFoundErrorF("Extension not found")},
 		},
 		Path: newPathWithDbQueryParams().Add("installations").
 			AddParameter("extensionId", openapi.STRING, "The ID of the installed extension for which to get the instances").

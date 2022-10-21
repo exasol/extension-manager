@@ -123,9 +123,9 @@
 | [Maven Install Plugin][63]                              | [The Apache Software License, Version 2.0][39] |
 | [Maven Site Plugin 3][64]                               | [The Apache Software License, Version 2.0][39] |
 
-[0]: https://github.com/dop251/goja/blob/c4d370b87b45/LICENSE
-[1]: https://github.com/dop251/goja_nodejs/blob/678b33ca5009/LICENSE
-[2]: https://github.com/exasol/exasol-driver-go/blob/v0.4.5/LICENSE
+[0]: https://github.com/dop251/goja/blob/09250e0eba20/LICENSE
+[1]: https://github.com/dop251/goja_nodejs/blob/3aa5028e57f6/LICENSE
+[2]: https://github.com/exasol/exasol-driver-go/blob/v0.4.6/LICENSE
 [3]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.2.4/go-client/LICENSE
 [4]: https://github.com/go-chi/chi/blob/v5.0.7/LICENSE
 [5]: https://github.com/sirupsen/logrus/blob/v1.9.0/LICENSE
