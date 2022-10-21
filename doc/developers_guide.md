@@ -124,3 +124,27 @@ sonar-scanner -Dsonar.organization=exasol -Dsonar.host.url=https://sonarcloud.io
 To use a local, non-published version of the extension interface in integration tests, edit [pkg/integrationTesting/extensionForTesting/package.json](./../pkg/integrationTesting/extensionForTesting/package.json) and replace the version of `"@exasol/extension-manager-interface"` with the path to your local clone of [extension-manager-interface](https://github.com/exasol/extension-manager-interface).
 
 Make sure to not commit the modified `package.json`.
+
+## Extension Registry
+
+The extension registry is an HTTPS service that provides a JSON file containing links to all available extensions. It consists of an S3 Bucket and a CloudFront distribution deployed via CDK.
+
+### Initial Configuration
+
+1. Create file `registry/lib/config.ts` with the following content:
+    ```ts
+    export const CONFIG = {
+        owner: 'your.email@example.com'
+    }
+    ```
+2. Run `npm install`
+3. Configure AWS profile and region:
+    ```sh
+    export AWS_PROFILE=<profile>
+    export AWS_REGION=eu-central-1
+    ```
+3. Run `npm run cdk diff`
+
+### Deploy Changes
+
+Run `npm run cdk deploy`

@@ -1,16 +1,11 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import { ContentDistributionConstruct } from './content-distribution';
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class RegistryStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: cdk.StackProps) {
     super(scope, id, props);
-
-    // The code that defines your stack goes here
-
-    // example resource
-    // const queue = new sqs.Queue(this, 'RegistryQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    new ContentDistributionConstruct(this, "ContentDistribution", props);
   }
 }

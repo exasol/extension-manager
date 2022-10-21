@@ -59,3 +59,4 @@ vendor/
 /registry/node_modules
 /registry/.cdk.staging
 /registry/cdk.out
+/registry/lib/config.ts
