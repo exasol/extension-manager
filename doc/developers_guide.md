@@ -143,8 +143,7 @@ The extension registry is an HTTPS service that provides a JSON file containing 
     export AWS_PROFILE=<profile>
     export AWS_REGION=eu-central-1
     ```
-3. Run `npm run cdk diff`
 
 ### Deploy Changes
 
-Run `npm run cdk deploy`
+Run `npm run cdk diff`. If the output looks good, run `npm run cdk deploy`.
