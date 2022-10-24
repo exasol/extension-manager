@@ -54,9 +54,14 @@ vendor/
 /extension-manager-integration-test-java/extension-test.properties
 /.scannerwork/
 
-/registry/**/*.js
-/registry/**/*.d.ts
-/registry/node_modules
+/registry/test/*.js
+/registry/test/*.d.ts
+/registry/lib/*.js
+/registry/lib/*.d.ts
+/registry/bin/*.js
+/registry/bin/*.d.ts
+/registry/node_modules/
 /registry/.cdk.staging
-/registry/cdk.out
+/registry/cdk.out/
+/registry/coverage/
 /registry/lib/config.ts
