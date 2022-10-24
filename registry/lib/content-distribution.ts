@@ -11,7 +11,10 @@ export class ContentDistributionConstruct extends Construct {
 
         const staticContentBucket = new Bucket(this, "StaticContentBucket", {
             removalPolicy: RemovalPolicy.DESTROY,
-            blockPublicAccess: BlockPublicAccess.BLOCK_ALL
+            blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+            enforceSSL: true,
+            publicReadAccess: false,
+            versioned: true,
         });
 
         const accessIdentity = new OriginAccessIdentity(this, "AccessIdentity", {
