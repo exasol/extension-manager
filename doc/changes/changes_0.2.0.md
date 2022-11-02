@@ -4,7 +4,7 @@ Code name: Add extension registry
 
 ## Summary
 
-In this release we added a CDK stack for deploying the infrastructure of the Extension Registry to AWS.
+This release adds a CDK stack for deploying the infrastructure of the Extension Registry to AWS.
 
 We also moved all Go sources to the `pkg` directory. Projects that use this library will need to adapt the imports by replacing `"github.com/exasol/extension-manager/*"` with `"github.com/exasol/extension-manager/pkg/*"`.
 

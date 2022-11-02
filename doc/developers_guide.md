@@ -127,7 +127,7 @@ Make sure to not commit the modified `package.json`.
 
 ## Extension Registry
 
-The extension registry is an HTTPS service that provides a JSON file containing links to all available extensions. It consists of an S3 Bucket and a CloudFront distribution deployed via CDK.
+The extension registry is an HTTPS service that provides a JSON file containing links to all available extensions. The service consists of an S3 Bucket and a CloudFront distribution deployed via AWS Cloud Development Kit (CDK).
 
 ### Initial Configuration
 
@@ -156,4 +156,4 @@ aws cloudformation describe-stacks --stack-name ExtensionManagerRegistry --query
 
 ### Deploy Registry Content
 
-To deploy the content of the Extension Registry to `test` or `prod` stage, run script `AWS_PROFILE=<profile> upload-registry.sh test|prod`. This will upload one of the json files in the `content` folder to the S3 bucket and invalidate the CloudFront cache.
+To deploy the content of the Extension Registry to `test` or `prod` stage, run script `AWS_PROFILE=<profile> upload-registry.sh <stage>` with `<stage>` being either `test` or `prod`. This will upload the JSON file from the `content` folder for the given stage to the S3 bucket and invalidate the CloudFront cache.
