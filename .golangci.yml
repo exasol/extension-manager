@@ -1,3 +1,6 @@
 # https://golangci-lint.run/usage/configuration/
 linters:
   enable-all: false
+run:
+  skip-dirs:
+    - node_modules
