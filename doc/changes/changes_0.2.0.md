@@ -1,14 +1,17 @@
-# Extension Manager 0.2.0, released 2022-??-??
+# Extension Manager 0.2.0, released 2022-11-02
 
-Code name:
+Code name: Add extension registry
 
 ## Summary
 
-In this release we moved all Go sources to the `pkg` directory. Projects that use this library will need to adapt the imports by replacing `"github.com/exasol/extension-manager/*"` with `"github.com/exasol/extension-manager/pkg/*"`.
+In this release we added a CDK stack for deploying the infrastructure of the Extension Registry to AWS.
+
+We also moved all Go sources to the `pkg` directory. Projects that use this library will need to adapt the imports by replacing `"github.com/exasol/extension-manager/*"` with `"github.com/exasol/extension-manager/pkg/*"`.
 
 ## Features
 
 * #80: Added prefix to log messages from JS extensions
+* #82: Added infrastructure for extension registry
 
 ## Refactoring
 
