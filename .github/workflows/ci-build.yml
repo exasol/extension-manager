@@ -88,7 +88,7 @@ jobs:
 
       - name: Prepare SonarCloud scan
         # Without this step, Sonar will fail with this error:
-        # Maven project detected. You should run the goal 'org.sonarsource.scanner.maven:sonar' during build rather than using this GitHub Action."
+        # "Maven project detected. You should run the goal 'org.sonarsource.scanner.maven:sonar' during build rather than using this GitHub Action."
         run: rm ./pom.xml
 
       - name: Build and test registry infrastructure
