@@ -23,7 +23,7 @@ export class ContentDistributionConstruct extends Construct {
         });
 
         const cloudfrontDistribution = new CloudFrontWebDistribution(this, "EMRegistryDistribution", {
-            comment: "Extension Registry",
+            comment: "Extension Manager Registry",
             originConfigs: [{
                 behaviors: [{ isDefaultBehavior: true }],
                 s3OriginSource: {

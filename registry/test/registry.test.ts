@@ -10,26 +10,59 @@ function renderTemplate(): Template {
 
 describe('Registry stack', () => {
     it('contains a bucket', () => {
-        renderTemplate().hasResourceProperties('AWS::S3::Bucket', {
-            "PublicAccessBlockConfiguration": {
-                "BlockPublicAcls": true,
-                "BlockPublicPolicy": true,
-                "IgnorePublicAcls": true,
-                "RestrictPublicBuckets": true
+        renderTemplate().hasResource('AWS::S3::Bucket', {
+            "Properties": {
+                "PublicAccessBlockConfiguration": {
+                    "BlockPublicAcls": true,
+                    "BlockPublicPolicy": true,
+                    "IgnorePublicAcls": true,
+                    "RestrictPublicBuckets": true
+                },
+                "Tags": [
+                    {
+                        "Key": "aws-cdk:auto-delete-objects",
+                        "Value": "true"
+                    }
+                ]
             },
-            "VersioningConfiguration": {
-                "Status": "Enabled"
-            },
-        });
+            "UpdateReplacePolicy": "Delete",
+            "DeletionPolicy": "Delete",
+        })
     });
     it('contains cloudfront distribution', () => {
-        renderTemplate().hasResourceProperties('AWS::CloudFront::Distribution', {
-            "DistributionConfig": {
-                "DefaultRootObject": "index.html",
-                "Enabled": true,
-                "HttpVersion": "http2and3",
-                "IPV6Enabled": true,
-            }
+        renderTemplate().hasResource('AWS::CloudFront::Distribution', {
+            "Properties": {
+                "DistributionConfig": {
+                    "Aliases": [],
+                    "Comment": "Extension Manager Registry",
+                    "DefaultCacheBehavior": {
+                        "AllowedMethods": [
+                            "GET",
+                            "HEAD"
+                        ],
+                        "CachedMethods": [
+                            "GET",
+                            "HEAD"
+                        ],
+                        "Compress": true,
+                        "ForwardedValues": {
+                            "Cookies": {
+                                "Forward": "none"
+                            },
+                            "QueryString": false
+                        },
+                        "ViewerProtocolPolicy": "redirect-to-https"
+                    },
+                    "DefaultRootObject": "index.html",
+                    "Enabled": true,
+                    "HttpVersion": "http2and3",
+                    "IPV6Enabled": true,
+                    "PriceClass": "PriceClass_100",
+                    "ViewerCertificate": {
+                        "CloudFrontDefaultCertificate": true
+                    }
+                }
+            },
         });
     });
 });
