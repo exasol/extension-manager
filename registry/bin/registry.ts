@@ -19,4 +19,4 @@ const props: cdk.StackProps = {
 }
 
 const app = new cdk.App();
-new RegistryStack(app, 'RegistryStack', props);
+new RegistryStack(app, 'ExtensionManagerRegistry', props);

@@ -9,19 +9,20 @@ export class ContentDistributionConstruct extends Construct {
     constructor(scope: Construct, id: string, props: cdk.StackProps) {
         super(scope, id);
 
-        const staticContentBucket = new Bucket(this, "StaticContentBucket", {
+        const staticContentBucket = new Bucket(this, "EMRegistryStaticContent", {
             removalPolicy: RemovalPolicy.DESTROY,
+            autoDeleteObjects: true,
             blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
             enforceSSL: true,
             publicReadAccess: false,
-            versioned: true,
+            versioned: false,
         });
 
         const accessIdentity = new OriginAccessIdentity(this, "AccessIdentity", {
             comment: `Access bucket ${staticContentBucket}`
         });
 
-        const cloudfrontDistribution = new CloudFrontWebDistribution(this, "CloudFrontDistribution", {
+        const cloudfrontDistribution = new CloudFrontWebDistribution(this, "EMRegistryDistribution", {
             comment: "Extension Registry",
             originConfigs: [{
                 behaviors: [{ isDefaultBehavior: true }],
