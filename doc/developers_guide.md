@@ -147,3 +147,13 @@ The extension registry is an HTTPS service that provides a JSON file containing 
 ### Deploy Changes
 
 Run `npm run cdk diff`. If the output looks good, run `npm run cdk deploy`.
+
+To get the output variables of the deployed stack (e.g. bucket name and CloudFront distribution host name), run the following command:
+
+```sh
+aws cloudformation describe-stacks --stack-name ExtensionManagerRegistry --query "Stacks[0].Outputs[].{key:ExportName,value:OutputValue}"
+```
+
+### Deploy Registry Content
+
+To deploy the content of the Extension Registry to `test` or `prod` stage, run script `AWS_PROFILE=<profile> upload-registry.sh test|prod`. This will upload one of the json files in the `content` folder to the S3 bucket and invalidate the CloudFront cache.
