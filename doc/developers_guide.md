@@ -157,3 +157,10 @@ aws cloudformation describe-stacks --stack-name ExtensionManagerRegistry --query
 ### Deploy Registry Content
 
 To deploy the content of the Extension Registry to `test` or `prod` stage, run script `AWS_PROFILE=<profile> upload-registry.sh <stage>` with `<stage>` being either `test` or `prod`. This will upload the JSON file from the `content` folder for the given stage to the S3 bucket and invalidate the CloudFront cache.
+
+### Upgrade NPM Dependencies
+
+```sh
+npx npm-check-updates -u && npm install
+```
+npm
