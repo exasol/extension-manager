@@ -1,8 +1,8 @@
 import * as cdk from 'aws-cdk-lib';
 import { CfnOutput, RemovalPolicy } from 'aws-cdk-lib';
-import { CloudFrontWebDistribution, HttpVersion, OriginAccessIdentity, PriceClass, ViewerCertificate, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
-import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { BlockPublicAccess, Bucket, BucketPolicy } from 'aws-cdk-lib/aws-s3';
+import { Distribution, HttpVersion, PriceClass, SecurityPolicyProtocol } from 'aws-cdk-lib/aws-cloudfront';
+import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
+import { BlockPublicAccess, Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
 export class ContentDistributionConstruct extends Construct {
@@ -18,34 +18,17 @@ export class ContentDistributionConstruct extends Construct {
             versioned: false,
         });
 
-        const accessIdentity = new OriginAccessIdentity(this, "AccessIdentity", {
-            comment: `Access bucket ${staticContentBucket}`
-        });
-
-        const cloudfrontDistribution = new CloudFrontWebDistribution(this, "EMRegistryDistribution", {
+        const cloudfrontDistribution = new Distribution(this, "EMRegistryDistribution", {
             comment: "Extension Manager Registry",
-            originConfigs: [{
-                behaviors: [{ isDefaultBehavior: true }],
-                s3OriginSource: {
-                    s3BucketSource: staticContentBucket,
-                    originAccessIdentity: accessIdentity
-                }
-            }],
+            defaultBehavior: { origin: new S3Origin(staticContentBucket) },
             defaultRootObject: "index.html",
-            enableIpV6: true,
-            viewerCertificate: ViewerCertificate.fromCloudFrontDefaultCertificate(),
-            priceClass: PriceClass.PRICE_CLASS_100,
-            viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+            enabled: true,
+            enableIpv6: true,
+            enableLogging: false,
             httpVersion: HttpVersion.HTTP2_AND_3,
+            priceClass: PriceClass.PRICE_CLASS_100,
+            minimumProtocolVersion: SecurityPolicyProtocol.TLS_V1_1_2016,
         });
-
-        const bucketPolicy = new BucketPolicy(this, "AllowReadAccessToCloudFront", { bucket: staticContentBucket });
-        bucketPolicy.document.addStatements(new PolicyStatement({
-            effect: Effect.ALLOW,
-            actions: ["s3:GetObject"],
-            resources: [`${staticContentBucket.bucketArn}/*`],
-            principals: [accessIdentity.grantPrincipal]
-        }));
 
         new CfnOutput(this, "StaticContentBucketName", {
             exportName: "StaticContentBucketName",
