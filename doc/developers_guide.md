@@ -163,4 +163,17 @@ To deploy the content of the Extension Registry to `test` or `prod` stage, run s
 ```sh
 npx npm-check-updates -u && npm install
 ```
-npm
+
+## Embedding Extension Manager in Other Go Programs
+
+You can embed the Extension Manager's REST API in other programs that use the [Nightapes/go-rest](https://github.com/Nightapes/go-rest) library:
+
+```go
+// Create an instance of `openapi.API`
+api := openapi.NewOpenAPI()
+// Create a new configuration object
+config := ExtensionManagerConfig{ExtensionRegistryURL: "https://<extension-registry>"}
+// Add endpoints
+err := restAPI.AddPublicEndpoints(api, config)
+// Start the server
+```

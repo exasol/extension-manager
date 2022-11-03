@@ -51,10 +51,42 @@ backend --> customerCluster: manages
 @enduml
 ```
 
+#### EM Provides a REST Interface
+`dsn~rest-interface~1`
+
+Covers:
+* [`req~rest-interface~1`](system_requirements.md#em-provides-a-rest-interface)
+
+Needs: impl, utest, itest
+
+#### EM Implemented as a Go Library
+`dsn~go-library~1`
+
+EM is implemented as a Go library instead of an executable Go program.
+
+Rationale:
+This allows embedding EM in other applications like SaaS, so it can be reused in different contexts. Nevertheless EM additionally contains an executable Go program which is useful for testing EM and extensions.
+
+Covers:
+* [`req~embeddable-rest-interface~1`](system_requirements.md#rest-interface-is-embeddable)
+
+Needs: impl, utest, itest
+
+#### EM Generates an OpenAPI Specification
+`dsn~openapi-spec~1`
+
+EM generates an OpenAPI specification at runtime using the [Nightapes/go-rest](https://github.com/Nightapes/go-rest) library.
+
+The standalone executable of EM provides the OpenAPI specification as a web page and in JSON format. Applications that embed EM as a library need to create their own endpoint for that.
+
+Covers:
+* [`req~openapi-spec~1`](system_requirements.md#em-provides-an-openapi-specification)
+ 
+Needs: impl, utest, itest
 
 ### Extensions
 
-The extension manager has an extension mechanism.
+The Extension Manager has an extension mechanism.
 
 The extensions are integration projects maintained by Exasol. For now, it's not possible to install third party extensions, since it would be a security risk.
 
