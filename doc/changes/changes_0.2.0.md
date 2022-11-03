@@ -1,4 +1,4 @@
-# Extension Manager 0.2.0, released 2022-11-02
+# Extension Manager 0.2.0, released 2022-11-03
 
 Code name: Add extension registry
 
