@@ -35,6 +35,17 @@ jobs:
             ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
             ${{ runner.os }}-go-
 
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v3
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Enable testcontainer reuse
         run: echo 'testcontainers.reuse.enable=true' > "$HOME/.testcontainers.properties"
 
@@ -77,8 +88,15 @@ jobs:
 
       - name: Prepare SonarCloud scan
         # Without this step, Sonar will fail with this error:
-        # Maven project detected. You should run the goal 'org.sonarsource.scanner.maven:sonar' during build rather than using this GitHub Action."
+        # "Maven project detected. You should run the goal 'org.sonarsource.scanner.maven:sonar' during build rather than using this GitHub Action."
         run: rm ./pom.xml
+
+      - name: Build and test registry infrastructure
+        run: |
+          cd registry
+          echo "export const CONFIG = { owner: 'dummy-owner@example.com' }" > lib/config.ts
+          npm ci
+          npm run test
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master

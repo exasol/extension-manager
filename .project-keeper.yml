@@ -20,6 +20,9 @@ sources:
       artifactId: "extension-manager-parent-pom"
       version: "${revision}"
       relativePath: "../pom.xml"
+# Activate registry when https://github.com/exasol/project-keeper/issues/398 is fixed
+#  - type: npm
+#    path: registry/package.json
 version: 0.2.0
 linkReplacements:
   - "https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.2.3/go-client/LICENSE|https://github.com/exasol/exasol-test-setup-abstraction-server/blob/main/LICENSE"
