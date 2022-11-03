@@ -137,7 +137,7 @@ The extension definitions are placed in a storage that is accessible from the ex
 Covers:
 * [`req~install-extension-artifacts~1`](system_requirements.md#install-database-objects)
 * [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
-* [`req~uninstall-extension~1`](system_requirements.md#define-configuration-parameters)
+* [`req~uninstall-extension~1`](system_requirements.md#uninstalling-extensions)
 
 Needs: impl, utest, itest
 
@@ -154,7 +154,7 @@ The alternative to also version the extension definition would lead to unmaintai
 
 Covers:
 * [`req~install-extension-artifacts~1`](system_requirements.md#install-database-objects)
-* [`req~uninstall-extension~1`](system_requirements.md#define-configuration-parameters)
+* [`req~uninstall-extension~1`](system_requirements.md#uninstall-an-extension)
 
 Needs: impl, utest, itest
 
@@ -397,7 +397,7 @@ jarV1InRepo --> jarV1InBucketFS
 Covers:
 * [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
 * [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
-* [`req~uninstall-extension~1`](system_requirements.md#define-configuration-parameters)
+* [`req~uninstall-extension~1`](system_requirements.md#uninstalling-extensions)
 
 Needs: impl, utest, itest
 
@@ -574,7 +574,7 @@ Rationale: By this a single implementation can be used for both validation stage
 
 ### Callback For Client Side Validation
 
-The developers decided against a callback for the client side [validation of parameters](#parameter-validation-rules). The main reason was that it would require to load code into the client at runtime. That would require to run `eval()` on code retrieved from a request. Even so the security risk of that seems acceptable, the developers decided against it since it would look suspicious.
+The developers decided against a callback for the client side [validation of parameters](#parameter-validation). The main reason was that it would require to load code into the client at runtime. That would require to run `eval()` on code retrieved from a request. Even so the security risk of that seems acceptable, the developers decided against it since it would look suspicious.
 
 ### Alternative Options to Represent Conditional Parameters
 
