@@ -33,36 +33,25 @@ describe('Registry stack', () => {
         renderTemplate().hasResource('AWS::CloudFront::Distribution', {
             "Properties": {
                 "DistributionConfig": {
-                    "Aliases": [],
                     "Comment": "Extension Manager Registry",
                     "DefaultCacheBehavior": {
-                        "AllowedMethods": [
-                            "GET",
-                            "HEAD"
-                        ],
-                        "CachedMethods": [
-                            "GET",
-                            "HEAD"
-                        ],
                         "Compress": true,
-                        "ForwardedValues": {
-                            "Cookies": {
-                                "Forward": "none"
-                            },
-                            "QueryString": false
-                        },
-                        "ViewerProtocolPolicy": "redirect-to-https"
+                        "ViewerProtocolPolicy": "allow-all"
                     },
                     "DefaultRootObject": "index.html",
                     "Enabled": true,
                     "HttpVersion": "http2and3",
                     "IPV6Enabled": true,
-                    "PriceClass": "PriceClass_100",
-                    "ViewerCertificate": {
-                        "CloudFrontDefaultCertificate": true
-                    }
+                    "Origins": [
+                        {
+                            "S3OriginConfig": {
+                                "OriginAccessIdentity": {}
+                            }
+                        }
+                    ],
+                    "PriceClass": "PriceClass_100"
                 }
-            },
+            }
         });
     });
 });
