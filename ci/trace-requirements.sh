@@ -19,7 +19,8 @@ if [[ ! -f "$jar_file" ]]; then
 fi
 
 # Trace all
-#java -jar "$jar_file" trace "$base_dir/doc"
-
-# Trace only feat,req,dsn
-java -jar "$jar_file" trace --wanted-artifact-types feat,req,dsn "$base_dir/doc"
+java -jar "$jar_file" trace \
+    "$base_dir/doc" \
+    "$base_dir/pkg" \
+    "$base_dir/extension-manager-integration-test-java" \
+    --wanted-artifact-types impl,itest,utest,dsn

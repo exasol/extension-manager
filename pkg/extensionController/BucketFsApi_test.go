@@ -44,6 +44,7 @@ func (suite *BucketFsAPISuite) TestListBuckets() {
 	suite.Contains(result, DEFAULT_BUCKET_NAME)
 }
 
+// [utest -> dsn~extension-components~1]
 func (suite *BucketFsAPISuite) TestListFiles() {
 	bfsAPI := suite.createBucketFs()
 	fileName := fmt.Sprintf("myFile-%d.txt", time.Now().Unix())

@@ -80,6 +80,7 @@ func (suite *RestAPISuite) TestGetInstallationsFailed() {
 
 // GetAllExtensions
 
+// [itest -> dsn~list-extensions~1]
 func (suite *RestAPISuite) TestGetAllExtensionsSuccessfully() {
 	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return([]*extensionController.Extension{{
 		Id: "ext-id", Name: "my-extension", Description: "a cool extension",

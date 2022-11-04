@@ -107,6 +107,11 @@ Rationale:
 
 When developers create new extensions for EM, these new extensions should be available to users as fast as possible.
 
+Covers:
+* [`feat~developing-extensions~1`](#developing-extensions)
+
+Needs: dsn
+
 #### Extensions
 `req~extension~1`
 

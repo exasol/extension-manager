@@ -111,3 +111,22 @@ jobs:
           path: extension-manager
           if-no-files-found: error
           retention-days: 5
+
+  trace-requirements:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Cache OpenFastTrace
+        uses: actions/cache@v2
+        with:
+          path: /tmp/oft/
+          key: oft-${{ hashFiles('ci/trace-requirements.sh') }}
+          restore-keys: |
+            oft-${{ hashFiles('ci/trace-requirements.sh') }}
+            oft
+      - name: Run OpenFastTrace
+        run: ./ci/trace-requirements.sh

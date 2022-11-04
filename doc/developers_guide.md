@@ -21,6 +21,10 @@ After starting the server you can get the OpenApi definition by executing
 curl "http://localhost:8080/openapi.json" -o extension-manager-api.json
 ```
 
+## Requirement Tracing
+
+You can run requirements tracing by executing script `ci/trace-requirements.sh`.
+
 ## Testing
 
 The different components of the project are responsible for testing different

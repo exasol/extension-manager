@@ -18,6 +18,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// [impl -> dsn~rest-interface~1]
 func setupStandaloneAPI(controller extensionController.TransactionController) (http.Handler, *openapi.API, error) {
 	api, err := CreateOpenApi()
 	if err != nil {
