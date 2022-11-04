@@ -1,4 +1,6 @@
 {
+  "name": "parameter-validator",
+  "version": "0.0.0",
   "scripts": {
     "build": "npm run clean && npm run compile",
     "compile": "tsc --build && esbuild dist/*.js --bundle --outfile=parameterValidator.js --target=es6",
