@@ -76,7 +76,9 @@ type Validator struct {
 	validate func(definition interface{}, value string) ValidationResult
 }
 
-// New creates a new reusable validator
+// New creates a new reusable validator.
+// [impl -> dsn~reuse-parameter-validation-rules~1]
+// [impl -> dsn~parameter-validation-rules-simple~1]
 func New() (*Validator, error) {
 	vm := newJavaScriptVm()
 	globalJsObj := vm.NewObject()
