@@ -1,4 +1,4 @@
-# Extension Manager 0.2.0, released 2022-11-??
+# Extension Manager 0.2.0, released 2022-11-04
 
 Code name: Add extension registry
 
@@ -19,7 +19,7 @@ We also moved all Go sources to the `pkg` directory. Projects that use this libr
 
 ## Documentation
 
-* #73: Updated requirements and add requirements tracing
+* #73: Updated requirements and added requirements tracing
 
 ## Dependency Updates
 
