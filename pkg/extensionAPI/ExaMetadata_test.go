@@ -32,7 +32,7 @@ func (suite *ExaMetadataSuite) BeforeTest(suiteName, testName string) {
 	})
 }
 
-// [utest -> dsn~extension-components~1]
+/* [utest -> dsn~extension-components~1] */
 func (suite *ExaMetadataSuite) TestReadMetadataWithAllColumnsDefined() {
 	fixture := integrationTesting.CreateLuaScriptFixture(suite.exasol.GetConnection())
 	fixture.Cleanup(suite.T())

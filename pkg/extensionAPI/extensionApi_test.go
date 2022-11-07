@@ -30,7 +30,7 @@ func (suite *ExtensionApiSuite) TearDownTest() {
 	suite.mockSQLClient.AssertExpectations(suite.T())
 }
 
-// [utest -> dsn~extension-definition~1]
+/* [utest -> dsn~extension-definition~1] */
 func (suite *ExtensionApiSuite) Test_LoadExtension() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).Build().AsString()
 	extension := suite.loadExtension(extensionContent)
@@ -59,7 +59,7 @@ func (suite *ExtensionApiSuite) Test_GetParameterDefinitions_EmptyResult() {
 	suite.Equal([]interface{}{}, definitions)
 }
 
-// [utest -> dsn~configuration-parameters~1]
+/* [utest -> dsn~configuration-parameters~1] */
 func (suite *ExtensionApiSuite) Test_GetParameterDefinitions() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string"}]`).

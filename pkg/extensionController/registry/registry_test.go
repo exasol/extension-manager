@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// [utest -> dsn~extension-registry~1]
+/* [utest -> dsn~extension-registry~1] */
 func TestNewRegistry(t *testing.T) {
 	const typeLocal = "*registry.localDirRegistry"
 	const typeHttp = "*registry.httpRegistry"

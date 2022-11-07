@@ -38,8 +38,8 @@ func (suite *HttpRegistrySuite) TestFindExtensions_noExtensionsAvailable() {
 	suite.Empty(extensions)
 }
 
-// [itest -> dsn~extension-registry~1]
-// [itest -> dsn~extension-definitions-storage~1]
+/* [itest -> dsn~extension-registry~1] */
+/* [itest -> dsn~extension-definitions-storage~1] */
 func (suite *HttpRegistrySuite) TestFindExtensions() {
 	suite.server.SetRegistryContent(`{"extensions":[{"id": "ext1"},{"id": "ext2"},{"id": "ext3"}]}`)
 	extensions, err := suite.registry.FindExtensions()

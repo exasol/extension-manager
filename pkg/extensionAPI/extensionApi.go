@@ -14,7 +14,7 @@ import (
 const SupportedApiVersion = "0.1.15"
 
 // LoadExtension loads an extension from the given file content.
-// [impl -> dsn~extension-definition~1]
+/* [impl -> dsn~extension-definition~1] */
 func LoadExtension(id, content string) (*JsExtension, error) {
 	logPrefix := fmt.Sprintf("JS:%s>", id)
 	vm := newJavaScriptVm(logPrefix)

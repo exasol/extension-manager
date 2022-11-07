@@ -18,8 +18,8 @@ type httpRegistry struct {
 	index *index.RegistryIndex
 }
 
-// [impl -> dsn~extension-registry~1]
-// [impl -> dsn~extension-definitions-storage~1]
+/* [impl -> dsn~extension-registry~1] */
+/* [impl -> dsn~extension-definitions-storage~1] */
 func (h *httpRegistry) FindExtensions() ([]string, error) {
 	err := h.loadIndex()
 	if err != nil {

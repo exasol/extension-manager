@@ -66,7 +66,7 @@ func (suite *ControllerUTestSuite) AfterTest(suiteName, testName string) {
 
 // GetAllExtensions
 
-// [utest -> dsn~list-extensions~1]
+/* [utest -> dsn~list-extensions~1] */
 func (suite *ControllerUTestSuite) TestGetAllExtensions() {
 	suite.writeDefaultExtension()
 	suite.bucketFsMock.simulateFiles([]BfsFile{{Name: "my-extension.1.2.3.jar", Size: 3}})
@@ -76,7 +76,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensions() {
 		InstallableVersions: []extensionAPI.JsExtensionVersion{{Name: "0.1.0", Latest: true, Deprecated: false}}}}, extensions)
 }
 
-// [utest -> dsn~list-extensions~1]
+/* [utest -> dsn~list-extensions~1] */
 func (suite *ControllerUTestSuite) TestGetAllExtensionsWithMissingJar() {
 	suite.writeDefaultExtension()
 	suite.bucketFsMock.simulateFiles([]BfsFile{})
@@ -170,7 +170,7 @@ func (suite *ControllerUTestSuite) TestGetParameterDefinitionsFails() {
 	}
 }
 
-// [utest -> dsn~parameter-versioning~1]
+/* [utest -> dsn~parameter-versioning~1] */
 func (suite *ControllerUTestSuite) TestGetParameterDefinitionsSucceeds() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithGetInstanceParameterDefinitionFunc(`context.sqlClient.query('get param definitions'); return [{id: "param1", name: "My param:"+version, type: "string"}]`).
@@ -313,7 +313,7 @@ func (suite *ControllerUTestSuite) TestUninstallFails() {
 
 // CreateInstance
 
-// [utest -> dsn~parameter-types~1]
+/* [utest -> dsn~parameter-types~1] */
 func (suite *ControllerUTestSuite) TestCreateInstance_invalidParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).

@@ -22,7 +22,8 @@ func CreateExaMetaDataReader() ExaMetadataReader {
 type metaDataReaderImpl struct {
 }
 
-// [impl -> dsn~extension-components~1]
+// ReadMetadataTables reads the metadata tables of the given schema.
+/* [impl -> dsn~extension-components~1] */
 func (r *metaDataReaderImpl) ReadMetadataTables(tx *sql.Tx, schemaName string) (*ExaMetadata, error) {
 	allScripts, err := readExaAllScriptTable(tx, schemaName)
 	if err != nil {

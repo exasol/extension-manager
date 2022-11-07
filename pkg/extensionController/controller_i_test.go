@@ -44,7 +44,7 @@ func (suite *ControllerITestSuite) SetupTest() {
 	suite.tempExtensionRepo = tempExtensionRepo
 }
 
-// [itest -> dsn~extension-definition~1]
+/* [itest -> dsn~extension-definition~1] */
 func (suite *ControllerITestSuite) TestGetAllExtensions() {
 	suite.writeDefaultExtension()
 	suite.uploadBucketFsFile("123", "my-extension.1.2.3.jar") // create file with 3B size
@@ -171,8 +171,8 @@ func (suite *ControllerITestSuite) TestEnsureSchemaDoesNotFailIfSchemaAlreadyExi
 	suite.Contains(suite.getAllSchemaNames(), schemaName)
 }
 
-// [itest -> dsn~validate-parameters~1]
-// [itest -> dsn~parameter-definitions~1]
+/* [itest -> dsn~validate-parameters~1] */
+/* [itest -> dsn~parameter-definitions~1] */
 func (suite *ControllerITestSuite) TestAddInstance_invalidParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).

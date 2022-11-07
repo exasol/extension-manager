@@ -42,10 +42,10 @@ func (suite *ParameterValidatorSuite) TestValidateParameter() {
 	}
 }
 
-// [utest -> dsn~validate-parameters~1]
-// [utest -> dsn~reuse-parameter-validation-rules~1]
-// [utest -> dsn~parameter-validation-rules-simple~1]
-// [utest -> dsn~parameter-definitions~1]
+/* [utest -> dsn~validate-parameters~1] */
+/* [utest -> dsn~reuse-parameter-validation-rules~1] */
+/* [utest -> dsn~parameter-validation-rules-simple~1] */
+/* [utest -> dsn~parameter-definitions~1] */
 func (suite *ParameterValidatorSuite) TestValidateParameters() {
 	var tests = []struct {
 		name        string

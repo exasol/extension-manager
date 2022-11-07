@@ -20,7 +20,7 @@ type localDirRegistry struct {
 }
 
 // FindExtensions searches for .js files in the local registry directory.
-// [impl -> dsn~extension-definitions-storage~1]
+/* [impl -> dsn~extension-definitions-storage~1] */
 func (l *localDirRegistry) FindExtensions() ([]string, error) {
 	var files []string
 	err := filepath.Walk(l.dir, func(path string, info os.FileInfo, err error) error {

@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// [impl -> dsn~parameter-versioning~1]
+/* [impl -> dsn~parameter-versioning~1] */
 func GetExtensionDetails(apiContext *ApiContext) *openapi.Get {
 	return &openapi.Get{
 		Summary:        "Get details about an extension version.",
