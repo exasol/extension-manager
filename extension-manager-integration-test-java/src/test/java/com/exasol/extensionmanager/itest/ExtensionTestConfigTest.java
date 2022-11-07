@@ -28,7 +28,7 @@ class ExtensionTestConfigTest {
         final Path missingFile = Path.of("missing-file");
         final UncheckedIOException exception = assertThrows(UncheckedIOException.class,
                 () -> ExtensionTestConfig.loadProperties(missingFile));
-        assertThat(exception.getMessage(), equalTo("E-EMIT-26: Error reading config file missing-file"));
+        assertThat(exception.getMessage(), equalTo("E-EMIT-26: Error reading config file 'missing-file'"));
     }
 
     @Test
