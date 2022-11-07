@@ -19,6 +19,12 @@ jobs:
           go-version: 1.19
         id: go
 
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 11
+
       - name: Check out code
         uses: actions/checkout@v3
         with:
@@ -45,6 +51,14 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml', 'ci/trace-requirements.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
 
       - name: Enable testcontainer reuse
         run: echo 'testcontainers.reuse.enable=true' > "$HOME/.testcontainers.properties"
