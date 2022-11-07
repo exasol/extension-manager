@@ -22,5 +22,4 @@ fi
 java -jar "$jar_file" trace \
     "$base_dir/doc" \
     "$base_dir/pkg" \
-    "$base_dir/extension-manager-integration-test-java" \
-    --wanted-artifact-types impl,itest,utest,dsn
+    "$base_dir/extension-manager-integration-test-java"
