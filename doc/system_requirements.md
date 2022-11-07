@@ -42,7 +42,7 @@ Features are the highest level requirements in this document that describe the m
 
 ### Managing Extensions
 
-EM allows managing extensions.
+EM allows managing extensions by providing the following actions in particular.
 
 #### List Extensions
 `feat~list-extensions~1`
@@ -270,7 +270,7 @@ Covers:
 #### Integration Test Framework for Extensions
 `req~extension-testing-framework~1`
 
-The Extension Testing Framework contains common setup code and convenient helper methods to simplify writing integration tests for new Extensions.
+The Extension Testing Framework contains common setup code and convenient helper methods to simplify writing integration tests for new extensions.
 
 Covers:
 * [`feat~developing-extensions~1`](#developing-extensions)

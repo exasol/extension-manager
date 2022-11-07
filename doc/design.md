@@ -93,7 +93,7 @@ EM uses a web service called Extension Registry (similar to service discovery) t
 
 Rationale:
 
-This will allow updating extension definitions without modifying the deployed EM. In the future this will also allow multiple instances of EM to use the same list of available extensions. During development and for integration tests it is easier to use a local directory with JavaScript files for finding available extensions. That's why EM supports both variants. At startup it will check if the configured extension registry URL starts with `http` and uses the appropriate implementation.
+This will allow updating extension definitions without modifying the deployed EM. In the future this will also allow multiple instances of EM to use the same list of available extensions. During development and for integration tests it is easier to use a local directory with JavaScript files for finding available extensions. That's why EM supports both variants. At startup it will check if the configured extension registry URL starts with `http` and will use the appropriate implementation.
 
 Covers:
 * [`req~finding-available-extensions~1`](system_requirements.md#em-finds-available-extensions)
