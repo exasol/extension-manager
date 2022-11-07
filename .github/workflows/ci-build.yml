@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
+      group: ${{ github.workflow }}-${{ github.ref }}-build
       cancel-in-progress: true
     steps:
 
@@ -123,7 +123,7 @@ jobs:
   trace-requirements:
     runs-on: ubuntu-latest
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
+      group: ${{ github.workflow }}-${{ github.ref }}-trace-requirements
       cancel-in-progress: true
     steps:
       - name: Check out code
