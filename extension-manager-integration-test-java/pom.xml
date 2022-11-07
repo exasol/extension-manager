@@ -31,7 +31,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-test-setup-abstraction-java</artifactId>
-            <version>0.3.2</version>
+            <version>1.0.0</version>
             <exclusions>
                 <!-- Exclude transitive dependency to fix https://ossindex.sonatype.org/vulnerability/sonatype-2020-0026 -->
                 <exclusion>
@@ -43,7 +43,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>test-db-builder-java</artifactId>
-            <version>3.4.0</version>
+            <version>3.4.1</version>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
@@ -65,7 +65,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>4.8.0</version>
+            <version>4.8.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -35,6 +35,21 @@ We also moved all Go sources to the `pkg` directory. Projects that use this libr
 
 ### Extension Manager Java Client
 
+#### Compile Dependency Updates
+
+* Updated `com.fasterxml.jackson.core:jackson-annotations:2.14.0-rc1` to `2.14.0`
+* Updated `com.fasterxml.jackson.core:jackson-core:2.14.0-rc1` to `2.14.0`
+* Updated `com.fasterxml.jackson.core:jackson-databind:2.14.0-rc1` to `2.14.0`
+* Updated `io.swagger.core.v3:swagger-annotations:2.2.3` to `2.2.6`
+* Updated `org.glassfish.jersey.core:jersey-client:2.36` to `2.37`
+* Updated `org.glassfish.jersey.inject:jersey-hk2:2.36` to `2.37`
+* Updated `org.glassfish.jersey.media:jersey-media-json-jackson:2.36` to `2.37`
+* Updated `org.glassfish.jersey.media:jersey-media-multipart:2.36` to `2.37`
+
+#### Test Dependency Updates
+
+* Updated `nl.jqno.equalsverifier:equalsverifier:3.10.1` to `3.11`
+
 #### Plugin Dependency Updates
 
 * Updated `com.exasol:error-code-crawler-maven-plugin:1.1.2` to `1.2.1`
@@ -50,7 +65,13 @@ We also moved all Go sources to the `pkg` directory. Projects that use this libr
 
 #### Compile Dependency Updates
 
+* Updated `com.exasol:exasol-test-setup-abstraction-java:0.3.2` to `1.0.0`
 * Updated `com.exasol:extension-manager-client-java:0.1.0` to `0.2.0`
+* Updated `com.exasol:test-db-builder-java:3.4.0` to `3.4.1`
+
+#### Test Dependency Updates
+
+* Updated `org.mockito:mockito-junit-jupiter:4.8.0` to `4.8.1`
 
 #### Plugin Dependency Updates
 
