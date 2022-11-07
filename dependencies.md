@@ -123,6 +123,24 @@
 | [Maven Install Plugin][63]                              | [The Apache Software License, Version 2.0][40] |
 | [Maven Site Plugin 3][64]                               | [The Apache Software License, Version 2.0][40] |
 
+## Registry
+
+### Compile Dependencies
+
+| Dependency               | License          |
+| ------------------------ | ---------------- |
+| [aws-cdk-lib][78]        | [Apache-2.0][79] |
+| [constructs][80]         | [Apache-2.0][81] |
+| [source-map-support][82] | [MIT][83]        |
+
+## Parametervalidator
+
+### Compile Dependencies
+
+| Dependency                                  | License |
+| ------------------------------------------- | ------- |
+| [@exasol/extension-parameter-validator][84] | MIT     |
+
 [0]: https://github.com/dop251/goja/blob/09250e0eba20/LICENSE
 [1]: https://github.com/dop251/goja_nodejs/blob/3aa5028e57f6/LICENSE
 [2]: https://github.com/exasol/exasol-driver-go/blob/v0.4.6/LICENSE
@@ -201,3 +219,10 @@
 [75]: https://github.com/exasol/udf-debugging-java/
 [76]: https://opensource.org/licenses/MIT
 [77]: https://maven.apache.org/surefire/maven-failsafe-plugin/
+[78]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.50.0.tgz
+[79]: https://github.com/aws/aws-cdk
+[80]: https://registry.npmjs.org/constructs/-/constructs-10.1.148.tgz
+[81]: https://github.com/aws/constructs
+[82]: https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz
+[83]: https://github.com/evanw/node-source-map-support
+[84]: https://registry.npmjs.org/@exasol/extension-parameter-validator/-/extension-parameter-validator-0.2.0.tgz
