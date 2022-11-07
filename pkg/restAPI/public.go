@@ -6,6 +6,7 @@ import (
 )
 
 const (
+	/* [impl -> const~use-reserved-schema~1] */
 	EXTENSION_SCHEMA_NAME = "EXA_EXTENSIONS"
 
 	TagExtension    = "Extension"

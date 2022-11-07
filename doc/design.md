@@ -76,6 +76,7 @@ Nevertheless EM additionally contains an executable Go program which is useful f
 
 Covers:
 * [`req~embeddable-rest-interface~1`](system_requirements.md#rest-interface-is-embeddable)
+* [`const~works-with-saas~1`](system_requirements.md#em-works-with-exasol-saas)
 
 Needs: impl
 

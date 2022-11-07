@@ -298,14 +298,14 @@ Rationale:
 
 This makes it clear to DBAs that objects in this schema are managed and should not be modified by hand.
 
-Needs: impl, utest, itest
+Needs: impl, itest
 
 ### EM works with Exasol SaaS
 `const~works-with-saas~1`
 
 EM works in an Exasol SaaS environment.
 
-Needs: impl, utest, itest
+Needs: dsn
 
 ## Out-of-Scope
 

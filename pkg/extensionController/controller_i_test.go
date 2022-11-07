@@ -148,6 +148,7 @@ func (suite *ControllerITestSuite) TestUninstallSucceeds() {
 	suite.NoError(err)
 }
 
+/* [itest -> const~use-reserved-schema~1] */
 func (suite *ControllerITestSuite) TestEnsureSchemaExistsCreatesSchemaIfItDoesNotExist() {
 	suite.writeDefaultExtension()
 	const schemaName = "my_testing_schema"
