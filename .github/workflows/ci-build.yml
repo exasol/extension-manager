@@ -12,6 +12,8 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-build
       cancel-in-progress: true
+    env:
+      EXASOL_VERSION: 7.1.15
     steps:
 
       - name: Check out code
@@ -92,7 +94,9 @@ jobs:
         run: cd ./extension-manager-integration-test-java/testing-extension && npm ci
 
       - name: Build and test integration test framework
-        run: mvn --batch-mode clean verify --file pom.xml -DtrimStackTrace=false
+        run: mvn --batch-mode clean verify -Dcom.exasol.dockerdb.image=$EXASOL_VERSION -DtrimStackTrace=false
+        env:
+          EXASOL_VERSION: ${{ env.EXASOL_VERSION }}
 
       - name: Prepare SonarCloud scan
         # Without this step, Sonar will fail with this error:

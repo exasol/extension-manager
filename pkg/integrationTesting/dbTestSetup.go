@@ -2,13 +2,14 @@ package integrationTesting
 
 import (
 	"database/sql"
+	"os"
 	"testing"
 
 	testSetupAbstraction "github.com/exasol/exasol-test-setup-abstraction-server/go-client"
 	"github.com/stretchr/testify/suite"
 )
 
-const exasolDbVersion = "7.1.15"
+const defaultExasolDbVersion = "7.1.15"
 
 type DbTestSetup struct {
 	suite          *suite.Suite
@@ -21,6 +22,7 @@ func StartDbSetup(suite *suite.Suite) *DbTestSetup {
 	if testing.Short() {
 		suite.T().Skip()
 	}
+	exasolDbVersion := getDbVersion()
 	suite.T().Logf("Starting Exasol %s...", exasolDbVersion)
 	exasol, err := testSetupAbstraction.New().DockerDbVersion(exasolDbVersion).Start()
 	if err != nil {
@@ -32,6 +34,14 @@ func StartDbSetup(suite *suite.Suite) *DbTestSetup {
 	}
 	setup := DbTestSetup{suite: suite, Exasol: exasol, ConnectionInfo: connectionInfo}
 	return &setup
+}
+
+func getDbVersion() string {
+	dbVersion := os.Getenv("EXASOL_VERSION")
+	if dbVersion != "" {
+		return dbVersion
+	}
+	return defaultExasolDbVersion
 }
 
 func (setup *DbTestSetup) StopDb() {
