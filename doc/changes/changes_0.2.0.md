@@ -27,9 +27,11 @@ We also moved all Go sources to the `pkg` directory. Projects that use this libr
 
 #### Compile Dependency Updates
 
-* Updated `github.com/dop251/goja:v0.0.0-20220906144433-c4d370b87b45` to `v0.0.0-20221019153710-09250e0eba20`
+* Updated `github.com/stretchr/testify:v1.8.0` to `v1.8.1`
+* Updated `github.com/dop251/goja:v0.0.0-20220906144433-c4d370b87b45` to `v0.0.0-20221106173738-3b8a68ca89b4`
 * Updated `github.com/dop251/goja_nodejs:v0.0.0-20220905124449-678b33ca5009` to `v0.0.0-20221009164102-3aa5028e57f6`
 * Updated `github.com/exasol/exasol-driver-go:v0.4.5` to `v0.4.6`
+* Updated `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.2.4` to `v0.3.0`
 
 ### Extension Manager Java Client
 

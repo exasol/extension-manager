@@ -141,13 +141,13 @@
 | ------------------------------------------- | ------- |
 | [@exasol/extension-parameter-validator][84] | MIT     |
 
-[0]: https://github.com/dop251/goja/blob/09250e0eba20/LICENSE
+[0]: https://github.com/dop251/goja/blob/3b8a68ca89b4/LICENSE
 [1]: https://github.com/dop251/goja_nodejs/blob/3aa5028e57f6/LICENSE
 [2]: https://github.com/exasol/exasol-driver-go/blob/v0.4.6/LICENSE
-[3]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.2.4/go-client/LICENSE
+[3]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.3.0/go-client/LICENSE
 [4]: https://github.com/go-chi/chi/blob/v5.0.7/LICENSE
 [5]: https://github.com/sirupsen/logrus/blob/v1.9.0/LICENSE
-[6]: https://github.com/stretchr/testify/blob/v1.8.0/LICENSE
+[6]: https://github.com/stretchr/testify/blob/v1.8.1/LICENSE
 [7]: https://github.com/swaggo/http-swagger/blob/v1.3.3/LICENSE
 [8]: https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE
 [9]: https://github.com/Nightapes/go-rest/blob/v0.2.1/LICENSE
