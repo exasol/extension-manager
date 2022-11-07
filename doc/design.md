@@ -284,10 +284,9 @@ Needs: impl, utest
 
 #### Conditional Parameters
 `dsn~conditional-parameters~1`
+Status: draft
 
 Conditions for conditional parameters are represented by JSON structures, see [design decision](#alternative-options-to-represent-conditional-parameters) against alternative options to represent conditional parameters.
-
-**This is not yet implemented**
 
 Covers:
 * [`req~parameter-types~1`](system_requirements.md#validation-of-parameter-values)
@@ -338,6 +337,7 @@ Needs: impl, utest
 
 #### Complex Parameter Validation Rules
 `dsn~parameter-validation-rules-complex~1`
+Status: draft
 
 More complex validations involving multiple parameters can be defined via a JavaScript callback function that is executed only in the backend, not the frontend. That gives the extension definition the maximum flexibility while simplifying the validation in the frontend.
 
@@ -353,8 +353,6 @@ extension = {
 ```
 
 See design decision [against a callback for the client side validation](#callback-for-client-side-validation).
-
-**This is not yet implemented**
 
 Covers:
 * [`req~validate-parameter-values~1`](system_requirements.md#ui-languages)
@@ -581,10 +579,9 @@ Needs: impl, utest, itest
 
 #### Updates
 `dsn~update-extension~1`
+Status: draft
 
 EM can update an installed extensions and its instances to the latest version.
-
-**This is not yet implemented**
 
 Covers:
 * [`req~update-extension~1`](system_requirements.md#uninstalling-extensions)
@@ -620,7 +617,7 @@ Rationale: By this a single implementation can be used for both validation stage
 
 ### Callback For Client Side Validation
 
-The developers decided against a callback for the client side [validation of parameters](#parameter-validation). The main reason was that it would require to load code into the client at runtime. That would require to run `eval()` on code retrieved from a request. Even so the security risk of that seems acceptable, the developers decided against it since it would look suspicious.
+We decided against a callback for the client side [validation of parameters](#parameter-validation). The main reason was that it would require to load code into the client at runtime. That would require to run `eval()` on code retrieved from a request. Even so the security risk of that seems acceptable, we decided against it since it would look suspicious.
 
 ### Alternative Options to Represent Conditional Parameters
 
