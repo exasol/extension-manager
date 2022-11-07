@@ -67,7 +67,12 @@ Needs: impl, itest
 EM is implemented as a Go library instead of an executable Go program.
 
 Rationale:
-This allows embedding EM in other applications like SaaS, so it can be reused in different contexts. Nevertheless EM additionally contains an executable Go program which is useful for testing EM and extensions.
+
+This allows embedding EM in other applications like SaaS, so it can be reused in different contexts
+
+Comment:
+ 
+Nevertheless EM additionally contains an executable Go program which is useful for testing EM and extensions.
 
 Covers:
 * [`req~embeddable-rest-interface~1`](system_requirements.md#rest-interface-is-embeddable)
