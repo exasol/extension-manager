@@ -13,6 +13,12 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
     steps:
+
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
@@ -25,11 +31,6 @@ jobs:
           distribution: 'temurin'
           java-version: 11
           cache: 'maven'
-
-      - name: Check out code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Cache go modules
         uses: actions/cache@v3
