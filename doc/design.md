@@ -51,10 +51,64 @@ backend --> customerCluster: manages
 @enduml
 ```
 
+#### EM Provides a REST Interface
+`dsn~rest-interface~1`
+
+EM provides a REST interface to clients.
+
+Covers:
+* [`req~rest-interface~1`](system_requirements.md#em-provides-a-rest-interface)
+
+Needs: impl, itest
+
+#### EM Implemented as a Go Library
+`dsn~go-library~1`
+
+EM is implemented as a Go library instead of an executable Go program.
+
+Rationale:
+
+This allows embedding EM in other applications like SaaS, so it can be reused in different contexts
+
+Comment:
+ 
+Nevertheless EM additionally contains an executable Go program which is useful for testing EM and extensions.
+
+Covers:
+* [`req~embeddable-rest-interface~1`](system_requirements.md#rest-interface-is-embeddable)
+* [`const~works-with-saas~1`](system_requirements.md#em-works-with-exasol-saas)
+
+Needs: impl
+
+#### EM Generates an OpenAPI Specification
+`dsn~openapi-spec~1`
+
+EM generates an OpenAPI specification at runtime using the [Nightapes/go-rest](https://github.com/Nightapes/go-rest) library.
+
+The standalone executable of EM provides the OpenAPI specification as a web page and in JSON format. Applications that embed EM as a library need to create their own endpoint for that.
+
+Covers:
+* [`req~openapi-spec~1`](system_requirements.md#em-provides-an-openapi-specification)
+ 
+Needs: impl, itest
+
+#### Extension Registry
+`dsn~extension-registry~1`
+
+EM uses a web service called Extension Registry (similar to service discovery) to find available extensions and their JavaScript definitions.
+
+Rationale:
+
+This will allow updating extension definitions without modifying the deployed EM. In the future this will also allow multiple instances of EM to use the same list of available extensions. During development and for integration tests it is easier to use a local directory with JavaScript files for finding available extensions. That's why EM supports both variants. At startup it will check if the configured extension registry URL starts with `http` and will use the appropriate implementation.
+
+Covers:
+* [`req~finding-available-extensions~1`](system_requirements.md#em-finds-available-extensions)
+
+Needs: impl, utest, itest
 
 ### Extensions
 
-The extension manager has an extension mechanism.
+The Extension Manager has an extension mechanism.
 
 The extensions are integration projects maintained by Exasol. For now, it's not possible to install third party extensions, since it would be a security risk.
 
@@ -79,7 +133,7 @@ extensionManager -> mysql: loaded at runtime
 #### Components of an Extension
 `dsn~extension-components~1`
 
-An extension might consist of JDBC driver, artifacts, configuration and database objects. Dependening on it's nature a specific extension might not require all artifacts.
+An extension might consist of JDBC driver, artifacts, configuration and database objects. Depending on it's nature a specific extension might not require all artifacts.
 
 In the initial version when managing extensions EM requires the following components to be available in BucketFS and does not actively manage them:
 * JDBC driver
@@ -103,7 +157,7 @@ Covers:
 * [`req~extension~1`](system_requirements.md#install-required-artifacts)
 * [`req~install-extension-artifacts~1`](system_requirements.md#install-database-objects)
 
-Needs: impl, utest, itest
+Needs: impl, utest
 
 ### Extension Definitions
 `dsn~extension-definition~1`
@@ -137,9 +191,9 @@ The extension definitions are placed in a storage that is accessible from the ex
 Covers:
 * [`req~install-extension-artifacts~1`](system_requirements.md#install-database-objects)
 * [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
-* [`req~uninstall-extension~1`](system_requirements.md#define-configuration-parameters)
+* [`req~uninstall-extension~1`](system_requirements.md#uninstalling-extensions)
 
-Needs: impl, utest, itest
+Needs: impl, itest
 
 #### Versioning
 `dsn~versioning~1`
@@ -152,11 +206,11 @@ That means that the extension definition must be able to uninstall and update al
 
 The alternative to also version the extension definition would lead to unmaintained and untested code, since the old version would not be tested with newer DB versions.
 
+This requirement must be covered by extensions.
+
 Covers:
 * [`req~install-extension-artifacts~1`](system_requirements.md#install-database-objects)
-* [`req~uninstall-extension~1`](system_requirements.md#define-configuration-parameters)
-
-Needs: impl, utest, itest
+* [`req~uninstall-extension~1`](system_requirements.md#uninstall-an-extension)
 
 ### Parameters for Extension Configuration
 `dsn~configuration-parameters~1`
@@ -166,7 +220,7 @@ The extension definition also includes parameters for configuring the extension.
 Covers:
 * [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
 
-Needs: impl, utest, itest
+Needs: impl, utest
 
 #### Parameter Definition Format
 `dsn~parameter-definitions~1`
@@ -232,17 +286,16 @@ SelectParameter <|-- BaseParameter
 Covers:
 * [`req~parameter-types~1`](system_requirements.md#validation-of-parameter-values)
 
-Needs: impl, utest, itest
+Needs: impl, utest
 
 #### Conditional Parameters
 `dsn~conditional-parameters~1`
+Status: draft
 
 Conditions for conditional parameters are represented by JSON structures, see [design decision](#alternative-options-to-represent-conditional-parameters) against alternative options to represent conditional parameters.
 
 Covers:
 * [`req~parameter-types~1`](system_requirements.md#validation-of-parameter-values)
-
-Needs: impl, utest, itest
 
 #### Parameters, Versions and Updates
 `dsn~parameter-versioning~1`
@@ -255,7 +308,7 @@ Covers:
 * [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
 * [`req~update-extension~1`](system_requirements.md#uninstalling-extensions)
 
-Needs: impl, utest, itest
+Needs: impl, utest
 
 ### Parameter Validation
 
@@ -267,7 +320,7 @@ Parameter validation for both stages (frontend and backend) is configured in [ex
 Covers:
 * [`req~validate-parameter-values~1`](system_requirements.md#ui-languages)
 
-Needs: impl, utest, itest
+Needs: impl, utest
 
 #### Simple Parameter Validation Rules
 `dsn~parameter-validation-rules-simple~1`
@@ -286,11 +339,11 @@ param = {
 Covers:
 * [`req~validate-parameter-values~1`](system_requirements.md#ui-languages)
 
-Needs: impl, utest, itest
-
+Needs: impl, utest
 
 #### Complex Parameter Validation Rules
 `dsn~parameter-validation-rules-complex~1`
+Status: draft
 
 More complex validations involving multiple parameters can be defined via a JavaScript callback function that is executed only in the backend, not the frontend. That gives the extension definition the maximum flexibility while simplifying the validation in the frontend.
 
@@ -309,9 +362,6 @@ See design decision [against a callback for the client side validation](#callbac
 
 Covers:
 * [`req~validate-parameter-values~1`](system_requirements.md#ui-languages)
-
-Needs: impl, utest, itest
-
 
 ## Runtime
 
@@ -361,7 +411,7 @@ postgres-extension-def-2.0.2.js.sha256
 
 A crawler collects the JARs and extension definitions and copies them to BucketFS at scheduled interval.
 
-This crawler is at the moment not part of this project.
+**This crawler is at the moment not part of this project.**
 
 ```plantuml
 @startuml
@@ -397,9 +447,7 @@ jarV1InRepo --> jarV1InBucketFS
 Covers:
 * [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
 * [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
-* [`req~uninstall-extension~1`](system_requirements.md#define-configuration-parameters)
-
-Needs: impl, utest, itest
+* [`req~uninstall-extension~1`](system_requirements.md#uninstalling-extensions)
 
 ### Configure an Extension
 
@@ -537,12 +585,13 @@ Needs: impl, utest, itest
 
 #### Updates
 `dsn~update-extension~1`
+Status: draft
+
+EM can update an installed extensions and its instances to the latest version.
 
 Covers:
 * [`req~update-extension~1`](system_requirements.md#uninstalling-extensions)
 * [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
-
-Needs: impl, utest, itest
 
 ## Cross-cutting Concerns
 
@@ -574,7 +623,7 @@ Rationale: By this a single implementation can be used for both validation stage
 
 ### Callback For Client Side Validation
 
-The developers decided against a callback for the client side [validation of parameters](#parameter-validation-rules). The main reason was that it would require to load code into the client at runtime. That would require to run `eval()` on code retrieved from a request. Even so the security risk of that seems acceptable, the developers decided against it since it would look suspicious.
+We decided against a callback for the client side [validation of parameters](#parameter-validation). The main reason was that it would require to load code into the client at runtime. That would require to run `eval()` on code retrieved from a request. Even so the security risk of that seems acceptable, we decided against it since it would look suspicious.
 
 ### Alternative Options to Represent Conditional Parameters
 

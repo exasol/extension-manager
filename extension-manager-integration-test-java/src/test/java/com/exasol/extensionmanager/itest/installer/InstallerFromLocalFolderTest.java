@@ -38,7 +38,7 @@ class InstallerFromLocalFolderTest {
         when(configMock.getLocalExtensionManagerProject()).thenReturn(Optional.of(Paths.get("localExtManager")));
         when(configMock.buildExtensionManager()).thenReturn(false);
         final IllegalStateException exception = assertThrows(IllegalStateException.class, installer::install);
-        assertThat(exception.getMessage(), equalTo("E-EMIT-5: Extension manager executable not found at localExtManager/extension-manager after build. This is an internal error that should not happen. Please report it by opening a GitHub issue."));
+        assertThat(exception.getMessage(), equalTo("E-EMIT-5: Extension manager executable not found at 'localExtManager/extension-manager' after build. This is an internal error that should not happen. Please report it by opening a GitHub issue."));
     }
 
     @Test

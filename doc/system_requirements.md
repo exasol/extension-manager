@@ -20,6 +20,10 @@ The EM main goal is to simplify installing, configuring and updating extensions 
 
 Database Administrators (DBA) use EM through it's REST API or a user interface for managing extensions in their Exasol databases.
 
+### Extension Developers
+
+Extension developers create and maintain extensions for EM.
+
 ## Terms and Abbreviations
 
 The following list gives you an overview of terms and abbreviations commonly used in the requirements specification.
@@ -36,48 +40,82 @@ The following list gives you an overview of terms and abbreviations commonly use
 
 Features are the highest level requirements in this document that describe the main functionality of EM.
 
-### List Extensions
+### Managing Extensions
+
+EM allows managing extensions by providing the following actions in particular.
+
+#### List Extensions
 `feat~list-extensions~1`
 
 EM lists extensions.
 
 Needs: dsn
 
-### Install Extensions
+#### Install Extensions
 `feat~install-extension~1`
 
 EM allows the DBA to install extensions.
 
 Needs: req
 
-### Configure an Extension
+#### Configure an Extension
 `feat~configure-extension~1`
 
 EM allows the DBA to configure an extension, e.g. in order to set up a Virtual Schema source system.
 
 Needs: req
 
-### Updating an Extension
+#### Updating an Extension
 `feat~update-extension~1`
 
 EM allows DBA to install a new version of an extension that was already installed in an older version.
 
 Needs: req
 
-### Uninstall an Extension
+#### Uninstall an Extension
 `feat~uninstall-extension~1`
 
 EM allows the DBA to uninstall an extension.
 
 Needs: req
 
+### Developing Extensions
+`feat~developing-extensions~1`
+
+As extensions are an important part of EM's ecosystem it must be easy for developers to create and maintain new extensions.
+
+Needs: req
+
+### REST Interface
+`feat~rest-interface~1`
+
+EM provides a REST interface for clients.
+
+Needs: req
+
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 ## Functional Requirements
 
-### Extensions
+### Managing Extensions
+
+#### EM Finds Available Extensions
+`req~finding-available-extensions~1`
+
+EM automatically finds available extensions at runtime. It allows adding new extensions at runtime.
+
+Rationale:
+
+When developers create new extensions for EM, these new extensions should be available to users as fast as possible.
+
+Covers:
+* [`feat~developing-extensions~1`](#developing-extensions)
+
+Needs: dsn
+
+#### Extensions
 `req~extension~1`
 
-An extension might consist of JDBC driver, artifacts, configuration and database objects. Dependening on the nature of the extension not all artifacts might be required.
+An extension might consist of JDBC driver, artifacts, configuration and database objects. Depending on the nature of the extension not all artifacts might be required.
 
 Covers:
 * [`feat~install-extension~1`](#configure-an-extension)
@@ -86,9 +124,9 @@ Covers:
 
 Needs: dsn
 
-### Installation
+#### Installation
 
-#### Install Required Artifacts
+##### Install Required Artifacts
 `req~install-extension-artifacts~1`
 
 EM installs all artifacts required by an extension from GitHub (Jar files, 3rd party libraries, JDBC drivers etc.).
@@ -98,7 +136,7 @@ Covers:
 
 Needs: dsn
 
-#### Install Database Objects
+##### Install Database Objects
 `req~install-extension-database-objects~1`
 
 EM installs corresponding database objects for an extension (UDFs, LUA Scripts, credentials, configuration tables etc.).
@@ -108,13 +146,13 @@ Covers:
 
 Needs: dsn
 
-### Update extension
+#### Update extension
 `req~update-extension~1`
 
 When updating an extension that is already installed in an older version, EM checks if any parameter definition has changed. If there were breaking changes, EM cannot perform the update automatically and aborts the installation with an appropriate error message.
 
 (( how to define "breaking" changes?
-any change in paramters is a breaking change
+any change in parameters is a breaking change
 user can uninstall the old version and install the new one
 ))
 
@@ -125,7 +163,7 @@ Covers:
 
 Needs: dsn
 
-### Uninstalling extensions
+#### Uninstalling extensions
 `req~uninstall-extension~1`
 
 Covers:
@@ -133,7 +171,7 @@ Covers:
 
 Needs: dsn
 
-### Define Configuration Parameters
+#### Define Configuration Parameters for Extensions
 `req~define-configuration-parameters~1`
 
 EM allows extensions to define a set of parameters. Each extension might have different parameters.
@@ -143,7 +181,7 @@ Covers:
 
 Needs: dsn
 
-#### Parameter Types
+##### Parameter Types
 `req~parameter-types~1`
 
 EM supports the following types for configuration parameters
@@ -160,7 +198,7 @@ Covers
 
 Needs: dsn
 
-#### Validation of parameter values
+##### Validation of parameter values
 `req~validate-parameter-values~1`
 
 EM validates parameter values selected or entered by the DBA.
@@ -175,12 +213,74 @@ Covers:
 
 Needs: dsn
 
+### EM Interface
+
+#### EM Provides a REST Interface
+`req~rest-interface~1`
+
+EM provides a REST interface.
+
+Rationale:
+
+EM needs to support both a Web UI and custom clients. A REST interface can be used by both.
+
+Covers:
+* [`feat~rest-interface~1`](#rest-interface)
+
+Needs: dsn
+
+#### EM Provides an OpenAPI Specification
+`req~openapi-spec~1`
+
+EM provides an interface specification in OpenAPI format.
+
+Rationale:
+
+This allows users of EM to generate client code for the EM API in arbitrary programming languages and frameworks.
+
+Covers:
+* [`feat~rest-interface~1`](#rest-interface)
+
+Needs: dsn
+
+#### REST Interface is Embeddable
+`req~embeddable-rest-interface~1`
+
+EM's REST interface can be embedded into other applications.
+
+Rationale:
+
+This allows including EM's functionality and REST interface into other applications which simplifies deployment.
+
+Covers:
+* [`feat~rest-interface~1`](#rest-interface)
+
+Needs: dsn
+
+### Easy Extension Development
+
+#### Extension API
+`req~extension-api~1`
+
+The Extension API provides a defined interface that extensions need to implement in order to be compatible with EM.
+
+Covers:
+* [`feat~developing-extensions~1`](#developing-extensions)
+
+#### Integration Test Framework for Extensions
+`req~extension-testing-framework~1`
+
+The Extension Testing Framework contains common setup code and convenient helper methods to simplify writing integration tests for new extensions.
+
+Covers:
+* [`feat~developing-extensions~1`](#developing-extensions)
+
 ## Non-functional Requirements
 
 ### UI Languages
 `req~ui-languages~1`
 
-The current SaaS implementation only supports English as language in the user interface. To avoid complexity EM currently only supports English language in the user interface, too.  This avoids additional efforts for UI translation until this is required.
+The current SaaS implementation only supports English as language in the user interface. To avoid complexity EM currently only supports English language in the user interface, too. This avoids additional efforts for UI translation until this is required.
 
 Covers:
 * [`feat~configure-extension~1`](#updating-an-extension)
@@ -198,14 +298,14 @@ Rationale:
 
 This makes it clear to DBAs that objects in this schema are managed and should not be modified by hand.
 
-Needs: impl, utest, itest
+Needs: impl, itest
 
 ### EM works with Exasol SaaS
 `const~works-with-saas~1`
 
 EM works in an Exasol SaaS environment.
 
-Needs: impl, utest, itest
+Needs: dsn
 
 ## Out-of-Scope
 

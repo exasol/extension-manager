@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-// Registry allows listing and loading extension files
+// Registry allows listing and loading extension files.
 type Registry interface {
 	// FindExtensions finds all available extensions and returns their IDs.
 	FindExtensions() ([]string, error)
@@ -23,6 +23,7 @@ func NewRegistry(extensionRegistryURL string) Registry {
 	return newLocalDirRegistry(extensionRegistryURL)
 }
 
+/* [impl -> dsn~extension-registry~1] */
 func isHttpUrl(urlOrPath string) bool {
 	lowerCaseUrlOrPath := strings.ToLower(urlOrPath)
 	return strings.HasPrefix(lowerCaseUrlOrPath, "http://") || strings.HasPrefix(lowerCaseUrlOrPath, "https://")

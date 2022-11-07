@@ -29,6 +29,12 @@ jobs:
         with:
           go-version: 1.19
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
+          cache-dependency-path: "**/package-lock.json"
+
       - name: Cache Project Keeper
         uses: actions/cache@v3
         with:
@@ -47,6 +53,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-licenses-${{ hashFiles('.github/workflows/project-keeper-verify.yml') }}
             ${{ runner.os }}-go-licenses-
+
+      - name: Install npm packages for registry -- workaround for https://github.com/exasol/project-keeper/issues/403
+        run: cd registry && npm ci
+
+      - name: Install npm packages for parameterValidator -- workaround for https://github.com/exasol/project-keeper/issues/403
+        run: cd pkg/parameterValidator && npm ci
 
       - name: Project Keeper Verify
         run: ./.github/workflows/project-keeper.sh

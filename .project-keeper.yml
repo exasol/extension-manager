@@ -20,9 +20,10 @@ sources:
       artifactId: "extension-manager-parent-pom"
       version: "${revision}"
       relativePath: "../pom.xml"
-# Activate registry when https://github.com/exasol/project-keeper/issues/398 is fixed
-#  - type: npm
-#    path: registry/package.json
+  - type: npm
+    path: registry/package.json
+  - type: npm
+    path: pkg/parameterValidator/package.json
 version: 0.2.0
 linkReplacements:
   - "https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.2.3/go-client/LICENSE|https://github.com/exasol/exasol-test-setup-abstraction-server/blob/main/LICENSE"
@@ -31,3 +32,4 @@ linkReplacements:
   - "jquery.org/license|https://jquery.org/license/"
   - "https://github.com/swagger-api/swagger-codegen/modules/swagger-codegen-maven-plugin|https://github.com/swagger-api/swagger-codegen/tree/master/modules/swagger-codegen-maven-plugin"
 excludes:
+  - "E-PK-CORE-18: Outdated content: '.github/workflows/project-keeper-verify.yml'"

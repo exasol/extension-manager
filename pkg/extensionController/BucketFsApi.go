@@ -37,6 +37,7 @@ func (bfs bucketFsAPIImpl) ListBuckets(ctx context.Context, db *sql.DB) ([]strin
 	return names, nil
 }
 
+/* [impl -> dsn~extension-components~1] */
 func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB, bucket string) ([]BfsFile, error) {
 	if strings.Contains(bucket, "/") {
 		return nil, fmt.Errorf("invalid bucket name. Bucket name must not contain slashes")

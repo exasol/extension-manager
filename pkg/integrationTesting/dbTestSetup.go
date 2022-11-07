@@ -2,11 +2,14 @@ package integrationTesting
 
 import (
 	"database/sql"
+	"os"
 	"testing"
 
 	testSetupAbstraction "github.com/exasol/exasol-test-setup-abstraction-server/go-client"
 	"github.com/stretchr/testify/suite"
 )
+
+const defaultExasolDbVersion = "7.1.15"
 
 type DbTestSetup struct {
 	suite          *suite.Suite
@@ -19,8 +22,9 @@ func StartDbSetup(suite *suite.Suite) *DbTestSetup {
 	if testing.Short() {
 		suite.T().Skip()
 	}
-	suite.T().Log("Starting Exasol test setup abstraction...")
-	exasol, err := testSetupAbstraction.Create("./exasol-test-setup-config.json") // file does not exist --> we use the testcontainer test setup
+	exasolDbVersion := getDbVersion()
+	suite.T().Logf("Starting Exasol %s...", exasolDbVersion)
+	exasol, err := testSetupAbstraction.New().DockerDbVersion(exasolDbVersion).Start()
 	if err != nil {
 		suite.FailNowf("failed to create test setup abstraction: %v", err.Error())
 	}
@@ -30,6 +34,14 @@ func StartDbSetup(suite *suite.Suite) *DbTestSetup {
 	}
 	setup := DbTestSetup{suite: suite, Exasol: exasol, ConnectionInfo: connectionInfo}
 	return &setup
+}
+
+func getDbVersion() string {
+	dbVersion := os.Getenv("EXASOL_VERSION")
+	if dbVersion != "" {
+		return dbVersion
+	}
+	return defaultExasolDbVersion
 }
 
 func (setup *DbTestSetup) StopDb() {

@@ -14,6 +14,7 @@ import (
 const SupportedApiVersion = "0.1.15"
 
 // LoadExtension loads an extension from the given file content.
+/* [impl -> dsn~extension-definition~1] */
 func LoadExtension(id, content string) (*JsExtension, error) {
 	logPrefix := fmt.Sprintf("JS:%s>", id)
 	vm := newJavaScriptVm(logPrefix)
@@ -74,10 +75,12 @@ type installedExtension struct {
 }
 
 type rawJsExtension struct {
-	Name                    string                                                                                  `json:"name"`
-	Description             string                                                                                  `json:"description"`
-	BucketFsUploads         []BucketFsUpload                                                                        `json:"bucketFsUploads"`
-	InstallableVersions     []rawJsExtensionVersion                                                                 `json:"installableVersions"`
+	Name                string                  `json:"name"`
+	Description         string                  `json:"description"`
+	BucketFsUploads     []BucketFsUpload        `json:"bucketFsUploads"`
+	InstallableVersions []rawJsExtensionVersion `json:"installableVersions"`
+	// [impl -> dsn~parameter-versioning~1]
+	// [impl -> dsn~configuration-parameters~1]
 	GetParameterDefinitions func(context *ExtensionContext, version string) []interface{}                           `json:"getInstanceParameters"`
 	Install                 func(context *ExtensionContext, version string)                                         `json:"install"`
 	Uninstall               func(context *ExtensionContext, version string)                                         `json:"uninstall"`
