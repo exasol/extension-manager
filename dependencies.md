@@ -104,6 +104,7 @@
 | [Apache Maven Compiler Plugin][36]                      | [Apache License, Version 2.0][27]              |
 | [Apache Maven Enforcer Plugin][37]                      | [Apache License, Version 2.0][27]              |
 | [Maven Flatten Plugin][38]                              | [Apache Software Licenese][27]                 |
+| [Project keeper maven plugin][46]                       | [The MIT License][47]                          |
 | [org.sonatype.ossindex.maven:ossindex-maven-plugin][39] | [ASL2][40]                                     |
 | [Maven Surefire Plugin][41]                             | [Apache License, Version 2.0][27]              |
 | [Versions Maven Plugin][42]                             | [Apache License, Version 2.0][27]              |
@@ -116,7 +117,6 @@
 | [JaCoCo :: Maven Plugin][55]                            | [Eclipse Public License 2.0][56]               |
 | [error-code-crawler-maven-plugin][57]                   | [MIT License][58]                              |
 | [Reproducible Build Maven Plugin][59]                   | [Apache 2.0][40]                               |
-| [Project keeper maven plugin][46]                       | [The MIT License][47]                          |
 | [Maven Clean Plugin][60]                                | [The Apache Software License, Version 2.0][40] |
 | [Maven Resources Plugin][61]                            | [The Apache Software License, Version 2.0][40] |
 | [Maven JAR Plugin][62]                                  | [The Apache Software License, Version 2.0][40] |
@@ -219,9 +219,9 @@
 [75]: https://github.com/exasol/udf-debugging-java/
 [76]: https://github.com/exasol/udf-debugging-java/blob/main/LICENSE
 [77]: https://maven.apache.org/surefire/maven-failsafe-plugin/
-[78]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.50.0.tgz
+[78]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.62.0.tgz
 [79]: https://github.com/aws/aws-cdk
-[80]: https://registry.npmjs.org/constructs/-/constructs-10.1.148.tgz
+[80]: https://registry.npmjs.org/constructs/-/constructs-10.1.231.tgz
 [81]: https://github.com/aws/constructs
 [82]: https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz
 [83]: https://github.com/evanw/node-source-map-support

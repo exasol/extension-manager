@@ -62,3 +62,27 @@ Code name:
 * Updated `org.apache.maven.plugins:maven-failsafe-plugin:3.0.0-M7` to `3.0.0-M8`
 * Updated `org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M7` to `3.0.0-M8`
 * Updated `org.codehaus.mojo:versions-maven-plugin:2.13.0` to `2.14.2`
+
+### Registry
+
+#### Compile Dependency Updates
+
+* Updated `aws-cdk-lib:2.50.0` to `2.62.0`
+* Updated `constructs:^10.1.148` to `^10.1.231`
+
+#### Development Dependency Updates
+
+* Updated `@types/node:18.11.9` to `18.11.18`
+* Updated `ts-jest:^29.0.3` to `^29.0.5`
+* Updated `@types/jest:^29.2.1` to `^29.4.0`
+* Updated `typescript:~4.8.4` to `~4.9.4`
+* Updated `@types/prettier:2.7.1` to `2.7.2`
+* Updated `jest:^29.2.2` to `^29.4.0`
+* Updated `aws-cdk:2.50.0` to `2.62.0`
+
+### ParameterValidator
+
+#### Development Dependency Updates
+
+* Updated `typescript:4.8.4` to `4.9.4`
+* Updated `esbuild:0.15.13` to `0.17.4`
