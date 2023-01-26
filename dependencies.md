@@ -62,7 +62,7 @@
 | [Apache Maven GPG Plugin][44]                           | [Apache License, Version 2.0][27]              |
 | [Apache Maven Source Plugin][45]                        | [Apache License, Version 2.0][27]              |
 | [Project keeper maven plugin][46]                       | [The MIT License][47]                          |
-| [Exec Maven Plugin][48]                                 | [Apache License 2][40]                         |
+| [Exec Maven Plugin][48]                                 | [Apache License 2][27]                         |
 | [swagger-codegen (maven-plugin)][49]                    | [Apache License 2.0][12]                       |
 | [Build Helper Maven Plugin][50]                         | [The MIT License][51]                          |
 | [Apache Maven Javadoc Plugin][52]                       | [Apache License, Version 2.0][27]              |
@@ -94,7 +94,7 @@
 | --------------------------- | --------------------------------- |
 | [JUnit Jupiter Params][31]  | [Eclipse Public License v2.0][32] |
 | [mockito-junit-jupiter][73] | [The MIT License][74]             |
-| [udf-debugging-java][75]    | [MIT][76]                         |
+| [udf-debugging-java][75]    | [MIT License][76]                 |
 
 ### Plugin Dependencies
 
@@ -141,11 +141,11 @@
 | ------------------------------------------- | ------- |
 | [@exasol/extension-parameter-validator][84] | MIT     |
 
-[0]: https://github.com/dop251/goja/blob/3b8a68ca89b4/LICENSE
-[1]: https://github.com/dop251/goja_nodejs/blob/3aa5028e57f6/LICENSE
+[0]: https://github.com/dop251/goja/blob/8f6e415ca41e/LICENSE
+[1]: https://github.com/dop251/goja_nodejs/blob/041f29a15066/LICENSE
 [2]: https://github.com/exasol/exasol-driver-go/blob/v0.4.6/LICENSE
-[3]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.3.0/go-client/LICENSE
-[4]: https://github.com/go-chi/chi/blob/v5.0.7/LICENSE
+[3]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.3.1/go-client/LICENSE
+[4]: https://github.com/go-chi/chi/blob/v5.0.8/LICENSE
 [5]: https://github.com/sirupsen/logrus/blob/v1.9.0/LICENSE
 [6]: https://github.com/stretchr/testify/blob/v1.8.1/LICENSE
 [7]: https://github.com/swaggo/http-swagger/blob/v1.3.3/LICENSE
@@ -183,13 +183,13 @@
 [39]: https://sonatype.github.io/ossindex-maven/maven-plugin/
 [40]: http://www.apache.org/licenses/LICENSE-2.0.txt
 [41]: https://maven.apache.org/surefire/maven-surefire-plugin/
-[42]: https://www.mojohaus.org/versions-maven-plugin/
+[42]: https://www.mojohaus.org/versions/versions-maven-plugin/
 [43]: https://maven.apache.org/plugins/maven-deploy-plugin/
 [44]: https://maven.apache.org/plugins/maven-gpg-plugin/
 [45]: https://maven.apache.org/plugins/maven-source-plugin/
 [46]: https://github.com/exasol/project-keeper/
 [47]: https://github.com/exasol/project-keeper/blob/main/LICENSE
-[48]: http://www.mojohaus.org/exec-maven-plugin
+[48]: https://www.mojohaus.org/exec-maven-plugin
 [49]: https://github.com/swagger-api/swagger-codegen/tree/master/modules/swagger-codegen-maven-plugin
 [50]: http://www.mojohaus.org/build-helper-maven-plugin/
 [51]: https://opensource.org/licenses/mit-license.php
@@ -217,7 +217,7 @@
 [73]: https://github.com/mockito/mockito
 [74]: https://github.com/mockito/mockito/blob/main/LICENSE
 [75]: https://github.com/exasol/udf-debugging-java/
-[76]: https://opensource.org/licenses/MIT
+[76]: https://github.com/exasol/udf-debugging-java/blob/main/LICENSE
 [77]: https://maven.apache.org/surefire/maven-failsafe-plugin/
 [78]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.50.0.tgz
 [79]: https://github.com/aws/aws-cdk

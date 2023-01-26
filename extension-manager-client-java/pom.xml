@@ -13,9 +13,9 @@
         <!-- ProjectKeeper already included in root project -->
         <project-keeper.skip>true</project-keeper.skip>
         <!-- Generated code dependencies -->
-        <swagger-core-version>2.2.6</swagger-core-version>
+        <swagger-core-version>2.2.8</swagger-core-version>
         <jersey-version>2.37</jersey-version>
-        <jackson-version>2.14.0</jackson-version>
+        <jackson-version>2.14.1</jackson-version>
     </properties>
     <distributionManagement>
         <snapshotRepository>
@@ -80,13 +80,13 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.9.1</version>
+            <version>5.9.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>3.11</version>
+            <version>3.12.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -107,7 +107,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>generate-openapi-spec</id>
@@ -127,7 +127,7 @@
             <plugin>
                 <groupId>io.swagger.codegen.v3</groupId>
                 <artifactId>swagger-codegen-maven-plugin</artifactId>
-                <version>3.0.35</version>
+                <version>3.0.39</version>
                 <executions>
                     <execution>
                         <goals>
@@ -191,6 +191,19 @@
                 <configuration>
                     <!-- No error codes available in generated code -->
                     <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.ossindex.maven</groupId>
+                <artifactId>ossindex-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <excludeVulnerabilityIds>
+                        <!-- com.fasterxml.jackson.core:jackson-core:jar:2.14.1: CWE-400:
+                        Uncontrolled Resource Consumption. We assume that this
+                        library is only used in tests for connecting to a trusted server. -->
+                        <exclude>sonatype-2022-6438</exclude>
+                    </excludeVulnerabilityIds>
                 </configuration>
             </plugin>
         </plugins>

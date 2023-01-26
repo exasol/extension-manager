@@ -8,20 +8,10 @@
     <description>Library for creating integration tests for the Extensions.</description>
     <url>https://github.com/exasol/extension-manager/</url>
     <properties>
-        <junit.version>5.9.1</junit.version>
+        <junit.version>5.9.2</junit.version>
         <!-- ProjectKeeper already included in root project -->
         <project-keeper.skip>true</project-keeper.skip>
     </properties>
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
     <dependencies>
         <dependency>
             <groupId>com.exasol</groupId>
@@ -31,19 +21,12 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-test-setup-abstraction-java</artifactId>
-            <version>1.0.0</version>
-            <exclusions>
-                <!-- Exclude transitive dependency to fix https://ossindex.sonatype.org/vulnerability/sonatype-2020-0026 -->
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-handler</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>2.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>test-db-builder-java</artifactId>
-            <version>3.4.1</version>
+            <version>3.4.2</version>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
@@ -65,13 +48,13 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>4.8.1</version>
+            <version>5.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>udf-debugging-java</artifactId>
-            <version>0.6.4</version>
+            <version>0.6.7</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -88,6 +71,27 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.ossindex.maven</groupId>
+                <artifactId>ossindex-maven-plugin</artifactId>
+                <configuration>
+                    <excludeVulnerabilityIds>
+                        <!-- com.fasterxml.jackson.core:jackson-core:jar:2.14.1: CWE-400:
+                        Uncontrolled Resource Consumption. We assume that this
+                        library is only used in tests for connecting to a trusted server. -->
+                        <exclude>sonatype-2022-6438</exclude>
+                        <!-- io.netty:netty-handler: Not a vulnerability in netty but how it
+                        is configured by the client software.amazon.awssdk:netty-nio-client. We are not
+                        affected, see https://github.com/aws/aws-sdk-java-v2/issues/3263 for details -->
+                        <exclude>sonatype-2020-0026</exclude>
+                        <!-- Transitive dependency fr.turri:aXMLRPC used by
+                        com.exasol:bucketfs-java. CVE-2020-36641 is reported
+                        to be fixed in aXMLRPC 1.12.1. We use version 1.13.0,
+                        so this is a false positive. -->
+                        <exclude>CVE-2020-36641</exclude>
+                    </excludeVulnerabilityIds>
+                </configuration>
             </plugin>
         </plugins>
     </build>
