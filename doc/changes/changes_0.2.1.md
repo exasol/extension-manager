@@ -6,6 +6,8 @@ Code name:
 
 ## Features
 
+## Bugfixes
+
 * #91: Upgrade dependencies to fix vulnerabilities
 
 ## Dependency Updates
