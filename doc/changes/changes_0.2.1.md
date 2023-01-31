@@ -16,10 +16,14 @@ Code name:
 
 #### Compile Dependency Updates
 
-* Updated `github.com/dop251/goja:v0.0.0-20221106173738-3b8a68ca89b4` to `v0.0.0-20230122160437-8f6e415ca41e`
+* Updated `github.com/dop251/goja:v0.0.0-20221106173738-3b8a68ca89b4` to `v0.0.0-20230128084908-78b980256d04`
 * Updated `github.com/dop251/goja_nodejs:v0.0.0-20221009164102-3aa5028e57f6` to `v0.0.0-20230121151440-041f29a15066`
-* Updated `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.3.0` to `v0.3.1`
+* Updated `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.3.0` to `v0.3.2`
 * Updated `github.com/go-chi/chi/v5:v5.0.7` to `v5.0.8`
+
+#### Test Dependency Updates
+
+* Updated `github.com/Nightapes/go-rest:v0.2.1` to `v0.3.0`
 
 ### Extension Manager Java Client
 
@@ -38,6 +42,7 @@ Code name:
 #### Plugin Dependency Updates
 
 * Updated `com.exasol:error-code-crawler-maven-plugin:1.2.1` to `1.2.2`
+* Updated `com.exasol:project-keeper-maven-plugin:2.9.1` to `2.9.2`
 * Updated `io.swagger.codegen.v3:swagger-codegen-maven-plugin:3.0.35` to `3.0.39`
 * Updated `org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M7` to `3.0.0-M8`
 * Updated `org.codehaus.mojo:exec-maven-plugin:3.0.0` to `3.1.0`
@@ -61,6 +66,7 @@ Code name:
 #### Plugin Dependency Updates
 
 * Updated `com.exasol:error-code-crawler-maven-plugin:1.2.1` to `1.2.2`
+* Updated `com.exasol:project-keeper-maven-plugin:2.9.1` to `2.9.2`
 * Updated `org.apache.maven.plugins:maven-failsafe-plugin:3.0.0-M7` to `3.0.0-M8`
 * Updated `org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M7` to `3.0.0-M8`
 * Updated `org.codehaus.mojo:versions-maven-plugin:2.13.0` to `2.14.2`

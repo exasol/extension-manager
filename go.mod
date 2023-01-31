@@ -3,7 +3,7 @@ module github.com/exasol/extension-manager
 go 1.19
 
 require (
-	github.com/dop251/goja v0.0.0-20230122160437-8f6e415ca41e
+	github.com/dop251/goja v0.0.0-20230128084908-78b980256d04
 	github.com/dop251/goja_nodejs v0.0.0-20230121151440-041f29a15066
 	github.com/stretchr/testify v1.8.1
 )
@@ -11,7 +11,7 @@ require (
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/exasol/exasol-driver-go v0.4.6
-	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.1
+	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.2
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/kinbiko/jsonassert v1.1.1
 	github.com/swaggo/http-swagger v1.3.3
@@ -31,14 +31,14 @@ require (
 )
 
 require (
-	github.com/Nightapes/go-rest v0.2.1
+	github.com/Nightapes/go-rest v0.3.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.8.0 // indirect
 	github.com/exasol/error-reporting-go v0.1.1 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
-	github.com/go-playground/universal-translator v0.18.0 // indirect
-	github.com/go-playground/validator/v10 v10.11.1 // indirect
+	github.com/go-playground/universal-translator v0.18.1 // indirect
+	github.com/go-playground/validator/v10 v10.11.2 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect

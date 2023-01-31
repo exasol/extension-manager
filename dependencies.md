@@ -141,16 +141,16 @@
 | ------------------------------------------- | ------- |
 | [@exasol/extension-parameter-validator][84] | MIT     |
 
-[0]: https://github.com/dop251/goja/blob/8f6e415ca41e/LICENSE
+[0]: https://github.com/dop251/goja/blob/78b980256d04/LICENSE
 [1]: https://github.com/dop251/goja_nodejs/blob/041f29a15066/LICENSE
 [2]: https://github.com/exasol/exasol-driver-go/blob/v0.4.6/LICENSE
-[3]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.3.1/go-client/LICENSE
+[3]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.3.2/go-client/LICENSE
 [4]: https://github.com/go-chi/chi/blob/v5.0.8/LICENSE
 [5]: https://github.com/sirupsen/logrus/blob/v1.9.0/LICENSE
 [6]: https://github.com/stretchr/testify/blob/v1.8.1/LICENSE
 [7]: https://github.com/swaggo/http-swagger/blob/v1.3.3/LICENSE
 [8]: https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE
-[9]: https://github.com/Nightapes/go-rest/blob/v0.2.1/LICENSE
+[9]: https://github.com/Nightapes/go-rest/blob/v0.3.0/LICENSE
 [10]: https://github.com/kinbiko/jsonassert/blob/HEAD/LICENSE
 [11]: https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-annotations
 [12]: http://www.apache.org/licenses/LICENSE-2.0.html
