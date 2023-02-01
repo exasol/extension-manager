@@ -23,7 +23,7 @@ Code name:
 
 #### Test Dependency Updates
 
-* Updated `github.com/Nightapes/go-rest:v0.2.1` to `v0.3.0`
+* Updated `github.com/Nightapes/go-rest:v0.2.1` to `v0.3.1`
 
 ### Extension Manager Java Client
 

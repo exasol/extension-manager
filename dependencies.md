@@ -150,7 +150,7 @@
 [6]: https://github.com/stretchr/testify/blob/v1.8.1/LICENSE
 [7]: https://github.com/swaggo/http-swagger/blob/v1.3.3/LICENSE
 [8]: https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE
-[9]: https://github.com/Nightapes/go-rest/blob/v0.3.0/LICENSE
+[9]: https://github.com/Nightapes/go-rest/blob/v0.3.1/LICENSE
 [10]: https://github.com/kinbiko/jsonassert/blob/HEAD/LICENSE
 [11]: https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-annotations
 [12]: http://www.apache.org/licenses/LICENSE-2.0.html

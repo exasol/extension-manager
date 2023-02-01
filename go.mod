@@ -31,7 +31,7 @@ require (
 )
 
 require (
-	github.com/Nightapes/go-rest v0.3.0
+	github.com/Nightapes/go-rest v0.3.1
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.8.0 // indirect
 	github.com/exasol/error-reporting-go v0.1.1 // indirect
