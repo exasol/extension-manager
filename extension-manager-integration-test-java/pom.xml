@@ -24,6 +24,15 @@
             <version>2.0.0</version>
         </dependency>
         <dependency>
+            <!-- Explicitly upgrade exasol-testcontainers to get fix for
+            https://github.com/exasol/exasol-testcontainers/issues/220.
+            This can be
+            removed once exasol-test-setup-abstraction-java was updated. -->
+            <groupId>com.exasol</groupId>
+            <artifactId>exasol-testcontainers</artifactId>
+            <version>6.5.1</version>
+        </dependency>
+        <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>test-db-builder-java</artifactId>
             <version>3.4.2</version>

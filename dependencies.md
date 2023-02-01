@@ -80,21 +80,22 @@
 
 ### Compile Dependencies
 
-| Dependency                               | License                           |
-| ---------------------------------------- | --------------------------------- |
-| [Extension Manager Java Client][65]      | [MIT License][66]                 |
-| [exasol-test-setup-abstraction-java][67] | [MIT License][68]                 |
-| [Test Database Builder for Java][69]     | [MIT License][70]                 |
-| [Matcher for SQL Result Sets][71]        | [MIT License][72]                 |
-| [JUnit Jupiter API][31]                  | [Eclipse Public License v2.0][32] |
+| Dependency                                 | License                           |
+| ------------------------------------------ | --------------------------------- |
+| [Extension Manager Java Client][65]        | [MIT License][66]                 |
+| [exasol-test-setup-abstraction-java][67]   | [MIT License][68]                 |
+| [Test containers for Exasol on Docker][69] | [MIT License][70]                 |
+| [Test Database Builder for Java][71]       | [MIT License][72]                 |
+| [Matcher for SQL Result Sets][73]          | [MIT License][74]                 |
+| [JUnit Jupiter API][31]                    | [Eclipse Public License v2.0][32] |
 
 ### Test Dependencies
 
 | Dependency                  | License                           |
 | --------------------------- | --------------------------------- |
 | [JUnit Jupiter Params][31]  | [Eclipse Public License v2.0][32] |
-| [mockito-junit-jupiter][73] | [The MIT License][74]             |
-| [udf-debugging-java][75]    | [MIT License][76]                 |
+| [mockito-junit-jupiter][75] | [The MIT License][76]             |
+| [udf-debugging-java][77]    | [MIT License][78]                 |
 
 ### Plugin Dependencies
 
@@ -113,7 +114,7 @@
 | [Apache Maven Source Plugin][45]                        | [Apache License, Version 2.0][27]              |
 | [Apache Maven Javadoc Plugin][52]                       | [Apache License, Version 2.0][27]              |
 | [Nexus Staging Maven Plugin][53]                        | [Eclipse Public License][54]                   |
-| [Maven Failsafe Plugin][77]                             | [Apache License, Version 2.0][27]              |
+| [Maven Failsafe Plugin][79]                             | [Apache License, Version 2.0][27]              |
 | [JaCoCo :: Maven Plugin][55]                            | [Eclipse Public License 2.0][56]               |
 | [error-code-crawler-maven-plugin][57]                   | [MIT License][58]                              |
 | [Reproducible Build Maven Plugin][59]                   | [Apache 2.0][40]                               |
@@ -129,9 +130,9 @@
 
 | Dependency               | License          |
 | ------------------------ | ---------------- |
-| [aws-cdk-lib][78]        | [Apache-2.0][79] |
-| [constructs][80]         | [Apache-2.0][81] |
-| [source-map-support][82] | [MIT][83]        |
+| [aws-cdk-lib][80]        | [Apache-2.0][81] |
+| [constructs][82]         | [Apache-2.0][83] |
+| [source-map-support][84] | [MIT][85]        |
 
 ## Parametervalidator
 
@@ -139,7 +140,7 @@
 
 | Dependency                                  | License |
 | ------------------------------------------- | ------- |
-| [@exasol/extension-parameter-validator][84] | MIT     |
+| [@exasol/extension-parameter-validator][86] | MIT     |
 
 [0]: https://github.com/dop251/goja/blob/78b980256d04/LICENSE
 [1]: https://github.com/dop251/goja_nodejs/blob/041f29a15066/LICENSE
@@ -210,19 +211,21 @@
 [66]: https://github.com/exasol/extension-manager/blob/main/LICENSE
 [67]: https://github.com/exasol/exasol-test-setup-abstraction-java/
 [68]: https://github.com/exasol/exasol-test-setup-abstraction-java/blob/main/LICENSE
-[69]: https://github.com/exasol/test-db-builder-java/
-[70]: https://github.com/exasol/test-db-builder-java/blob/main/LICENSE
-[71]: https://github.com/exasol/hamcrest-resultset-matcher/
-[72]: https://github.com/exasol/hamcrest-resultset-matcher/blob/main/LICENSE
-[73]: https://github.com/mockito/mockito
-[74]: https://github.com/mockito/mockito/blob/main/LICENSE
-[75]: https://github.com/exasol/udf-debugging-java/
-[76]: https://github.com/exasol/udf-debugging-java/blob/main/LICENSE
-[77]: https://maven.apache.org/surefire/maven-failsafe-plugin/
-[78]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.62.0.tgz
-[79]: https://github.com/aws/aws-cdk
-[80]: https://registry.npmjs.org/constructs/-/constructs-10.1.231.tgz
-[81]: https://github.com/aws/constructs
-[82]: https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz
-[83]: https://github.com/evanw/node-source-map-support
-[84]: https://registry.npmjs.org/@exasol/extension-parameter-validator/-/extension-parameter-validator-0.2.0.tgz
+[69]: https://github.com/exasol/exasol-testcontainers/
+[70]: https://github.com/exasol/exasol-testcontainers/blob/main/LICENSE
+[71]: https://github.com/exasol/test-db-builder-java/
+[72]: https://github.com/exasol/test-db-builder-java/blob/main/LICENSE
+[73]: https://github.com/exasol/hamcrest-resultset-matcher/
+[74]: https://github.com/exasol/hamcrest-resultset-matcher/blob/main/LICENSE
+[75]: https://github.com/mockito/mockito
+[76]: https://github.com/mockito/mockito/blob/main/LICENSE
+[77]: https://github.com/exasol/udf-debugging-java/
+[78]: https://github.com/exasol/udf-debugging-java/blob/main/LICENSE
+[79]: https://maven.apache.org/surefire/maven-failsafe-plugin/
+[80]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.62.0.tgz
+[81]: https://github.com/aws/aws-cdk
+[82]: https://registry.npmjs.org/constructs/-/constructs-10.1.231.tgz
+[83]: https://github.com/aws/constructs
+[84]: https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz
+[85]: https://github.com/evanw/node-source-map-support
+[86]: https://registry.npmjs.org/@exasol/extension-parameter-validator/-/extension-parameter-validator-0.2.0.tgz
