@@ -14,8 +14,8 @@
         <project-keeper.skip>true</project-keeper.skip>
         <!-- Generated code dependencies -->
         <swagger-core-version>2.2.8</swagger-core-version>
-        <jersey-version>2.37</jersey-version>
-        <jackson-version>2.14.1</jackson-version>
+        <jersey-version>2.38</jersey-version>
+        <jackson-version>2.14.2</jackson-version>
     </properties>
     <distributionManagement>
         <snapshotRepository>
@@ -86,7 +86,7 @@
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>3.12.3</version>
+            <version>3.13.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -191,19 +191,6 @@
                 <configuration>
                     <!-- No error codes available in generated code -->
                     <skip>true</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.ossindex.maven</groupId>
-                <artifactId>ossindex-maven-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <excludeVulnerabilityIds>
-                        <!-- com.fasterxml.jackson.core:jackson-core:jar:2.14.1: CWE-400:
-                        Uncontrolled Resource Consumption. We assume that this
-                        library is only used in tests for connecting to a trusted server. -->
-                        <exclude>sonatype-2022-6438</exclude>
-                    </excludeVulnerabilityIds>
                 </configuration>
             </plugin>
         </plugins>

@@ -57,13 +57,13 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.0.0</version>
+            <version>5.1.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>udf-debugging-java</artifactId>
-            <version>0.6.7</version>
+            <version>0.6.8</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -80,27 +80,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.ossindex.maven</groupId>
-                <artifactId>ossindex-maven-plugin</artifactId>
-                <configuration>
-                    <excludeVulnerabilityIds>
-                        <!-- com.fasterxml.jackson.core:jackson-core:jar:2.14.1: CWE-400:
-                        Uncontrolled Resource Consumption. We assume that this
-                        library is only used in tests for connecting to a trusted server. -->
-                        <exclude>sonatype-2022-6438</exclude>
-                        <!-- io.netty:netty-handler: Not a vulnerability in netty but how it
-                        is configured by the client software.amazon.awssdk:netty-nio-client. We are not
-                        affected, see https://github.com/aws/aws-sdk-java-v2/issues/3263 for details -->
-                        <exclude>sonatype-2020-0026</exclude>
-                        <!-- Transitive dependency fr.turri:aXMLRPC used by
-                        com.exasol:bucketfs-java. CVE-2020-36641 is reported
-                        to be fixed in aXMLRPC 1.12.1. We use version 1.13.0,
-                        so this is a false positive. -->
-                        <exclude>CVE-2020-36641</exclude>
-                    </excludeVulnerabilityIds>
-                </configuration>
             </plugin>
         </plugins>
     </build>
