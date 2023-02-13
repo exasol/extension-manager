@@ -29,14 +29,18 @@ Code name:
 
 #### Compile Dependency Updates
 
-* Updated `com.fasterxml.jackson.core:jackson-annotations:2.14.0` to `2.14.1`
-* Updated `com.fasterxml.jackson.core:jackson-core:2.14.0` to `2.14.1`
-* Updated `com.fasterxml.jackson.core:jackson-databind:2.14.0` to `2.14.1`
+* Updated `com.fasterxml.jackson.core:jackson-annotations:2.14.0` to `2.14.2`
+* Updated `com.fasterxml.jackson.core:jackson-core:2.14.0` to `2.14.2`
+* Updated `com.fasterxml.jackson.core:jackson-databind:2.14.0` to `2.14.2`
 * Updated `io.swagger.core.v3:swagger-annotations:2.2.6` to `2.2.8`
+* Updated `org.glassfish.jersey.core:jersey-client:2.37` to `2.38`
+* Updated `org.glassfish.jersey.inject:jersey-hk2:2.37` to `2.38`
+* Updated `org.glassfish.jersey.media:jersey-media-json-jackson:2.37` to `2.38`
+* Updated `org.glassfish.jersey.media:jersey-media-multipart:2.37` to `2.38`
 
 #### Test Dependency Updates
 
-* Updated `nl.jqno.equalsverifier:equalsverifier:3.11` to `3.12.3`
+* Updated `nl.jqno.equalsverifier:equalsverifier:3.11` to `3.13.1`
 * Updated `org.junit.jupiter:junit-jupiter-api:5.9.1` to `5.9.2`
 
 #### Plugin Dependency Updates
@@ -60,9 +64,9 @@ Code name:
 
 #### Test Dependency Updates
 
-* Updated `com.exasol:udf-debugging-java:0.6.4` to `0.6.7`
+* Updated `com.exasol:udf-debugging-java:0.6.4` to `0.6.8`
 * Updated `org.junit.jupiter:junit-jupiter-params:5.9.1` to `5.9.2`
-* Updated `org.mockito:mockito-junit-jupiter:4.8.1` to `5.0.0`
+* Updated `org.mockito:mockito-junit-jupiter:4.8.1` to `5.1.1`
 
 #### Plugin Dependency Updates
 
