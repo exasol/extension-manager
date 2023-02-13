@@ -16,8 +16,8 @@ Code name:
 
 #### Compile Dependency Updates
 
-* Updated `github.com/dop251/goja:v0.0.0-20221106173738-3b8a68ca89b4` to `v0.0.0-20230128084908-78b980256d04`
-* Updated `github.com/dop251/goja_nodejs:v0.0.0-20221009164102-3aa5028e57f6` to `v0.0.0-20230121151440-041f29a15066`
+* Updated `github.com/dop251/goja:v0.0.0-20221106173738-3b8a68ca89b4` to `v0.0.0-20230203172422-5460598cfa32`
+* Updated `github.com/dop251/goja_nodejs:v0.0.0-20221009164102-3aa5028e57f6` to `v0.0.0-20230207183254-2229640ea097`
 * Updated `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.3.0` to `v0.3.2`
 * Updated `github.com/go-chi/chi/v5:v5.0.7` to `v5.0.8`
 

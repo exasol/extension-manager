@@ -142,8 +142,8 @@
 | ------------------------------------------- | ------- |
 | [@exasol/extension-parameter-validator][86] | MIT     |
 
-[0]: https://github.com/dop251/goja/blob/78b980256d04/LICENSE
-[1]: https://github.com/dop251/goja_nodejs/blob/041f29a15066/LICENSE
+[0]: https://github.com/dop251/goja/blob/5460598cfa32/LICENSE
+[1]: https://github.com/dop251/goja_nodejs/blob/2229640ea097/LICENSE
 [2]: https://github.com/exasol/exasol-driver-go/blob/v0.4.6/LICENSE
 [3]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.3.2/go-client/LICENSE
 [4]: https://github.com/go-chi/chi/blob/v5.0.8/LICENSE
