@@ -15,6 +15,21 @@
         <module>extension-manager-integration-test-java</module>
         <module>extension-manager-client-java</module>
     </modules>
+    <distributionManagement>
+        <!-- This is required to fix error during deployment: "Failed to execute goal
+        org.apache.maven.plugins:maven-deploy-plugin:2.7:deploy (default-deploy) on project
+        extension-manager-parent-pom: Deployment failed: repository element was not specified in the
+        POM inside distributionManagement element or in -DaltDeploymentRepository=id::layout::url
+        parameter" -->
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
     <build>
         <plugins>
             <plugin>
