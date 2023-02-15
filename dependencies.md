@@ -28,27 +28,27 @@
 
 ### Compile Dependencies
 
-[36]: http://www.apache.org/licenses/LICENSE-2.0.txt
-[37]: http://sonarsource.github.io/sonar-scanner-maven/
-[38]: http://www.gnu.org/licenses/lgpl.txt
-[39]: https://maven.apache.org/plugins/maven-compiler-plugin/
-[40]: https://maven.apache.org/enforcer/maven-enforcer-plugin/
-[41]: https://maven.apache.org/surefire/maven-surefire-plugin/
-[42]: https://www.mojohaus.org/versions/versions-maven-plugin/
-[43]: https://maven.apache.org/plugins/maven-deploy-plugin/
-[44]: https://maven.apache.org/plugins/maven-gpg-plugin/
-[45]: https://maven.apache.org/plugins/maven-source-plugin/
-[46]: https://github.com/exasol/project-keeper/
-[47]: https://github.com/exasol/project-keeper/blob/main/LICENSE
-[48]: https://www.mojohaus.org/exec-maven-plugin
-[49]: https://github.com/swagger-api/swagger-codegen/tree/master/modules/swagger-codegen-maven-plugin
-[50]: http://www.mojohaus.org/build-helper-maven-plugin/
-[51]: https://opensource.org/licenses/mit-license.php
-[52]: https://maven.apache.org/plugins/maven-javadoc-plugin/
-[53]: http://www.sonatype.com/public-parent/nexus-maven-plugins/nexus-staging/nexus-staging-maven-plugin/
-[54]: http://www.eclipse.org/legal/epl-v10.html
-[55]: https://www.jacoco.org/jacoco/trunk/doc/maven.html
-[56]: https://www.eclipse.org/legal/epl-2.0/
+| Dependency                      | License                                                                                                                                                                                             |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [swagger-annotations][11]       | [Apache License 2.0][12]                                                                                                                                                                            |
+| [jersey-core-client][13]        | [EPL 2.0][14]; [GPL2 w/ CPE][15]; [EDL 1.0][16]; [BSD 2-Clause][17]; [Apache License, 2.0][12]; [Public Domain][18]; [Modified BSD][19]; [jQuery license][20]; [MIT license][21]; [W3C license][22] |
+| [jersey-media-multipart][23]    | [EPL 2.0][14]; [GPL2 w/ CPE][15]; [EDL 1.0][16]; [BSD 2-Clause][17]; [Apache License, 2.0][12]; [Public Domain][18]; [Modified BSD][19]; [jQuery license][20]; [MIT license][21]; [W3C license][22] |
+| [jersey-media-json-jackson][24] | [EPL 2.0][14]; [The GNU General Public License (GPL), Version 2, With Classpath Exception][15]; [Apache License, 2.0][12]                                                                           |
+| [jersey-inject-hk2][25]         | [EPL 2.0][14]; [GPL2 w/ CPE][15]; [EDL 1.0][16]; [BSD 2-Clause][17]; [Apache License, 2.0][12]; [Public Domain][18]; [Modified BSD][19]; [jQuery license][20]; [MIT license][21]; [W3C license][22] |
+| [Jackson-core][26]              | [The Apache Software License, Version 2.0][27]                                                                                                                                                      |
+| [Jackson-annotations][28]       | [The Apache Software License, Version 2.0][27]                                                                                                                                                      |
+| [jackson-databind][28]          | [The Apache Software License, Version 2.0][27]                                                                                                                                                      |
+| [MiG Base64][29]                | [Prior BSD License][30]                                                                                                                                                                             |
+
+### Test Dependencies
+
+| Dependency                                | License                           |
+| ----------------------------------------- | --------------------------------- |
+| [JUnit Jupiter API][31]                   | [Eclipse Public License v2.0][32] |
+| [EqualsVerifier | release normal jar][33] | [Apache License, Version 2.0][27] |
+
+### Plugin Dependencies
+
 [57]: https://github.com/exasol/error-code-crawler-maven-plugin/
 [58]: https://github.com/exasol/error-code-crawler-maven-plugin/blob/main/LICENSE
 [59]: http://zlika.github.io/reproducible-build-maven-plugin
