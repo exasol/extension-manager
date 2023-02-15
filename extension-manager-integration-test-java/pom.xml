@@ -8,20 +8,10 @@
     <description>Library for creating integration tests for the Extensions.</description>
     <url>https://github.com/exasol/extension-manager/</url>
     <properties>
-        <junit.version>5.9.1</junit.version>
+        <junit.version>5.9.2</junit.version>
         <!-- ProjectKeeper already included in root project -->
         <project-keeper.skip>true</project-keeper.skip>
     </properties>
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
     <dependencies>
         <dependency>
             <groupId>com.exasol</groupId>
@@ -31,19 +21,21 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-test-setup-abstraction-java</artifactId>
-            <version>1.0.0</version>
-            <exclusions>
-                <!-- Exclude transitive dependency to fix https://ossindex.sonatype.org/vulnerability/sonatype-2020-0026 -->
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-handler</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <!-- Explicitly upgrade exasol-testcontainers to get fix for
+            https://github.com/exasol/exasol-testcontainers/issues/220.
+            This can be
+            removed once exasol-test-setup-abstraction-java was updated. -->
+            <groupId>com.exasol</groupId>
+            <artifactId>exasol-testcontainers</artifactId>
+            <version>6.5.1</version>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>test-db-builder-java</artifactId>
-            <version>3.4.1</version>
+            <version>3.4.2</version>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
@@ -65,13 +57,13 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>4.8.1</version>
+            <version>5.1.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>udf-debugging-java</artifactId>
-            <version>0.6.4</version>
+            <version>0.6.8</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -80,7 +72,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>2.9.1</version>
+                <version>2.9.3</version>
                 <executions>
                     <execution>
                         <goals>

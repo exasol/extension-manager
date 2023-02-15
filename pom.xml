@@ -9,20 +9,59 @@
     <packaging>pom</packaging>
     <url>https://github.com/exasol/extension-manager/</url>
     <properties>
-        <revision>0.2.0</revision>
+        <revision>0.2.1</revision>
     </properties>
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
     <modules>
         <module>extension-manager-integration-test-java</module>
         <module>extension-manager-client-java</module>
     </modules>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.sonatype.ossindex.maven</groupId>
+                <artifactId>ossindex-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <excludeVulnerabilityIds>
+                        <!-- com.fasterxml.jackson.core:jackson-core:jar:2.14.1: CWE-400:
+                        Uncontrolled Resource Consumption. We assume that this
+                        library is only used in tests for connecting to a trusted server. -->
+                        <exclude>sonatype-2022-6438</exclude>
+                        <!-- Transitive test dependency io.netty:netty-handler:4.1.86 used by
+                        com.exasol:exasol-test-setup-abstraction-java. we are not affected, see
+                        https://github.com/aws/aws-sdk-java-v2/issues/3263 for details -->
+                        <exclude>sonatype-2020-0026</exclude>
+                        <!-- com.fasterxml.jackson.core:jackson-core:2.14.2: Uncontrolled Resource
+                        Consumption. Only used in tests, so we accept the risk. -->
+                        <exclude>sonatype-2022-6438</exclude>
+                        <!-- Transitive dependency fr.turri:aXMLRPC used by
+                        com.exasol:bucketfs-java.
+                        CVE-2020-36641 is reported to be fixed in aXMLRPC 1.12.1. We use version 1.13.0, so this is a false
+                        positive. -->
+                        <exclude>CVE-2020-36641</exclude>
+                    </excludeVulnerabilityIds>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.6.3</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
