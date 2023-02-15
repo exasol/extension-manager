@@ -1,4 +1,4 @@
-# Extension Manager 0.2.2, released 2023-02-15
+# Extension Manager 0.2.2, released 2023-02-17
 
 Code name: Fix Maven Central Deployment
 
