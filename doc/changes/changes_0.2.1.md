@@ -1,4 +1,4 @@
-# Extension Manager 0.2.1, released 2023-02-14
+# Extension Manager 0.2.1, released 2023-02-15
 
 Code name: Fix vulnerabilities in dependencies
 
