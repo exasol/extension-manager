@@ -34,4 +34,4 @@ linkReplacements:
 excludes:
   - "E-PK-CORE-18: Outdated content: '.github/workflows/project-keeper-verify.yml'"
   # PK expects inconsistent content for dependencies.md
-  - "E-PK-CORE-53: The dependencies.md file has outdated content."
+  - regex: "E-PK-CORE-53: The dependencies.md file has outdated content.*"
