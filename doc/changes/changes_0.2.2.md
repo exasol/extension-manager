@@ -1,10 +1,14 @@
-# Extension Manager 0.2.1, released 2023-02-15
+# Extension Manager 0.2.2, released 2023-02-15
 
-Code name: Retracted
+Code name: Fix Maven Central Deployment
 
 ## Summary
 
-This release is retracted, please use v0.2.2.
+This release upgrades dependencies to fix vulnerabilities.
+
+## Bugfixes
+
+* #91: Upgrade dependencies to fix vulnerabilities
 
 ## Dependency Updates
 
@@ -54,7 +58,7 @@ This release is retracted, please use v0.2.2.
 
 * Updated `com.exasol:exasol-test-setup-abstraction-java:1.0.0` to `2.0.0`
 * Added `com.exasol:exasol-testcontainers:6.5.1`
-* Updated `com.exasol:extension-manager-client-java:0.2.0` to `0.2.1`
+* Updated `com.exasol:extension-manager-client-java:0.2.0` to `0.2.2`
 * Updated `com.exasol:test-db-builder-java:3.4.1` to `3.4.2`
 * Updated `org.junit.jupiter:junit-jupiter-api:5.9.1` to `5.9.2`
 
