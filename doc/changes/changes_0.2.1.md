@@ -1,14 +1,10 @@
 # Extension Manager 0.2.1, released 2023-02-15
 
-Code name: Fix vulnerabilities in dependencies
+Code name: Retracted
 
 ## Summary
 
-## Features
-
-## Bugfixes
-
-* #91: Upgrade dependencies to fix vulnerabilities
+This release is retracted, please use v0.2.2.
 
 ## Dependency Updates
 
