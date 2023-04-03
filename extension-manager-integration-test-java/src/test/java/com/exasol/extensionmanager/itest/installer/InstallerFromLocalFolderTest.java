@@ -54,7 +54,7 @@ class InstallerFromLocalFolderTest {
         when(configMock.getLocalExtensionManagerProject()).thenReturn(Optional.of(tempDir));
         when(configMock.buildExtensionManager()).thenReturn(true);
         final IllegalStateException exception = assertThrows(IllegalStateException.class, installer::install);
-        assertThat(exception.getMessage(), startsWith("E-EMIT-12: Command 'go build -o extension-manager cmd/main.go' failed"));
+        assertThat(exception.getMessage(), startsWith("E-EMIT-12: Command 'go build -o extension-manager cmd/main.go' in working dir '" + tempDir + "' failed"));
     }
 
     @Test
