@@ -41,6 +41,7 @@ vendor/
 
 /pkg/integrationTesting/extensionForTesting/node_modules/
 /pkg/integrationTesting/extensionForTesting/package-lock.json
+pkg/integrationTesting/extensionForTesting/dist/
 /pkg/parameterValidator/node_modules/
 /pkg/parameterValidator/dist/
 /coverage.out

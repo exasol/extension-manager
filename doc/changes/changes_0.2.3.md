@@ -59,3 +59,26 @@ This release fixes CVE-2022-41723 in `golang.org/x/net`.
 * Updated `com.exasol:project-keeper-maven-plugin:2.9.3` to `2.9.6`
 * Updated `org.apache.maven.plugins:maven-deploy-plugin:3.0.0` to `3.1.0`
 * Updated `org.apache.maven.plugins:maven-enforcer-plugin:3.1.0` to `3.2.1`
+
+### Registry
+
+#### Compile Dependency Updates
+
+* Updated `aws-cdk-lib:2.62.0` to `2.72.1`
+* Updated `constructs:^10.1.231` to `^10.1.300`
+
+#### Development Dependency Updates
+
+* Updated `@types/node:18.11.18` to `18.15.11`
+* Updated `ts-jest:^29.0.5` to `^29.1.0`
+* Updated `@types/jest:^29.4.0` to `^29.5.0`
+* Updated `typescript:~4.9.4` to `~5.0.3`
+* Updated `jest:^29.4.0` to `^29.5.0`
+* Updated `aws-cdk:2.62.0` to `2.72.1`
+
+### ParameterValidator
+
+#### Development Dependency Updates
+
+* Updated `typescript:4.9.4` to `5.0.3`
+* Updated `esbuild:0.17.4` to `0.17.15`
