@@ -19,11 +19,14 @@ public class SimpleProcess {
     private static final Logger LOGGER = Logger.getLogger(SimpleProcess.class.getName());
 
     private final Process process;
+    private final Path workingDirectory;
     private final List<String> command;
     private final Instant startTime;
 
-    private SimpleProcess(final Process process, final List<String> command, final Instant startTime) {
+    private SimpleProcess(final Process process, final Path workingDirectory, final List<String> command,
+            final Instant startTime) {
         this.process = process;
+        this.workingDirectory = workingDirectory;
         this.command = command;
         this.startTime = startTime;
     }
@@ -100,7 +103,7 @@ public class SimpleProcess {
             final Instant startTime = Instant.now();
             new AsyncStreamReader().startCollectingConsumer(process.getInputStream(), outputStreamConsumer);
             new AsyncStreamReader().startCollectingConsumer(process.getErrorStream(), errorStreamConsumer);
-            return new SimpleProcess(process, command, startTime);
+            return new SimpleProcess(process, workingDirectory, command, startTime);
         } catch (final IOException exception) {
             throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-8")
                     .message("Error executing command {{command}}.", String.join(" ", command))
@@ -121,11 +124,10 @@ public class SimpleProcess {
         final Duration duration = Duration.between(this.startTime, Instant.now());
         final int exitCode = this.process.exitValue();
         if (exitCode != 0) {
-            throw new IllegalStateException(
-                    ExaError.messageBuilder("E-EMIT-12")
-                            .message("Command {{command}} failed with exit code {{exit code|u}} after {{duration|u}}.",
-                                    formatCommand(), exitCode, duration)
-                            .mitigation("See log output for details.").toString());
+            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-12").message(
+                    "Command {{command}} in working dir {{working dir}} failed with exit code {{exit code|u}} after {{duration|u}}.",
+                    formatCommand(), workingDirectory, exitCode, duration).mitigation("See log output for details.")
+                    .toString());
         }
         LOGGER.fine(() -> "Command '" + formatCommand() + "' finished successfully after " + duration);
     }

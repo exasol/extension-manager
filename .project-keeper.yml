@@ -24,14 +24,10 @@ sources:
     path: registry/package.json
   - type: npm
     path: pkg/parameterValidator/package.json
-version: 0.2.2
+version: 0.2.3
 linkReplacements:
   - "https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.2.3/go-client/LICENSE|https://github.com/exasol/exasol-test-setup-abstraction-server/blob/main/LICENSE"
   - "Unknown|https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE"
   - "https://github.com/swagger-api/swagger-core/modules/swagger-annotations|https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-annotations"
   - "jquery.org/license|https://jquery.org/license/"
   - "https://github.com/swagger-api/swagger-codegen/modules/swagger-codegen-maven-plugin|https://github.com/swagger-api/swagger-codegen/tree/master/modules/swagger-codegen-maven-plugin"
-excludes:
-  - "E-PK-CORE-18: Outdated content: '.github/workflows/project-keeper-verify.yml'"
-  # PK expects inconsistent content for dependencies.md
-  - regex: "E-PK-CORE-53: The dependencies.md file has outdated content.*"

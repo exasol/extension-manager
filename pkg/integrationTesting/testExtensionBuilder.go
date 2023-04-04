@@ -1,7 +1,6 @@
 package integrationTesting
 
 import (
-	"bytes"
 	_ "embed"
 	"encoding/json"
 	"errors"
@@ -206,16 +205,7 @@ var isNpmInstallCalled = false
 func (b TestExtensionBuilder) runBuild(workDir string) []byte {
 	buildLock.Lock()
 	b.runNpmInstall(workDir)
-	var output bytes.Buffer
-	buildCommand := exec.Command("npm", "run", "build")
-	buildCommand.Stdout = &output
-	buildCommand.Stderr = &output
-	buildCommand.Dir = workDir
-	err := buildCommand.Run()
-	if err != nil {
-		fmt.Println(output.String())
-		panic(fmt.Sprintf("failed to build extension in workdir %s. See log for details: %v", workDir, err))
-	}
+	b.runNpmBuild(workDir)
 	path := path.Join(workDir, "dist.js")
 	cleanupFile(b.testing, path)
 	builtExtension, err := os.ReadFile(path)
@@ -229,15 +219,21 @@ func (b TestExtensionBuilder) runBuild(workDir string) []byte {
 func (b TestExtensionBuilder) runNpmInstall(workDir string) {
 	if !isNpmInstallCalled { // running it once is enough
 		b.testing.Logf("Running npm install in %s", workDir)
-		var stderr bytes.Buffer
 		installCommand := exec.Command("npm", "install")
 		installCommand.Dir = workDir
 		output, err := installCommand.CombinedOutput()
-
 		if err != nil {
-			fmt.Println(stderr.String())
-			log.Fatalf("Failed to install node modules (run 'npm install') for extensionForTesting. Cause: %v, Output:\n%s", err, output)
+			log.Fatalf("Failed to run 'npm install' in dir %v. Cause: %v, Output:\n%s", workDir, err, output)
 		}
 		isNpmInstallCalled = true
+	}
+}
+
+func (TestExtensionBuilder) runNpmBuild(workDir string) {
+	buildCommand := exec.Command("npm", "run", "build")
+	buildCommand.Dir = workDir
+	output, err := buildCommand.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Failed to run 'npm run build' in dir %v. Cause: %v, Output:\n%s", workDir, err, output)
 	}
 }
