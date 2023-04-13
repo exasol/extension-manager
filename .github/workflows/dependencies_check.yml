@@ -13,8 +13,12 @@ jobs:
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: "temurin"
           java-version: 11
-          cache: 'maven'
+          cache: "maven"
+      - name: Install to local maven repo
+        # This avoids this error:
+        # [ERROR] Failed to execute goal on project extension-manager-integration-test-java: Could not resolve dependencies for project com.exasol:extension-manager-integration-test-java:jar:0.2.3: Could not find artifact com.exasol:extension-manager-client-java:jar:0.2.3 in central
+        run: mvn --batch-mode install -DskipTests
       - name: Checking dependencies for vulnerabilities
         run: mvn --batch-mode org.sonatype.ossindex.maven:ossindex-maven-plugin:audit -f pom.xml
