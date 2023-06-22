@@ -28,6 +28,12 @@ func TestCompatibleOlderVersion(t *testing.T) {
 	a.NoError(err)
 }
 
+func TestCompatibleSameVersion(t *testing.T) {
+	a := assert.New(t)
+	err := checkCompatibleVersion("id", supportedApiVersion)
+	a.NoError(err)
+}
+
 func TestIncompatibleOlderVersion(t *testing.T) {
 	a := assert.New(t)
 	err := checkCompatibleVersion("id", "99.0.0")
