@@ -62,9 +62,12 @@ jobs:
         run: |
           go get -t ./...
 
+      - name: Revert go.sum modification by previous "go get"
+        run: |
+          go mod tidy
+
       - name: Check generated code
         run: |
-          go mod tidy # Revert modification of go.sum by previous `go get` step
           go generate ./...
           if [[ `git status --porcelain` ]]; then
             echo "Project files did change:\n"
