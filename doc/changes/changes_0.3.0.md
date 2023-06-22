@@ -6,7 +6,7 @@ Code name:
 
 ## Features
 
-* #29: Added support for multiple API versions
+* #29: Added support for extensions with compatible API versions
 
 ## Dependency Updates
 
