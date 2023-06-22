@@ -64,6 +64,7 @@ jobs:
 
       - name: Check generated code
         run: |
+          go mod tidy # Revert modification of go.sum by previous `go get` step
           go generate ./...
           if [[ `git status --porcelain` ]]; then
             echo "Project files did change:\n"
