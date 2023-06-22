@@ -1,6 +1,7 @@
 package extensionAPI
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/exasol/extension-manager/pkg/backend"
@@ -175,17 +176,29 @@ func (suite *ExtensionApiSuite) TestFindInstallationsReturningParameters() {
 	suite.NoError(err)
 }
 
-func (suite *ExtensionApiSuite) TestLoadExtensionWithOutdatedApiVersion() {
-	extensionContent := `
+func (suite *ExtensionApiSuite) TestLoadExtensionWithCompatibleApiVersion() {
+	extensionContent := minimalExtension("0.1.15")
+	extension, err := LoadExtension("ext-id", extensionContent)
+	suite.NoError(err)
+	suite.NotNil(extension)
+}
+
+func (suite *ExtensionApiSuite) TestLoadExtensionWithIncompatibleApiVersion() {
+	extensionContent := minimalExtension("99.0.0")
+	extension, err := LoadExtension("ext-id", extensionContent)
+	suite.ErrorContains(err, `incompatible extension API version "99.0.0". Please update the extension to use supported version "`+SupportedApiVersion+`"`)
+	suite.Nil(extension)
+}
+
+func minimalExtension(version string) string {
+	content := `
 	(function(){
 		global.installedExtension = {
 			extension: {},
-			apiVersion: "0.0.0"
+			apiVersion: "$VERSION$"
 		}
 	})()`
-	extension, err := LoadExtension("ext-id", extensionContent)
-	suite.ErrorContains(err, `incompatible extension API version "0.0.0". Please update the extension to use supported version "`+SupportedApiVersion+`"`)
-	suite.Nil(extension)
+	return strings.Replace(content, "$VERSION$", version, 1)
 }
 
 func (suite *ExtensionApiSuite) TestLoadExtensionWithoutSettingGlobalVariable() {

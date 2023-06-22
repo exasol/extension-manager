@@ -11,7 +11,7 @@ import (
 	"github.com/dop251/goja_nodejs/require"
 )
 
-const SupportedApiVersion = "0.1.15"
+const SupportedApiVersion = "0.1.16"
 
 // LoadExtension loads an extension from the given file content.
 /* [impl -> dsn~extension-definition~1] */

@@ -15,8 +15,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const DefaultExtensionApiVersion = "0.1.16"
+
 func CreateTestExtensionBuilder(t *testing.T) *TestExtensionBuilder {
 	builder := TestExtensionBuilder{testing: t}
+	builder.extensionApiVersion = DefaultExtensionApiVersion
 	builder.findInstallationsFunc = "return []"
 	builder.installFunc = "context.sqlClient.execute('select 1')"
 	builder.uninstallFunc = ""
@@ -29,6 +32,7 @@ func CreateTestExtensionBuilder(t *testing.T) *TestExtensionBuilder {
 
 type TestExtensionBuilder struct {
 	testing                             *testing.T
+	extensionApiVersion                 string
 	bucketFsUploads                     []BucketFsUploadParams
 	findInstallationsFunc               string
 	installFunc                         string
@@ -96,40 +100,16 @@ func (b *TestExtensionBuilder) WithBucketFsUpload(upload BucketFsUploadParams) *
 	return b
 }
 
-//go:embed extensionForTesting/extensionForTestingTemplate.ts
-var template string
-
-//go:embed extensionForTesting/package.json
-var packageJson []byte
-
 //go:embed extensionForTesting/tsconfig.json
 var tscConfig []byte
 
 func (b TestExtensionBuilder) Build() *BuiltExtension {
-	bfsUploadsJson, err := json.Marshal(b.bucketFsUploads)
+	workDir := b.createWorkDir()
+	err := os.WriteFile(path.Join(workDir, "package.json"), []byte(b.createPackageJsonContent()), 0600)
 	if err != nil {
 		panic(err)
 	}
-	extensionTs := strings.Replace(template, "$UPLOADS$", string(bfsUploadsJson), 1)
-	extensionTs = strings.Replace(extensionTs, "$FIND_INSTALLATIONS$", b.findInstallationsFunc, 1)
-	extensionTs = strings.Replace(extensionTs, "$INSTALL_EXTENSION$", b.installFunc, 1)
-	extensionTs = strings.Replace(extensionTs, "$UNINSTALL_EXTENSION$", b.uninstallFunc, 1)
-	extensionTs = strings.Replace(extensionTs, "$ADD_INSTANCE$", b.addInstanceFunc, 1)
-	extensionTs = strings.Replace(extensionTs, "$FIND_INSTANCES$", b.findInstancesFunc, 1)
-	extensionTs = strings.Replace(extensionTs, "$DELETE_INSTANCE$", b.deleteInstanceFunc, 1)
-	extensionTs = strings.Replace(extensionTs, "$GET_INSTANCE_PARAMETER_DEFINITIONS$", b.getInstanceParameterDefinitionsFunc, 1)
-	workDir := path.Join(os.TempDir(), "extension-manager-test-extension-build-dir")
-	if _, err := os.Stat(workDir); errors.Is(err, os.ErrNotExist) {
-		err := os.Mkdir(workDir, os.ModePerm)
-		if err != nil {
-			panic(err)
-		}
-	}
-	err = os.WriteFile(path.Join(workDir, "package.json"), packageJson, 0600)
-	if err != nil {
-		panic(err)
-	}
-	err = os.WriteFile(path.Join(workDir, "extensionForTesting.ts"), []byte(extensionTs), 0600)
+	err = os.WriteFile(path.Join(workDir, "extensionForTesting.ts"), []byte(b.createExtensionTsContent()), 0600)
 	if err != nil {
 		panic(err)
 	}
@@ -139,6 +119,43 @@ func (b TestExtensionBuilder) Build() *BuiltExtension {
 	}
 	content := b.runBuild(workDir)
 	return &BuiltExtension{content: content, testing: b.testing}
+}
+
+func (b TestExtensionBuilder) createWorkDir() string {
+	workDir := path.Join(os.TempDir(), "extension-manager-test-extension", "api-"+b.extensionApiVersion)
+	if _, err := os.Stat(workDir); errors.Is(err, os.ErrNotExist) {
+		err := os.MkdirAll(workDir, os.ModePerm)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return workDir
+}
+
+//go:embed extensionForTesting/package.json
+var packageJsonTemplate string
+
+func (b TestExtensionBuilder) createPackageJsonContent() string {
+	return strings.Replace(packageJsonTemplate, "$EXTENSION_API_VERSION$", b.extensionApiVersion, 1)
+}
+
+//go:embed extensionForTesting/extensionForTestingTemplate.ts
+var extensionTemplate string
+
+func (b TestExtensionBuilder) createExtensionTsContent() string {
+	bfsUploadsJson, err := json.Marshal(b.bucketFsUploads)
+	if err != nil {
+		panic(err)
+	}
+	content := strings.Replace(extensionTemplate, "$UPLOADS$", string(bfsUploadsJson), 1)
+	content = strings.Replace(content, "$FIND_INSTALLATIONS$", b.findInstallationsFunc, 1)
+	content = strings.Replace(content, "$INSTALL_EXTENSION$", b.installFunc, 1)
+	content = strings.Replace(content, "$UNINSTALL_EXTENSION$", b.uninstallFunc, 1)
+	content = strings.Replace(content, "$ADD_INSTANCE$", b.addInstanceFunc, 1)
+	content = strings.Replace(content, "$FIND_INSTANCES$", b.findInstancesFunc, 1)
+	content = strings.Replace(content, "$DELETE_INSTANCE$", b.deleteInstanceFunc, 1)
+	content = strings.Replace(content, "$GET_INSTANCE_PARAMETER_DEFINITIONS$", b.getInstanceParameterDefinitionsFunc, 1)
+	return content
 }
 
 type BuiltExtension struct {
@@ -200,7 +217,6 @@ func cleanupFile(t *testing.T, fileName string) {
 }
 
 var buildLock sync.Mutex
-var isNpmInstallCalled = false
 
 func (b TestExtensionBuilder) runBuild(workDir string) []byte {
 	buildLock.Lock()
@@ -216,17 +232,21 @@ func (b TestExtensionBuilder) runBuild(workDir string) []byte {
 	return builtExtension
 }
 
+var isNpmInstallCalledForVersion = make(map[string]bool)
+
 func (b TestExtensionBuilder) runNpmInstall(workDir string) {
-	if !isNpmInstallCalled { // running it once is enough
-		b.testing.Logf("Running npm install in %s", workDir)
-		installCommand := exec.Command("npm", "install")
-		installCommand.Dir = workDir
-		output, err := installCommand.CombinedOutput()
-		if err != nil {
-			log.Fatalf("Failed to run 'npm install' in dir %v. Cause: %v, Output:\n%s", workDir, err, output)
-		}
-		isNpmInstallCalled = true
+	if isNpmInstallCalledForVersion[b.extensionApiVersion] {
+		// running it once is enough
+		return
 	}
+	b.testing.Logf("Running npm install in %s", workDir)
+	installCommand := exec.Command("npm", "install")
+	installCommand.Dir = workDir
+	output, err := installCommand.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Failed to run 'npm install' in dir %v. Cause: %v, Output:\n%s", workDir, err, output)
+	}
+	isNpmInstallCalledForVersion[b.extensionApiVersion] = true
 }
 
 func (TestExtensionBuilder) runNpmBuild(workDir string) {
