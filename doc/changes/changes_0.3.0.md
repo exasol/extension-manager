@@ -70,6 +70,7 @@ Code name:
 
 * Updated `org.junit.jupiter:junit-jupiter-params:5.9.2` to `5.9.3`
 * Updated `org.mockito:mockito-junit-jupiter:5.1.1` to `5.4.0`
+* Added `org.slf4j:slf4j-jdk14:2.0.7`
 
 #### Plugin Dependency Updates
 

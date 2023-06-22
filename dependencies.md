@@ -97,6 +97,7 @@
 | [JUnit Jupiter Params][31]  | [Eclipse Public License v2.0][32] |
 | [mockito-junit-jupiter][76] | [The MIT License][77]             |
 | [udf-debugging-java][78]    | [MIT License][79]                 |
+| [SLF4J JDK14 Binding][80]   | [MIT License][21]                 |
 
 ### Plugin Dependencies
 
@@ -115,7 +116,7 @@
 | [Apache Maven Source Plugin][46]                        | [Apache License, Version 2.0][27]              |
 | [Apache Maven Javadoc Plugin][53]                       | [Apache-2.0][27]                               |
 | [Nexus Staging Maven Plugin][54]                        | [Eclipse Public License][55]                   |
-| [Maven Failsafe Plugin][80]                             | [Apache-2.0][27]                               |
+| [Maven Failsafe Plugin][81]                             | [Apache-2.0][27]                               |
 | [JaCoCo :: Maven Plugin][56]                            | [Eclipse Public License 2.0][57]               |
 | [error-code-crawler-maven-plugin][58]                   | [MIT License][59]                              |
 | [Reproducible Build Maven Plugin][60]                   | [Apache 2.0][36]                               |
@@ -132,9 +133,9 @@
 
 | Dependency               | License          |
 | ------------------------ | ---------------- |
-| [aws-cdk-lib][81]        | [Apache-2.0][82] |
-| [constructs][83]         | [Apache-2.0][84] |
-| [source-map-support][85] | [MIT][86]        |
+| [aws-cdk-lib][82]        | [Apache-2.0][83] |
+| [constructs][84]         | [Apache-2.0][85] |
+| [source-map-support][86] | [MIT][87]        |
 
 ## Parametervalidator
 
@@ -142,7 +143,7 @@
 
 | Dependency                                  | License |
 | ------------------------------------------- | ------- |
-| [@exasol/extension-parameter-validator][87] | MIT     |
+| [@exasol/extension-parameter-validator][88] | MIT     |
 
 [0]: https://github.com/Nightapes/go-rest/blob/v0.3.3/LICENSE
 [1]: https://github.com/dop251/goja/blob/7749907a8a20/LICENSE
@@ -224,11 +225,12 @@
 [77]: https://github.com/mockito/mockito/blob/main/LICENSE
 [78]: https://github.com/exasol/udf-debugging-java/
 [79]: https://github.com/exasol/udf-debugging-java/blob/main/LICENSE
-[80]: https://maven.apache.org/surefire/maven-failsafe-plugin/
-[81]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.72.1.tgz
-[82]: https://github.com/aws/aws-cdk
-[83]: https://registry.npmjs.org/constructs/-/constructs-10.1.300.tgz
-[84]: https://github.com/aws/constructs
-[85]: https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz
-[86]: https://github.com/evanw/node-source-map-support
-[87]: https://registry.npmjs.org/@exasol/extension-parameter-validator/-/extension-parameter-validator-0.2.0.tgz
+[80]: http://www.slf4j.org
+[81]: https://maven.apache.org/surefire/maven-failsafe-plugin/
+[82]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.72.1.tgz
+[83]: https://github.com/aws/aws-cdk
+[84]: https://registry.npmjs.org/constructs/-/constructs-10.1.300.tgz
+[85]: https://github.com/aws/constructs
+[86]: https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz
+[87]: https://github.com/evanw/node-source-map-support
+[88]: https://registry.npmjs.org/@exasol/extension-parameter-validator/-/extension-parameter-validator-0.2.0.tgz
