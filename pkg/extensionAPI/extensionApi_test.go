@@ -20,6 +20,7 @@ func TestExtensionApiSuite(t *testing.T) {
 }
 
 func (suite *ExtensionApiSuite) SetupSuite() {
+	// Nothing to do
 }
 
 func (suite *ExtensionApiSuite) SetupTest() {
@@ -31,7 +32,7 @@ func (suite *ExtensionApiSuite) TearDownTest() {
 }
 
 /* [utest -> dsn~extension-definition~1] */
-func (suite *ExtensionApiSuite) Test_LoadExtension() {
+func (suite *ExtensionApiSuite) TestLoadExtension() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).Build().AsString()
 	extension := suite.loadExtension(extensionContent)
 	suite.Equal("MyDemoExtension", extension.Name)
@@ -50,7 +51,7 @@ func (mock *sqlClientMock) Query(query string, args ...any) backend.QueryResult 
 	return mockArgs.Get(0).(backend.QueryResult)
 }
 
-func (suite *ExtensionApiSuite) Test_GetParameterDefinitions_EmptyResult() {
+func (suite *ExtensionApiSuite) TestGetParameterDefinitionsEmptyResult() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithGetInstanceParameterDefinitionFunc(`return []`).
 		Build().AsString()
@@ -60,7 +61,7 @@ func (suite *ExtensionApiSuite) Test_GetParameterDefinitions_EmptyResult() {
 }
 
 /* [utest -> dsn~configuration-parameters~1] */
-func (suite *ExtensionApiSuite) Test_GetParameterDefinitions() {
+func (suite *ExtensionApiSuite) TestGetParameterDefinitions() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string"}]`).
 		Build().AsString()
@@ -69,7 +70,7 @@ func (suite *ExtensionApiSuite) Test_GetParameterDefinitions() {
 	suite.Equal([]interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}, definitions)
 }
 
-func (suite *ExtensionApiSuite) Test_Install() {
+func (suite *ExtensionApiSuite) TestInstall() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).Build().AsString()
 	extension := suite.loadExtension(extensionContent)
 	suite.mockSQLClient.On("Execute", "select 1", []any{}).Return()
@@ -77,7 +78,7 @@ func (suite *ExtensionApiSuite) Test_Install() {
 	suite.NoError(err)
 }
 
-func (suite *ExtensionApiSuite) Test_Install_ResolveBucketFsPath() {
+func (suite *ExtensionApiSuite) TestInstallResolveBucketFsPath() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithInstallFunc("context.sqlClient.execute(`create script path ${context.bucketFs.resolvePath('my-adapter-'+version+'.jar')}`)").
 		Build().AsString()
@@ -87,7 +88,7 @@ func (suite *ExtensionApiSuite) Test_Install_ResolveBucketFsPath() {
 	suite.NoError(err)
 }
 
-func (suite *ExtensionApiSuite) Test_Install_ConsoleLog() {
+func (suite *ExtensionApiSuite) TestInstallConsoleLog() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithInstallFunc("console.log('test log message')").
 		Build().AsString()
@@ -96,7 +97,7 @@ func (suite *ExtensionApiSuite) Test_Install_ConsoleLog() {
 	suite.NoError(err)
 }
 
-func (suite *ExtensionApiSuite) Test_Uninstall() {
+func (suite *ExtensionApiSuite) TestUninstall() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUninstallFunc("context.sqlClient.execute(`uninstall version ${version}`)").
 		Build().AsString()
@@ -106,7 +107,7 @@ func (suite *ExtensionApiSuite) Test_Uninstall() {
 	suite.NoError(err)
 }
 
-func (suite *ExtensionApiSuite) Test_AddInstance_validParameters() {
+func (suite *ExtensionApiSuite) TestAddInstanceValidParameters() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithAddInstanceFunc("context.sqlClient.execute('create vs');\n" +
 			"return {id: 'instId', name: `instance_${version}_${params.values[0].name}_${params.values[0].value}`};").
@@ -118,7 +119,7 @@ func (suite *ExtensionApiSuite) Test_AddInstance_validParameters() {
 	suite.Equal(&JsExtInstance{Id: "instId", Name: "instance_extensionVersion_p1_v1"}, instance)
 }
 
-func (suite *ExtensionApiSuite) Test_ListInstances_EmptyResult() {
+func (suite *ExtensionApiSuite) TestListInstancesEmptyResult() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		Build().AsString()
 	extension := suite.loadExtension(extensionContent)
@@ -127,7 +128,7 @@ func (suite *ExtensionApiSuite) Test_ListInstances_EmptyResult() {
 	suite.Empty(instances)
 }
 
-func (suite *ExtensionApiSuite) Test_ListInstances_NonEmptyResult() {
+func (suite *ExtensionApiSuite) TestListInstancesNonEmptyResult() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstancesFunc(`return [{id: "instId", name: "instName"}]`).
 		Build().AsString()
@@ -137,7 +138,7 @@ func (suite *ExtensionApiSuite) Test_ListInstances_NonEmptyResult() {
 	suite.Equal([]*JsExtInstance{{Id: "instId", Name: "instName"}}, instances)
 }
 
-func (suite *ExtensionApiSuite) Test_DeleteInstance() {
+func (suite *ExtensionApiSuite) TestDeleteInstance() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithDeleteInstanceFunc("context.sqlClient.execute(`drop instance ${instanceId}`)").
 		Build().AsString()
@@ -152,7 +153,7 @@ func createMockMetadata() *ExaMetadata {
 	return &ExaMetadata{AllScripts: exaAllScripts}
 }
 
-func (suite *ExtensionApiSuite) Test_FindInstallationsCanReadAllScriptsTable() {
+func (suite *ExtensionApiSuite) TestFindInstallationsCanReadAllScriptsTable() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(`
 		return metadata.allScripts.rows.map(row => {
@@ -164,7 +165,7 @@ func (suite *ExtensionApiSuite) Test_FindInstallationsCanReadAllScriptsTable() {
 	suite.NoError(err)
 }
 
-func (suite *ExtensionApiSuite) Test_FindInstallationsReturningParameters() {
+func (suite *ExtensionApiSuite) TestFindInstallationsReturningParameters() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.
 			MockFindInstallationsFunction("test", "0.1.0")).Build().AsString()
@@ -174,7 +175,7 @@ func (suite *ExtensionApiSuite) Test_FindInstallationsReturningParameters() {
 	suite.NoError(err)
 }
 
-func (suite *ExtensionApiSuite) Test_LoadExtension_withOutdatedApiVersion() {
+func (suite *ExtensionApiSuite) TestLoadExtensionWithOutdatedApiVersion() {
 	extensionContent := `
 	(function(){
 		global.installedExtension = {
@@ -187,13 +188,13 @@ func (suite *ExtensionApiSuite) Test_LoadExtension_withOutdatedApiVersion() {
 	suite.Nil(extension)
 }
 
-func (suite *ExtensionApiSuite) Test_LoadExtension_withoutSettingGlobalVariable() {
+func (suite *ExtensionApiSuite) TestLoadExtensionWithoutSettingGlobalVariable() {
 	extension, err := LoadExtension("ext-id", `(function(){ })()`)
 	suite.EqualError(err, `extension "ext-id" did not set global.installedExtension`)
 	suite.Nil(extension)
 }
 
-func (suite *ExtensionApiSuite) Test_LoadExtension_invalidJavaScript() {
+func (suite *ExtensionApiSuite) TestLoadExtensionInvalidJavaScript() {
 	extension, err := LoadExtension("ext-id", `invalid javascript`)
 	suite.ErrorContains(err, `failed to run extension "ext-id"`)
 	suite.ErrorContains(err, "SyntaxError")
