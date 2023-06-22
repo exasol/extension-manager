@@ -26,17 +26,25 @@ Code name:
 
 #### Compile Dependency Updates
 
-* Updated `io.swagger.core.v3:swagger-annotations:2.2.8` to `2.2.9`
+* Updated `com.fasterxml.jackson.core:jackson-annotations:2.14.2` to `2.15.2`
+* Updated `com.fasterxml.jackson.core:jackson-core:2.14.2` to `2.15.2`
+* Updated `com.fasterxml.jackson.core:jackson-databind:2.14.2` to `2.15.2`
+* Updated `io.swagger.core.v3:swagger-annotations:2.2.8` to `2.2.12`
+* Updated `org.glassfish.jersey.core:jersey-client:2.38` to `2.39.1`
+* Updated `org.glassfish.jersey.inject:jersey-hk2:2.38` to `2.39.1`
+* Updated `org.glassfish.jersey.media:jersey-media-json-jackson:2.38` to `2.39.1`
+* Updated `org.glassfish.jersey.media:jersey-media-multipart:2.38` to `2.39.1`
 
 #### Test Dependency Updates
 
-* Updated `nl.jqno.equalsverifier:equalsverifier:3.13.1` to `3.14.1`
+* Updated `nl.jqno.equalsverifier:equalsverifier:3.13.1` to `3.14.2`
+* Updated `org.junit.jupiter:junit-jupiter-api:5.9.2` to `5.9.3`
 
 #### Plugin Dependency Updates
 
 * Updated `com.exasol:error-code-crawler-maven-plugin:1.2.2` to `1.2.3`
 * Updated `com.exasol:project-keeper-maven-plugin:2.9.3` to `2.9.7`
-* Updated `io.swagger.codegen.v3:swagger-codegen-maven-plugin:3.0.39` to `3.0.41`
+* Updated `io.swagger.codegen.v3:swagger-codegen-maven-plugin:3.0.39` to `3.0.46`
 * Updated `org.apache.maven.plugins:maven-compiler-plugin:3.10.1` to `3.11.0`
 * Updated `org.apache.maven.plugins:maven-deploy-plugin:3.0.0` to `3.1.1`
 * Updated `org.apache.maven.plugins:maven-enforcer-plugin:3.1.0` to `3.3.0`
@@ -51,12 +59,16 @@ Code name:
 
 #### Compile Dependency Updates
 
-* Updated `com.exasol:extension-manager-client-java:0.2.2` to `0.2.3`
-* Updated `com.exasol:hamcrest-resultset-matcher:1.5.2` to `1.5.3`
+* Updated `com.exasol:exasol-test-setup-abstraction-java:2.0.0` to `2.0.1`
+* Removed `com.exasol:exasol-testcontainers:6.5.1`
+* Updated `com.exasol:extension-manager-client-java:0.2.2` to `0.3.0`
+* Updated `com.exasol:hamcrest-resultset-matcher:1.5.2` to `1.6.0`
+* Updated `org.junit.jupiter:junit-jupiter-api:5.9.2` to `5.9.3`
 
 #### Test Dependency Updates
 
-* Updated `org.mockito:mockito-junit-jupiter:5.1.1` to `5.2.0`
+* Updated `org.junit.jupiter:junit-jupiter-params:5.9.2` to `5.9.3`
+* Updated `org.mockito:mockito-junit-jupiter:5.1.1` to `5.4.0`
 
 #### Plugin Dependency Updates
 

@@ -13,9 +13,9 @@
         <!-- ProjectKeeper already included in root project -->
         <project-keeper.skip>true</project-keeper.skip>
         <!-- Generated code dependencies -->
-        <swagger-core-version>2.2.9</swagger-core-version>
-        <jersey-version>2.38</jersey-version>
-        <jackson-version>2.14.2</jackson-version>
+        <swagger-core-version>2.2.12</swagger-core-version>
+        <jersey-version>2.39.1</jersey-version>
+        <jackson-version>2.15.2</jackson-version>
     </properties>
     <distributionManagement>
         <snapshotRepository>
@@ -80,13 +80,13 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.9.2</version>
+            <version>5.9.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>3.14.1</version>
+            <version>3.14.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -127,7 +127,7 @@
             <plugin>
                 <groupId>io.swagger.codegen.v3</groupId>
                 <artifactId>swagger-codegen-maven-plugin</artifactId>
-                <version>3.0.41</version>
+                <version>3.0.46</version>
                 <executions>
                     <execution>
                         <goals>
