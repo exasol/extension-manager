@@ -31,3 +31,4 @@ linkReplacements:
   - "https://github.com/swagger-api/swagger-core/modules/swagger-annotations|https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-annotations"
   - "jquery.org/license|https://jquery.org/license/"
   - "https://github.com/swagger-api/swagger-codegen/modules/swagger-codegen-maven-plugin|https://github.com/swagger-api/swagger-codegen/tree/master/modules/swagger-codegen-maven-plugin"
+  - "https://netty.io/netty-handler/|https://netty.io"

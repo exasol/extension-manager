@@ -215,7 +215,7 @@
 [67]: https://github.com/exasol/extension-manager/blob/main/LICENSE
 [68]: https://github.com/exasol/exasol-test-setup-abstraction-java/
 [69]: https://github.com/exasol/exasol-test-setup-abstraction-java/blob/main/LICENSE
-[70]: https://netty.io/netty-handler/
+[70]: https://netty.io
 [71]: https://www.apache.org/licenses/LICENSE-2.0
 [72]: https://github.com/exasol/test-db-builder-java/
 [73]: https://github.com/exasol/test-db-builder-java/blob/main/LICENSE
