@@ -24,6 +24,12 @@
             <version>2.0.1</version>
         </dependency>
         <dependency>
+            <!-- Upgrade transitive dependency to fix CVE-2023-34462 CWE-94: Improper Control of Generation of Code -->
+            <groupId>io.netty</groupId>
+            <artifactId>netty-handler</artifactId>
+            <version>4.1.94.Final</version>
+        </dependency>
+        <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>test-db-builder-java</artifactId>
             <version>3.4.2</version>

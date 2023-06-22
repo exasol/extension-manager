@@ -63,6 +63,7 @@ Code name:
 * Removed `com.exasol:exasol-testcontainers:6.5.1`
 * Updated `com.exasol:extension-manager-client-java:0.2.2` to `0.3.0`
 * Updated `com.exasol:hamcrest-resultset-matcher:1.5.2` to `1.6.0`
+* Added `io.netty:netty-handler:4.1.94.Final`
 * Updated `org.junit.jupiter:junit-jupiter-api:5.9.2` to `5.9.3`
 
 #### Test Dependency Updates
