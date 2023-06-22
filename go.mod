@@ -6,6 +6,7 @@ require (
 	github.com/dop251/goja v0.0.0-20230621100801-7749907a8a20
 	github.com/dop251/goja_nodejs v0.0.0-20230602164024-804a84515562
 	github.com/stretchr/testify v1.8.4
+	golang.org/x/mod v0.11.0
 )
 
 require (

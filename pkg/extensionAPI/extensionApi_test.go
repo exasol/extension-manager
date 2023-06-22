@@ -176,6 +176,7 @@ func (suite *ExtensionApiSuite) TestFindInstallationsReturningParameters() {
 	suite.NoError(err)
 }
 
+/* [itest -> dsn~extension-compatibility~1] */
 func (suite *ExtensionApiSuite) TestLoadExtensionWithCompatibleApiVersion() {
 	extensionContent := minimalExtension("0.1.15")
 	extension, err := LoadExtension("ext-id", extensionContent)
@@ -183,10 +184,18 @@ func (suite *ExtensionApiSuite) TestLoadExtensionWithCompatibleApiVersion() {
 	suite.NotNil(extension)
 }
 
+/* [itest -> dsn~extension-compatibility~1] */
 func (suite *ExtensionApiSuite) TestLoadExtensionWithIncompatibleApiVersion() {
 	extensionContent := minimalExtension("99.0.0")
 	extension, err := LoadExtension("ext-id", extensionContent)
-	suite.ErrorContains(err, `incompatible extension API version "99.0.0". Please update the extension to use supported version "`+SupportedApiVersion+`"`)
+	suite.ErrorContains(err, `extension "ext-id" uses incompatible API version "99.0.0". Please update the extension to use supported version "`+supportedApiVersion+`"`)
+	suite.Nil(extension)
+}
+
+func (suite *ExtensionApiSuite) TestLoadExtensionWithInvalidApiVersion() {
+	extensionContent := minimalExtension("invalid")
+	extension, err := LoadExtension("ext-id", extensionContent)
+	suite.ErrorContains(err, `extension "ext-id" uses invalid API version number "invalid"`)
 	suite.Nil(extension)
 }
 
