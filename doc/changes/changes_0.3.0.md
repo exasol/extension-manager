@@ -22,6 +22,10 @@ Code name:
 * Updated `github.com/swaggo/http-swagger:v1.3.3` to `v1.3.4`
 * Updated `github.com/exasol/exasol-driver-go:v0.4.6` to `v1.0.0`
 
+#### Test Dependency Updates
+
+* Added `golang.org/x/mod:v0.11.0`
+
 ### Extension Manager Java Client
 
 #### Compile Dependency Updates
