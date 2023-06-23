@@ -236,7 +236,7 @@ var isNpmInstallCalledForVersion = make(map[string]bool)
 
 func (b TestExtensionBuilder) runNpmInstall(workDir string) {
 	if isNpmInstallCalledForVersion[b.extensionApiVersion] {
-		// running it once is enough
+		// running "npm install" once for each version is enough
 		return
 	}
 	b.testing.Logf("Running npm install in %s", workDir)
@@ -245,8 +245,9 @@ func (b TestExtensionBuilder) runNpmInstall(workDir string) {
 	output, err := installCommand.CombinedOutput()
 	if err != nil {
 		log.Fatalf("Failed to run 'npm install' in dir %v. Cause: %v, Output:\n%s", workDir, err, output)
+	} else {
+		isNpmInstallCalledForVersion[b.extensionApiVersion] = true
 	}
-	isNpmInstallCalledForVersion[b.extensionApiVersion] = true
 }
 
 func (TestExtensionBuilder) runNpmBuild(workDir string) {
