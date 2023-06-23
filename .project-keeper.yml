@@ -32,3 +32,5 @@ linkReplacements:
   - "jquery.org/license|https://jquery.org/license/"
   - "https://github.com/swagger-api/swagger-codegen/modules/swagger-codegen-maven-plugin|https://github.com/swagger-api/swagger-codegen/tree/master/modules/swagger-codegen-maven-plugin"
   - "https://netty.io/netty-handler/|https://netty.io"
+excludes:
+  - "E-PK-CORE-18: Outdated content: '.github/workflows/broken_links_checker.yml'"
