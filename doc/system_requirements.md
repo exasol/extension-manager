@@ -112,6 +112,20 @@ Covers:
 
 Needs: dsn
 
+#### Extension Compatibility
+`req~extension-compatibility~1`
+
+EM only loads extensions that use a compatible version of the extension API. Versions are considered compatible when they have the same major version.
+
+Rationale:
+
+Requiring the exact extension API version is not feasible as updating all extensions before updating the API version in EM is too much effort. That's why EM must support loading extensions that use an older but compatible API version.
+
+Covers:
+* [`feat~developing-extensions~1`](#developing-extensions)
+
+Needs: dsn
+
 #### Extensions
 `req~extension~1`
 

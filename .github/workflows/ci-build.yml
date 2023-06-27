@@ -62,6 +62,10 @@ jobs:
         run: |
           go get -t ./...
 
+      - name: Revert go.sum modification by previous "go get"
+        run: |
+          go mod tidy
+
       - name: Check generated code
         run: |
           go generate ./...

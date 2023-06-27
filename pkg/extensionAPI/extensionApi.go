@@ -11,8 +11,6 @@ import (
 	"github.com/dop251/goja_nodejs/require"
 )
 
-const SupportedApiVersion = "0.1.15"
-
 // LoadExtension loads an extension from the given file content.
 /* [impl -> dsn~extension-definition~1] */
 func LoadExtension(id, content string) (*JsExtension, error) {
@@ -22,11 +20,12 @@ func LoadExtension(id, content string) (*JsExtension, error) {
 	if err != nil {
 		return nil, err
 	}
-	if extensionJs.APIVersion != SupportedApiVersion {
-		return nil, fmt.Errorf("incompatible extension API version %q. Please update the extension to use supported version %q", extensionJs.APIVersion, SupportedApiVersion)
+	err = validateExtensionIsCompatibleWithApiVersion(id, extensionJs.APIVersion)
+	if err != nil {
+		return nil, err
 	}
 	wrappedExtension := wrapExtension(&extensionJs.Extension, id, vm)
-	log.Debugf("Extension %q with id %q loaded", wrappedExtension.Name, wrappedExtension.Id)
+	log.Debugf("Extension %q with id %q using API version %q loaded successfully", wrappedExtension.Name, wrappedExtension.Id, extensionJs.APIVersion)
 	return wrappedExtension, nil
 }
 
@@ -118,7 +117,8 @@ type ParameterValues struct {
 	Values []ParameterValue `json:"values"`
 }
 
-// Find returns the parameter with the given ID or nil in case none exists.
+// Find returns the parameter with the given ID and true if the parameter exists
+// or an empty parameter and false in case none exists.
 func (pv ParameterValues) Find(id string) (value ParameterValue, found bool) {
 	for _, v := range pv.Values {
 		if v.Name == id {

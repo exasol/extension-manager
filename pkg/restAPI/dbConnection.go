@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/exasol/exasol-driver-go"
+	"github.com/exasol/exasol-driver-go/pkg/dsn"
 	"github.com/exasol/extension-manager/pkg/apiErrors"
 )
 
@@ -42,7 +43,7 @@ func opendbRequest(request *http.Request) (*sql.DB, error) {
 	return database, nil
 }
 
-func createDbConfig(request *http.Request) (*exasol.DSNConfigBuilder, error) {
+func createDbConfig(request *http.Request) (*dsn.DSNConfigBuilder, error) {
 	query := request.URL.Query()
 	config, err := createDbConfigWithAuthentication(request)
 	if err != nil {
@@ -67,7 +68,7 @@ func createDbConfig(request *http.Request) (*exasol.DSNConfigBuilder, error) {
 	return config, nil
 }
 
-func createDbConfigWithAuthentication(request *http.Request) (*exasol.DSNConfigBuilder, error) {
+func createDbConfigWithAuthentication(request *http.Request) (*dsn.DSNConfigBuilder, error) {
 	auth := request.Header.Get("Authorization")
 	if auth == "" {
 		return nil, apiErrors.NewUnauthorizedErrorF("missing Authorization header")
@@ -87,7 +88,7 @@ func createDbConfigWithAuthentication(request *http.Request) (*exasol.DSNConfigB
 	}
 }
 
-func newUserPasswordConfig(basicAuthCredentials string) (*exasol.DSNConfigBuilder, error) {
+func newUserPasswordConfig(basicAuthCredentials string) (*dsn.DSNConfigBuilder, error) {
 	user, password, err := extractUserPassword(basicAuthCredentials)
 	if err != nil {
 		return nil, err

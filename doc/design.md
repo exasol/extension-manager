@@ -195,6 +195,16 @@ Covers:
 
 Needs: impl, itest
 
+#### Extension Compatibility
+`dsn~extension-compatibility~1`
+
+EM verifies that a loaded extension uses an extension API versions with the same major version as EM.
+
+Covers:
+* [`req~extension-compatibility~1`](system_requirements.md#extension-compatibility)
+
+Needs: impl, utest, itest
+
 #### Versioning
 `dsn~versioning~1`
 
