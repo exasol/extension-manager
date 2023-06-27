@@ -1,8 +1,10 @@
-# Extension Manager 0.3.0, released 2023-??-??
+# Extension Manager 0.3.0, released 2023-06-27
 
 Code name: API Compatibility Handling
 
 ## Summary
+
+This release allows loading extensions that use a compatible Extension API version. Before, the versions had to match exactly. Now the same major version number suffices.
 
 ## Features
 
