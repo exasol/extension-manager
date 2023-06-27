@@ -20,7 +20,7 @@ func LoadExtension(id, content string) (*JsExtension, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = checkCompatibleVersion(id, extensionJs.APIVersion)
+	err = validateExtensionIsCompatibleWithApiVersion(id, extensionJs.APIVersion)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,8 @@ type ParameterValues struct {
 	Values []ParameterValue `json:"values"`
 }
 
-// Find returns the parameter with the given ID or nil in case none exists.
+// Find returns the parameter with the given ID and true if the parameter exists
+// or an empty parameter and false in case none exists.
 func (pv ParameterValues) Find(id string) (value ParameterValue, found bool) {
 	for _, v := range pv.Values {
 		if v.Name == id {

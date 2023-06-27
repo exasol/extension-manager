@@ -1,6 +1,6 @@
 # Extension Manager 0.3.0, released 2023-??-??
 
-Code name:
+Code name: API Compatibility Handling
 
 ## Summary
 

@@ -9,7 +9,7 @@ import (
 const supportedApiVersion = "0.1.16"
 
 /* [impl -> dsn~extension-compatibility~1] */
-func checkCompatibleVersion(extensionId, currentExtensionApiVersion string) error {
+func validateExtensionIsCompatibleWithApiVersion(extensionId, currentExtensionApiVersion string) error {
 	prefixedVersion := "v" + currentExtensionApiVersion
 	if !semver.IsValid(prefixedVersion) {
 		return fmt.Errorf("extension %q uses invalid API version number %q", extensionId, currentExtensionApiVersion)
