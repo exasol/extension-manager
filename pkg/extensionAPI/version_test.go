@@ -1,6 +1,7 @@
 package extensionAPI
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -37,5 +38,5 @@ func TestCompatibleSameVersion(t *testing.T) {
 func TestIncompatibleOlderVersion(t *testing.T) {
 	a := assert.New(t)
 	err := validateExtensionIsCompatibleWithApiVersion("id", "99.0.0")
-	a.EqualError(err, `extension "id" uses incompatible API version "99.0.0". Please update the extension to use supported version "0.1.16"`)
+	a.EqualError(err, fmt.Sprintf(`extension "id" uses incompatible API version "99.0.0". Please update the extension to use supported version "%s"`, supportedApiVersion)
 }

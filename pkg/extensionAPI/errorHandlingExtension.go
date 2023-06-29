@@ -12,6 +12,7 @@ type JsExtension struct {
 	vm                  *goja.Runtime
 	Id                  string
 	Name                string
+	Category            string
 	Description         string
 	InstallableVersions []JsExtensionVersion
 	BucketFsUploads     []BucketFsUpload
@@ -29,6 +30,7 @@ func wrapExtension(ext *rawJsExtension, id string, vm *goja.Runtime) *JsExtensio
 		Id:                  id,
 		vm:                  vm,
 		Name:                ext.Name,
+		Category:            ext.Category,
 		Description:         ext.Description,
 		InstallableVersions: convertVersions(ext.InstallableVersions),
 		BucketFsUploads:     ext.BucketFsUploads,

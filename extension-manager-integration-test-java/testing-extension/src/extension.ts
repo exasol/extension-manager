@@ -10,6 +10,7 @@ import {
 export function createExtension(): ExasolExtension {
     return {
         name: "Testing Extension",
+        category: "testing",
         description: "Extension for testing EM integration test setup",
         installableVersions: [{ name: "0.0.0", latest: true, deprecated: false }],
         bucketFsUploads: [],

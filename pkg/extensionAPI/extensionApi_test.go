@@ -37,6 +37,7 @@ func (suite *ExtensionApiSuite) TestLoadExtension() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).Build().AsString()
 	extension := suite.loadExtension(extensionContent)
 	suite.Equal("MyDemoExtension", extension.Name)
+	suite.Equal("Demo category", extension.Category)
 }
 
 type sqlClientMock struct {
