@@ -68,11 +68,19 @@ func (c *controllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, err
 	var extensions []*Extension
 	for _, jsExtension := range jsExtensions {
 		if c.requiredFilesAvailable(jsExtension, bfsFiles) {
-			extension := Extension{Id: jsExtension.Id, Name: jsExtension.Name, Description: jsExtension.Description, InstallableVersions: jsExtension.InstallableVersions}
-			extensions = append(extensions, &extension)
+			extensions = append(extensions, convertExtension(jsExtension))
 		}
 	}
 	return extensions, nil
+}
+
+func convertExtension(jsExtension *extensionAPI.JsExtension) *Extension {
+	return &Extension{
+		Id:                  jsExtension.Id,
+		Name:                jsExtension.Name,
+		Category:            jsExtension.Category,
+		Description:         jsExtension.Description,
+		InstallableVersions: jsExtension.InstallableVersions}
 }
 
 func (c *controllerImpl) requiredFilesAvailable(extension *extensionAPI.JsExtension, bfsFiles []BfsFile) bool {

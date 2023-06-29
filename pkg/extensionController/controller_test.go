@@ -72,7 +72,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensions() {
 	suite.bucketFsMock.simulateFiles([]BfsFile{{Name: "my-extension.1.2.3.jar", Size: 3}})
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
 	suite.NoError(err)
-	suite.Equal([]*Extension{{Name: "MyDemoExtension", Id: "testing-extension.js", Description: "An extension for testing.",
+	suite.Equal([]*Extension{{Name: "MyDemoExtension", Id: "testing-extension.js", Category: "Demo category", Description: "An extension for testing.",
 		InstallableVersions: []extensionAPI.JsExtensionVersion{{Name: "0.1.0", Latest: true, Deprecated: false}}}}, extensions)
 }
 

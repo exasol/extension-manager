@@ -50,12 +50,18 @@ func handleListAvailableExtensions(apiContext *ApiContext) dbHandler {
 func convertResponse(extensions []*extensionController.Extension) ExtensionsResponse {
 	convertedExtensions := make([]ExtensionsResponseExtension, 0, len(extensions))
 	for _, extension := range extensions {
-		ext := ExtensionsResponseExtension{Id: extension.Id, Name: extension.Name, Description: extension.Description, InstallableVersions: convertVersions(extension.InstallableVersions)}
-		convertedExtensions = append(convertedExtensions, ext)
+		convertedExtensions = append(convertedExtensions, convertExtension(extension))
 	}
-	return ExtensionsResponse{
-		Extensions: convertedExtensions,
-	}
+	return ExtensionsResponse{Extensions: convertedExtensions}
+}
+
+func convertExtension(extension *extensionController.Extension) ExtensionsResponseExtension {
+	return ExtensionsResponseExtension{
+		Id:                  extension.Id,
+		Name:                extension.Name,
+		Category:            extension.Category,
+		Description:         extension.Description,
+		InstallableVersions: convertVersions(extension.InstallableVersions)}
 }
 
 func convertVersions(versions []extensionAPI.JsExtensionVersion) []ExtensionVersion {
@@ -75,6 +81,7 @@ type ExtensionsResponse struct {
 type ExtensionsResponseExtension struct {
 	Id                  string             `json:"id"`                  // ID of the extension. Don't store this as it may change when restarting the server.
 	Name                string             `json:"name"`                // The name of the extension to be displayed to the user.
+	Category            string             `json:"category"`            // The category of the extension, e.g. "driver" or "virtual-schema".
 	Description         string             `json:"description"`         // The description of the extension to be displayed to the user.
 	InstallableVersions []ExtensionVersion `json:"installableVersions"` // A list of versions of this extension available for installation.
 }
