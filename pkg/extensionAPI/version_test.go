@@ -38,5 +38,5 @@ func TestCompatibleSameVersion(t *testing.T) {
 func TestIncompatibleOlderVersion(t *testing.T) {
 	a := assert.New(t)
 	err := validateExtensionIsCompatibleWithApiVersion("id", "99.0.0")
-	a.EqualError(err, fmt.Sprintf(`extension "id" uses incompatible API version "99.0.0". Please update the extension to use supported version "%s"`, supportedApiVersion)
+	a.EqualError(err, fmt.Sprintf(`extension "id" uses incompatible API version "99.0.0". Please update the extension to use supported version "%s"`, supportedApiVersion))
 }
