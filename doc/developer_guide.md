@@ -125,7 +125,10 @@ sonar-scanner -Dsonar.organization=exasol -Dsonar.host.url=https://sonarcloud.io
 
 ## Using a Local Extension Interface
 
-To use a local, non-published version of the extension interface in integration tests, edit [pkg/integrationTesting/extensionForTesting/package.json](./../pkg/integrationTesting/extensionForTesting/package.json) and replace the version of `"@exasol/extension-manager-interface"` with the path to your local clone of [extension-manager-interface](https://github.com/exasol/extension-manager-interface).
+To use a local, non-published version of the extension interface in integration tests follow these steps:
+
+1. Build `extension-manager-interface` by running `npm run build`. This is required after each change.
+1. Edit [pkg/integrationTesting/extensionForTesting/package.json](./../pkg/integrationTesting/extensionForTesting/package.json) and replace the version of `"@exasol/extension-manager-interface"` with the path to your local clone of [extension-manager-interface](https://github.com/exasol/extension-manager-interface).
 
 Make sure to not commit the modified `package.json`.
 
