@@ -12,6 +12,13 @@ This release adds a field for a category to the extension. This allows extension
 
 ## Dependency Updates
 
+### Extension-manager
+
+#### Compile Dependency Updates
+
+* Updated `github.com/dop251/goja:v0.0.0-20230621100801-7749907a8a20` to `v0.0.0-20230626124041-ba8a63e79201`
+* Updated `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.3.2` to `v0.3.3`
+
 ### Extension Integration Tests Library
 
 #### Compile Dependency Updates

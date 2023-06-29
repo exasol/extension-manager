@@ -3,7 +3,7 @@ module github.com/exasol/extension-manager
 go 1.19
 
 require (
-	github.com/dop251/goja v0.0.0-20230621100801-7749907a8a20
+	github.com/dop251/goja v0.0.0-20230626124041-ba8a63e79201
 	github.com/dop251/goja_nodejs v0.0.0-20230602164024-804a84515562
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/mod v0.11.0
@@ -12,7 +12,7 @@ require (
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/exasol/exasol-driver-go v1.0.0
-	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.2
+	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.3
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/kinbiko/jsonassert v1.1.1
 	github.com/swaggo/http-swagger v1.3.4
