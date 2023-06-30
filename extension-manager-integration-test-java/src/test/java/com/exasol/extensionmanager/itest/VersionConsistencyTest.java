@@ -20,11 +20,14 @@ class VersionConsistencyTest {
 
     private String versionFromProjectKeeperConfig() throws IOException {
         final Path projectKeeperConfig = Path.of("../.project-keeper.yml").toAbsolutePath();
+        final String linePrefix = "version: ";
         return Files.readAllLines(projectKeeperConfig).stream() //
-                .filter(line -> line.startsWith("version: ")) //
-                .map(line -> line.replace("version: ", "")) //
-                .map(String::trim).findFirst()
-                .orElseThrow(() -> new AssertionError("Did not find 'version: ' entry in file " + projectKeeperConfig));
+                .filter(line -> line.startsWith(linePrefix)) //
+                .map(line -> line.replace(linePrefix, "")) //
+                .map(String::trim) //
+                .findFirst() //
+                .orElseThrow(() -> new AssertionError(
+                        "Did not find '" + linePrefix + "' entry in file " + projectKeeperConfig));
     }
 
     private String versionFromPom() {
