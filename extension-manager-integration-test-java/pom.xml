@@ -70,6 +70,12 @@
             <version>0.6.8</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.exasol</groupId>
+            <artifactId>maven-project-version-getter</artifactId>
+            <version>1.2.0</version>
+            <scope>test</scope>
+        </dependency>
         <!-- Enable logging in integration tests -->
         <dependency>
             <groupId>org.slf4j</groupId>

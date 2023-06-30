@@ -38,6 +38,14 @@ The release also updates the integration test framework to use the current versi
 
 * Updated `com.exasol:extension-manager-client-java:0.3.0` to `0.4.0`
 
+#### Test Dependency Updates
+
+* Added `com.exasol:maven-project-version-getter:1.2.0`
+
+#### Plugin Dependency Updates
+
+* Updated `org.apache.maven.plugins:maven-jar-plugin:2.4` to `3.3.0`
+
 ### Registry
 
 #### Compile Dependency Updates
