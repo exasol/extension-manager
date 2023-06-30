@@ -13,7 +13,7 @@
         <!-- ProjectKeeper already included in root project -->
         <project-keeper.skip>true</project-keeper.skip>
         <!-- Generated code dependencies -->
-        <swagger-core-version>2.2.12</swagger-core-version>
+        <swagger-core-version>2.2.14</swagger-core-version>
         <jersey-version>2.39.1</jersey-version>
         <jackson-version>2.15.2</jackson-version>
     </properties>
@@ -86,7 +86,7 @@
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>3.14.2</version>
+            <version>3.14.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
