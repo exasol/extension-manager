@@ -15,11 +15,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const DefaultExtensionApiVersion = "0.1.16"
+const defaultExtensionApiVersion = "0.2.0"
 
 func CreateTestExtensionBuilder(t *testing.T) *TestExtensionBuilder {
 	builder := TestExtensionBuilder{testing: t}
-	builder.extensionApiVersion = DefaultExtensionApiVersion
+	builder.extensionApiVersion = defaultExtensionApiVersion
 	builder.findInstallationsFunc = "return []"
 	builder.installFunc = "context.sqlClient.execute('select 1')"
 	builder.uninstallFunc = ""

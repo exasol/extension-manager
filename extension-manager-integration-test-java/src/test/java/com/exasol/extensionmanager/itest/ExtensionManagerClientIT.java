@@ -51,7 +51,8 @@ class ExtensionManagerClientIT {
     @Test
     void listExtensions() {
         final ExtensionsResponseExtension expected = new ExtensionsResponseExtension().id("testing-extension.js")
-                .name("Testing Extension").description("Extension for testing EM integration test setup")
+                .name("Testing Extension").category("testing")
+                .description("Extension for testing EM integration test setup")
                 .addInstallableVersionsItem(new ExtensionVersion().name("0.0.0").latest(true).deprecated(false));
         assertThat(client.getExtensions(), contains(expected));
     }

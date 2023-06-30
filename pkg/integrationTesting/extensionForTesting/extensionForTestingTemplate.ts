@@ -9,7 +9,8 @@ function createExtension(): ExasolExtension {
     return {
         name: "MyDemoExtension",
         description: "An extension for testing.",
-        installableVersions: [{name:"0.1.0", latest:true, deprecated:false}],
+        category: "Demo category",
+        installableVersions: [{ name: "0.1.0", latest: true, deprecated: false }],
         bucketFsUploads: $UPLOADS$,
         install(context: Context, version: string) {
             $INSTALL_EXTENSION$
@@ -38,11 +39,11 @@ function createExtension(): ExasolExtension {
     }
 }
 
-if(false) {
+if (false) {
     // dummy to keep import
     throw new BadRequestError("dummy");
 }
-if(false) {
+if (false) {
     // dummy to keep import
     throw new InternalServerError("dummy");
 }

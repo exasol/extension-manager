@@ -24,7 +24,7 @@ sources:
     path: registry/package.json
   - type: npm
     path: pkg/parameterValidator/package.json
-version: 0.3.0
+version: 0.4.0
 linkReplacements:
   - "https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.2.3/go-client/LICENSE|https://github.com/exasol/exasol-test-setup-abstraction-server/blob/main/LICENSE"
   - "Unknown|https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE"

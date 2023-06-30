@@ -147,10 +147,10 @@
 | [@exasol/extension-parameter-validator][89] | MIT     |
 
 [0]: https://github.com/Nightapes/go-rest/blob/v0.3.3/LICENSE
-[1]: https://github.com/dop251/goja/blob/7749907a8a20/LICENSE
+[1]: https://github.com/dop251/goja/blob/ba8a63e79201/LICENSE
 [2]: https://github.com/dop251/goja_nodejs/blob/804a84515562/LICENSE
 [3]: https://github.com/exasol/exasol-driver-go/blob/v1.0.0/LICENSE
-[4]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.3.2/go-client/LICENSE
+[4]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.3.3/go-client/LICENSE
 [5]: https://github.com/go-chi/chi/blob/v5.0.8/LICENSE
 [6]: https://github.com/sirupsen/logrus/blob/v1.9.3/LICENSE
 [7]: https://github.com/stretchr/testify/blob/v1.8.4/LICENSE
@@ -229,9 +229,9 @@
 [80]: https://github.com/exasol/udf-debugging-java/blob/main/LICENSE
 [81]: http://www.slf4j.org
 [82]: https://maven.apache.org/surefire/maven-failsafe-plugin/
-[83]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.72.1.tgz
+[83]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.86.0.tgz
 [84]: https://github.com/aws/aws-cdk
-[85]: https://registry.npmjs.org/constructs/-/constructs-10.1.300.tgz
+[85]: https://registry.npmjs.org/constructs/-/constructs-10.2.64.tgz
 [86]: https://github.com/aws/constructs
 [87]: https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz
 [88]: https://github.com/evanw/node-source-map-support

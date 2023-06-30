@@ -50,6 +50,7 @@ type TransactionController interface {
 type Extension struct {
 	Id                  string
 	Name                string
+	Category            string
 	Description         string
 	InstallableVersions []extensionAPI.JsExtensionVersion
 }

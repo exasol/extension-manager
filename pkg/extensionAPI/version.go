@@ -6,7 +6,7 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-const supportedApiVersion = "0.1.16"
+const supportedApiVersion = "0.2.0"
 
 /* [impl -> dsn~extension-compatibility~1] */
 func validateExtensionIsCompatibleWithApiVersion(extensionId, currentExtensionApiVersion string) error {

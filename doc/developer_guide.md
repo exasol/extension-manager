@@ -125,7 +125,13 @@ sonar-scanner -Dsonar.organization=exasol -Dsonar.host.url=https://sonarcloud.io
 
 ## Using a Local Extension Interface
 
-To use a local, non-published version of the extension interface in integration tests, edit [pkg/integrationTesting/extensionForTesting/package.json](./../pkg/integrationTesting/extensionForTesting/package.json) and replace the version of `"@exasol/extension-manager-interface"` with the path to your local clone of [extension-manager-interface](https://github.com/exasol/extension-manager-interface).
+To use a local, non-published version of the extension interface for testing EM follow these steps:
+
+1. Build `extension-manager-interface` by running `npm run build`. This is required after each change.
+2. Edit [pkg/integrationTesting/extensionForTesting/package.json](./../pkg/integrationTesting/extensionForTesting/package.json) and replace the version of `"@exasol/extension-manager-interface"` with the path to your local clone of [extension-manager-interface](https://github.com/exasol/extension-manager-interface).
+3. Edit [pkg/integrationTesting/extensionForTesting/extensionForTestingTemplate.ts](./../pkg/integrationTesting/extensionForTesting/extensionForTestingTemplate.ts) and adapt it to the new API if necessary.
+
+   **Note:** The file contains placeholders that will be replaced during tests. It is not valid TypeScript, so it's normal that the editor complains about the invalid syntax.
 
 Make sure to not commit the modified `package.json`.
 

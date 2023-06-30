@@ -75,6 +75,7 @@ type installedExtension struct {
 
 type rawJsExtension struct {
 	Name                string                  `json:"name"`
+	Category            string                  `json:"category"`
 	Description         string                  `json:"description"`
 	BucketFsUploads     []BucketFsUpload        `json:"bucketFsUploads"`
 	InstallableVersions []rawJsExtensionVersion `json:"installableVersions"`
