@@ -69,12 +69,21 @@ public class ExtensionTestConfig {
     }
 
     /**
-     * Get the extension manager version to use for the tests, defaults to {@code latest}.
+     * Get the extension manager version to use for the tests. If no version is configured, this defaults to the JAR
+     * Manifest version or {@code "latest"} if no Manifest exists.
      * 
      * @return extension manager version
      */
     public String getExtensionManagerVersion() {
-        return getOptionalValue("extensionManagerVersion").orElse("latest");
+        return getOptionalValue("extensionManagerVersion") //
+                .or(this::getJarFileVersion).map(version -> "v" + version) //
+                .orElse("latest");
+    }
+
+    private Optional<String> getJarFileVersion() {
+        final String version = this.getClass().getPackage().getImplementationVersion();
+        LOGGER.finest(() -> "Found version " + version + " for JAR");
+        return Optional.ofNullable(version);
     }
 
     /**

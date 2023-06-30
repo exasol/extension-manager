@@ -6,9 +6,12 @@ Code name: Extension Categories
 
 This release adds a field for a category to the extension. This allows extensions to specify a category like "virtual schema" or "cloud storage".
 
+The release also updates the integration test framework to use the current version of EM for testing instead of `latest`. This avoids breaking tests for extensions when a new EM version is released.
+
 ## Features
 
 * #100: Added category field
+* #77: Updated integration test framework to use the current EM version for tests
 
 ## Dependency Updates
 
