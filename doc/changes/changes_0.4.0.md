@@ -34,3 +34,18 @@ This release adds a field for a category to the extension. This allows extension
 #### Compile Dependency Updates
 
 * Updated `com.exasol:extension-manager-client-java:0.3.0` to `0.4.0`
+
+### Registry
+
+#### Compile Dependency Updates
+
+* Updated `aws-cdk-lib:2.72.1` to `2.86.0`
+* Updated `constructs:^10.1.300` to `^10.2.64`
+
+#### Development Dependency Updates
+
+* Updated `@types/node:18.15.11` to `20.3.2`
+* Updated `@types/jest:^29.5.0` to `^29.5.2`
+* Updated `typescript:~5.0.3` to `~5.1.6`
+* Updated `@types/prettier:2.7.2` to `2.7.3`
+* Updated `aws-cdk:2.72.1` to `2.86.0`

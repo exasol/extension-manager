@@ -229,9 +229,9 @@
 [80]: https://github.com/exasol/udf-debugging-java/blob/main/LICENSE
 [81]: http://www.slf4j.org
 [82]: https://maven.apache.org/surefire/maven-failsafe-plugin/
-[83]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.72.1.tgz
+[83]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.86.0.tgz
 [84]: https://github.com/aws/aws-cdk
-[85]: https://registry.npmjs.org/constructs/-/constructs-10.1.300.tgz
+[85]: https://registry.npmjs.org/constructs/-/constructs-10.2.64.tgz
 [86]: https://github.com/aws/constructs
 [87]: https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz
 [88]: https://github.com/evanw/node-source-map-support
