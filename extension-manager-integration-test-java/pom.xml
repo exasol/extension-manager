@@ -70,6 +70,12 @@
             <version>0.6.8</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.exasol</groupId>
+            <artifactId>maven-project-version-getter</artifactId>
+            <version>1.2.0</version>
+            <scope>test</scope>
+        </dependency>
         <!-- Enable logging in integration tests -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -91,6 +97,19 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <!-- Required for reading the version of the integration test framework specified in the POM file of a concrete extension. -->
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
             </plugin>
         </plugins>
     </build>

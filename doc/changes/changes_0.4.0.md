@@ -6,9 +6,16 @@ Code name: Extension Categories
 
 This release adds a field for a category to the extension. This allows extensions to specify a category like "virtual schema" or "cloud storage".
 
+Besides its actual implementation EM also provides the ITF &mdash; a framework for integration tests of concrete extensions. The included ITF has the same version as the EM itself.
+
+In the past when a concrete extension added the ITF to its POM file with version _v_ then the ITF ran integration tests using EM's latest version which could differ from _v_.
+
+EM's current release fixes ITF to use the same version of EM as specified in the extension's POM file.
+
 ## Features
 
 * #100: Added category field
+* #77: Updated integration test framework to use the current EM version for tests
 
 ## Dependency Updates
 
@@ -34,6 +41,14 @@ This release adds a field for a category to the extension. This allows extension
 #### Compile Dependency Updates
 
 * Updated `com.exasol:extension-manager-client-java:0.3.0` to `0.4.0`
+
+#### Test Dependency Updates
+
+* Added `com.exasol:maven-project-version-getter:1.2.0`
+
+#### Plugin Dependency Updates
+
+* Updated `org.apache.maven.plugins:maven-jar-plugin:2.4` to `3.3.0`
 
 ### Registry
 
