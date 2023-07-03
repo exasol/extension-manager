@@ -69,8 +69,9 @@ public class ExtensionTestConfig {
     }
 
     /**
-     * Get the extension manager version to use for the tests. If no version is configured, this defaults to the JAR
-     * Manifest version or {@code "latest"} if no Manifest exists.
+     * Get the extension manager version to use for the tests. 
+     * If the POM file of the extension does not specify a version, this defaults to 
+     * version of the Manifest in the JAR or {@code "latest"} if no Manifest exists.
      * 
      * @return extension manager version
      */
