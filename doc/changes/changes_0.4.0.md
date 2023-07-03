@@ -21,6 +21,10 @@ EM's current release fixes ITF to use the same version of EM as specified in the
 
 * #107: Adapted EM to work with Exasol 8
 
+## Bugfixes
+
+* #107: Adapted EM to work with Exasol 8
+
 ## Dependency Updates
 
 ### Extension-manager
