@@ -8,7 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -17,7 +18,6 @@ import java.util.Map;
 import org.junit.jupiter.api.*;
 
 import com.exasol.exasoltestsetup.ExasolTestSetup;
-import com.exasol.exasoltestsetup.ExasolTestSetupFactory;
 import com.exasol.extensionmanager.client.invoker.ApiException;
 import com.exasol.extensionmanager.client.model.*;
 import com.exasol.extensionmanager.itest.builder.ExtensionBuilder;
@@ -31,7 +31,7 @@ class ExtensionManagerClientIT {
 
     @BeforeAll
     static void setupExasol() throws SQLException, IOException {
-        exasolTestSetup = new ExasolTestSetupFactory(Path.of("dummy-config")).getTestSetup();
+        exasolTestSetup = IntegrationTestCommon.createExasolTestSetup();
         connection = exasolTestSetup.createConnection();
         Files.writeString(IntegrationTestCommon.CONFIG_FILE,
                 "localExtensionManager = " + Paths.get("..").toAbsolutePath().normalize() + "\n");

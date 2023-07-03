@@ -10,6 +10,10 @@ This release adds a field for a category to the extension. This allows extension
 
 * #100: Added category field
 
+## Bugfixes
+
+* #107: Adapted EM to work with Exasol 8
+
 ## Dependency Updates
 
 ### Extension-manager
