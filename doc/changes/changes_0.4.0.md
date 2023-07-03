@@ -6,7 +6,11 @@ Code name: Extension Categories
 
 This release adds a field for a category to the extension. This allows extensions to specify a category like "virtual schema" or "cloud storage".
 
-The release also updates the integration test framework to use the current version of EM for testing instead of `latest`. This avoids breaking tests for extensions when a new EM version is released.
+Besides its actual implementation EM also provides the ITF &mdash; a framework for integration tests of concrete extensions. The included ITF has the same version as the EM itself.
+
+In the past when a concrete extension added the ITF to its POM file with version _v_ then the ITF ran integration tests using EM's latest version which could differ from _v_.
+
+EM's current release fixes ITF to use the same version of EM as specified in the extension's POM file.
 
 ## Features
 
