@@ -1,4 +1,4 @@
-# Extension Manager 0.4.0, released 2023-06-??
+# Extension Manager 0.4.0, released 2023-07-03
 
 Code name: Extension Categories
 
