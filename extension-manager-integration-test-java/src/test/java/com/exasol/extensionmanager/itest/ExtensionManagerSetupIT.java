@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import java.nio.file.Path;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -15,7 +14,6 @@ import org.junit.jupiter.api.*;
 
 import com.exasol.dbbuilder.dialects.exasol.ExasolSchema;
 import com.exasol.exasoltestsetup.ExasolTestSetup;
-import com.exasol.exasoltestsetup.ExasolTestSetupFactory;
 import com.exasol.extensionmanager.itest.builder.ExtensionBuilder;
 
 class ExtensionManagerSetupIT {
@@ -24,7 +22,7 @@ class ExtensionManagerSetupIT {
 
     @BeforeAll
     static void setupExasol() {
-        exasolTestSetup = new ExasolTestSetupFactory(Path.of("dummy-config")).getTestSetup();
+        exasolTestSetup = IntegrationTestCommon.createExasolTestSetup();
     }
 
     @AfterAll
