@@ -3,12 +3,9 @@ package com.exasol.extensionmanager.itest;
 import static com.exasol.extensionmanager.itest.IntegrationTestCommon.TESTING_EXTENSION_SOURCE_DIR;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import java.nio.file.Path;
-
 import org.junit.jupiter.api.*;
 
 import com.exasol.exasoltestsetup.ExasolTestSetup;
-import com.exasol.exasoltestsetup.ExasolTestSetupFactory;
 import com.exasol.extensionmanager.itest.builder.ExtensionBuilder;
 
 class ExasolMetadataIT {
@@ -19,7 +16,7 @@ class ExasolMetadataIT {
 
     @BeforeAll
     static void setupExasol() {
-        exasolTestSetup = new ExasolTestSetupFactory(Path.of("dummy-config")).getTestSetup();
+        exasolTestSetup = IntegrationTestCommon.createExasolTestSetup();
         extensionManager = ExtensionManagerSetup.create(exasolTestSetup, ExtensionBuilder.createDefaultNpmBuilder(
                 TESTING_EXTENSION_SOURCE_DIR, TESTING_EXTENSION_SOURCE_DIR.resolve("dist/testing-extension.js")));
         metadata = extensionManager.exasolMetadata();
