@@ -1,4 +1,4 @@
-# Extension Manager 0.4.0, released 2023-06-??
+# Extension Manager 0.4.0, released 2023-07-03
 
 Code name: Extension Categories
 
@@ -16,6 +16,10 @@ EM's current release fixes ITF to use the same version of EM as specified in the
 
 * #100: Added category field
 * #77: Updated integration test framework to use the current EM version for tests
+
+## Bugfixes
+
+* #107: Adapted EM to work with Exasol 8
 
 ## Dependency Updates
 
