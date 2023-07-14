@@ -233,9 +233,9 @@
 [83]: http://www.slf4j.org
 [84]: https://maven.apache.org/surefire/maven-failsafe-plugin/
 [85]: https://maven.apache.org/plugins/maven-jar-plugin/
-[86]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.86.0.tgz
+[86]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.87.0.tgz
 [87]: https://github.com/aws/aws-cdk
-[88]: https://registry.npmjs.org/constructs/-/constructs-10.2.64.tgz
+[88]: https://registry.npmjs.org/constructs/-/constructs-10.2.69.tgz
 [89]: https://github.com/aws/constructs
 [90]: https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz
 [91]: https://github.com/evanw/node-source-map-support
