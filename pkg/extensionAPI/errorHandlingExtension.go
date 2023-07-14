@@ -56,6 +56,9 @@ func (e *JsExtension) GetParameterDefinitions(context *ExtensionContext, version
 }
 
 func (e *JsExtension) Install(context *ExtensionContext, version string) (errorResult error) {
+	if e.extension.Install == nil {
+		return e.unsupportedFunction("install")
+	}
 	defer func() {
 		if err := recover(); err != nil {
 			errorResult = e.convertError(fmt.Sprintf("failed to install extension %q", e.Id), err)
@@ -66,6 +69,9 @@ func (e *JsExtension) Install(context *ExtensionContext, version string) (errorR
 }
 
 func (e *JsExtension) Uninstall(context *ExtensionContext, version string) (errorResult error) {
+	if e.extension.Uninstall == nil {
+		return e.unsupportedFunction("uninstall")
+	}
 	defer func() {
 		if err := recover(); err != nil {
 			errorResult = e.convertError(fmt.Sprintf("failed to uninstall extension %q", e.Id), err)
@@ -76,6 +82,9 @@ func (e *JsExtension) Uninstall(context *ExtensionContext, version string) (erro
 }
 
 func (e *JsExtension) FindInstallations(context *ExtensionContext, metadata *ExaMetadata) (installations []*JsExtInstallation, errorResult error) {
+	if e.extension.FindInstallations == nil {
+		return nil, e.unsupportedFunction("findInstallations")
+	}
 	defer func() {
 		if err := recover(); err != nil {
 			errorResult = e.convertError(fmt.Sprintf("failed to find installations for extension %q", e.Id), err)
@@ -85,6 +94,9 @@ func (e *JsExtension) FindInstallations(context *ExtensionContext, metadata *Exa
 }
 
 func (e *JsExtension) AddInstance(context *ExtensionContext, version string, params *ParameterValues) (instance *JsExtInstance, errorResult error) {
+	if e.extension.AddInstance == nil {
+		return nil, e.unsupportedFunction("addInstance")
+	}
 	defer func() {
 		if err := recover(); err != nil {
 			errorResult = e.convertError(fmt.Sprintf("failed to add instance for extension %q", e.Id), err)
@@ -94,6 +106,9 @@ func (e *JsExtension) AddInstance(context *ExtensionContext, version string, par
 }
 
 func (e *JsExtension) ListInstances(context *ExtensionContext, version string) (instances []*JsExtInstance, errorResult error) {
+	if e.extension.FindInstances == nil {
+		return nil, e.unsupportedFunction("findInstances")
+	}
 	defer func() {
 		if err := recover(); err != nil {
 			errorResult = e.convertError(fmt.Sprintf("failed to list instances for extension %q in version %q", e.Id, version), err)
@@ -103,6 +118,9 @@ func (e *JsExtension) ListInstances(context *ExtensionContext, version string) (
 }
 
 func (e *JsExtension) DeleteInstance(context *ExtensionContext, extensionVersion, instanceId string) (errorResult error) {
+	if e.extension.DeleteInstance == nil {
+		return e.unsupportedFunction("deleteInstance")
+	}
 	defer func() {
 		if err := recover(); err != nil {
 			errorResult = e.convertError(fmt.Sprintf("failed to delete instance %q for extension %q", instanceId, e.Id), err)
@@ -133,6 +151,10 @@ func (e *JsExtension) convertError(message string, err any) error {
 
 func basicError(message string, err any) error {
 	return fmt.Errorf("%s: %v", message, err)
+}
+
+func (e *JsExtension) unsupportedFunction(functionName string) error {
+	return fmt.Errorf("extension %q does not support operation %q", e.Id, functionName)
 }
 
 type jsApiError struct {
