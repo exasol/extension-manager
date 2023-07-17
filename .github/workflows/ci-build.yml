@@ -145,7 +145,7 @@ jobs:
   static-code-analysis-go:
     runs-on: ubuntu-latest
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-trace-requirements
+      group: ${{ github.workflow }}-${{ github.ref }}-static-code-analysis-go
       cancel-in-progress: true
     steps:
       - name: Check out code
