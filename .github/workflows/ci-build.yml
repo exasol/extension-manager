@@ -101,11 +101,6 @@ jobs:
         env:
           EXASOL_VERSION: ${{ env.EXASOL_VERSION }}
 
-      - name: Prepare SonarCloud scan
-        # Without this step, Sonar will fail with this error:
-        # "Maven project detected. You should run the goal 'org.sonarsource.scanner.maven:sonar' during build rather than using this GitHub Action."
-        run: rm ./pom.xml
-
       - name: Build and test registry infrastructure
         run: |
           cd registry
@@ -113,11 +108,20 @@ jobs:
           npm ci
           npm run test
 
+      - name: Prepare SonarCloud scan
+        # Without this step, Sonar will fail with this error:
+        # "Maven project detected. You should run the goal 'org.sonarsource.scanner.maven:sonar' during build rather than using this GitHub Action."
+        run: rm ./pom.xml
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Dependency Check
+        id: govulncheck
+        uses: golang/govulncheck-action@v1
 
       - name: Upload executable
         uses: actions/upload-artifact@v3
