@@ -22,3 +22,6 @@ jobs:
         run: mvn --batch-mode install -DskipTests
       - name: Checking dependencies for vulnerabilities
         run: mvn --batch-mode org.sonatype.ossindex.maven:ossindex-maven-plugin:audit -f pom.xml
+      - name: Dependency Check
+        id: govulncheck
+        uses: golang/govulncheck-action@v1
