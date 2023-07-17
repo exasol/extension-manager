@@ -24,6 +24,7 @@ func ListAvailableExtensions(apiContext *ApiContext) *openapi.Get {
 				Extensions: []ExtensionsResponseExtension{{
 					Id:                  "s3-vs",
 					Name:                "S3 Virtual Schema",
+					Category:            "virtual-schema",
 					Description:         "...",
 					InstallableVersions: []ExtensionVersion{{Name: "1.2.3", Deprecated: true, Latest: false}, {Name: "1.3.0", Latest: true, Deprecated: false}},
 				}},

@@ -7,10 +7,10 @@
     "clean": "tsc --build --clean && rm -f parameterValidator.js"
   },
   "dependencies": {
-    "@exasol/extension-parameter-validator": "0.2.0"
+    "@exasol/extension-parameter-validator": "0.2.1"
   },
   "devDependencies": {
-    "esbuild": "0.17.15",
-    "typescript": "5.0.3"
+    "esbuild": "0.18.13",
+    "typescript": "5.1.6"
   }
 }

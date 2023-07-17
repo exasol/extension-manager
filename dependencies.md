@@ -61,7 +61,7 @@
 | [Versions Maven Plugin][43]                             | [Apache License, Version 2.0][28]              |
 | [duplicate-finder-maven-plugin Maven Mojo][44]          | [Apache License 2.0][13]                       |
 | [Apache Maven Deploy Plugin][45]                        | [Apache-2.0][28]                               |
-| [Apache Maven GPG Plugin][46]                           | [Apache License, Version 2.0][28]              |
+| [Apache Maven GPG Plugin][46]                           | [Apache-2.0][28]                               |
 | [Apache Maven Source Plugin][47]                        | [Apache License, Version 2.0][28]              |
 | [Project keeper maven plugin][48]                       | [The MIT License][49]                          |
 | [Exec Maven Plugin][50]                                 | [Apache License 2][28]                         |
@@ -114,7 +114,7 @@
 | [Versions Maven Plugin][43]                             | [Apache License, Version 2.0][28]              |
 | [duplicate-finder-maven-plugin Maven Mojo][44]          | [Apache License 2.0][13]                       |
 | [Apache Maven Deploy Plugin][45]                        | [Apache-2.0][28]                               |
-| [Apache Maven GPG Plugin][46]                           | [Apache License, Version 2.0][28]              |
+| [Apache Maven GPG Plugin][46]                           | [Apache-2.0][28]                               |
 | [Apache Maven Source Plugin][47]                        | [Apache License, Version 2.0][28]              |
 | [Apache Maven Javadoc Plugin][54]                       | [Apache-2.0][28]                               |
 | [Nexus Staging Maven Plugin][55]                        | [Eclipse Public License][56]                   |
@@ -191,7 +191,7 @@
 [41]: https://maven.apache.org/enforcer/maven-enforcer-plugin/
 [42]: https://maven.apache.org/surefire/maven-surefire-plugin/
 [43]: https://www.mojohaus.org/versions/versions-maven-plugin/
-[44]: https://github.com/basepom/duplicate-finder-maven-plugin
+[44]: https://basepom.github.io/duplicate-finder-maven-plugin
 [45]: https://maven.apache.org/plugins/maven-deploy-plugin/
 [46]: https://maven.apache.org/plugins/maven-gpg-plugin/
 [47]: https://maven.apache.org/plugins/maven-source-plugin/
@@ -233,10 +233,10 @@
 [83]: http://www.slf4j.org
 [84]: https://maven.apache.org/surefire/maven-failsafe-plugin/
 [85]: https://maven.apache.org/plugins/maven-jar-plugin/
-[86]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.86.0.tgz
+[86]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.87.0.tgz
 [87]: https://github.com/aws/aws-cdk
-[88]: https://registry.npmjs.org/constructs/-/constructs-10.2.64.tgz
+[88]: https://registry.npmjs.org/constructs/-/constructs-10.2.69.tgz
 [89]: https://github.com/aws/constructs
 [90]: https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz
 [91]: https://github.com/evanw/node-source-map-support
-[92]: https://registry.npmjs.org/@exasol/extension-parameter-validator/-/extension-parameter-validator-0.2.0.tgz
+[92]: https://registry.npmjs.org/@exasol/extension-parameter-validator/-/extension-parameter-validator-0.2.1.tgz

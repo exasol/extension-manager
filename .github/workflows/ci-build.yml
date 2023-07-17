@@ -13,7 +13,7 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}-build
       cancel-in-progress: true
     env:
-      EXASOL_VERSION: 7.1.19
+      EXASOL_VERSION: 7.1.21
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
           go-version: 1.19
         id: go
@@ -97,17 +97,17 @@ jobs:
         env:
           EXASOL_VERSION: ${{ env.EXASOL_VERSION }}
 
-      - name: Prepare SonarCloud scan
-        # Without this step, Sonar will fail with this error:
-        # "Maven project detected. You should run the goal 'org.sonarsource.scanner.maven:sonar' during build rather than using this GitHub Action."
-        run: rm ./pom.xml
-
       - name: Build and test registry infrastructure
         run: |
           cd registry
           echo "export const CONFIG = { owner: 'dummy-owner@example.com' }" > lib/config.ts
           npm ci
           npm run test
+
+      - name: Prepare SonarCloud scan
+        # Without this step, Sonar will fail with this error:
+        # "Maven project detected. You should run the goal 'org.sonarsource.scanner.maven:sonar' during build rather than using this GitHub Action."
+        run: rm ./pom.xml
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
