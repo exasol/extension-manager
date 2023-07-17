@@ -68,6 +68,13 @@ func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsFailure() {
 	suite.Nil(installations)
 }
 
+func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsUnsupported() {
+	suite.rawExtension.FindInstallations = nil
+	installations, err := suite.extension.FindInstallations(createMockContext(), &ExaMetadata{})
+	suite.EqualError(err, `extension "id" does not support operation "findInstallations"`)
+	suite.Nil(installations)
+}
+
 // GetParameterDefinitions
 
 func (suite *ErrorHandlingExtensionSuite) GetParameterDefinitionsSuccessful() {
@@ -89,10 +96,18 @@ func (suite *ErrorHandlingExtensionSuite) GetParameterDefinitionsFailure() {
 	suite.Nil(installations)
 }
 
+func (suite *ErrorHandlingExtensionSuite) GetParameterDefinitionsUnsupported() {
+	suite.rawExtension.GetParameterDefinitions = nil
+	installations, err := suite.extension.GetParameterDefinitions(createMockContext(), "ext-version")
+	suite.EqualError(err, `extension "id" does not support operation "getInstanceParameters"`)
+	suite.Nil(installations)
+}
+
 // Install
 
 func (suite *ErrorHandlingExtensionSuite) TestInstallSuccessful() {
 	suite.rawExtension.Install = func(context *ExtensionContext, version string) {
+		// empty mocked function
 	}
 	err := suite.extension.Install(createMockContext(), "version")
 	suite.NoError(err)
@@ -106,10 +121,17 @@ func (suite *ErrorHandlingExtensionSuite) TestInstallFailure() {
 	suite.EqualError(err, "failed to install extension \"id\": mock error")
 }
 
+func (suite *ErrorHandlingExtensionSuite) TestInstallUnsupported() {
+	suite.rawExtension.Install = nil
+	err := suite.extension.Install(createMockContext(), "version")
+	suite.EqualError(err, `extension "id" does not support operation "install"`)
+}
+
 // Uninstall
 
 func (suite *ErrorHandlingExtensionSuite) TestUninstallSuccessful() {
 	suite.rawExtension.Uninstall = func(context *ExtensionContext, version string) {
+		// empty mocked function
 	}
 	err := suite.extension.Uninstall(createMockContext(), "version")
 	suite.NoError(err)
@@ -121,6 +143,12 @@ func (suite *ErrorHandlingExtensionSuite) TestUninstallFailure() {
 	}
 	err := suite.extension.Uninstall(createMockContext(), "version")
 	suite.EqualError(err, "failed to uninstall extension \"id\": mock error")
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestUninstallUnsupported() {
+	suite.rawExtension.Uninstall = nil
+	err := suite.extension.Uninstall(createMockContext(), "version")
+	suite.EqualError(err, `extension "id" does not support operation "uninstall"`)
 }
 
 // AddInstance
@@ -141,6 +169,37 @@ func (suite *ErrorHandlingExtensionSuite) TestAddInstanceFails() {
 	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{})
 	suite.EqualError(err, "failed to add instance for extension \"id\": mock error")
 	suite.Nil(instance)
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestAddInstanceUnsupported() {
+	suite.rawExtension.AddInstance = nil
+	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{})
+	suite.EqualError(err, `extension "id" does not support operation "addInstance"`)
+	suite.Nil(instance)
+}
+
+// DeleteInstance
+
+func (suite *ErrorHandlingExtensionSuite) TestDeleteInstanceSuccessful() {
+	suite.rawExtension.DeleteInstance = func(context *ExtensionContext, version, instanceId string) {
+		// empty mocked function
+	}
+	err := suite.extension.DeleteInstance(createMockContext(), "version", "instance-id")
+	suite.NoError(err)
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestDeleteInstanceFails() {
+	suite.rawExtension.DeleteInstance = func(context *ExtensionContext, version, instanceId string) {
+		panic("mock error")
+	}
+	err := suite.extension.DeleteInstance(createMockContext(), "version", "instance-id")
+	suite.EqualError(err, "failed to delete instance \"instance-id\" for extension \"id\": mock error")
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestDeleteInstanceUnsupported() {
+	suite.rawExtension.DeleteInstance = nil
+	err := suite.extension.DeleteInstance(createMockContext(), "version", "instance-id")
+	suite.EqualError(err, `extension "id" does not support operation "deleteInstance"`)
 }
 
 // convertError

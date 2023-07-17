@@ -200,6 +200,25 @@ func (suite *ExtensionApiSuite) TestLoadExtensionWithInvalidApiVersion() {
 	suite.Nil(extension)
 }
 
+func (suite *ExtensionApiSuite) TestUsingExtensionWithMissingPropertiesWorks() {
+	extensionContent := minimalExtension("0.1.15")
+	extension, err := LoadExtension("ext-id", extensionContent)
+	suite.NoError(err)
+	suite.Equal("ext-id", extension.Id)
+	suite.Equal("", extension.Category)
+	suite.Equal("", extension.Description)
+	suite.Empty(extension.BucketFsUploads)
+	suite.Empty(extension.InstallableVersions)
+}
+
+func (suite *ExtensionApiSuite) TestUsingExtensionWithMissingFunctionFailsGracefully() {
+	extensionContent := minimalExtension("0.1.15")
+	extension, err := LoadExtension("ext-id", extensionContent)
+	suite.NoError(err)
+	err = extension.Install(nil, "version")
+	suite.EqualError(err, `extension "ext-id" does not support operation "install"`)
+}
+
 func minimalExtension(version string) string {
 	content := `
 	(function(){
