@@ -53,7 +53,7 @@ func (api *restAPIImpl) Serve() {
 	api.server = &http.Server{
 		Addr:              api.serverAddress,
 		Handler:           handler,
-		ReadHeaderTimeout: 500 * time.Millisecond,
+		ReadHeaderTimeout: 3 * time.Second,
 	}
 	api.startServer()
 }
