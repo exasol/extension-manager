@@ -57,3 +57,14 @@ This release improves error handling when using extensions with missing function
 * Updated `@types/jest:^29.5.2` to `^29.5.3`
 * Updated `jest:^29.5.0` to `^29.6.1`
 * Updated `aws-cdk:2.86.0` to `2.87.0`
+
+### ParameterValidator
+
+#### Compile Dependency Updates
+
+* Updated `@exasol/extension-parameter-validator:0.2.0` to `0.2.1`
+
+#### Development Dependency Updates
+
+* Updated `typescript:5.0.3` to `5.1.6`
+* Updated `esbuild:0.17.15` to `0.18.13`

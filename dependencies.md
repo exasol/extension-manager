@@ -239,4 +239,4 @@
 [89]: https://github.com/aws/constructs
 [90]: https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz
 [91]: https://github.com/evanw/node-source-map-support
-[92]: https://registry.npmjs.org/@exasol/extension-parameter-validator/-/extension-parameter-validator-0.2.0.tgz
+[92]: https://registry.npmjs.org/@exasol/extension-parameter-validator/-/extension-parameter-validator-0.2.1.tgz
