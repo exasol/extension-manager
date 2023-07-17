@@ -65,7 +65,7 @@ type APIError struct {
 	Status        int    `json:"code"`                // HTTP status code
 	Message       string `json:"message"`             // human-readable message
 	RequestID     string `json:"requestID,omitempty"` // ID to identify the request that caused this error
-	Timestamp     string `json:"timestamp,omitempty" jsonschema:"format=date-time" `
+	Timestamp     string `json:"timestamp,omitempty" jsonschema:"format=date-time"`
 	APIID         string `json:"apiID,omitempty"` // Corresponding API action
 	OriginalError error  `json:"-"`
 }

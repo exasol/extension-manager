@@ -6,7 +6,7 @@ linters:
     - complexity
     #- comment
     #- error
-    #- format
+    - format
     #- import
     #- metalinter
     #- module
@@ -16,6 +16,8 @@ linters:
     #- test
     #- unused
   disable:
+    - gofumpt # "gofmt" is OK for us, no need for stricter rules (https://github.com/mvdan/gofumpt)
+    - gci # No need to explicitly format imports using GCI (https://github.com/daixiang0/gci)
 run:
   tests: false
   skip-dirs:
