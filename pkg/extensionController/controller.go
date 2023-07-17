@@ -110,7 +110,7 @@ func (c *controllerImpl) getAllExtensions() ([]*extensionAPI.JsExtension, error)
 	if err != nil {
 		return nil, err
 	}
-	var extensions []*extensionAPI.JsExtension
+	extensions := make([]*extensionAPI.JsExtension, 0, len(extensionIds))
 	for _, id := range extensionIds {
 		extension, err := c.loadExtensionById(id)
 		if err != nil {

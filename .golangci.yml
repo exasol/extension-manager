@@ -8,10 +8,10 @@ linters:
     - import
     - module
     - sql
-    # - unused # Deactivated because of false positives for mocks
     - comment
+    # - unused # Deactivated because of false positives for mocks
     #- error
-    #- performance
+    - performance
     #- style
     #- test
     #- metalinter
