@@ -9,16 +9,17 @@ linters:
     - module
     - sql
     - comment
-    # - unused # Deactivated because of false positives for mocks
-    #- error
     - performance
+    - test
+    #- error
     #- style
-    #- test
     #- metalinter
+    #- unused # Deactivated because of false positives for mocks
   disable:
     - gofumpt # "gofmt" is OK for us, no need for stricter rules (https://github.com/mvdan/gofumpt)
     - gci # No need to explicitly format imports using GCI (https://github.com/daixiang0/gci)
     - depguard # No need to restrict imported packages (https://github.com/OpenPeeDeeP/depguard)
+    - exhaustruct # Listing every field of a struct is not worth the effort (https://github.com/GaijinEntertainment/go-exhaustruct)
 run:
   tests: false
   skip-dirs:
