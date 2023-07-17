@@ -75,10 +75,12 @@ func (api *restAPIImpl) waitUntilServerReplies() {
 	timeout := time.Now().Add(1 * time.Second)
 	for {
 		response, err := http.DefaultClient.Do(request)
-		if err == nil && response.StatusCode == 404 {
-			return
+		if err == nil {
+			response.Body.Close()
+			if response.StatusCode == 404 {
+				return
+			}
 		}
-		defer response.Body.Close()
 		if time.Now().After(timeout) {
 			log.Fatalf("Server did not reply within 1s, error: %v, response: %d %s", err, response.StatusCode, response.Status)
 		}
