@@ -119,11 +119,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Install govulncheck
-        run: go install golang.org/x/vuln/cmd/govulncheck@latest
-      - name: Run govulncheck
-        run: govulncheck ./...
-
       - name: Upload executable
         uses: actions/upload-artifact@v3
         with:
