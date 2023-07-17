@@ -89,7 +89,7 @@ def run(ctx):
 	defer result.Close()
 	for result.Next() {
 		if result.Err() != nil {
-			return nil, fmt.Errorf("failed reading result of BucketFS list UDF. Cause: %w", err)
+			return nil, fmt.Errorf("failed iterating BucketFS list UDF. Cause: %w", err)
 		}
 		var file BfsFile
 		var fileSize float64
