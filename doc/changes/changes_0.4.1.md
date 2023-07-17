@@ -4,7 +4,9 @@ Code name:
 
 ## Summary
 
-This release improves error handling when using extensions with missing functions. EM now returns a helpful error message instead of failing with a `nil`-pointer error.
+This release improves error handling when using extensions not implementing all functions required by EM. EM now returns a helpful error message instead of failing with a `nil`-pointer error.
+
+A common scenario for an extension not implementing a required function is when the extension had been built using an older version of EM's extension intererface.
 
 ## Bugfixes
 
