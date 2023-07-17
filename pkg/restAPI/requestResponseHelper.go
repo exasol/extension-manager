@@ -19,7 +19,7 @@ const (
 	HeaderContentType = "Content-Type"
 )
 
-// SendJSON to writer
+// SendJSON converts the given data to JSON and sends it to the writer.
 func SendJSON(ctx context.Context, writer http.ResponseWriter, data interface{}) {
 	SendJSONWithStatus(ctx, 200, writer, data)
 }

@@ -17,7 +17,7 @@ type BucketFsAPI interface {
 	ListFiles(ctx context.Context, db *sql.DB, bucket string) ([]BfsFile, error)
 }
 
-// CreateBucketFsAPI creates an instance of BucketFsAPI
+// CreateBucketFsAPI creates an instance of BucketFsAPI.
 func CreateBucketFsAPI() BucketFsAPI {
 	return &bucketFsAPIImpl{}
 }
@@ -37,7 +37,7 @@ func (bfs bucketFsAPIImpl) ListBuckets(ctx context.Context, db *sql.DB) ([]strin
 	return names, nil
 }
 
-/* [impl -> dsn~extension-components~1] */
+/* [impl -> dsn~extension-components~1]. */
 func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB, bucket string) ([]BfsFile, error) {
 	if strings.Contains(bucket, "/") {
 		return nil, fmt.Errorf("invalid bucket name. Bucket name must not contain slashes")
@@ -45,7 +45,7 @@ func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB, bucket str
 	return bfs.listDirInUDF(ctx, db, "/buckets/bfsdefault/"+bucket)
 }
 
-// BfsFile represents a file in BucketFS
+// BfsFile represents a file in BucketFS.
 type BfsFile struct {
 	Name string
 	Size int

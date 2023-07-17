@@ -23,7 +23,7 @@ func NewRegistry(extensionRegistryURL string) Registry {
 	return newLocalDirRegistry(extensionRegistryURL)
 }
 
-/* [impl -> dsn~extension-registry~1] */
+/* [impl -> dsn~extension-registry~1]. */
 func isHttpUrl(urlOrPath string) bool {
 	lowerCaseUrlOrPath := strings.ToLower(urlOrPath)
 	return strings.HasPrefix(lowerCaseUrlOrPath, "http://") || strings.HasPrefix(lowerCaseUrlOrPath, "https://")

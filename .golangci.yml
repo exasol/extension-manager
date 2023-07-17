@@ -4,20 +4,21 @@ linters:
   presets:
     - bugs
     - complexity
-    #- comment
-    #- error
     - format
-    #- import
-    #- metalinter
-    #- module
+    - import
+    - module
+    - sql
+    # - unused # Deactivated because of false positives for mocks
+    - comment
+    #- error
     #- performance
-    #- sql
     #- style
     #- test
-    #- unused
+    #- metalinter
   disable:
     - gofumpt # "gofmt" is OK for us, no need for stricter rules (https://github.com/mvdan/gofumpt)
     - gci # No need to explicitly format imports using GCI (https://github.com/daixiang0/gci)
+    - depguard # No need to restrict imported packages (https://github.com/OpenPeeDeeP/depguard)
 run:
   tests: false
   skip-dirs:

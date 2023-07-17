@@ -23,7 +23,7 @@ type metaDataReaderImpl struct {
 }
 
 // ReadMetadataTables reads the metadata tables of the given schema.
-/* [impl -> dsn~extension-components~1] */
+/* [impl -> dsn~extension-components~1]. */
 func (r *metaDataReaderImpl) ReadMetadataTables(tx *sql.Tx, schemaName string) (*ExaMetadata, error) {
 	allScripts, err := readExaAllScriptTable(tx, schemaName)
 	if err != nil {
@@ -98,7 +98,7 @@ func getExasolMajorVersion(tx *sql.Tx) (string, error) {
 	return majorVersion, nil
 }
 
-// This reads virtual schemas from the metadata tables of Exasol version 8
+// This reads virtual schemas from the metadata tables of Exasol version 8.
 func readExaAllVirtualSchemasTableV8(tx *sql.Tx) (*ExaVirtualSchemasTable, error) {
 	result, err := tx.Query(`
 SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT_SCHEMA, ADAPTER_SCRIPT_NAME, ADAPTER_NOTES
@@ -122,7 +122,7 @@ FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS`)
 	return &ExaVirtualSchemasTable{Rows: rows}, nil
 }
 
-// This reads virtual schemas from the metadata tables of Exasol version 7.1
+// This reads virtual schemas from the metadata tables of Exasol version 7.1.
 func readExaAllVirtualSchemasTableV7(tx *sql.Tx) (*ExaVirtualSchemasTable, error) {
 	result, err := tx.Query(`
 SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT, ADAPTER_NOTES
