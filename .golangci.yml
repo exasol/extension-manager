@@ -1,6 +1,22 @@
 # https://golangci-lint.run/usage/configuration/
 linters:
   enable-all: false
+  presets:
+    - bugs
+    #- comment
+    #- complexity
+    #- error
+    #- format
+    #- import
+    #- metalinter
+    #- module
+    #- performance
+    #- sql
+    #- style
+    #- test
+    #- unused
+  disable:
 run:
+  tests: false
   skip-dirs:
     - node_modules

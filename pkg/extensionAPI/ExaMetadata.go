@@ -44,8 +44,12 @@ WHERE SCRIPT_SCHEMA=?`, schemaName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read SYS.EXA_ALL_SCRIPTS: %w", err)
 	}
+	defer result.Close()
 	rows := make([]ExaScriptRow, 0)
 	for result.Next() {
+		if result.Err() != nil {
+			return nil, fmt.Errorf("failed to iterate SYS.EXA_ALL_SCRIPTS: %w", err)
+		}
 		var row ExaScriptRow
 		var inputType sql.NullString
 		var resultType sql.NullString
@@ -79,8 +83,12 @@ func getExasolMajorVersion(tx *sql.Tx) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("query failed: %w", err)
 	}
+	defer result.Close()
 	if !result.Next() {
 		return "", fmt.Errorf("no result found for query")
+	}
+	if result.Err() != nil {
+		return "", fmt.Errorf("failed to iterate SYS.EXA_METADATA: %w", err)
 	}
 	var majorVersion string
 	err = result.Scan(&majorVersion)
@@ -98,8 +106,12 @@ FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS`)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
 	}
+	defer result.Close()
 	rows := make([]ExaVirtualSchemaRow, 0)
 	for result.Next() {
+		if result.Err() != nil {
+			return nil, fmt.Errorf("failed to iterate SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
+		}
 		var row ExaVirtualSchemaRow
 		err := result.Scan(&row.Name, &row.Owner, &row.AdapterScriptSchema, &row.AdapterScriptName, &row.AdapterNotes)
 		if err != nil {
@@ -118,8 +130,12 @@ FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS`)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
 	}
+	defer result.Close()
 	rows := make([]ExaVirtualSchemaRow, 0)
 	for result.Next() {
+		if result.Err() != nil {
+			return nil, fmt.Errorf("failed to iterate SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
+		}
 		var row ExaVirtualSchemaRow
 		var adapterScriptSchemaAndName string
 		err := result.Scan(&row.Name, &row.Owner, &adapterScriptSchemaAndName, &row.AdapterNotes)

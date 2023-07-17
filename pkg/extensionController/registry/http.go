@@ -1,9 +1,11 @@
 package registry
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/exasol/extension-manager/pkg/apiErrors"
 	"github.com/exasol/extension-manager/pkg/extensionController/registry/index"
@@ -33,6 +35,7 @@ func (h *httpRegistry) loadIndex() error {
 	if err != nil {
 		return err
 	}
+	defer response.Body.Close()
 	index, err := index.Decode(response.Body)
 	if err != nil {
 		return err
@@ -42,7 +45,11 @@ func (h *httpRegistry) loadIndex() error {
 }
 
 func getResponse(url string) (*http.Response, error) {
-	response, err := http.Get(url)
+	request, err := http.NewRequestWithContext(context.Background(), "GET", url, strings.NewReader(""))
+	if err != nil {
+		return nil, err
+	}
+	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return nil, err
 	}
@@ -74,6 +81,7 @@ func getUrlContent(url string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer response.Body.Close()
 	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return "", fmt.Errorf("failed to read response: %w", err)

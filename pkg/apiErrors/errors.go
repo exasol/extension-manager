@@ -41,7 +41,8 @@ func NewAPIError(status int, message string) error {
 }
 
 func NewAPIErrorWithCause(message string, cause error) error {
-	if apiErr, ok := cause.(*APIError); ok {
+	var apiErr *APIError
+	if errors.As(cause, &apiErr) {
 		return &APIError{
 			Status:        apiErr.Status,
 			Message:       fmt.Sprintf("%s: %s", message, apiErr.Message),
@@ -52,16 +53,12 @@ func NewAPIErrorWithCause(message string, cause error) error {
 }
 
 // UnwrapAPIError returns an API Error if one exists in the given error's chain or nil if no API Error exists in the chain.
-func UnwrapAPIError(orgErr error) *APIError {
-	err := orgErr
-	for {
-		if apiErr, ok := err.(*APIError); ok {
-			return apiErr
-		}
-		if err = errors.Unwrap(err); err == nil {
-			return NewInternalServerError(orgErr)
-		}
+func UnwrapAPIError(err error) *APIError {
+	var apiErr *APIError
+	if errors.As(err, &apiErr) {
+		return apiErr
 	}
+	return NewInternalServerError(err)
 }
 
 type APIError struct {

@@ -77,15 +77,20 @@ def run(ctx):
 	if err != nil {
 		return nil, fmt.Errorf("failed to create script for listing bucket. Cause: %w", err)
 	}
-	statement, err := transaction.Prepare("SELECT " + schemaName + ".LS(?)")
+	statement, err := transaction.Prepare("SELECT " + schemaName + ".LS(?)") //nolint:gosec // SQL string concatenation is safe here
 	if err != nil {
 		return nil, fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
 	}
+	defer statement.Close()
 	result, err := statement.Query(directory)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list files in BucketFS using UDF. Cause: %w", err)
 	}
+	defer result.Close()
 	for result.Next() {
+		if result.Err() != nil {
+			return nil, fmt.Errorf("failed reading result of BucketFS list UDF. Cause: %w", err)
+		}
 		var file BfsFile
 		var fileSize float64
 		err = result.Scan(&file.Name, &fileSize)

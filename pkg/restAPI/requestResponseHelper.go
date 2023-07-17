@@ -34,8 +34,12 @@ func SendJSONWithStatus(ctx context.Context, status int, writer http.ResponseWri
 	writer.WriteHeader(status)
 
 	if log.IsLevelEnabled(log.TraceLevel) {
-		jsonData, _ := json.MarshalIndent(data, "", "    ")
-		logger.Debugf("Send json %s", jsonData)
+		jsonData, err := json.MarshalIndent(data, "", "    ")
+		if err != nil {
+			logger.Warnf("Failed to format json data for logging: %q", data)
+		} else {
+			logger.Debugf("Send json %s", jsonData)
+		}
 	}
 	if data != nil {
 		encoder := json.NewEncoder(writer)
@@ -139,7 +143,7 @@ func DecodeJSONBody(writer http.ResponseWriter, request *http.Request, dst inter
 	}
 
 	err = dec.Decode(&struct{}{})
-	if err != io.EOF {
+	if !errors.Is(err, io.EOF) {
 		return apiErrors.NewBadRequestErrorF("Request body must only contain a single JSON object")
 	}
 
