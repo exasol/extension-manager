@@ -51,11 +51,11 @@ type controllerImpl struct {
 	metaDataReader extensionAPI.ExaMetadataReader
 }
 
-func createImpl(extensionRegistryURL string, schema string) controller {
+func createImpl(config ExtensionManagerConfig) controller {
 	return &controllerImpl{
-		registry:       registry.NewRegistry(extensionRegistryURL),
+		registry:       registry.NewRegistry(config.ExtensionRegistryURL),
 		metaDataReader: extensionAPI.CreateExaMetaDataReader(),
-		schema:         schema,
+		schema:         config.ExtensionSchema,
 	}
 }
 

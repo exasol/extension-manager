@@ -17,16 +17,11 @@ const (
 	BasicAuth  = "DbUsernamePassword"
 )
 
-// Configuration options for the extension manager.
-type ExtensionManagerConfig struct {
-	ExtensionRegistryURL string // URL of the extension registry index used to find available extensions. This can also be the path of a local directory.
-}
-
 // AddPublicEndpoints adds the extension manager endpoints to the API.
 // The config struct contains configuration options for the extension manager.
 /* [impl -> dsn~go-library~1]. */
-func AddPublicEndpoints(api *openapi.API, config ExtensionManagerConfig) error {
-	controller := extensionController.Create(config.ExtensionRegistryURL, EXTENSION_SCHEMA_NAME)
+func AddPublicEndpoints(api *openapi.API, config extensionController.ExtensionManagerConfig) error {
+	controller := extensionController.CreateWithConfig(config)
 	return addPublicEndpointsWithController(api, controller)
 }
 
