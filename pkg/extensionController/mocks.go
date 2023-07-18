@@ -24,16 +24,8 @@ func (m *bucketFsMock) simulateFiles(files []BfsFile) {
 	m.On("ListFiles", mock.Anything, mock.Anything, "default").Return(files, nil)
 }
 
-func (m *bucketFsMock) ListBuckets(ctx context.Context, db *sql.DB) ([]string, error) {
-	args := m.Called(ctx, db)
-	if buckets, ok := args.Get(0).([]string); ok {
-		return buckets, args.Error(1)
-	}
-	return nil, args.Error(1)
-}
-
-func (mock *bucketFsMock) ListFiles(ctx context.Context, db *sql.DB, bucket string) ([]BfsFile, error) {
-	args := mock.Called(ctx, db, bucket)
+func (mock *bucketFsMock) ListFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error) {
+	args := mock.Called(ctx, db)
 	if buckets, ok := args.Get(0).([]BfsFile); ok {
 		return buckets, args.Error(1)
 	}

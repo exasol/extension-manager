@@ -40,7 +40,7 @@ func (suite *BucketFsAPISuite) BeforeTest(suiteName, testName string) {
 /* [utest -> dsn~extension-components~1] */
 func (suite *BucketFsAPISuite) TestListEmptyDir() {
 	bfsAPI := suite.createBucketFs()
-	result, err := bfsAPI.ListFiles(context.Background(), suite.exasol.GetConnection(), DEFAULT_BUCKET_PATH)
+	result, err := bfsAPI.ListFiles(context.Background(), suite.exasol.GetConnection())
 	suite.NoError(err)
 	suite.Empty(result)
 }
@@ -52,7 +52,7 @@ func (suite *BucketFsAPISuite) TestListSingleFile() {
 	suite.T().Cleanup(func() {
 		suite.NoError(suite.exasol.Exasol.DeleteFile(fileName))
 	})
-	result, err := bfsAPI.ListFiles(context.Background(), suite.exasol.GetConnection(), DEFAULT_BUCKET_PATH)
+	result, err := bfsAPI.ListFiles(context.Background(), suite.exasol.GetConnection())
 	suite.NoError(err)
 	suite.Len(result, 1)
 	suite.Equal([]BfsFile{{Name: fileName, Path: DEFAULT_BUCKET_PATH + fileName, Size: 5}}, result)
@@ -71,7 +71,7 @@ func (suite *BucketFsAPISuite) TestListFilesRecursively() {
 		suite.NoError(suite.exasol.Exasol.DeleteFile(file2))
 		suite.NoError(suite.exasol.Exasol.DeleteFile(file3))
 	})
-	result, err := bfsAPI.ListFiles(context.Background(), suite.exasol.GetConnection(), DEFAULT_BUCKET_PATH)
+	result, err := bfsAPI.ListFiles(context.Background(), suite.exasol.GetConnection())
 	suite.NoError(err)
 	suite.Len(result, 3)
 	suite.Equal([]BfsFile{
@@ -81,5 +81,5 @@ func (suite *BucketFsAPISuite) TestListFilesRecursively() {
 }
 
 func (suite *BucketFsAPISuite) createBucketFs() BucketFsAPI {
-	return CreateBucketFsAPI()
+	return CreateBucketFsAPI(DEFAULT_BUCKET_PATH)
 }

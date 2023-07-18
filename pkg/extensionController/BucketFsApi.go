@@ -11,21 +11,22 @@ import (
 // BucketFsAPI allows access to BucketFS. Currently, it's implemented by running UDFs via SQL that read the data.
 // In the future that implementation might be replaced by direct access.
 type BucketFsAPI interface {
-	// ListFiles lists the files in a given bucket
-	ListFiles(ctx context.Context, db *sql.DB, bucket string) ([]BfsFile, error)
+	// ListFiles lists all files in a given bucket recursively.
+	ListFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error)
 }
 
 // CreateBucketFsAPI creates an instance of BucketFsAPI.
-func CreateBucketFsAPI() BucketFsAPI {
-	return &bucketFsAPIImpl{}
+func CreateBucketFsAPI(bucketFsBasePath string) BucketFsAPI {
+	return &bucketFsAPIImpl{bucketFsBasePath: bucketFsBasePath}
 }
 
 type bucketFsAPIImpl struct {
+	bucketFsBasePath string
 }
 
 /* [impl -> dsn~extension-components~1]. */
-func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB, path string) ([]BfsFile, error) {
-	return bfs.listDirInUDF(ctx, db, path)
+func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error) {
+	return bfs.listDirInUDF(ctx, db)
 }
 
 // BfsFile represents a file in BucketFS.
@@ -35,7 +36,7 @@ type BfsFile struct {
 	Size int
 }
 
-func (bfs bucketFsAPIImpl) listDirInUDF(ctx context.Context, db *sql.DB, path string) (files []BfsFile, retErr error) {
+func (bfs bucketFsAPIImpl) listDirInUDF(ctx context.Context, db *sql.DB) (files []BfsFile, retErr error) {
 	transaction, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a transaction. Cause: %w", err)
@@ -46,17 +47,17 @@ func (bfs bucketFsAPIImpl) listDirInUDF(ctx context.Context, db *sql.DB, path st
 			retErr = fmt.Errorf("failed to rollback transaction. Cause: %w", err)
 		}
 	}()
-	scriptName, err := createUdfScript(transaction)
+	scriptName, err := bfs.createUdfScript(transaction)
 	if err != nil {
 		return nil, err
 	}
-	return queryUdfScript(transaction, scriptName, path, files)
+	return bfs.queryUdfScript(transaction, scriptName)
 }
 
 //go:embed list_files_recursively_udf.py
 var listFilesRecursivelyUdfContent string
 
-func createUdfScript(transaction *sql.Tx) (string, error) {
+func (bfs bucketFsAPIImpl) createUdfScript(transaction *sql.Tx) (string, error) {
 	schemaName := fmt.Sprintf("INTERNAL_%v", time.Now().Unix())
 	_, err := transaction.Exec("CREATE SCHEMA " + schemaName)
 	if err != nil {
@@ -74,17 +75,18 @@ func createUdfScript(transaction *sql.Tx) (string, error) {
 	return scriptName, nil
 }
 
-func queryUdfScript(transaction *sql.Tx, scriptName string, path string, files []BfsFile) ([]BfsFile, error) {
+func (bfs bucketFsAPIImpl) queryUdfScript(transaction *sql.Tx, scriptName string) ([]BfsFile, error) {
 	statement, err := transaction.Prepare("SELECT " + scriptName + "(?) ORDER BY FULL_PATH") //nolint:gosec // SQL string concatenation is safe here
 	if err != nil {
 		return nil, fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
 	}
 	defer statement.Close()
-	result, err := statement.Query(path)
+	result, err := statement.Query(bfs.bucketFsBasePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list files in BucketFS using UDF. Cause: %w", err)
 	}
 	defer result.Close()
+	var files []BfsFile
 	for result.Next() {
 		if result.Err() != nil {
 			return nil, fmt.Errorf("failed iterating BucketFS list UDF. Cause: %w", err)

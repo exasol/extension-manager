@@ -92,7 +92,9 @@ func Create(extensionRegistryURL string, schema string) TransactionController {
 // CreateWithConfig creates a new instance of [TransactionController] with more configuration options.
 func CreateWithConfig(config ExtensionManagerConfig) TransactionController {
 	controller := createImpl(config)
-	return &transactionControllerImpl{controller: controller, bucketFs: CreateBucketFsAPI()}
+	return &transactionControllerImpl{
+		controller: controller,
+		bucketFs:   CreateBucketFsAPI(config.BucketFSBasePath)}
 }
 
 type transactionControllerImpl struct {
@@ -109,7 +111,7 @@ func (c *transactionControllerImpl) GetAllExtensions(ctx context.Context, db *sq
 }
 
 func (c *transactionControllerImpl) listBfsFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error) {
-	bfsFiles, err := c.bucketFs.ListFiles(ctx, db, "default")
+	bfsFiles, err := c.bucketFs.ListFiles(ctx, db)
 	if err != nil {
 		return nil, fmt.Errorf("failed to search for required files in BucketFS. Cause: %w", err)
 	}
