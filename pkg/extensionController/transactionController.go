@@ -60,11 +60,11 @@ type ParameterValue struct {
 	Value string
 }
 
-// ExtInstallation represents the installation of an Extension
+// ExtInstallation represents the installation of an Extension.
 type ExtInstallation struct {
 }
 
-// Create an instance of TransactionController
+// Create an instance of TransactionController.
 func Create(extensionRegistryURL string, schema string) TransactionController {
 	controller := createImpl(extensionRegistryURL, schema)
 	return &transactionControllerImpl{controller: controller, bucketFs: CreateBucketFsAPI()}

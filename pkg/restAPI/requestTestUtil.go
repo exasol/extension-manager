@@ -1,6 +1,7 @@
 package restAPI
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -30,7 +31,7 @@ type baseRestAPITest struct {
 func (t *baseRestAPITest) makeRequestWithAuthHeader(method string, path string, authHeader string, body string, expectedStatusCode int) string {
 	t.suite.T().Helper()
 	url := t.baseUrl + path
-	request, err := http.NewRequest(method, url, strings.NewReader(body))
+	request, err := http.NewRequestWithContext(context.Background(), method, url, strings.NewReader(body))
 	if err != nil {
 		t.suite.FailNowf("Creating request %s %s failed: %v", method, url, err)
 	}

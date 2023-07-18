@@ -8,7 +8,7 @@ import (
 
 const supportedApiVersion = "0.2.0"
 
-/* [impl -> dsn~extension-compatibility~1] */
+/* [impl -> dsn~extension-compatibility~1]. */
 func validateExtensionIsCompatibleWithApiVersion(extensionId, currentExtensionApiVersion string) error {
 	prefixedVersion := "v" + currentExtensionApiVersion
 	if !semver.IsValid(prefixedVersion) {

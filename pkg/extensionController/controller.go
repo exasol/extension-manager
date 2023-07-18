@@ -59,7 +59,7 @@ func createImpl(extensionRegistryURL string, schema string) controller {
 	}
 }
 
-/* [impl -> dsn~list-extensions~1] */
+/* [impl -> dsn~list-extensions~1]. */
 func (c *controllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, error) {
 	jsExtensions, err := c.getAllExtensions()
 	if err != nil {
@@ -110,7 +110,7 @@ func (c *controllerImpl) getAllExtensions() ([]*extensionAPI.JsExtension, error)
 	if err != nil {
 		return nil, err
 	}
-	var extensions []*extensionAPI.JsExtension
+	extensions := make([]*extensionAPI.JsExtension, 0, len(extensionIds))
 	for _, id := range extensionIds {
 		extension, err := c.loadExtensionById(id)
 		if err != nil {
@@ -254,7 +254,7 @@ func (c *controllerImpl) ensureSchemaExists(tx *sql.Tx) error {
 	return nil
 }
 
-/* [impl -> dsn~parameter-types~1] */
+/* [impl -> dsn~parameter-types~1]. */
 func validateParameters(parameterDefinitions []parameterValidator.ParameterDefinition, params extensionAPI.ParameterValues) error {
 	validator, err := parameterValidator.New()
 	if err != nil {

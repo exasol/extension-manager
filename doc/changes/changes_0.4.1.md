@@ -6,11 +6,12 @@ Code name:
 
 This release improves error handling when using extensions not implementing all functions required by EM. EM now returns a helpful error message instead of failing with a `nil`-pointer error.
 
-A common scenario for an extension not implementing a required function is when the extension had been built using an older version of EM's extension intererface.
+A common scenario for an extension not implementing a required function is when the extension had been built using an older version of EM's extension interface.
 
 ## Bugfixes
 
 * #105: Ensured that EM can load and use compatible extensions
+* #74: Fixed most important linter warnings
 
 ## Dependency Updates
 

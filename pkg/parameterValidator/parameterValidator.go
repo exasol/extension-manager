@@ -78,7 +78,7 @@ type Validator struct {
 
 // New creates a new reusable validator.
 /* [impl -> dsn~reuse-parameter-validation-rules~1] */
-/* [impl -> dsn~parameter-validation-rules-simple~1] */
+/* [impl -> dsn~parameter-validation-rules-simple~1]. */
 func New() (*Validator, error) {
 	vm := newJavaScriptVm()
 	globalJsObj := vm.NewObject()
@@ -103,7 +103,7 @@ func New() (*Validator, error) {
 // ValidateParameters validates parameter values against the parameter definition and returns a list of failed validations.
 // If all parameters are valid, this returns an empty slice.
 /* [impl -> dsn~validate-parameters~1] */
-/* [impl -> dsn~parameter-definitions~1] */
+/* [impl -> dsn~parameter-definitions~1]. */
 func (v *Validator) ValidateParameters(definitions []ParameterDefinition, params extensionAPI.ParameterValues) (failedValidations []ValidationResult, err error) {
 	result := make([]ValidationResult, 0)
 	for _, def := range definitions {
@@ -134,7 +134,7 @@ func findParamValue(params extensionAPI.ParameterValues, id string) string {
 	return ""
 }
 
-// ValidateParameters uses the given parameter definition to validate a single value
+// ValidateParameters uses the given parameter definition to validate a single value.
 func (v *Validator) ValidateParameter(def ParameterDefinition, value string) (validationResult *ValidationResult, errorResult error) {
 	defer func() {
 		if err := recover(); err != nil {

@@ -87,7 +87,7 @@ func (builder *TestExtensionBuilder) WithGetInstanceParameterDefinitionFunc(tsFu
 	return builder
 }
 
-// MockFindInstallationsFunction creates a JS findInstallations function with extension name and version
+// MockFindInstallationsFunction creates a JS findInstallations function with extension name and version.
 func MockFindInstallationsFunction(extensionName string, version string) string {
 	template := `return [{name: "$NAME$", version: "$VERSION$"}]`
 	filledTemplate := strings.Replace(template, "$NAME$", extensionName, 1)

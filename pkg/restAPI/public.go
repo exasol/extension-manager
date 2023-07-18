@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	/* [impl -> const~use-reserved-schema~1] */
+	/* [impl -> const~use-reserved-schema~1]. */
 	EXTENSION_SCHEMA_NAME = "EXA_EXTENSIONS"
 
 	TagExtension    = "Extension"
@@ -24,14 +24,14 @@ type ExtensionManagerConfig struct {
 
 // AddPublicEndpoints adds the extension manager endpoints to the API.
 // The config struct contains configuration options for the extension manager.
-/* [impl -> dsn~go-library~1] */
+/* [impl -> dsn~go-library~1]. */
 func AddPublicEndpoints(api *openapi.API, config ExtensionManagerConfig) error {
 	controller := extensionController.Create(config.ExtensionRegistryURL, EXTENSION_SCHEMA_NAME)
 	return addPublicEndpointsWithController(api, controller)
 }
 
 /* [impl -> dsn~rest-interface~1] */
-/* [impl -> dsn~openapi-spec~1] */
+/* [impl -> dsn~openapi-spec~1]. */
 func addPublicEndpointsWithController(api *openapi.API, controller extensionController.TransactionController) error {
 	api.AddTag(TagExtension, "List and install extensions")
 	api.AddTag(TagInstallation, "List and uninstall installed extensions")

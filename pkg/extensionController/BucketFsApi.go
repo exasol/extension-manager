@@ -17,7 +17,7 @@ type BucketFsAPI interface {
 	ListFiles(ctx context.Context, db *sql.DB, bucket string) ([]BfsFile, error)
 }
 
-// CreateBucketFsAPI creates an instance of BucketFsAPI
+// CreateBucketFsAPI creates an instance of BucketFsAPI.
 func CreateBucketFsAPI() BucketFsAPI {
 	return &bucketFsAPIImpl{}
 }
@@ -37,7 +37,7 @@ func (bfs bucketFsAPIImpl) ListBuckets(ctx context.Context, db *sql.DB) ([]strin
 	return names, nil
 }
 
-/* [impl -> dsn~extension-components~1] */
+/* [impl -> dsn~extension-components~1]. */
 func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB, bucket string) ([]BfsFile, error) {
 	if strings.Contains(bucket, "/") {
 		return nil, fmt.Errorf("invalid bucket name. Bucket name must not contain slashes")
@@ -45,7 +45,7 @@ func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB, bucket str
 	return bfs.listDirInUDF(ctx, db, "/buckets/bfsdefault/"+bucket)
 }
 
-// BfsFile represents a file in BucketFS
+// BfsFile represents a file in BucketFS.
 type BfsFile struct {
 	Name string
 	Size int
@@ -77,15 +77,20 @@ def run(ctx):
 	if err != nil {
 		return nil, fmt.Errorf("failed to create script for listing bucket. Cause: %w", err)
 	}
-	statement, err := transaction.Prepare("SELECT " + schemaName + ".LS(?)")
+	statement, err := transaction.Prepare("SELECT " + schemaName + ".LS(?)") //nolint:gosec // SQL string concatenation is safe here
 	if err != nil {
 		return nil, fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
 	}
+	defer statement.Close()
 	result, err := statement.Query(directory)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list files in BucketFS using UDF. Cause: %w", err)
 	}
+	defer result.Close()
 	for result.Next() {
+		if result.Err() != nil {
+			return nil, fmt.Errorf("failed iterating BucketFS list UDF. Cause: %w", err)
+		}
 		var file BfsFile
 		var fileSize float64
 		err = result.Scan(&file.Name, &fileSize)

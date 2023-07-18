@@ -23,7 +23,7 @@ type metaDataReaderImpl struct {
 }
 
 // ReadMetadataTables reads the metadata tables of the given schema.
-/* [impl -> dsn~extension-components~1] */
+/* [impl -> dsn~extension-components~1]. */
 func (r *metaDataReaderImpl) ReadMetadataTables(tx *sql.Tx, schemaName string) (*ExaMetadata, error) {
 	allScripts, err := readExaAllScriptTable(tx, schemaName)
 	if err != nil {
@@ -44,8 +44,12 @@ WHERE SCRIPT_SCHEMA=?`, schemaName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read SYS.EXA_ALL_SCRIPTS: %w", err)
 	}
+	defer result.Close()
 	rows := make([]ExaScriptRow, 0)
 	for result.Next() {
+		if result.Err() != nil {
+			return nil, fmt.Errorf("failed to iterate SYS.EXA_ALL_SCRIPTS: %w", err)
+		}
 		var row ExaScriptRow
 		var inputType sql.NullString
 		var resultType sql.NullString
@@ -79,8 +83,12 @@ func getExasolMajorVersion(tx *sql.Tx) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("query failed: %w", err)
 	}
+	defer result.Close()
 	if !result.Next() {
 		return "", fmt.Errorf("no result found for query")
+	}
+	if result.Err() != nil {
+		return "", fmt.Errorf("failed to iterate SYS.EXA_METADATA: %w", err)
 	}
 	var majorVersion string
 	err = result.Scan(&majorVersion)
@@ -90,7 +98,7 @@ func getExasolMajorVersion(tx *sql.Tx) (string, error) {
 	return majorVersion, nil
 }
 
-// This reads virtual schemas from the metadata tables of Exasol version 8
+// This reads virtual schemas from the metadata tables of Exasol version 8.
 func readExaAllVirtualSchemasTableV8(tx *sql.Tx) (*ExaVirtualSchemasTable, error) {
 	result, err := tx.Query(`
 SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT_SCHEMA, ADAPTER_SCRIPT_NAME, ADAPTER_NOTES
@@ -98,8 +106,12 @@ FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS`)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
 	}
+	defer result.Close()
 	rows := make([]ExaVirtualSchemaRow, 0)
 	for result.Next() {
+		if result.Err() != nil {
+			return nil, fmt.Errorf("failed to iterate SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
+		}
 		var row ExaVirtualSchemaRow
 		err := result.Scan(&row.Name, &row.Owner, &row.AdapterScriptSchema, &row.AdapterScriptName, &row.AdapterNotes)
 		if err != nil {
@@ -110,7 +122,7 @@ FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS`)
 	return &ExaVirtualSchemasTable{Rows: rows}, nil
 }
 
-// This reads virtual schemas from the metadata tables of Exasol version 7.1
+// This reads virtual schemas from the metadata tables of Exasol version 7.1.
 func readExaAllVirtualSchemasTableV7(tx *sql.Tx) (*ExaVirtualSchemasTable, error) {
 	result, err := tx.Query(`
 SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT, ADAPTER_NOTES
@@ -118,8 +130,12 @@ FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS`)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
 	}
+	defer result.Close()
 	rows := make([]ExaVirtualSchemaRow, 0)
 	for result.Next() {
+		if result.Err() != nil {
+			return nil, fmt.Errorf("failed to iterate SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
+		}
 		var row ExaVirtualSchemaRow
 		var adapterScriptSchemaAndName string
 		err := result.Scan(&row.Name, &row.Owner, &adapterScriptSchemaAndName, &row.AdapterNotes)

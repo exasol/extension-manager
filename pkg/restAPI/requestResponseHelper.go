@@ -19,7 +19,7 @@ const (
 	HeaderContentType = "Content-Type"
 )
 
-// SendJSON to writer
+// SendJSON converts the given data to JSON and sends it to the writer.
 func SendJSON(ctx context.Context, writer http.ResponseWriter, data interface{}) {
 	SendJSONWithStatus(ctx, 200, writer, data)
 }
@@ -34,8 +34,12 @@ func SendJSONWithStatus(ctx context.Context, status int, writer http.ResponseWri
 	writer.WriteHeader(status)
 
 	if log.IsLevelEnabled(log.TraceLevel) {
-		jsonData, _ := json.MarshalIndent(data, "", "    ")
-		logger.Debugf("Send json %s", jsonData)
+		jsonData, err := json.MarshalIndent(data, "", "    ")
+		if err != nil {
+			logger.Warnf("Failed to format json data for logging: %q", data)
+		} else {
+			logger.Debugf("Send json %s", jsonData)
+		}
 	}
 	if data != nil {
 		encoder := json.NewEncoder(writer)
@@ -104,44 +108,48 @@ func DecodeJSONBody(writer http.ResponseWriter, request *http.Request, dst inter
 	}
 
 	request.Body = http.MaxBytesReader(writer, request.Body, 1048576)
-
 	dec := json.NewDecoder(request.Body)
 	dec.DisallowUnknownFields()
-
 	err := dec.Decode(&dst)
 	if err != nil {
-		var syntaxError *json.SyntaxError
-		var unmarshalTypeError *json.UnmarshalTypeError
-
-		switch {
-		case errors.As(err, &syntaxError):
-			return apiErrors.NewBadRequestErrorF("Request body contains badly-formed JSON (at position %d)", syntaxError.Offset)
-
-		case errors.Is(err, io.ErrUnexpectedEOF):
-			return apiErrors.NewBadRequestErrorF("Request body contains badly-formed JSON")
-
-		case errors.As(err, &unmarshalTypeError):
-			return apiErrors.NewBadRequestErrorF("Request body contains an invalid value for the %q field (at position %d)", unmarshalTypeError.Field, unmarshalTypeError.Offset)
-
-		case strings.HasPrefix(err.Error(), "json: unknown field "):
-			fieldName := strings.TrimPrefix(err.Error(), "json: unknown field ")
-			return apiErrors.NewBadRequestErrorF("Request body contains unknown field %q", fieldName)
-
-		case errors.Is(err, io.EOF):
-			return apiErrors.NewBadRequestErrorF("Request body must not be empty")
-
-		case err.Error() == "http: request body too large":
-			return apiErrors.NewBadRequestErrorF("Request body must not be larger than 1MB")
-
-		default:
-			return err
-		}
+		return convertError(err)
 	}
 
-	err = dec.Decode(&struct{}{})
-	if err != io.EOF {
+	return verifyNoMoreJsonContent(dec)
+}
+
+func verifyNoMoreJsonContent(dec *json.Decoder) error {
+	err := dec.Decode(&struct{}{})
+	if !errors.Is(err, io.EOF) {
 		return apiErrors.NewBadRequestErrorF("Request body must only contain a single JSON object")
 	}
-
 	return nil
+}
+
+func convertError(err error) error {
+	var syntaxError *json.SyntaxError
+	var unmarshalTypeError *json.UnmarshalTypeError
+	switch {
+	case errors.As(err, &syntaxError):
+		return apiErrors.NewBadRequestErrorF("Request body contains badly-formed JSON (at position %d)", syntaxError.Offset)
+
+	case errors.Is(err, io.ErrUnexpectedEOF):
+		return apiErrors.NewBadRequestErrorF("Request body contains badly-formed JSON")
+
+	case errors.As(err, &unmarshalTypeError):
+		return apiErrors.NewBadRequestErrorF("Request body contains an invalid value for the %q field (at position %d)", unmarshalTypeError.Field, unmarshalTypeError.Offset)
+
+	case strings.HasPrefix(err.Error(), "json: unknown field "):
+		fieldName := strings.TrimPrefix(err.Error(), "json: unknown field ")
+		return apiErrors.NewBadRequestErrorF("Request body contains unknown field %q", fieldName)
+
+	case errors.Is(err, io.EOF):
+		return apiErrors.NewBadRequestErrorF("Request body must not be empty")
+
+	case err.Error() == "http: request body too large":
+		return apiErrors.NewBadRequestErrorF("Request body must not be larger than 1MB")
+
+	default:
+		return err
+	}
 }

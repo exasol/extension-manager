@@ -51,8 +51,9 @@ func (api *restAPIImpl) Serve() {
 		log.Fatalf("failed to setup api: %v", err)
 	}
 	api.server = &http.Server{
-		Addr:    api.serverAddress,
-		Handler: handler,
+		Addr:              api.serverAddress,
+		Handler:           handler,
+		ReadHeaderTimeout: 3 * time.Second,
 	}
 	api.startServer()
 }
@@ -67,15 +68,18 @@ func (api *restAPIImpl) startServer() {
 }
 
 func (api *restAPIImpl) waitUntilServerReplies() {
-	request, err := http.NewRequest("GET", fmt.Sprintf("http://%s", api.serverAddress), strings.NewReader(""))
+	request, err := http.NewRequestWithContext(context.Background(), "GET", fmt.Sprintf("http://%s", api.serverAddress), strings.NewReader(""))
 	if err != nil {
 		log.Fatalf("failed to create request: %v", err)
 	}
 	timeout := time.Now().Add(1 * time.Second)
 	for {
 		response, err := http.DefaultClient.Do(request)
-		if err == nil && response.StatusCode == 404 {
-			return
+		if err == nil {
+			response.Body.Close()
+			if response.StatusCode == 404 {
+				return
+			}
 		}
 		if time.Now().After(timeout) {
 			log.Fatalf("Server did not reply within 1s, error: %v, response: %d %s", err, response.StatusCode, response.Status)

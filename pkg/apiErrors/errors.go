@@ -41,7 +41,8 @@ func NewAPIError(status int, message string) error {
 }
 
 func NewAPIErrorWithCause(message string, cause error) error {
-	if apiErr, ok := cause.(*APIError); ok {
+	var apiErr *APIError
+	if errors.As(cause, &apiErr) {
 		return &APIError{
 			Status:        apiErr.Status,
 			Message:       fmt.Sprintf("%s: %s", message, apiErr.Message),
@@ -52,23 +53,19 @@ func NewAPIErrorWithCause(message string, cause error) error {
 }
 
 // UnwrapAPIError returns an API Error if one exists in the given error's chain or nil if no API Error exists in the chain.
-func UnwrapAPIError(orgErr error) *APIError {
-	err := orgErr
-	for {
-		if apiErr, ok := err.(*APIError); ok {
-			return apiErr
-		}
-		if err = errors.Unwrap(err); err == nil {
-			return NewInternalServerError(orgErr)
-		}
+func UnwrapAPIError(err error) *APIError {
+	var apiErr *APIError
+	if errors.As(err, &apiErr) {
+		return apiErr
 	}
+	return NewInternalServerError(err)
 }
 
 type APIError struct {
 	Status        int    `json:"code"`                // HTTP status code
 	Message       string `json:"message"`             // human-readable message
 	RequestID     string `json:"requestID,omitempty"` // ID to identify the request that caused this error
-	Timestamp     string `json:"timestamp,omitempty" jsonschema:"format=date-time" `
+	Timestamp     string `json:"timestamp,omitempty" jsonschema:"format=date-time"`
 	APIID         string `json:"apiID,omitempty"` // Corresponding API action
 	OriginalError error  `json:"-"`
 }
