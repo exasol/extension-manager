@@ -1,4 +1,4 @@
-# Extension Manager 0.4.1, released 2023-??-??
+# Extension Manager 0.5.0, released 2023-??-??
 
 Code name:
 
@@ -32,7 +32,7 @@ A common scenario for an extension not implementing a required function is when 
 
 #### Compile Dependency Updates
 
-* Updated `com.exasol:extension-manager-client-java:0.4.0` to `0.4.1`
+* Updated `com.exasol:extension-manager-client-java:0.4.0` to `0.5.0`
 
 #### Plugin Dependency Updates
 
