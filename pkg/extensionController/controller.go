@@ -64,13 +64,13 @@ func (c *controllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, err
 	if err != nil {
 		return nil, err
 	}
-	log.Infof("Filtering %d extensions using %d files in BucketFS", len(jsExtensions), len(bfsFiles))
 	var extensions []*Extension
 	for _, jsExtension := range jsExtensions {
 		if c.requiredFilesAvailable(jsExtension, bfsFiles) {
 			extensions = append(extensions, convertExtension(jsExtension))
 		}
 	}
+	log.Infof("Found %d of %d extensions with required files (%d files available in total)", len(extensions), len(jsExtensions), len(bfsFiles))
 	return extensions, nil
 }
 

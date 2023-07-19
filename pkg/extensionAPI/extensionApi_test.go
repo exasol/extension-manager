@@ -90,7 +90,7 @@ func (suite *ExtensionApiSuite) TestInstallResolveBucketFsPath() {
 	suite.NoError(err)
 }
 
-func (suite *ExtensionApiSuite) TestJavaScriptConsoleLogWorks() {
+func (suite *ExtensionApiSuite) TestJavaScriptConsoleLog() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithInstallFunc("console.log('test log message')").
 		Build().AsString()
@@ -99,7 +99,7 @@ func (suite *ExtensionApiSuite) TestJavaScriptConsoleLogWorks() {
 	suite.NoError(err)
 }
 
-func (suite *ExtensionApiSuite) TestJavaScriptConsoleWarnWorks() {
+func (suite *ExtensionApiSuite) TestJavaScriptConsoleWarn() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithInstallFunc("console.warn('test warning message')").
 		Build().AsString()
@@ -108,7 +108,7 @@ func (suite *ExtensionApiSuite) TestJavaScriptConsoleWarnWorks() {
 	suite.NoError(err)
 }
 
-func (suite *ExtensionApiSuite) TestJavaScriptConsoleErrorWorks() {
+func (suite *ExtensionApiSuite) TestJavaScriptConsoleError() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithInstallFunc("console.error('test error message')").
 		Build().AsString()
