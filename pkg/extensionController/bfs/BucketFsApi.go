@@ -12,6 +12,11 @@ import (
 type BucketFsAPI interface {
 	// ListFiles lists all files in the configured directory recursively.
 	ListFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error)
+
+	// FindAbsolutePath searches for a file with the given name in BucketFS and returns its absolute path.
+	// If multiple files with the same name exist in different folders, this picks an arbitrary file and returns it's path.
+	// If no file with the given name exists, this will return an error.
+	FindAbsolutePath(ctx context.Context, db *sql.DB, fileName string) (string, error)
 }
 
 // BfsFile represents a file in BucketFS.
@@ -34,18 +39,13 @@ type bucketFsAPIImpl struct {
 }
 
 /* [impl -> dsn~extension-components~1]. */
-func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error) {
-	return bfs.listDirInUDF(ctx, db)
-}
-
-func (bfs bucketFsAPIImpl) listDirInUDF(ctx context.Context, db *sql.DB) (files []BfsFile, retErr error) {
+func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB) (files []BfsFile, retErr error) {
 	transaction, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a transaction. Cause: %w", err)
 	}
 	defer func() {
-		err = transaction.Rollback()
-		if err != nil {
+		if err = transaction.Rollback(); err != nil {
 			retErr = fmt.Errorf("failed to rollback transaction. Cause: %w", err)
 		}
 	}()
@@ -53,7 +53,24 @@ func (bfs bucketFsAPIImpl) listDirInUDF(ctx context.Context, db *sql.DB) (files 
 	if err != nil {
 		return nil, err
 	}
-	return bfs.queryUdfScript(transaction, scriptName)
+	return bfs.queryBucketFsContent(transaction, scriptName)
+}
+
+func (bfs bucketFsAPIImpl) FindAbsolutePath(ctx context.Context, db *sql.DB, fileName string) (absolutePath string, retErr error) {
+	transaction, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to create a transaction. Cause: %w", err)
+	}
+	defer func() {
+		if err = transaction.Rollback(); err != nil {
+			retErr = fmt.Errorf("failed to rollback transaction. Cause: %w", err)
+		}
+	}()
+	scriptName, err := bfs.createUdfScript(transaction)
+	if err != nil {
+		return "", err
+	}
+	return bfs.queryAbsoluteFilePath(transaction, scriptName, fileName)
 }
 
 //go:embed list_files_recursively_udf.py
@@ -77,7 +94,7 @@ func (bfs bucketFsAPIImpl) createUdfScript(transaction *sql.Tx) (string, error) 
 	return scriptName, nil
 }
 
-func (bfs bucketFsAPIImpl) queryUdfScript(transaction *sql.Tx, scriptName string) ([]BfsFile, error) {
+func (bfs bucketFsAPIImpl) queryBucketFsContent(transaction *sql.Tx, scriptName string) ([]BfsFile, error) {
 	statement, err := transaction.Prepare("SELECT " + scriptName + "(?) ORDER BY FULL_PATH") //nolint:gosec // SQL string concatenation is safe here
 	if err != nil {
 		return nil, fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
@@ -88,18 +105,18 @@ func (bfs bucketFsAPIImpl) queryUdfScript(transaction *sql.Tx, scriptName string
 		return nil, fmt.Errorf("failed to list files in BucketFS using UDF. Cause: %w", err)
 	}
 	defer result.Close()
-	return readQueryResult(result, err)
+	return readQueryResult(result)
 }
 
-func readQueryResult(result *sql.Rows, err error) ([]BfsFile, error) {
+func readQueryResult(result *sql.Rows) ([]BfsFile, error) {
 	var files []BfsFile
 	for result.Next() {
 		if result.Err() != nil {
-			return nil, fmt.Errorf("failed iterating BucketFS list UDF. Cause: %w", err)
+			return nil, fmt.Errorf("failed iterating BucketFS list UDF. Cause: %w", result.Err())
 		}
 		var file BfsFile
 		var fileSize float64
-		err = result.Scan(&file.Name, &file.Path, &fileSize)
+		err := result.Scan(&file.Name, &file.Path, &fileSize)
 		if err != nil {
 			return nil, fmt.Errorf("failed reading result of BucketFS list UDF. Cause: %w", err)
 		}
@@ -107,4 +124,30 @@ func readQueryResult(result *sql.Rows, err error) ([]BfsFile, error) {
 		files = append(files, file)
 	}
 	return files, nil
+}
+
+func (bfs bucketFsAPIImpl) queryAbsoluteFilePath(transaction *sql.Tx, scriptName string, fileName string) (string, error) {
+	// select "PATH" from (select test.ls('/scripts')) order by "PATH" limit 1;
+	statement, err := transaction.Prepare(`select FULL_PATH from (SELECT ` + scriptName + `(?)) ORDER BY FULL_PATH LIMIT 1`) //nolint:gosec // SQL string concatenation is safe here
+	if err != nil {
+		return "", fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
+	}
+	defer statement.Close()
+	result, err := statement.Query(bfs.bucketFsBasePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to list files in BucketFS using UDF. Cause: %w", err)
+	}
+	defer result.Close()
+	if !result.Next() {
+		if result.Err() != nil {
+			return "", fmt.Errorf("failed iterating absolute path results. Cause: %w", result.Err())
+		}
+		return "", fmt.Errorf("file %q not found in BucketFS", fileName)
+	}
+	var absolutePath string
+	err = result.Scan(&absolutePath)
+	if err != nil {
+		return "", fmt.Errorf("failed reading absolute. Cause: %w", err)
+	}
+	return absolutePath, nil
 }

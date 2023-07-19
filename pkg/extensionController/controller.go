@@ -48,7 +48,7 @@ type controller interface {
 
 type controllerImpl struct {
 	registry       registry.Registry
-	schema         string
+	config         ExtensionManagerConfig
 	metaDataReader extensionAPI.ExaMetadataReader
 }
 
@@ -56,7 +56,7 @@ func createImpl(config ExtensionManagerConfig) controller {
 	return &controllerImpl{
 		registry:       registry.NewRegistry(config.ExtensionRegistryURL),
 		metaDataReader: extensionAPI.CreateExaMetaDataReader(),
-		schema:         config.ExtensionSchema,
+		config:         config,
 	}
 }
 
@@ -137,7 +137,7 @@ func (c *controllerImpl) loadExtensionById(id string) (*extensionAPI.JsExtension
 }
 
 func (c *controllerImpl) GetAllInstallations(txCtx *transactionContext.TransactionContext) ([]*extensionAPI.JsExtInstallation, error) {
-	metadata, err := c.metaDataReader.ReadMetadataTables(txCtx.GetTransaction(), c.schema)
+	metadata, err := c.metaDataReader.ReadMetadataTables(txCtx.GetTransaction(), c.config.ExtensionSchema)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
@@ -246,11 +246,11 @@ func (c *controllerImpl) FindInstances(txCtx *transactionContext.TransactionCont
 }
 
 func (c *controllerImpl) createExtensionContext(txCtx *transactionContext.TransactionContext) *context.ExtensionContext {
-	return context.CreateContext(txCtx.GetContext(), c.schema, txCtx.GetTransaction(), txCtx.GetDBConnection())
+	return context.CreateContext(txCtx, c.config.ExtensionSchema, c.config.BucketFSBasePath)
 }
 
 func (c *controllerImpl) ensureSchemaExists(txCtx *transactionContext.TransactionContext) error {
-	_, err := txCtx.GetTransaction().Exec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"`, c.schema))
+	_, err := txCtx.GetTransaction().Exec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"`, c.config.ExtensionSchema))
 	if err != nil {
 		return fmt.Errorf("failed to create schema: %w", err)
 	}

@@ -2,9 +2,9 @@ import pathlib
 import stat
 
 def run(ctx):
-	files = [p for p in pathlib.Path(ctx.path).rglob("*") if p.exists() and "EXAClusterOS" not in p.parts]
-	files = [read_path(p) for p in files]
-	files = [p for p in files if p["is_file"]]
+	files = (p for p in pathlib.Path(ctx.path).glob("**/*") if p.exists() and "EXAClusterOS" not in p.parts)
+	files = (read_path(p) for p in files)
+	files = (p for p in files if p["is_file"])
 	for file in files:
 		ctx.emit(file['name'], file['path'], file['size'])
 

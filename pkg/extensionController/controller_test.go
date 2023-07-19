@@ -40,12 +40,15 @@ func (suite *ControllerUTestSuite) BeforeTest(suiteName, testName string) {
 	suite.initDbMock()
 }
 
-func (suite *ControllerUTestSuite) createController() {
+func (suite *ControllerUTestSuite) createController() TransactionController {
 	suite.bucketFsMock = bfs.BucketFsMock{}
 	suite.metaDataMock = createExaMetaDataReaderMock(EXTENSION_SCHEMA)
 	ctrl := &controllerImpl{
-		registry:       registry.NewRegistry(suite.tempExtensionRepo),
-		schema:         EXTENSION_SCHEMA,
+		registry: registry.NewRegistry(suite.tempExtensionRepo),
+		config: ExtensionManagerConfig{
+			ExtensionSchema:      EXTENSION_SCHEMA,
+			ExtensionRegistryURL: "registryUrl",
+			BucketFSBasePath:     "bfsBasePath"},
 		metaDataReader: &suite.metaDataMock,
 	}
 	suite.controller = &transactionControllerImpl{controller: ctrl, bucketFs: &suite.bucketFsMock}
