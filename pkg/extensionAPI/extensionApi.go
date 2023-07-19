@@ -3,7 +3,7 @@ package extensionAPI
 import (
 	"fmt"
 
-	"github.com/exasol/extension-manager/pkg/backend"
+	"github.com/exasol/extension-manager/pkg/extensionAPI/context"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/dop251/goja"
@@ -81,13 +81,13 @@ type rawJsExtension struct {
 	InstallableVersions []rawJsExtensionVersion `json:"installableVersions"`
 	// [impl -> dsn~parameter-versioning~1]
 	// [impl -> dsn~configuration-parameters~1]
-	GetParameterDefinitions func(context *ExtensionContext, version string) []interface{}                           `json:"getInstanceParameters"`
-	Install                 func(context *ExtensionContext, version string)                                         `json:"install"`
-	Uninstall               func(context *ExtensionContext, version string)                                         `json:"uninstall"`
-	FindInstallations       func(context *ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation             `json:"findInstallations"`
-	AddInstance             func(context *ExtensionContext, version string, params *ParameterValues) *JsExtInstance `json:"addInstance"`
-	FindInstances           func(context *ExtensionContext, version string) []*JsExtInstance                        `json:"findInstances"`
-	DeleteInstance          func(context *ExtensionContext, version, instanceId string)                             `json:"deleteInstance"`
+	GetParameterDefinitions func(context *context.ExtensionContext, version string) []interface{}                           `json:"getInstanceParameters"`
+	Install                 func(context *context.ExtensionContext, version string)                                         `json:"install"`
+	Uninstall               func(context *context.ExtensionContext, version string)                                         `json:"uninstall"`
+	FindInstallations       func(context *context.ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation             `json:"findInstallations"`
+	AddInstance             func(context *context.ExtensionContext, version string, params *ParameterValues) *JsExtInstance `json:"addInstance"`
+	FindInstances           func(context *context.ExtensionContext, version string) []*JsExtInstance                        `json:"findInstances"`
+	DeleteInstance          func(context *context.ExtensionContext, version, instanceId string)                             `json:"deleteInstance"`
 }
 
 type rawJsExtensionVersion struct {
@@ -132,13 +132,4 @@ func (pv ParameterValues) Find(id string) (value ParameterValue, found bool) {
 type ParameterValue struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
-}
-
-// Extensions use this SQL client to execute queries.
-type SimpleSQLClient interface {
-	// Execute runs a query that does not return rows, e.g. INSERT or UPDATE.
-	Execute(query string, args ...any)
-
-	// Query runs a query that returns rows, typically a SELECT.
-	Query(query string, args ...any) backend.QueryResult
 }

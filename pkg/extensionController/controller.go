@@ -8,6 +8,7 @@ import (
 
 	"github.com/exasol/extension-manager/pkg/apiErrors"
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
+	"github.com/exasol/extension-manager/pkg/extensionAPI/context"
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/registry"
 	"github.com/exasol/extension-manager/pkg/extensionController/transactionContext"
@@ -244,8 +245,8 @@ func (c *controllerImpl) FindInstances(txCtx *transactionContext.TransactionCont
 	return extension.ListInstances(c.createExtensionContext(txCtx), extensionVersion)
 }
 
-func (c *controllerImpl) createExtensionContext(txCtx *transactionContext.TransactionContext) *extensionAPI.ExtensionContext {
-	return extensionAPI.CreateContext(txCtx.GetContext(), c.schema, txCtx.GetTransaction(), txCtx.GetDBConnection())
+func (c *controllerImpl) createExtensionContext(txCtx *transactionContext.TransactionContext) *context.ExtensionContext {
+	return context.CreateContext(txCtx.GetContext(), c.schema, txCtx.GetTransaction(), txCtx.GetDBConnection())
 }
 
 func (c *controllerImpl) ensureSchemaExists(txCtx *transactionContext.TransactionContext) error {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/exasol/extension-manager/pkg/apiErrors"
+	"github.com/exasol/extension-manager/pkg/extensionAPI/context"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -38,20 +39,20 @@ func (suite *ErrorHandlingExtensionSuite) TestProperties() {
 		suite.extension)
 }
 
-func createMockContextWithSqlClient(sqlClient SimpleSQLClient) *ExtensionContext {
-	return CreateContextWithClient("extension_schema", sqlClient)
+func createMockContextWithSqlClient(sqlClient context.SimpleSQLClient) *context.ExtensionContext {
+	return context.CreateContextWithClient("extension_schema", sqlClient)
 }
 
-func createMockContext() *ExtensionContext {
-	var client SimpleSQLClient = &sqlClientMock{}
-	return CreateContextWithClient("extension_schema", client)
+func createMockContext() *context.ExtensionContext {
+	var client context.SimpleSQLClient = &sqlClientMock{}
+	return context.CreateContextWithClient("extension_schema", client)
 }
 
 // FindInstallations
 
 func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsSuccessful() {
 	expectedInstallations := []*JsExtInstallation{{Name: "instName"}}
-	suite.rawExtension.FindInstallations = func(context *ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation {
+	suite.rawExtension.FindInstallations = func(context *context.ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation {
 		return expectedInstallations
 	}
 	installations, err := suite.extension.FindInstallations(createMockContext(), &ExaMetadata{})
@@ -60,7 +61,7 @@ func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsSuccessful() {
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsFailure() {
-	suite.rawExtension.FindInstallations = func(context *ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation {
+	suite.rawExtension.FindInstallations = func(context *context.ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation {
 		panic("mock error")
 	}
 	installations, err := suite.extension.FindInstallations(createMockContext(), &ExaMetadata{})
@@ -79,7 +80,7 @@ func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsUnsupported() {
 
 func (suite *ErrorHandlingExtensionSuite) GetParameterDefinitionsSuccessful() {
 	expectedDefinitions := []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}
-	suite.rawExtension.GetParameterDefinitions = func(context *ExtensionContext, version string) []interface{} {
+	suite.rawExtension.GetParameterDefinitions = func(context *context.ExtensionContext, version string) []interface{} {
 		return expectedDefinitions
 	}
 	definitions, err := suite.extension.GetParameterDefinitions(createMockContext(), "ext-version")
@@ -88,7 +89,7 @@ func (suite *ErrorHandlingExtensionSuite) GetParameterDefinitionsSuccessful() {
 }
 
 func (suite *ErrorHandlingExtensionSuite) GetParameterDefinitionsFailure() {
-	suite.rawExtension.GetParameterDefinitions = func(context *ExtensionContext, version string) []interface{} {
+	suite.rawExtension.GetParameterDefinitions = func(context *context.ExtensionContext, version string) []interface{} {
 		panic("mock error")
 	}
 	installations, err := suite.extension.GetParameterDefinitions(createMockContext(), "ext-version")
@@ -106,7 +107,7 @@ func (suite *ErrorHandlingExtensionSuite) GetParameterDefinitionsUnsupported() {
 // Install
 
 func (suite *ErrorHandlingExtensionSuite) TestInstallSuccessful() {
-	suite.rawExtension.Install = func(context *ExtensionContext, version string) {
+	suite.rawExtension.Install = func(context *context.ExtensionContext, version string) {
 		// empty mocked function
 	}
 	err := suite.extension.Install(createMockContext(), "version")
@@ -114,7 +115,7 @@ func (suite *ErrorHandlingExtensionSuite) TestInstallSuccessful() {
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestInstallFailure() {
-	suite.rawExtension.Install = func(context *ExtensionContext, version string) {
+	suite.rawExtension.Install = func(context *context.ExtensionContext, version string) {
 		panic("mock error")
 	}
 	err := suite.extension.Install(createMockContext(), "version")
@@ -130,7 +131,7 @@ func (suite *ErrorHandlingExtensionSuite) TestInstallUnsupported() {
 // Uninstall
 
 func (suite *ErrorHandlingExtensionSuite) TestUninstallSuccessful() {
-	suite.rawExtension.Uninstall = func(context *ExtensionContext, version string) {
+	suite.rawExtension.Uninstall = func(context *context.ExtensionContext, version string) {
 		// empty mocked function
 	}
 	err := suite.extension.Uninstall(createMockContext(), "version")
@@ -138,7 +139,7 @@ func (suite *ErrorHandlingExtensionSuite) TestUninstallSuccessful() {
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestUninstallFailure() {
-	suite.rawExtension.Uninstall = func(context *ExtensionContext, version string) {
+	suite.rawExtension.Uninstall = func(context *context.ExtensionContext, version string) {
 		panic("mock error")
 	}
 	err := suite.extension.Uninstall(createMockContext(), "version")
@@ -154,7 +155,7 @@ func (suite *ErrorHandlingExtensionSuite) TestUninstallUnsupported() {
 // AddInstance
 
 func (suite *ErrorHandlingExtensionSuite) TestAddInstanceSuccessful() {
-	suite.rawExtension.AddInstance = func(context *ExtensionContext, version string, params *ParameterValues) *JsExtInstance {
+	suite.rawExtension.AddInstance = func(context *context.ExtensionContext, version string, params *ParameterValues) *JsExtInstance {
 		return &JsExtInstance{Name: "newInstance"}
 	}
 	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{})
@@ -163,7 +164,7 @@ func (suite *ErrorHandlingExtensionSuite) TestAddInstanceSuccessful() {
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestAddInstanceFails() {
-	suite.rawExtension.AddInstance = func(context *ExtensionContext, version string, params *ParameterValues) *JsExtInstance {
+	suite.rawExtension.AddInstance = func(context *context.ExtensionContext, version string, params *ParameterValues) *JsExtInstance {
 		panic("mock error")
 	}
 	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{})
@@ -181,7 +182,7 @@ func (suite *ErrorHandlingExtensionSuite) TestAddInstanceUnsupported() {
 // DeleteInstance
 
 func (suite *ErrorHandlingExtensionSuite) TestDeleteInstanceSuccessful() {
-	suite.rawExtension.DeleteInstance = func(context *ExtensionContext, version, instanceId string) {
+	suite.rawExtension.DeleteInstance = func(context *context.ExtensionContext, version, instanceId string) {
 		// empty mocked function
 	}
 	err := suite.extension.DeleteInstance(createMockContext(), "version", "instance-id")
@@ -189,7 +190,7 @@ func (suite *ErrorHandlingExtensionSuite) TestDeleteInstanceSuccessful() {
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestDeleteInstanceFails() {
-	suite.rawExtension.DeleteInstance = func(context *ExtensionContext, version, instanceId string) {
+	suite.rawExtension.DeleteInstance = func(context *context.ExtensionContext, version, instanceId string) {
 		panic("mock error")
 	}
 	err := suite.extension.DeleteInstance(createMockContext(), "version", "instance-id")
