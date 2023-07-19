@@ -4,10 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"strings"
 
-	"github.com/exasol/extension-manager/pkg/apiErrors"
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
+	"github.com/exasol/extension-manager/pkg/extensionController/transactionContext"
 	"github.com/exasol/extension-manager/pkg/parameterValidator"
 )
 
@@ -119,14 +118,14 @@ func (c *transactionControllerImpl) listBfsFiles(ctx context.Context, db *sql.DB
 }
 
 func (c *transactionControllerImpl) InstallExtension(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) (returnErr error) {
-	txCtx, err := beginTransaction(ctx, db)
+	txCtx, err := transactionContext.BeginTransaction(ctx, db)
 	if err != nil {
 		return err
 	}
-	defer txCtx.rollback()
+	defer txCtx.Rollback()
 	err = c.controller.InstallExtension(txCtx, extensionId, extensionVersion)
 	if err == nil {
-		err = txCtx.transaction.Commit()
+		err = txCtx.Commit()
 		if err != nil {
 			return err
 		}
@@ -135,14 +134,14 @@ func (c *transactionControllerImpl) InstallExtension(ctx context.Context, db *sq
 }
 
 func (c *transactionControllerImpl) UninstallExtension(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) (returnErr error) {
-	tx, err := beginTransaction(ctx, db)
+	tx, err := transactionContext.BeginTransaction(ctx, db)
 	if err != nil {
 		return err
 	}
-	defer tx.rollback()
+	defer tx.Rollback()
 	err = c.controller.UninstallExtension(tx, extensionId, extensionVersion)
 	if err == nil {
-		err = tx.commit()
+		err = tx.Commit()
 		if err != nil {
 			return err
 		}
@@ -151,32 +150,32 @@ func (c *transactionControllerImpl) UninstallExtension(ctx context.Context, db *
 }
 
 func (c *transactionControllerImpl) GetInstalledExtensions(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
-	tx, err := beginTransaction(ctx, db)
+	tx, err := transactionContext.BeginTransaction(ctx, db)
 	if err != nil {
 		return nil, err
 	}
-	defer tx.rollback()
+	defer tx.Rollback()
 	return c.controller.GetAllInstallations(tx)
 }
 
 func (c *transactionControllerImpl) GetParameterDefinitions(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
-	tx, err := beginTransaction(ctx, db)
+	tx, err := transactionContext.BeginTransaction(ctx, db)
 	if err != nil {
 		return nil, err
 	}
-	defer tx.rollback()
+	defer tx.Rollback()
 	return c.controller.GetParameterDefinitions(tx, extensionId, extensionVersion)
 }
 
 func (c *transactionControllerImpl) CreateInstance(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {
-	tx, err := beginTransaction(ctx, db)
+	tx, err := transactionContext.BeginTransaction(ctx, db)
 	if err != nil {
 		return nil, err
 	}
-	defer tx.rollback()
+	defer tx.Rollback()
 	instance, err := c.controller.CreateInstance(tx, extensionId, extensionVersion, parameterValues)
 	if err == nil {
-		err = tx.commit()
+		err = tx.Commit()
 		if err != nil {
 			return nil, err
 		}
@@ -185,53 +184,26 @@ func (c *transactionControllerImpl) CreateInstance(ctx context.Context, db *sql.
 }
 
 func (c *transactionControllerImpl) FindInstances(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error) {
-	tx, err := beginTransaction(ctx, db)
+	tx, err := transactionContext.BeginTransaction(ctx, db)
 	if err != nil {
 		return nil, err
 	}
-	defer tx.rollback()
+	defer tx.Rollback()
 	return c.controller.FindInstances(tx, extensionId, extensionVersion)
 }
 
 func (c *transactionControllerImpl) DeleteInstance(ctx context.Context, db *sql.DB, extensionId, extensionVersion, instanceId string) error {
-	tx, err := beginTransaction(ctx, db)
+	tx, err := transactionContext.BeginTransaction(ctx, db)
 	if err != nil {
 		return err
 	}
-	defer tx.rollback()
+	defer tx.Rollback()
 	err = c.controller.DeleteInstance(tx, extensionId, extensionVersion, instanceId)
 	if err == nil {
-		err = tx.commit()
+		err = tx.Commit()
 		if err != nil {
 			return err
 		}
 	}
 	return err
-}
-
-func beginTransaction(ctx context.Context, db *sql.DB) (*transactionContext, error) {
-	tx, err := db.BeginTx(ctx, nil)
-	if err != nil {
-		if strings.Contains(err.Error(), "Connection exception - authentication failed") {
-			return nil, apiErrors.NewUnauthorizedErrorF("invalid database credentials")
-		}
-		return nil, fmt.Errorf("failed to begin transaction: %w", err)
-	}
-	return &transactionContext{context: ctx, db: db, transaction: tx}, nil
-}
-
-type transactionContext struct {
-	context     context.Context
-	db          *sql.DB
-	transaction *sql.Tx
-}
-
-func (ctx *transactionContext) rollback() {
-	// Even if Tx.Rollback fails, the transaction will no longer be valid, nor will it have been committed to the database.
-	// See https://go.dev/doc/database/execute-transactions
-	_ = ctx.transaction.Rollback()
-}
-
-func (ctx *transactionContext) commit() error {
-	return ctx.transaction.Commit()
 }

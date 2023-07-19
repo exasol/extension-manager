@@ -1,7 +1,6 @@
 package extensionController
 
 import (
-	"database/sql"
 	"fmt"
 	"strings"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/exasol/extension-manager/pkg/apiErrors"
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
 	"github.com/exasol/extension-manager/pkg/extensionController/registry"
+	"github.com/exasol/extension-manager/pkg/extensionController/transactionContext"
 	"github.com/exasol/extension-manager/pkg/parameterValidator"
 )
 
@@ -19,29 +19,29 @@ type controller interface {
 	GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, error)
 
 	// GetAllInstallations searches for installations of any extensions.
-	GetAllInstallations(txCtx *transactionContext) ([]*extensionAPI.JsExtInstallation, error)
+	GetAllInstallations(txCtx *transactionContext.TransactionContext) ([]*extensionAPI.JsExtInstallation, error)
 
 	// GetParameterDefinitions returns the parameter definitions required for installing a given extension version.
-	GetParameterDefinitions(txCtx *transactionContext, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error)
+	GetParameterDefinitions(txCtx *transactionContext.TransactionContext, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error)
 
 	// InstallExtension installs an extension.
 	// extensionId is the ID of the extension to install
 	// extensionVersion is the version of the extension to install
-	InstallExtension(txCtx *transactionContext, extensionId string, extensionVersion string) error
+	InstallExtension(txCtx *transactionContext.TransactionContext, extensionId string, extensionVersion string) error
 
 	// UninstallExtension removes an extension.
 	// extensionId is the ID of the extension to uninstall
 	// extensionVersion is the version of the extension to uninstall
-	UninstallExtension(txCtx *transactionContext, extensionId string, extensionVersion string) error
+	UninstallExtension(txCtx *transactionContext.TransactionContext, extensionId string, extensionVersion string) error
 
 	// CreateInstance creates a new instance of an extension, e.g. a virtual schema and returns it's name.
-	CreateInstance(txCtx *transactionContext, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error)
+	CreateInstance(txCtx *transactionContext.TransactionContext, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error)
 
 	// FindInstances returns a list of all instances for the given version.
-	FindInstances(txCtx *transactionContext, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error)
+	FindInstances(txCtx *transactionContext.TransactionContext, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error)
 
 	// DeleteInstance deletes instance with the given ID.
-	DeleteInstance(txCtx *transactionContext, extensionId, extensionVersion, instanceId string) error
+	DeleteInstance(txCtx *transactionContext.TransactionContext, extensionId, extensionVersion, instanceId string) error
 }
 
 type controllerImpl struct {
@@ -134,8 +134,8 @@ func (c *controllerImpl) loadExtensionById(id string) (*extensionAPI.JsExtension
 	return extension, nil
 }
 
-func (c *controllerImpl) GetAllInstallations(txCtx *transactionContext) ([]*extensionAPI.JsExtInstallation, error) {
-	metadata, err := c.metaDataReader.ReadMetadataTables(txCtx.transaction, c.schema)
+func (c *controllerImpl) GetAllInstallations(txCtx *transactionContext.TransactionContext) ([]*extensionAPI.JsExtInstallation, error) {
+	metadata, err := c.metaDataReader.ReadMetadataTables(txCtx.GetTransaction(), c.schema)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read metadata tables. Cause: %w", err)
 	}
@@ -156,7 +156,7 @@ func (c *controllerImpl) GetAllInstallations(txCtx *transactionContext) ([]*exte
 	return allInstallations, nil
 }
 
-func (c *controllerImpl) GetParameterDefinitions(txCtx *transactionContext, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
+func (c *controllerImpl) GetParameterDefinitions(txCtx *transactionContext.TransactionContext, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
 		return nil, extensionLoadingFailed(extensionId, err)
@@ -172,19 +172,19 @@ func (c *controllerImpl) GetParameterDefinitions(txCtx *transactionContext, exte
 	return definitions, nil
 }
 
-func (c *controllerImpl) InstallExtension(txCtx *transactionContext, extensionId string, extensionVersion string) error {
+func (c *controllerImpl) InstallExtension(txCtx *transactionContext.TransactionContext, extensionId string, extensionVersion string) error {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
 		return extensionLoadingFailed(extensionId, err)
 	}
-	err = c.ensureSchemaExists(txCtx.transaction)
+	err = c.ensureSchemaExists(txCtx)
 	if err != nil {
 		return err
 	}
 	return extension.Install(c.createExtensionContext(txCtx), extensionVersion)
 }
 
-func (c *controllerImpl) UninstallExtension(txCtx *transactionContext, extensionId string, extensionVersion string) error {
+func (c *controllerImpl) UninstallExtension(txCtx *transactionContext.TransactionContext, extensionId string, extensionVersion string) error {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
 		return extensionLoadingFailed(extensionId, err)
@@ -192,12 +192,12 @@ func (c *controllerImpl) UninstallExtension(txCtx *transactionContext, extension
 	return extension.Uninstall(c.createExtensionContext(txCtx), extensionVersion)
 }
 
-func (c *controllerImpl) CreateInstance(txCtx *transactionContext, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {
+func (c *controllerImpl) CreateInstance(txCtx *transactionContext.TransactionContext, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
 		return nil, extensionLoadingFailed(extensionId, err)
 	}
-	err = c.ensureSchemaExists(txCtx.transaction)
+	err = c.ensureSchemaExists(txCtx)
 	if err != nil {
 		return nil, err
 	}
@@ -227,7 +227,7 @@ func (c *controllerImpl) CreateInstance(txCtx *transactionContext, extensionId s
 	return instance, nil
 }
 
-func (c *controllerImpl) DeleteInstance(txCtx *transactionContext, extensionId, extensionVersion, instanceId string) error {
+func (c *controllerImpl) DeleteInstance(txCtx *transactionContext.TransactionContext, extensionId, extensionVersion, instanceId string) error {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
 		return extensionLoadingFailed(extensionId, err)
@@ -235,7 +235,7 @@ func (c *controllerImpl) DeleteInstance(txCtx *transactionContext, extensionId, 
 	return extension.DeleteInstance(c.createExtensionContext(txCtx), extensionVersion, instanceId)
 }
 
-func (c *controllerImpl) FindInstances(txCtx *transactionContext, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error) {
+func (c *controllerImpl) FindInstances(txCtx *transactionContext.TransactionContext, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error) {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {
 		return nil, extensionLoadingFailed(extensionId, err)
@@ -243,12 +243,12 @@ func (c *controllerImpl) FindInstances(txCtx *transactionContext, extensionId st
 	return extension.ListInstances(c.createExtensionContext(txCtx), extensionVersion)
 }
 
-func (c *controllerImpl) createExtensionContext(txCtx *transactionContext) *extensionAPI.ExtensionContext {
-	return extensionAPI.CreateContext(txCtx.context, c.schema, txCtx.transaction, txCtx.db)
+func (c *controllerImpl) createExtensionContext(txCtx *transactionContext.TransactionContext) *extensionAPI.ExtensionContext {
+	return extensionAPI.CreateContext(txCtx.GetContext(), c.schema, txCtx.GetTransaction(), txCtx.GetDBConnection())
 }
 
-func (c *controllerImpl) ensureSchemaExists(tx *sql.Tx) error {
-	_, err := tx.Exec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"`, c.schema))
+func (c *controllerImpl) ensureSchemaExists(txCtx *transactionContext.TransactionContext) error {
+	_, err := txCtx.GetTransaction().Exec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"`, c.schema))
 	if err != nil {
 		return fmt.Errorf("failed to create schema: %w", err)
 	}

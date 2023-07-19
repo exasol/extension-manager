@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
+	"github.com/exasol/extension-manager/pkg/extensionController/transactionContext"
 	"github.com/exasol/extension-manager/pkg/parameterValidator"
 	"github.com/stretchr/testify/mock"
 )
@@ -74,7 +75,7 @@ func (mock *mockControllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extensi
 	return nil, args.Error(1)
 }
 
-func (mock *mockControllerImpl) GetParameterDefinitions(txCtx *transactionContext, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
+func (mock *mockControllerImpl) GetParameterDefinitions(txCtx *transactionContext.TransactionContext, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
 	args := mock.Called(extensionId, extensionVersion)
 	if result, ok := args.Get(0).([]parameterValidator.ParameterDefinition); ok {
 		return result, args.Error(1)
@@ -82,7 +83,7 @@ func (mock *mockControllerImpl) GetParameterDefinitions(txCtx *transactionContex
 	return nil, args.Error(1)
 }
 
-func (mock *mockControllerImpl) GetAllInstallations(txCtx *transactionContext) ([]*extensionAPI.JsExtInstallation, error) {
+func (mock *mockControllerImpl) GetAllInstallations(txCtx *transactionContext.TransactionContext) ([]*extensionAPI.JsExtInstallation, error) {
 	args := mock.Called(txCtx)
 	if result, ok := args.Get(0).([]*extensionAPI.JsExtInstallation); ok {
 		return result, args.Error(1)
@@ -90,17 +91,17 @@ func (mock *mockControllerImpl) GetAllInstallations(txCtx *transactionContext) (
 	return nil, args.Error(1)
 }
 
-func (mock *mockControllerImpl) InstallExtension(txCtx *transactionContext, extensionId string, extensionVersion string) error {
+func (mock *mockControllerImpl) InstallExtension(txCtx *transactionContext.TransactionContext, extensionId string, extensionVersion string) error {
 	args := mock.Called(txCtx, extensionId, extensionVersion)
 	return args.Error(0)
 }
 
-func (mock *mockControllerImpl) UninstallExtension(txCtx *transactionContext, extensionId string, extensionVersion string) error {
+func (mock *mockControllerImpl) UninstallExtension(txCtx *transactionContext.TransactionContext, extensionId string, extensionVersion string) error {
 	args := mock.Called(txCtx, extensionId, extensionVersion)
 	return args.Error(0)
 }
 
-func (mock *mockControllerImpl) CreateInstance(txCtx *transactionContext, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {
+func (mock *mockControllerImpl) CreateInstance(txCtx *transactionContext.TransactionContext, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {
 	args := mock.Called(txCtx, extensionId, extensionVersion, parameterValues)
 	if result, ok := args.Get(0).(*extensionAPI.JsExtInstance); ok {
 		return result, args.Error(1)
@@ -108,7 +109,7 @@ func (mock *mockControllerImpl) CreateInstance(txCtx *transactionContext, extens
 	return nil, args.Error(1)
 }
 
-func (mock *mockControllerImpl) FindInstances(txCtx *transactionContext, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error) {
+func (mock *mockControllerImpl) FindInstances(txCtx *transactionContext.TransactionContext, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error) {
 	args := mock.Called(txCtx, extensionId, extensionVersion)
 	if result, ok := args.Get(0).([]*extensionAPI.JsExtInstance); ok {
 		return result, args.Error(1)
@@ -116,7 +117,7 @@ func (mock *mockControllerImpl) FindInstances(txCtx *transactionContext, extensi
 	return nil, args.Error(1)
 }
 
-func (mock *mockControllerImpl) DeleteInstance(txCtx *transactionContext, extensionId, extensionVersion, instanceId string) error {
+func (mock *mockControllerImpl) DeleteInstance(txCtx *transactionContext.TransactionContext, extensionId, extensionVersion, instanceId string) error {
 	args := mock.Called(txCtx, extensionId, extensionVersion, instanceId)
 	return args.Error(0)
 }
