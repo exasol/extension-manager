@@ -19,7 +19,7 @@ type extCtrlUnitTestSuite struct {
 	db       *sql.DB
 	dbMock   sqlmock.Sqlmock
 	mockCtrl mockControllerImpl
-	mockBfs  bucketFsMock
+	mockBfs  bfs.BucketFsMock
 }
 
 func TestExtensionControllerUnitTestSuite(t *testing.T) {
@@ -28,7 +28,7 @@ func TestExtensionControllerUnitTestSuite(t *testing.T) {
 
 func (suite *extCtrlUnitTestSuite) SetupTest() {
 	suite.mockCtrl = mockControllerImpl{}
-	suite.mockBfs = bucketFsMock{}
+	suite.mockBfs = bfs.BucketFsMock{}
 	suite.ctrl = &transactionControllerImpl{controller: &suite.mockCtrl, bucketFs: &suite.mockBfs}
 	db, dbMock, err := sqlmock.New()
 	if err != nil {

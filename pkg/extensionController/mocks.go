@@ -1,7 +1,6 @@
 package extensionController
 
 import (
-	"context"
 	"database/sql"
 
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
@@ -10,29 +9,6 @@ import (
 	"github.com/exasol/extension-manager/pkg/parameterValidator"
 	"github.com/stretchr/testify/mock"
 )
-
-// BucketFs
-
-type bucketFsMock struct {
-	mock.Mock
-}
-
-func createBucketFsMock() bucketFsMock {
-	var _ bfs.BucketFsAPI = &bucketFsMock{}
-	return bucketFsMock{}
-}
-
-func (m *bucketFsMock) simulateFiles(files []bfs.BfsFile) {
-	m.On("ListFiles", mock.Anything, mock.Anything).Return(files, nil)
-}
-
-func (mock *bucketFsMock) ListFiles(ctx context.Context, db *sql.DB) ([]bfs.BfsFile, error) {
-	args := mock.Called(ctx, db)
-	if buckets, ok := args.Get(0).([]bfs.BfsFile); ok {
-		return buckets, args.Error(1)
-	}
-	return nil, args.Error(1)
-}
 
 // Exa metadata reader
 

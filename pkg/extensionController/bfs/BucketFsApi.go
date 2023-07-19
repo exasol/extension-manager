@@ -14,6 +14,13 @@ type BucketFsAPI interface {
 	ListFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error)
 }
 
+// BfsFile represents a file in BucketFS.
+type BfsFile struct {
+	Path string // Absolute path in BucketFS, starting with the base path, e.g. "/buckets/bfsdefault/default/"
+	Name string // File name
+	Size int    // File size in bytes
+}
+
 // CreateBucketFsAPI creates an instance of BucketFsAPI.
 //
 // The current implementation uses a Python UDF for accessing BucketFS.
@@ -29,13 +36,6 @@ type bucketFsAPIImpl struct {
 /* [impl -> dsn~extension-components~1]. */
 func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error) {
 	return bfs.listDirInUDF(ctx, db)
-}
-
-// BfsFile represents a file in BucketFS.
-type BfsFile struct {
-	Path string // Absolute path in BucketFS, starting with the base path, e.g. "/buckets/bfsdefault/default/"
-	Name string // File name
-	Size int    // File size in bytes
 }
 
 func (bfs bucketFsAPIImpl) listDirInUDF(ctx context.Context, db *sql.DB) (files []BfsFile, retErr error) {
