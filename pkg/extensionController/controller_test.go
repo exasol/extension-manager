@@ -41,7 +41,7 @@ func (suite *ControllerUTestSuite) BeforeTest(suiteName, testName string) {
 	suite.initDbMock()
 }
 
-func (suite *ControllerUTestSuite) createController() {
+func (suite *ControllerUTestSuite) createController() TransactionController {
 	suite.bucketFsMock = bfs.BucketFsMock{}
 	suite.metaDataMock = exaMetadata.CreateExaMetaDataReaderMock(EXTENSION_SCHEMA)
 	ctrl := &controllerImpl{
