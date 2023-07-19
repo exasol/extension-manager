@@ -30,7 +30,7 @@ type ExtensionContext struct {
 	BucketFs            BucketFsContext `json:"bucketFs"`            // Allows extensions to interact with BucketFS
 }
 
-// BucketFsContext allows extensions to interact with BucketFS
+// BucketFsContext allows extensions to interact with BucketFS.
 type BucketFsContext interface {
 	// ResolvePath returns an absolute path for the given filename in BucketFS.
 	ResolvePath(fileName string) string
