@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
+	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/transactionContext"
 	"github.com/exasol/extension-manager/pkg/parameterValidator"
 	"github.com/stretchr/testify/mock"
@@ -17,17 +18,17 @@ type bucketFsMock struct {
 }
 
 func createBucketFsMock() bucketFsMock {
-	var _ BucketFsAPI = &bucketFsMock{}
+	var _ bfs.BucketFsAPI = &bucketFsMock{}
 	return bucketFsMock{}
 }
 
-func (m *bucketFsMock) simulateFiles(files []BfsFile) {
+func (m *bucketFsMock) simulateFiles(files []bfs.BfsFile) {
 	m.On("ListFiles", mock.Anything, mock.Anything).Return(files, nil)
 }
 
-func (mock *bucketFsMock) ListFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error) {
+func (mock *bucketFsMock) ListFiles(ctx context.Context, db *sql.DB) ([]bfs.BfsFile, error) {
 	args := mock.Called(ctx, db)
-	if buckets, ok := args.Get(0).([]BfsFile); ok {
+	if buckets, ok := args.Get(0).([]bfs.BfsFile); ok {
 		return buckets, args.Error(1)
 	}
 	return nil, args.Error(1)
@@ -67,7 +68,7 @@ type mockControllerImpl struct {
 	mock.Mock
 }
 
-func (mock *mockControllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, error) {
+func (mock *mockControllerImpl) GetAllExtensions(bfsFiles []bfs.BfsFile) ([]*Extension, error) {
 	args := mock.Called(bfsFiles)
 	if ext, ok := args.Get(0).([]*Extension); ok {
 		return ext, args.Error(1)

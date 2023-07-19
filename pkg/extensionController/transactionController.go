@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
+	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/transactionContext"
 	"github.com/exasol/extension-manager/pkg/parameterValidator"
 )
@@ -93,12 +94,12 @@ func CreateWithConfig(config ExtensionManagerConfig) TransactionController {
 	controller := createImpl(config)
 	return &transactionControllerImpl{
 		controller: controller,
-		bucketFs:   CreateBucketFsAPI(config.BucketFSBasePath)}
+		bucketFs:   bfs.CreateBucketFsAPI(config.BucketFSBasePath)}
 }
 
 type transactionControllerImpl struct {
 	controller controller
-	bucketFs   BucketFsAPI
+	bucketFs   bfs.BucketFsAPI
 }
 
 func (c *transactionControllerImpl) GetAllExtensions(ctx context.Context, db *sql.DB) ([]*Extension, error) {
@@ -109,7 +110,7 @@ func (c *transactionControllerImpl) GetAllExtensions(ctx context.Context, db *sq
 	return c.controller.GetAllExtensions(bfsFiles)
 }
 
-func (c *transactionControllerImpl) listBfsFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error) {
+func (c *transactionControllerImpl) listBfsFiles(ctx context.Context, db *sql.DB) ([]bfs.BfsFile, error) {
 	bfsFiles, err := c.bucketFs.ListFiles(ctx, db)
 	if err != nil {
 		return nil, fmt.Errorf("failed to search for required files in BucketFS. Cause: %w", err)

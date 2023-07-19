@@ -7,6 +7,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
+	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -47,7 +48,7 @@ func (suite *extCtrlUnitTestSuite) AfterTest(suiteName, testName string) {
 // GetAllExtensions
 
 func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_Success() {
-	suite.mockBfs.On("ListFiles", mock.Anything, mock.Anything).Return([]BfsFile{}, nil)
+	suite.mockBfs.On("ListFiles", mock.Anything, mock.Anything).Return([]bfs.BfsFile{}, nil)
 	suite.mockCtrl.On("GetAllExtensions", mock.Anything).Return([]*Extension{}, nil)
 	extensions, err := suite.ctrl.GetAllExtensions(mockContext(), suite.db)
 	suite.NoError(err)
@@ -62,7 +63,7 @@ func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_BucketFsListFails() {
 }
 
 func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_GetFails() {
-	suite.mockBfs.On("ListFiles", mock.Anything, mock.Anything).Return([]BfsFile{}, nil)
+	suite.mockBfs.On("ListFiles", mock.Anything, mock.Anything).Return([]bfs.BfsFile{}, nil)
 	suite.mockCtrl.On("GetAllExtensions", mock.Anything).Return(nil, fmt.Errorf("mock"))
 	extensions, err := suite.ctrl.GetAllExtensions(mockContext(), suite.db)
 	suite.EqualError(err, "mock")

@@ -8,6 +8,7 @@ import (
 
 	"github.com/exasol/extension-manager/pkg/apiErrors"
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
+	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/registry"
 	"github.com/exasol/extension-manager/pkg/extensionController/transactionContext"
 	"github.com/exasol/extension-manager/pkg/parameterValidator"
@@ -16,7 +17,7 @@ import (
 // controller is the core part of the extension-manager that provides the extension handling functionality.
 type controller interface {
 	// GetAllExtensions reports all extension definitions.
-	GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, error)
+	GetAllExtensions(bfsFiles []bfs.BfsFile) ([]*Extension, error)
 
 	// GetAllInstallations searches for installations of any extensions.
 	GetAllInstallations(txCtx *transactionContext.TransactionContext) ([]*extensionAPI.JsExtInstallation, error)
@@ -59,7 +60,7 @@ func createImpl(config ExtensionManagerConfig) controller {
 }
 
 /* [impl -> dsn~list-extensions~1]. */
-func (c *controllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extension, error) {
+func (c *controllerImpl) GetAllExtensions(bfsFiles []bfs.BfsFile) ([]*Extension, error) {
 	jsExtensions, err := c.getAllExtensions()
 	if err != nil {
 		return nil, err
@@ -84,7 +85,7 @@ func convertExtension(jsExtension *extensionAPI.JsExtension) *Extension {
 		InstallableVersions: jsExtension.InstallableVersions}
 }
 
-func (c *controllerImpl) requiredFilesAvailable(extension *extensionAPI.JsExtension, bfsFiles []BfsFile) bool {
+func (c *controllerImpl) requiredFilesAvailable(extension *extensionAPI.JsExtension, bfsFiles []bfs.BfsFile) bool {
 	for _, requiredFile := range extension.BucketFsUploads {
 		if !existsFileInBfs(bfsFiles, requiredFile) {
 			log.Debugf("Ignoring extension %q since the required file %q (%q) does not exist or has a wrong file size.\n", extension.Name, requiredFile.Name, requiredFile.BucketFsFilename)
@@ -94,7 +95,7 @@ func (c *controllerImpl) requiredFilesAvailable(extension *extensionAPI.JsExtens
 	return true
 }
 
-func existsFileInBfs(bfsFiles []BfsFile, requiredFile extensionAPI.BucketFsUpload) bool {
+func existsFileInBfs(bfsFiles []bfs.BfsFile, requiredFile extensionAPI.BucketFsUpload) bool {
 	for _, existingFile := range bfsFiles {
 		if requiredFile.BucketFsFilename == existingFile.Name && requiredFile.FileSize == existingFile.Size {
 			return true
