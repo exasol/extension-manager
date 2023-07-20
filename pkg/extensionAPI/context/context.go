@@ -55,7 +55,7 @@ func (b *bucketFsContextImpl) ResolvePath(fileName string) string {
 	if err != nil {
 		// This is called by JavaScript code.
 		// The JS runtime will convert this panic into a thrown JS error.
-		panic(fmt.Sprintf("failed to find absolute path for file %q: %v", fileName, err))
+		panic(fmt.Errorf("failed to find absolute path for file %q: %w", fileName, err))
 	}
 	return path
 }
