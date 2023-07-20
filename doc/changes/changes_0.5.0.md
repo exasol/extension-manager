@@ -34,7 +34,13 @@ A common scenario for an extension not implementing a required function is when 
 
 #### Compile Dependency Updates
 
+* Updated `com.exasol:exasol-test-setup-abstraction-java:2.0.1` to `2.0.2`
 * Updated `com.exasol:extension-manager-client-java:0.4.0` to `0.5.0`
+* Removed `io.netty:netty-handler:4.1.94.Final`
+
+#### Test Dependency Updates
+
+* Updated `com.exasol:udf-debugging-java:0.6.8` to `0.6.10`
 
 #### Plugin Dependency Updates
 
