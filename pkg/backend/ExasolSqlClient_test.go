@@ -76,13 +76,13 @@ func (suite *ExasolSqlClientUTestSuite) TestExecute_validation() {
 
 func (suite *ExasolSqlClientUTestSuite) TestQuery_fails() {
 	client := suite.createClient()
-	suite.dbMock.ExpectQuery("invalid").WillReturnError(fmt.Errorf("expected"))
+	suite.dbMock.ExpectQuery("invalid").WillReturnError(fmt.Errorf("expected")).RowsWillBeClosed()
 	suite.PanicsWithError("error executing statement \"invalid\": expected", func() { client.Query("invalid") })
 }
 
 func (suite *ExasolSqlClientUTestSuite) TestQuery_succeeds() {
 	client := suite.createClient()
-	suite.dbMock.ExpectQuery("query").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).AddRow(1, "a").AddRow(2, "b"))
+	suite.dbMock.ExpectQuery("query").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).AddRow(1, "a").AddRow(2, "b")).RowsWillBeClosed()
 	result := client.Query("query")
 	suite.NotNil(result)
 	suite.Equal(QueryResult{
@@ -92,7 +92,7 @@ func (suite *ExasolSqlClientUTestSuite) TestQuery_succeeds() {
 
 func (suite *ExasolSqlClientUTestSuite) TestQuery_rowFails() {
 	client := suite.createClient()
-	suite.dbMock.ExpectQuery("query").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).AddRow(2, "b").RowError(0, fmt.Errorf("mock")))
+	suite.dbMock.ExpectQuery("query").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).AddRow(2, "b").RowError(0, fmt.Errorf("mock"))).RowsWillBeClosed()
 	suite.PanicsWithError("error while iterating result: mock", func() { client.Query("query") })
 }
 
@@ -104,7 +104,7 @@ func (suite *ExasolSqlClientUTestSuite) TestQuery_validation() {
 				expectedError := fmt.Sprintf("statement %q contains forbidden command %q. Transaction handling is done by extension manager", test.statement, test.forbiddenCommand)
 				suite.PanicsWithError(expectedError, func() { client.Query(test.statement) })
 			} else {
-				suite.dbMock.ExpectQuery(test.statement).WillReturnRows(sqlmock.NewRows([]string{"col1"}))
+				suite.dbMock.ExpectQuery(test.statement).WillReturnRows(sqlmock.NewRows([]string{"col1"})).RowsWillBeClosed()
 				result := client.Query(test.statement)
 				suite.NotNil(result)
 			}

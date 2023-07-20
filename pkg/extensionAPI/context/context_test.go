@@ -26,9 +26,7 @@ func TestContextSuite(t *testing.T) {
 
 func (suite *ContextSuite) SetupTest() {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherRegexp))
-	if err != nil {
-		suite.Failf("an error '%v' was not expected when opening a stub database connection", err.Error())
-	}
+	suite.NoError(err)
 	suite.db = db
 	suite.dbMock = mock
 	suite.dbMock.MatchExpectationsInOrder(true)
@@ -49,7 +47,7 @@ func (suite *ContextSuite) TestCreate() {
 
 func (suite *ContextSuite) TestSqlClientQuerySuccess() {
 	ctx := suite.createContext()
-	suite.dbMock.ExpectQuery("select 1").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).AddRow(1, "a").AddRow(2, "b"))
+	suite.dbMock.ExpectQuery("select 1").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).AddRow(1, "a").AddRow(2, "b")).RowsWillBeClosed()
 	result := ctx.SqlClient.Query("select 1")
 	suite.Equal(backend.QueryResult{
 		Columns: []backend.Column{{Name: "col1"}, {Name: "col2"}},
