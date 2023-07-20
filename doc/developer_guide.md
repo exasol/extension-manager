@@ -211,4 +211,5 @@ controller:=extensionController.CreateWithConfig(extensionController.ExtensionMa
 })
 var db *sql.DB // create database connection
 extensions, err := controller.GetAllExtensions(context.Background(), db)
+// ...
 ```
