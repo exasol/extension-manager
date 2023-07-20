@@ -1,31 +1,26 @@
 {
-    "go.testTimeout": "240s",
-    "go.testFlags": [
-        "-p",
-        "1",
-        "-v"
-    ],
-    "go.coverOnSingleTest": true,
-    "go.coverOnSingleTestFile": true,
-    "go.coverOnTestPackage": true,
-    "go.lintOnSave": "workspace",
-    "go.lintTool": "golangci-lint",
-    //"go.lintFlags": ["--enable-all"],
-    "sonarlint.connectedMode.project": {
-        "connectionId": "exasol",
-        "projectKey": "com.exasol:extension-manager"
-    },
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-        "source.organizeImports": true,
-        "source.generate.finalModifiers": true
-    },
-    "java.saveActions.organizeImports": true,
-    "java.sources.organizeImports.starThreshold": 3,
-    "java.sources.organizeImports.staticStarThreshold": 3,
-    "java.test.config": {
-        "vmArgs": [
-            "-Djava.util.logging.config.file=src/test/resources/logging.properties"
-        ]
-    },
+  "go.testTimeout": "240s",
+  "go.testFlags": ["-p", "1", "-v"],
+  "go.coverOnSingleTest": true,
+  "go.coverOnSingleTestFile": true,
+  "go.coverOnTestPackage": true,
+  "go.lintOnSave": "workspace",
+  "go.lintTool": "golangci-lint",
+  "sonarlint.connectedMode.project": {
+    "connectionId": "exasol",
+    "projectKey": "com.exasol:extension-manager"
+  },
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true,
+    "source.generate.finalModifiers": true
+  },
+  "java.saveActions.organizeImports": true,
+  "java.sources.organizeImports.starThreshold": 3,
+  "java.sources.organizeImports.staticStarThreshold": 3,
+  "java.test.config": {
+    "vmArgs": [
+      "-Djava.util.logging.config.file=src/test/resources/logging.properties"
+    ]
+  }
 }
