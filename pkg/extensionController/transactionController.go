@@ -12,6 +12,9 @@ import (
 )
 
 // TransactionController is the core part of the extension-manager that provides the extension handling functionality.
+// All of it's methods expect a [context.Context] and [*sql.DB] as arguments.
+// The controller will take care of transaction handling,
+// i.e. it will create a new transaction and commit or rollback if necessary.
 type TransactionController interface {
 	// GetAllExtensions reports all extension definitions.
 	// db is a connection to the Exasol DB
@@ -64,10 +67,34 @@ type ParameterValue struct {
 type ExtInstallation struct {
 }
 
-// Create an instance of TransactionController.
+// Configuration options for the extension manager.
+type ExtensionManagerConfig struct {
+	// URL of the extension registry index used to find available extensions.
+	// This can also be the path of a local directory for local testing.
+	ExtensionRegistryURL string
+	// BucketFS base path where to search for extension files, e.g. "/buckets/bfsdefault/default/".
+	BucketFSBasePath string
+	// Schema where extensions are searched for and new extensions are created, e.g. "EXA_EXTENSIONS".
+	ExtensionSchema string
+}
+
+// Create creates a new instance of [TransactionController].
+//
+// Deprecated: Use function [CreateWithConfig] which allows specifying additional configuration options.
 func Create(extensionRegistryURL string, schema string) TransactionController {
-	controller := createImpl(extensionRegistryURL, schema)
-	return &transactionControllerImpl{controller: controller, bucketFs: CreateBucketFsAPI()}
+	return CreateWithConfig(ExtensionManagerConfig{
+		ExtensionRegistryURL: extensionRegistryURL,
+		BucketFSBasePath:     "/buckets/bfsdefault/default/",
+		ExtensionSchema:      schema,
+	})
+}
+
+// CreateWithConfig creates a new instance of [TransactionController] with more configuration options.
+func CreateWithConfig(config ExtensionManagerConfig) TransactionController {
+	controller := createImpl(config)
+	return &transactionControllerImpl{
+		controller: controller,
+		bucketFs:   CreateBucketFsAPI(config.BucketFSBasePath)}
 }
 
 type transactionControllerImpl struct {
@@ -84,7 +111,7 @@ func (c *transactionControllerImpl) GetAllExtensions(ctx context.Context, db *sq
 }
 
 func (c *transactionControllerImpl) listBfsFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error) {
-	bfsFiles, err := c.bucketFs.ListFiles(ctx, db, "default")
+	bfsFiles, err := c.bucketFs.ListFiles(ctx, db)
 	if err != nil {
 		return nil, fmt.Errorf("failed to search for required files in BucketFS. Cause: %w", err)
 	}
@@ -92,14 +119,14 @@ func (c *transactionControllerImpl) listBfsFiles(ctx context.Context, db *sql.DB
 }
 
 func (c *transactionControllerImpl) InstallExtension(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) (returnErr error) {
-	tx, err := beginTransaction(ctx, db)
+	txCtx, err := beginTransaction(ctx, db)
 	if err != nil {
 		return err
 	}
-	defer rollback(tx)
-	err = c.controller.InstallExtension(tx, extensionId, extensionVersion)
+	defer txCtx.rollback()
+	err = c.controller.InstallExtension(txCtx, extensionId, extensionVersion)
 	if err == nil {
-		err = tx.Commit()
+		err = txCtx.transaction.Commit()
 		if err != nil {
 			return err
 		}
@@ -112,10 +139,10 @@ func (c *transactionControllerImpl) UninstallExtension(ctx context.Context, db *
 	if err != nil {
 		return err
 	}
-	defer rollback(tx)
+	defer tx.rollback()
 	err = c.controller.UninstallExtension(tx, extensionId, extensionVersion)
 	if err == nil {
-		err = tx.Commit()
+		err = tx.commit()
 		if err != nil {
 			return err
 		}
@@ -128,7 +155,7 @@ func (c *transactionControllerImpl) GetInstalledExtensions(ctx context.Context, 
 	if err != nil {
 		return nil, err
 	}
-	defer rollback(tx)
+	defer tx.rollback()
 	return c.controller.GetAllInstallations(tx)
 }
 
@@ -137,7 +164,7 @@ func (c *transactionControllerImpl) GetParameterDefinitions(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	defer rollback(tx)
+	defer tx.rollback()
 	return c.controller.GetParameterDefinitions(tx, extensionId, extensionVersion)
 }
 
@@ -146,10 +173,10 @@ func (c *transactionControllerImpl) CreateInstance(ctx context.Context, db *sql.
 	if err != nil {
 		return nil, err
 	}
-	defer rollback(tx)
+	defer tx.rollback()
 	instance, err := c.controller.CreateInstance(tx, extensionId, extensionVersion, parameterValues)
 	if err == nil {
-		err = tx.Commit()
+		err = tx.commit()
 		if err != nil {
 			return nil, err
 		}
@@ -162,7 +189,7 @@ func (c *transactionControllerImpl) FindInstances(ctx context.Context, db *sql.D
 	if err != nil {
 		return nil, err
 	}
-	defer rollback(tx)
+	defer tx.rollback()
 	return c.controller.FindInstances(tx, extensionId, extensionVersion)
 }
 
@@ -171,10 +198,10 @@ func (c *transactionControllerImpl) DeleteInstance(ctx context.Context, db *sql.
 	if err != nil {
 		return err
 	}
-	defer rollback(tx)
+	defer tx.rollback()
 	err = c.controller.DeleteInstance(tx, extensionId, extensionVersion, instanceId)
 	if err == nil {
-		err = tx.Commit()
+		err = tx.commit()
 		if err != nil {
 			return err
 		}
@@ -182,7 +209,7 @@ func (c *transactionControllerImpl) DeleteInstance(ctx context.Context, db *sql.
 	return err
 }
 
-func beginTransaction(ctx context.Context, db *sql.DB) (*sql.Tx, error) {
+func beginTransaction(ctx context.Context, db *sql.DB) (*transactionContext, error) {
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		if strings.Contains(err.Error(), "Connection exception - authentication failed") {
@@ -190,11 +217,21 @@ func beginTransaction(ctx context.Context, db *sql.DB) (*sql.Tx, error) {
 		}
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	return tx, nil
+	return &transactionContext{context: ctx, db: db, transaction: tx}, nil
 }
 
-func rollback(tx *sql.Tx) {
+type transactionContext struct {
+	context     context.Context
+	db          *sql.DB
+	transaction *sql.Tx
+}
+
+func (ctx *transactionContext) rollback() {
 	// Even if Tx.Rollback fails, the transaction will no longer be valid, nor will it have been committed to the database.
 	// See https://go.dev/doc/database/execute-transactions
-	_ = tx.Rollback()
+	_ = ctx.transaction.Rollback()
+}
+
+func (ctx *transactionContext) commit() error {
+	return ctx.transaction.Commit()
 }

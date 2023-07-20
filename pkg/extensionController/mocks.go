@@ -21,19 +21,11 @@ func createBucketFsMock() bucketFsMock {
 }
 
 func (m *bucketFsMock) simulateFiles(files []BfsFile) {
-	m.On("ListFiles", mock.Anything, mock.Anything, "default").Return(files, nil)
+	m.On("ListFiles", mock.Anything, mock.Anything).Return(files, nil)
 }
 
-func (m *bucketFsMock) ListBuckets(ctx context.Context, db *sql.DB) ([]string, error) {
-	args := m.Called(ctx, db)
-	if buckets, ok := args.Get(0).([]string); ok {
-		return buckets, args.Error(1)
-	}
-	return nil, args.Error(1)
-}
-
-func (mock *bucketFsMock) ListFiles(ctx context.Context, db *sql.DB, bucket string) ([]BfsFile, error) {
-	args := mock.Called(ctx, db, bucket)
+func (mock *bucketFsMock) ListFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error) {
+	args := mock.Called(ctx, db)
 	if buckets, ok := args.Get(0).([]BfsFile); ok {
 		return buckets, args.Error(1)
 	}
@@ -82,7 +74,7 @@ func (mock *mockControllerImpl) GetAllExtensions(bfsFiles []BfsFile) ([]*Extensi
 	return nil, args.Error(1)
 }
 
-func (mock *mockControllerImpl) GetParameterDefinitions(tx *sql.Tx, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
+func (mock *mockControllerImpl) GetParameterDefinitions(txCtx *transactionContext, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
 	args := mock.Called(extensionId, extensionVersion)
 	if result, ok := args.Get(0).([]parameterValidator.ParameterDefinition); ok {
 		return result, args.Error(1)
@@ -90,41 +82,41 @@ func (mock *mockControllerImpl) GetParameterDefinitions(tx *sql.Tx, extensionId 
 	return nil, args.Error(1)
 }
 
-func (mock *mockControllerImpl) GetAllInstallations(tx *sql.Tx) ([]*extensionAPI.JsExtInstallation, error) {
-	args := mock.Called(tx)
+func (mock *mockControllerImpl) GetAllInstallations(txCtx *transactionContext) ([]*extensionAPI.JsExtInstallation, error) {
+	args := mock.Called(txCtx)
 	if result, ok := args.Get(0).([]*extensionAPI.JsExtInstallation); ok {
 		return result, args.Error(1)
 	}
 	return nil, args.Error(1)
 }
 
-func (mock *mockControllerImpl) InstallExtension(tx *sql.Tx, extensionId string, extensionVersion string) error {
-	args := mock.Called(tx, extensionId, extensionVersion)
+func (mock *mockControllerImpl) InstallExtension(txCtx *transactionContext, extensionId string, extensionVersion string) error {
+	args := mock.Called(txCtx, extensionId, extensionVersion)
 	return args.Error(0)
 }
 
-func (mock *mockControllerImpl) UninstallExtension(tx *sql.Tx, extensionId string, extensionVersion string) error {
-	args := mock.Called(tx, extensionId, extensionVersion)
+func (mock *mockControllerImpl) UninstallExtension(txCtx *transactionContext, extensionId string, extensionVersion string) error {
+	args := mock.Called(txCtx, extensionId, extensionVersion)
 	return args.Error(0)
 }
 
-func (mock *mockControllerImpl) CreateInstance(tx *sql.Tx, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {
-	args := mock.Called(tx, extensionId, extensionVersion, parameterValues)
+func (mock *mockControllerImpl) CreateInstance(txCtx *transactionContext, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {
+	args := mock.Called(txCtx, extensionId, extensionVersion, parameterValues)
 	if result, ok := args.Get(0).(*extensionAPI.JsExtInstance); ok {
 		return result, args.Error(1)
 	}
 	return nil, args.Error(1)
 }
 
-func (mock *mockControllerImpl) FindInstances(tx *sql.Tx, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error) {
-	args := mock.Called(tx, extensionId, extensionVersion)
+func (mock *mockControllerImpl) FindInstances(txCtx *transactionContext, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error) {
+	args := mock.Called(txCtx, extensionId, extensionVersion)
 	if result, ok := args.Get(0).([]*extensionAPI.JsExtInstance); ok {
 		return result, args.Error(1)
 	}
 	return nil, args.Error(1)
 }
 
-func (mock *mockControllerImpl) DeleteInstance(tx *sql.Tx, extensionId, extensionVersion, instanceId string) error {
-	args := mock.Called(tx, extensionId, extensionVersion, instanceId)
+func (mock *mockControllerImpl) DeleteInstance(txCtx *transactionContext, extensionId, extensionVersion, instanceId string) error {
+	args := mock.Called(txCtx, extensionId, extensionVersion, instanceId)
 	return args.Error(0)
 }
