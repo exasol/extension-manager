@@ -13,7 +13,7 @@ type ExaMetadataITestSuite struct {
 	exasol *integrationTesting.DbTestSetup
 }
 
-func TestExaAllScriptsTableSuite(t *testing.T) {
+func TestExaMetadataITestSuite(t *testing.T) {
 	suite.Run(t, new(ExaMetadataITestSuite))
 }
 
