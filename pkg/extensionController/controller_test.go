@@ -11,6 +11,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/exasol/extension-manager/pkg/apiErrors"
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
+	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/registry"
 	"github.com/exasol/extension-manager/pkg/integrationTesting"
 	"github.com/exasol/extension-manager/pkg/parameterValidator"
@@ -24,7 +25,7 @@ type ControllerUTestSuite struct {
 	controller        TransactionController
 	db                *sql.DB
 	dbMock            sqlmock.Sqlmock
-	bucketFsMock      bucketFsMock
+	bucketFsMock      bfs.BucketFsMock
 	metaDataMock      exaMetaDataReaderMock
 }
 
@@ -40,7 +41,7 @@ func (suite *ControllerUTestSuite) BeforeTest(suiteName, testName string) {
 }
 
 func (suite *ControllerUTestSuite) createController() {
-	suite.bucketFsMock = createBucketFsMock()
+	suite.bucketFsMock = bfs.BucketFsMock{}
 	suite.metaDataMock = createExaMetaDataReaderMock(EXTENSION_SCHEMA)
 	ctrl := &controllerImpl{
 		registry:       registry.NewRegistry(suite.tempExtensionRepo),
@@ -69,7 +70,7 @@ func (suite *ControllerUTestSuite) AfterTest(suiteName, testName string) {
 /* [utest -> dsn~list-extensions~1] */
 func (suite *ControllerUTestSuite) TestGetAllExtensions() {
 	suite.writeDefaultExtension()
-	suite.bucketFsMock.simulateFiles([]BfsFile{{Name: "my-extension.1.2.3.jar", Size: 3}})
+	suite.bucketFsMock.SimulateFiles([]bfs.BfsFile{{Name: "my-extension.1.2.3.jar", Size: 3}})
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
 	suite.NoError(err)
 	suite.Equal([]*Extension{{Name: "MyDemoExtension", Id: "testing-extension.js", Category: "Demo category", Description: "An extension for testing.",
@@ -79,7 +80,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensions() {
 /* [utest -> dsn~list-extensions~1] */
 func (suite *ControllerUTestSuite) TestGetAllExtensionsWithMissingJar() {
 	suite.writeDefaultExtension()
-	suite.bucketFsMock.simulateFiles([]BfsFile{})
+	suite.bucketFsMock.SimulateFiles([]bfs.BfsFile{})
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
 	suite.NoError(err)
 	suite.Empty(extensions)
@@ -87,7 +88,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsWithMissingJar() {
 
 func (suite *ControllerUTestSuite) TestGetAllExtensionsFailsForInvalidExtension() {
 	suite.writeFile("broken-extension.js", "invalid javascript")
-	suite.bucketFsMock.simulateFiles([]BfsFile{})
+	suite.bucketFsMock.SimulateFiles([]bfs.BfsFile{})
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
 	suite.ErrorContains(err, `failed to load extension "broken-extension.js": failed to run extension "broken-extension.js" with content "invalid javascript": SyntaxError`)
 	suite.Empty(extensions)

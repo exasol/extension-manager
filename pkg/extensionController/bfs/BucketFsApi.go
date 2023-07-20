@@ -1,4 +1,4 @@
-package extensionController
+package bfs
 
 import (
 	"context"
@@ -8,14 +8,23 @@ import (
 	"time"
 )
 
-// BucketFsAPI allows access to BucketFS. Currently, it's implemented by running UDFs via SQL that read the data.
-// In the future that implementation might be replaced by direct access.
+// BucketFsAPI allows access to BucketFS.
 type BucketFsAPI interface {
-	// ListFiles lists all files in a given bucket recursively.
+	// ListFiles lists all files in the configured directory recursively.
 	ListFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error)
 }
 
+// BfsFile represents a file in BucketFS.
+type BfsFile struct {
+	Path string // Absolute path in BucketFS, starting with the base path, e.g. "/buckets/bfsdefault/default/"
+	Name string // File name
+	Size int    // File size in bytes
+}
+
 // CreateBucketFsAPI creates an instance of BucketFsAPI.
+//
+// The current implementation uses a Python UDF for accessing BucketFS.
+// In the future that implementation might be replaced by direct access.
 func CreateBucketFsAPI(bucketFsBasePath string) BucketFsAPI {
 	return &bucketFsAPIImpl{bucketFsBasePath: bucketFsBasePath}
 }
@@ -27,13 +36,6 @@ type bucketFsAPIImpl struct {
 /* [impl -> dsn~extension-components~1]. */
 func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error) {
 	return bfs.listDirInUDF(ctx, db)
-}
-
-// BfsFile represents a file in BucketFS.
-type BfsFile struct {
-	Path string
-	Name string
-	Size int
 }
 
 func (bfs bucketFsAPIImpl) listDirInUDF(ctx context.Context, db *sql.DB) (files []BfsFile, retErr error) {
@@ -86,6 +88,10 @@ func (bfs bucketFsAPIImpl) queryUdfScript(transaction *sql.Tx, scriptName string
 		return nil, fmt.Errorf("failed to list files in BucketFS using UDF. Cause: %w", err)
 	}
 	defer result.Close()
+	return readQueryResult(result, err)
+}
+
+func readQueryResult(result *sql.Rows, err error) ([]BfsFile, error) {
 	var files []BfsFile
 	for result.Next() {
 		if result.Err() != nil {

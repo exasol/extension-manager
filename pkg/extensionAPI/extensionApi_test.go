@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/exasol/extension-manager/pkg/backend"
+	"github.com/exasol/extension-manager/pkg/extensionAPI/context"
 	"github.com/exasol/extension-manager/pkg/integrationTesting"
 
 	"github.com/stretchr/testify/mock"
@@ -262,7 +263,7 @@ func (suite *ExtensionApiSuite) TestLoadExtensionInvalidJavaScript() {
 	suite.Nil(extension)
 }
 
-func (suite *ExtensionApiSuite) mockContext() *ExtensionContext {
+func (suite *ExtensionApiSuite) mockContext() *context.ExtensionContext {
 	return createMockContextWithSqlClient(&suite.mockSQLClient)
 }
 
