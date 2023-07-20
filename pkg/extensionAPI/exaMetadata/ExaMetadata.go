@@ -1,4 +1,4 @@
-package extensionAPI
+package exaMetadata
 
 import (
 	"database/sql"

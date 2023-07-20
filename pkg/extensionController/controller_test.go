@@ -11,6 +11,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/exasol/extension-manager/pkg/apiErrors"
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
+	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/registry"
 	"github.com/exasol/extension-manager/pkg/integrationTesting"
@@ -126,7 +127,7 @@ func (suite *ControllerUTestSuite) TestGetAllInstallationsFails() {
 				WithFindInstallationsFunc(t.throwCommand).
 				Build().
 				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-			suite.metaDataMock.simulateExaMetaData(extensionAPI.ExaMetadata{})
+			suite.metaDataMock.simulateExaMetaData(exaMetadata.ExaMetadata{})
 			suite.initDbMock()
 			suite.dbMock.ExpectBegin()
 			suite.dbMock.ExpectRollback()
@@ -144,7 +145,7 @@ func (suite *ControllerUTestSuite) TestFindInstancesFails() {
 				WithFindInstancesFunc(t.throwCommand).
 				Build().
 				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-			suite.metaDataMock.simulateExaMetaData(extensionAPI.ExaMetadata{})
+			suite.metaDataMock.simulateExaMetaData(exaMetadata.ExaMetadata{})
 			suite.initDbMock()
 			suite.dbMock.ExpectBegin()
 			suite.dbMock.ExpectRollback()
@@ -204,7 +205,7 @@ func (suite *ControllerUTestSuite) assertError(t errorTest, actualError error) {
 
 func (suite *ControllerUTestSuite) TestGetAllInstallations() {
 	suite.writeDefaultExtension()
-	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{{Schema: "schema", Name: "script"}})
+	suite.metaDataMock.simulateExaAllScripts([]exaMetadata.ExaScriptRow{{Schema: "schema", Name: "script"}})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
 	installations, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
@@ -325,7 +326,7 @@ func (suite *ControllerUTestSuite) TestCreateInstance_invalidParameters() {
 		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string", required: true}]`).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
+	suite.metaDataMock.simulateExaAllScripts([]exaMetadata.ExaScriptRow{})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectRollback()
@@ -342,7 +343,7 @@ func (suite *ControllerUTestSuite) TestCreateInstanceFails() {
 				WithAddInstanceFunc(t.throwCommand).
 				Build().
 				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-			suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
+			suite.metaDataMock.simulateExaAllScripts([]exaMetadata.ExaScriptRow{})
 			suite.dbMock.ExpectBegin()
 			suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 			suite.dbMock.ExpectRollback()
@@ -359,7 +360,7 @@ func (suite *ControllerUTestSuite) TestCreateInstance_validParameters() {
 		WithAddInstanceFunc("return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
+	suite.metaDataMock.simulateExaAllScripts([]exaMetadata.ExaScriptRow{})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()
@@ -391,7 +392,7 @@ func (suite *ControllerUTestSuite) TestDeleteInstanceSucceeds() {
 		WithDeleteInstanceFunc("context.sqlClient.execute(`delete instance ${instanceId}`)").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
+	suite.metaDataMock.simulateExaAllScripts([]exaMetadata.ExaScriptRow{})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec("delete instance instId").WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()

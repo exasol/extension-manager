@@ -7,6 +7,7 @@ import (
 
 	"github.com/exasol/extension-manager/pkg/backend"
 	"github.com/exasol/extension-manager/pkg/extensionAPI/context"
+	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/integrationTesting"
 
@@ -188,9 +189,9 @@ func (suite *ExtensionApiSuite) TestDeleteInstance() {
 	suite.NoError(err)
 }
 
-func createMockMetadata() *ExaMetadata {
-	exaAllScripts := ExaScriptTable{Rows: []ExaScriptRow{{Name: "test"}}}
-	return &ExaMetadata{AllScripts: exaAllScripts}
+func createMockMetadata() *exaMetadata.ExaMetadata {
+	exaAllScripts := exaMetadata.ExaScriptTable{Rows: []exaMetadata.ExaScriptRow{{Name: "test"}}}
+	return &exaMetadata.ExaMetadata{AllScripts: exaAllScripts}
 }
 
 func (suite *ExtensionApiSuite) TestFindInstallationsCanReadAllScriptsTable() {

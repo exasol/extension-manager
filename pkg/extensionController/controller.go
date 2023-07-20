@@ -9,6 +9,7 @@ import (
 	"github.com/exasol/extension-manager/pkg/apiErrors"
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
 	"github.com/exasol/extension-manager/pkg/extensionAPI/context"
+	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/registry"
 	"github.com/exasol/extension-manager/pkg/extensionController/transactionContext"
@@ -49,13 +50,13 @@ type controller interface {
 type controllerImpl struct {
 	registry       registry.Registry
 	config         ExtensionManagerConfig
-	metaDataReader extensionAPI.ExaMetadataReader
+	metaDataReader exaMetadata.ExaMetadataReader
 }
 
 func createImpl(config ExtensionManagerConfig) controller {
 	return &controllerImpl{
 		registry:       registry.NewRegistry(config.ExtensionRegistryURL),
-		metaDataReader: extensionAPI.CreateExaMetaDataReader(),
+		metaDataReader: exaMetadata.CreateExaMetaDataReader(),
 		config:         config,
 	}
 }

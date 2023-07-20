@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/exasol/extension-manager/pkg/extensionAPI/context"
+	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/dop251/goja"
@@ -84,7 +85,7 @@ type rawJsExtension struct {
 	GetParameterDefinitions func(context *context.ExtensionContext, version string) []interface{}                           `json:"getInstanceParameters"`
 	Install                 func(context *context.ExtensionContext, version string)                                         `json:"install"`
 	Uninstall               func(context *context.ExtensionContext, version string)                                         `json:"uninstall"`
-	FindInstallations       func(context *context.ExtensionContext, metadata *ExaMetadata) []*JsExtInstallation             `json:"findInstallations"`
+	FindInstallations       func(context *context.ExtensionContext, metadata *exaMetadata.ExaMetadata) []*JsExtInstallation `json:"findInstallations"`
 	AddInstance             func(context *context.ExtensionContext, version string, params *ParameterValues) *JsExtInstance `json:"addInstance"`
 	FindInstances           func(context *context.ExtensionContext, version string) []*JsExtInstance                        `json:"findInstances"`
 	DeleteInstance          func(context *context.ExtensionContext, version, instanceId string)                             `json:"deleteInstance"`

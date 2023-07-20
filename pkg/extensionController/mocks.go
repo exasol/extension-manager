@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
+	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/transactionContext"
 	"github.com/exasol/extension-manager/pkg/parameterValidator"
@@ -18,21 +19,21 @@ type exaMetaDataReaderMock struct {
 }
 
 func createExaMetaDataReaderMock(extensionSchema string) exaMetaDataReaderMock {
-	var _ extensionAPI.ExaMetadataReader = &exaMetaDataReaderMock{}
+	var _ exaMetadata.ExaMetadataReader = &exaMetaDataReaderMock{}
 	return exaMetaDataReaderMock{extensionSchema: extensionSchema}
 }
 
-func (m *exaMetaDataReaderMock) simulateExaAllScripts(scripts []extensionAPI.ExaScriptRow) {
-	m.simulateExaMetaData(extensionAPI.ExaMetadata{AllScripts: extensionAPI.ExaScriptTable{Rows: scripts}})
+func (m *exaMetaDataReaderMock) simulateExaAllScripts(scripts []exaMetadata.ExaScriptRow) {
+	m.simulateExaMetaData(exaMetadata.ExaMetadata{AllScripts: exaMetadata.ExaScriptTable{Rows: scripts}})
 }
 
-func (m *exaMetaDataReaderMock) simulateExaMetaData(metaData extensionAPI.ExaMetadata) {
+func (m *exaMetaDataReaderMock) simulateExaMetaData(metaData exaMetadata.ExaMetadata) {
 	m.On("ReadMetadataTables", mock.Anything, m.extensionSchema).Return(&metaData, nil)
 }
 
-func (mock *exaMetaDataReaderMock) ReadMetadataTables(tx *sql.Tx, schemaName string) (*extensionAPI.ExaMetadata, error) {
+func (mock *exaMetaDataReaderMock) ReadMetadataTables(tx *sql.Tx, schemaName string) (*exaMetadata.ExaMetadata, error) {
 	args := mock.Called(tx, schemaName)
-	if buckets, ok := args.Get(0).(*extensionAPI.ExaMetadata); ok {
+	if buckets, ok := args.Get(0).(*exaMetadata.ExaMetadata); ok {
 		return buckets, args.Error(1)
 	}
 	return nil, args.Error(1)
