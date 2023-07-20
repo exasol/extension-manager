@@ -9,7 +9,7 @@ import (
 	"github.com/exasol/extension-manager/pkg/extensionAPI/context"
 	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
-	"github.com/exasol/extension-manager/pkg/extensionController/transactionContext"
+	"github.com/exasol/extension-manager/pkg/extensionController/transaction"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -43,7 +43,7 @@ func (suite *ErrorHandlingExtensionSuite) TestProperties() {
 }
 
 func createMockContextWithSqlClient(sqlClient context.SimpleSQLClient, bucketFsClientMock bfs.BucketFsAPI) *context.ExtensionContext {
-	txCtx := &transactionContext.TransactionContext{}
+	txCtx := &transaction.TransactionContext{}
 	return context.CreateContextWithClient("extension_schema", txCtx, sqlClient, bucketFsClientMock)
 }
 

@@ -7,16 +7,16 @@ import (
 
 	"github.com/exasol/extension-manager/pkg/backend"
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
-	"github.com/exasol/extension-manager/pkg/extensionController/transactionContext"
+	"github.com/exasol/extension-manager/pkg/extensionController/transaction"
 )
 
-func CreateContext(txCtx *transactionContext.TransactionContext, extensionSchemaName string, bucketFsBasePath string) *ExtensionContext {
+func CreateContext(txCtx *transaction.TransactionContext, extensionSchemaName string, bucketFsBasePath string) *ExtensionContext {
 	var sqlClient SimpleSQLClient = backend.NewSqlClient(txCtx.GetContext(), txCtx.GetTransaction())
 	var bucketFsClient bfs.BucketFsAPI = bfs.CreateBucketFsAPI(bucketFsBasePath)
 	return CreateContextWithClient(extensionSchemaName, txCtx, sqlClient, bucketFsClient)
 }
 
-func CreateContextWithClient(extensionSchemaName string, txCtx *transactionContext.TransactionContext, client SimpleSQLClient, bucketFsClient bfs.BucketFsAPI) *ExtensionContext {
+func CreateContextWithClient(extensionSchemaName string, txCtx *transaction.TransactionContext, client SimpleSQLClient, bucketFsClient bfs.BucketFsAPI) *ExtensionContext {
 	return &ExtensionContext{
 		ExtensionSchemaName: extensionSchemaName,
 		SqlClient:           client,

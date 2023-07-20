@@ -9,7 +9,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/exasol/extension-manager/pkg/backend"
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
-	"github.com/exasol/extension-manager/pkg/extensionController/transactionContext"
+	"github.com/exasol/extension-manager/pkg/extensionController/transaction"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -96,14 +96,14 @@ func (suite *ContextSuite) TestBucketFsResolvePathError() {
 
 func (suite *ContextSuite) createContext() *ExtensionContext {
 	suite.dbMock.ExpectBegin()
-	txCtx, err := transactionContext.BeginTransaction(context.Background(), suite.db)
+	txCtx, err := transaction.BeginTransaction(context.Background(), suite.db)
 	suite.NoError(err)
 	return CreateContext(txCtx, "EXT_SCHEMA", "/bucketfs/base/path/")
 }
 
 func (suite *ContextSuite) createContextWithMocks() *ExtensionContext {
 	suite.dbMock.ExpectBegin()
-	txCtx, err := transactionContext.BeginTransaction(context.Background(), suite.db)
+	txCtx, err := transaction.BeginTransaction(context.Background(), suite.db)
 	suite.NoError(err)
 	return CreateContextWithClient("EXT_SCHEMA", txCtx, nil, suite.bucketFSMock)
 }
