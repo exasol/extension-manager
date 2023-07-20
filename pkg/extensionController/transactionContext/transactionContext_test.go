@@ -75,14 +75,14 @@ func (suite *TransactionContextSuite) TestRollback() {
 	suite.dbMock.ExpectBegin()
 	txCtx, _ := suite.beginTransaction()
 	suite.dbMock.ExpectRollback()
-	txCtx.transaction.Rollback()
+	txCtx.Rollback()
 }
 
 func (suite *TransactionContextSuite) TestCommit() {
 	suite.dbMock.ExpectBegin()
 	txCtx, _ := suite.beginTransaction()
 	suite.dbMock.ExpectCommit()
-	txCtx.transaction.Commit()
+	txCtx.Commit()
 }
 
 func (suite *TransactionContextSuite) beginTransaction() (*TransactionContext, error) {
