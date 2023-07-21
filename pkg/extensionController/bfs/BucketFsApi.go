@@ -89,7 +89,7 @@ func (bfs bucketFsAPIImpl) createUdfScript(transaction *sql.Tx) (string, error) 
 /`, udfScriptName, listFilesRecursivelyUdfContent)
 	_, err = transaction.Exec(script)
 	if err != nil {
-		return "", fmt.Errorf("failed to create script for listing bucket. Cause: %w", err)
+		return "", fmt.Errorf("failed to create UDF script for listing bucket. Cause: %w", err)
 	}
 	return udfScriptName, nil
 }
@@ -132,9 +132,9 @@ func (bfs bucketFsAPIImpl) queryAbsoluteFilePath(transaction *sql.Tx, udfScriptN
 		return "", fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
 	}
 	defer statement.Close()
-	result, err := statement.Query(bfs.bucketFsBasePath)
+	result, err := statement.Query(bfs.bucketFsBasePath, fileName)
 	if err != nil {
-		return "", fmt.Errorf("failed to list files in BucketFS using UDF. Cause: %w", err)
+		return "", fmt.Errorf("failed to find absolute path in BucketFS using UDF. Cause: %w", err)
 	}
 	defer result.Close()
 	if !result.Next() {
@@ -146,7 +146,7 @@ func (bfs bucketFsAPIImpl) queryAbsoluteFilePath(transaction *sql.Tx, udfScriptN
 	var absolutePath string
 	err = result.Scan(&absolutePath)
 	if err != nil {
-		return "", fmt.Errorf("failed reading absolute. Cause: %w", err)
+		return "", fmt.Errorf("failed reading absolute path. Cause: %w", err)
 	}
 	return absolutePath, nil
 }
