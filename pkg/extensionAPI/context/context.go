@@ -53,7 +53,7 @@ type bucketFsContextImpl struct {
 func (b *bucketFsContextImpl) ResolvePath(fileName string) string {
 	path, err := b.bucketFsClient.FindAbsolutePath(b.context, b.db, fileName)
 	if err != nil {
-		// This is called by JavaScript code.
+		// Function ResolvePath() is called by JavaScript code.
 		// The JS runtime will convert this panic into a thrown JS error.
 		panic(fmt.Errorf("failed to find absolute path for file %q: %w", fileName, err))
 	}

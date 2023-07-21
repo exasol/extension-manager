@@ -284,7 +284,7 @@ func (suite *ExtensionApiSuite) TestLoadExtensionInvalidJavaScript() {
 }
 
 func (suite *ExtensionApiSuite) mockContext() *context.ExtensionContext {
-	return createMockContextWithSqlClient(&suite.mockSQLClient, &suite.mockBucketFsClient)
+	return createMockContextWithClients(&suite.mockSQLClient, &suite.mockBucketFsClient)
 }
 
 func (suite *ExtensionApiSuite) loadExtension(content string) *JsExtension {

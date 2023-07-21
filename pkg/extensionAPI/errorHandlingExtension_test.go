@@ -42,7 +42,7 @@ func (suite *ErrorHandlingExtensionSuite) TestProperties() {
 		suite.extension)
 }
 
-func createMockContextWithSqlClient(sqlClient context.SimpleSQLClient, bucketFsClientMock bfs.BucketFsAPI) *context.ExtensionContext {
+func createMockContextWithClients(sqlClient context.SimpleSQLClient, bucketFsClientMock bfs.BucketFsAPI) *context.ExtensionContext {
 	txCtx := &transaction.TransactionContext{}
 	return context.CreateContextWithClient("extension_schema", txCtx, sqlClient, bucketFsClientMock)
 }
@@ -50,7 +50,7 @@ func createMockContextWithSqlClient(sqlClient context.SimpleSQLClient, bucketFsC
 func createMockContext() *context.ExtensionContext {
 	var sqlClientMock context.SimpleSQLClient = &sqlClientMock{}
 	var bucketFsClientMock bfs.BucketFsAPI = &bfs.BucketFsMock{}
-	return createMockContextWithSqlClient(sqlClientMock, bucketFsClientMock)
+	return createMockContextWithClients(sqlClientMock, bucketFsClientMock)
 }
 
 // FindInstallations

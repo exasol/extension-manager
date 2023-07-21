@@ -81,13 +81,13 @@ func (suite *ContextSuite) TestSqlClientExecuteFailure() {
 }
 
 func (suite *ContextSuite) TestBucketFsResolvePath() {
-	ctx := suite.createContextWithMocks()
+	ctx := suite.createContextWithClients()
 	suite.bucketFSMock.SimulateAbsolutePath("file.txt", "/absolute/path/file.txt")
 	suite.Equal("/absolute/path/file.txt", ctx.BucketFs.ResolvePath("file.txt"))
 }
 
 func (suite *ContextSuite) TestBucketFsResolvePathError() {
-	ctx := suite.createContextWithMocks()
+	ctx := suite.createContextWithClients()
 	suite.bucketFSMock.SimulateAbsolutePathError("file.txt", fmt.Errorf("mock error"))
 	suite.PanicsWithError("failed to find absolute path for file \"file.txt\": mock error", func() {
 		ctx.BucketFs.ResolvePath("file.txt")
@@ -101,7 +101,7 @@ func (suite *ContextSuite) createContext() *ExtensionContext {
 	return CreateContext(txCtx, "EXT_SCHEMA", "/bucketfs/base/path/")
 }
 
-func (suite *ContextSuite) createContextWithMocks() *ExtensionContext {
+func (suite *ContextSuite) createContextWithClients() *ExtensionContext {
 	suite.dbMock.ExpectBegin()
 	txCtx, err := transaction.BeginTransaction(context.Background(), suite.db)
 	suite.NoError(err)

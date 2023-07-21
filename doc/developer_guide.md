@@ -206,8 +206,8 @@ If you want to directly use the controller:
 ```go
 controller:=extensionController.CreateWithConfig(extensionController.ExtensionManagerConfig{
     ExtensionRegistryURL: "https://example.com/registry.json", 
-	BucketFSBasePath: "/buckets/bfsdefault/default/",
-	ExtensionSchema: "EXA_EXTENSIONS",
+    BucketFSBasePath: "/buckets/bfsdefault/default/",
+    ExtensionSchema: "EXA_EXTENSIONS",
 })
 var db *sql.DB // create database connection
 extensions, err := controller.GetAllExtensions(context.Background(), db)
