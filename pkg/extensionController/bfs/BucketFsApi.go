@@ -127,7 +127,7 @@ func readQueryResult(result *sql.Rows) ([]BfsFile, error) {
 }
 
 func (bfs bucketFsAPIImpl) queryAbsoluteFilePath(transaction *sql.Tx, udfScriptName string, fileName string) (string, error) {
-	statement, err := transaction.Prepare(`SELECT FULL_PATH FROM (SELECT ` + udfScriptName + `(?)) ORDER BY FULL_PATH LIMIT 1`) //nolint:gosec // SQL string concatenation is safe here
+	statement, err := transaction.Prepare(`SELECT FULL_PATH FROM (SELECT ` + udfScriptName + `(?)) WHERE FILE_NAME = ? ORDER BY FULL_PATH LIMIT 1`) //nolint:gosec // SQL string concatenation is safe here
 	if err != nil {
 		return "", fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
 	}
