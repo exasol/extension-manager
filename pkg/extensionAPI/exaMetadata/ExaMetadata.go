@@ -1,4 +1,4 @@
-package extensionAPI
+package exaMetadata
 
 import (
 	"database/sql"
@@ -48,7 +48,7 @@ WHERE SCRIPT_SCHEMA=?`, schemaName)
 	rows := make([]ExaScriptRow, 0)
 	for result.Next() {
 		if result.Err() != nil {
-			return nil, fmt.Errorf("failed to iterate SYS.EXA_ALL_SCRIPTS: %w", err)
+			return nil, fmt.Errorf("failed to iterate SYS.EXA_ALL_SCRIPTS: %w", result.Err())
 		}
 		var row ExaScriptRow
 		var inputType sql.NullString
@@ -88,7 +88,7 @@ func getExasolMajorVersion(tx *sql.Tx) (string, error) {
 		return "", fmt.Errorf("no result found for query")
 	}
 	if result.Err() != nil {
-		return "", fmt.Errorf("failed to iterate SYS.EXA_METADATA: %w", err)
+		return "", fmt.Errorf("failed to iterate SYS.EXA_METADATA: %w", result.Err())
 	}
 	var majorVersion string
 	err = result.Scan(&majorVersion)
@@ -110,7 +110,7 @@ FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS`)
 	rows := make([]ExaVirtualSchemaRow, 0)
 	for result.Next() {
 		if result.Err() != nil {
-			return nil, fmt.Errorf("failed to iterate SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
+			return nil, fmt.Errorf("failed to iterate SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", result.Err())
 		}
 		var row ExaVirtualSchemaRow
 		err := result.Scan(&row.Name, &row.Owner, &row.AdapterScriptSchema, &row.AdapterScriptName, &row.AdapterNotes)
@@ -134,7 +134,7 @@ FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS`)
 	rows := make([]ExaVirtualSchemaRow, 0)
 	for result.Next() {
 		if result.Err() != nil {
-			return nil, fmt.Errorf("failed to iterate SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
+			return nil, fmt.Errorf("failed to iterate SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", result.Err())
 		}
 		var row ExaVirtualSchemaRow
 		var adapterScriptSchemaAndName string

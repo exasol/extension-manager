@@ -6,6 +6,7 @@ import (
 	"github.com/dop251/goja"
 	"github.com/exasol/extension-manager/pkg/apiErrors"
 	"github.com/exasol/extension-manager/pkg/extensionAPI/context"
+	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
 )
 
 type JsExtension struct {
@@ -82,7 +83,7 @@ func (e *JsExtension) Uninstall(context *context.ExtensionContext, version strin
 	return nil
 }
 
-func (e *JsExtension) FindInstallations(context *context.ExtensionContext, metadata *ExaMetadata) (installations []*JsExtInstallation, errorResult error) {
+func (e *JsExtension) FindInstallations(context *context.ExtensionContext, metadata *exaMetadata.ExaMetadata) (installations []*JsExtInstallation, errorResult error) {
 	if e.extension.FindInstallations == nil {
 		return nil, e.unsupportedFunction("findInstallations")
 	}

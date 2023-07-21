@@ -3,20 +3,28 @@ package context
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/exasol/extension-manager/pkg/backend"
+	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
+	"github.com/exasol/extension-manager/pkg/extensionController/transaction"
 )
 
-func CreateContext(ctx context.Context, extensionSchemaName string, tx *sql.Tx, db *sql.DB) *ExtensionContext {
-	var client SimpleSQLClient = backend.NewSqlClient(ctx, tx)
-	return CreateContextWithClient(extensionSchemaName, client)
+func CreateContext(txCtx *transaction.TransactionContext, extensionSchemaName string, bucketFsBasePath string) *ExtensionContext {
+	var sqlClient SimpleSQLClient = backend.NewSqlClient(txCtx.GetContext(), txCtx.GetTransaction())
+	var bucketFsClient bfs.BucketFsAPI = bfs.CreateBucketFsAPI(bucketFsBasePath)
+	return CreateContextWithClient(extensionSchemaName, txCtx, sqlClient, bucketFsClient)
 }
 
-func CreateContextWithClient(extensionSchemaName string, client SimpleSQLClient) *ExtensionContext {
+func CreateContextWithClient(extensionSchemaName string, txCtx *transaction.TransactionContext, client SimpleSQLClient, bucketFsClient bfs.BucketFsAPI) *ExtensionContext {
 	return &ExtensionContext{
 		ExtensionSchemaName: extensionSchemaName,
 		SqlClient:           client,
-		BucketFs:            &bucketFsContextImpl{},
+		BucketFs: &bucketFsContextImpl{
+			bucketFsClient: bucketFsClient,
+			context:        txCtx.GetContext(),
+			db:             txCtx.GetDBConnection(),
+		},
 	}
 }
 
@@ -36,10 +44,20 @@ type BucketFsContext interface {
 	ResolvePath(fileName string) string
 }
 
-type bucketFsContextImpl struct{}
+type bucketFsContextImpl struct {
+	bucketFsClient bfs.BucketFsAPI
+	context        context.Context
+	db             *sql.DB
+}
 
 func (b *bucketFsContextImpl) ResolvePath(fileName string) string {
-	return "/buckets/bfsdefault/default/" + fileName
+	path, err := b.bucketFsClient.FindAbsolutePath(b.context, b.db, fileName)
+	if err != nil {
+		// Function ResolvePath() is called by JavaScript code.
+		// The JS runtime will convert this panic into a thrown JS error.
+		panic(fmt.Errorf("failed to find absolute path for file %q: %w", fileName, err))
+	}
+	return path
 }
 
 // Extensions use this SQL client to execute queries.

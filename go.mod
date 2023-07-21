@@ -3,17 +3,17 @@ module github.com/exasol/extension-manager
 go 1.19
 
 require (
-	github.com/dop251/goja v0.0.0-20230626124041-ba8a63e79201
+	github.com/dop251/goja v0.0.0-20230707174833-636fdf960de1
 	github.com/dop251/goja_nodejs v0.0.0-20230602164024-804a84515562
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/mod v0.11.0
+	golang.org/x/mod v0.12.0
 )
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/exasol/exasol-driver-go v1.0.0
 	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.3
-	github.com/go-chi/chi/v5 v5.0.8
+	github.com/go-chi/chi/v5 v5.0.10
 	github.com/kinbiko/jsonassert v1.1.1
 	github.com/swaggo/http-swagger v1.3.4
 )
@@ -21,15 +21,15 @@ require (
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
-	github.com/go-openapi/jsonpointer v0.19.6 // indirect
+	github.com/go-openapi/jsonpointer v0.20.0 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-openapi/spec v0.20.9 // indirect
-	github.com/google/pprof v0.0.0-20230602150820-91b7bce49751 // indirect
-	github.com/iancoleman/orderedmap v0.2.0 // indirect
+	github.com/google/pprof v0.0.0-20230705174524-200ffdc848b8 // indirect
+	github.com/iancoleman/orderedmap v0.3.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/swaggo/swag v1.16.1 // indirect
-	golang.org/x/tools v0.10.0 // indirect
+	golang.org/x/tools v0.11.0 // indirect
 )
 
 require (
@@ -48,11 +48,11 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/swaggo/files v1.0.1 // indirect
-	golang.org/x/crypto v0.10.0 // indirect
-	golang.org/x/net v0.11.0 // indirect
+	golang.org/x/crypto v0.11.0 // indirect
+	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.9.0 // indirect
-	golang.org/x/text v0.10.0 // indirect
+	golang.org/x/sys v0.10.0 // indirect
+	golang.org/x/text v0.11.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

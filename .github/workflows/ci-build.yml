@@ -61,9 +61,7 @@ jobs:
       - name: Install dependencies
         run: |
           go get -t ./...
-
-      - name: Revert go.sum modification by previous "go get"
-        run: |
+          echo Revert go.sum modification by previous "go get"
           go mod tidy
 
       - name: Check generated code
@@ -73,6 +71,8 @@ jobs:
             echo "Project files did change:\n"
             git --no-pager diff
             exit 1
+          else
+            echo "Generated code is up-to-date"
           fi
 
       - name: Build

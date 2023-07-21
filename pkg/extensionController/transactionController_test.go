@@ -48,7 +48,7 @@ func (suite *extCtrlUnitTestSuite) AfterTest(suiteName, testName string) {
 // GetAllExtensions
 
 func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_Success() {
-	suite.mockBfs.On("ListFiles", mock.Anything, mock.Anything).Return([]bfs.BfsFile{}, nil)
+	suite.mockBfs.SimulateFiles([]bfs.BfsFile{})
 	suite.mockCtrl.On("GetAllExtensions", mock.Anything).Return([]*Extension{}, nil)
 	extensions, err := suite.ctrl.GetAllExtensions(mockContext(), suite.db)
 	suite.NoError(err)
@@ -56,14 +56,14 @@ func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_Success() {
 }
 
 func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_BucketFsListFails() {
-	suite.mockBfs.On("ListFiles", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("mock"))
+	suite.mockBfs.SimulateFilesError(fmt.Errorf("mock"))
 	extensions, err := suite.ctrl.GetAllExtensions(mockContext(), suite.db)
 	suite.EqualError(err, "failed to search for required files in BucketFS. Cause: mock")
 	suite.Nil(extensions)
 }
 
 func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_GetFails() {
-	suite.mockBfs.On("ListFiles", mock.Anything, mock.Anything).Return([]bfs.BfsFile{}, nil)
+	suite.mockBfs.SimulateFiles([]bfs.BfsFile{})
 	suite.mockCtrl.On("GetAllExtensions", mock.Anything).Return(nil, fmt.Errorf("mock"))
 	extensions, err := suite.ctrl.GetAllExtensions(mockContext(), suite.db)
 	suite.EqualError(err, "mock")
