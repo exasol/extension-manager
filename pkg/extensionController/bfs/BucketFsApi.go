@@ -30,6 +30,7 @@ type BfsFile struct {
 //
 // The current implementation uses a Python UDF for accessing BucketFS.
 // In the future that implementation might be replaced by direct access.
+/* [impl -> dsn~configure-bucketfs-path~1]. */
 func CreateBucketFsAPI(bucketFsBasePath string) BucketFsAPI {
 	return &bucketFsAPIImpl{bucketFsBasePath: bucketFsBasePath}
 }
@@ -56,6 +57,7 @@ func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB) (files []B
 	return bfs.queryBucketFsContent(transaction, udfScriptName)
 }
 
+/* [impl -> dsn~resolving-files-in-bucketfs~1] */
 func (bfs bucketFsAPIImpl) FindAbsolutePath(ctx context.Context, db *sql.DB, fileName string) (absolutePath string, retErr error) {
 	transaction, err := db.BeginTx(ctx, nil)
 	if err != nil {

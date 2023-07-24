@@ -50,6 +50,7 @@ type bucketFsContextImpl struct {
 	db             *sql.DB
 }
 
+/* [impl -> dsn~resolving-files-in-bucketfs~1] */
 func (b *bucketFsContextImpl) ResolvePath(fileName string) string {
 	path, err := b.bucketFsClient.FindAbsolutePath(b.context, b.db, fileName)
 	if err != nil {

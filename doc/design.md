@@ -137,17 +137,17 @@ An extension might consist of JDBC driver, artifacts, configuration and database
 
 In the initial version when managing extensions EM requires the following components to be available in BucketFS and does not actively manage them:
 * JDBC driver
-* artifacts in BucketFS, e.g. jar files
+* Artifacts in BucketFS, e.g. jar files
 * 3rd party libraries
 
 Instead, for managing extensions EM only considers the following database objects:
-* ADAPTER SCRIPT
-* SET SCRIPT
-* CONNECTION
-* VIRTUAL SCHEMA including mapping
+* `ADAPTER SCRIPT`
+* `SET SCRIPT`
+* `CONNECTION`
+* `VIRTUAL SCHEMA` including mapping
 
 Note: In the following cases a separate artifact in BucketFS is not required, as extension definition can inline these contents into the SQL statements of either adapter script or set script:
-* VIRTUAL SCHEMA mapping, json content
+* JSON content of virtual schema EDML mapping, see [EDML user guide](https://github.com/exasol/virtual-schema-common-document/blob/main/doc/user_guide/edml_user_guide.md)
 * Lua scripts
 
 When creating the required database objects EM will read all required arguments, configurations and credentials from the [extension definition](#extension-definitions). The extension definition can also define [parameters](#parameters-for-extension-configuration). EM will evaluate the parameter definitions and then ask the user to enter a value for each of the parameters. See also an example of the [installation process](#installation-process).
@@ -158,6 +158,30 @@ Covers:
 * [`req~install-extension-artifacts~1`](system_requirements.md#install-database-objects)
 
 Needs: impl, utest
+
+#### Configurable BucketFS Path
+`dsn~configure-bucketfs-path~1`
+
+EM allows configuring the BucketFS path where extensions artifacts like JAR files are located.
+
+Rationale:
+
+As described in [`dsn~extension-components~1`](#components-of-an-extension) an extensions may require files in BucketFS. The path to the BucketFS location depends on the Exasol database deployment.
+
+Needs: impl, utest, itest
+
+#### Resolving Files in BucketFS
+`dsn~resolving-files-in-bucketfs~1`
+
+EM resolves filenames to absolute paths in BucketFS.
+
+Rationale:
+
+Extensions require files in BucketFS. The exact location in BucketFS of the files is not known when creating an extension, only the file name (e.g. `document-files-virtual-schema-dist-7.3.3-s3-2.6.2.jar`). In order to create adapter scripts, the extension must know the absolute path of the file in BucketFS (e.g. `/buckets/bfsdefault/default/document-files-virtual-schema-dist-7.3.3-s3-2.6.2.jar`). So EM must allow the extension to resolve file names to an absolute path in BucketFS.
+
+Needs: impl, utest, itest
+
+#### Resolving Artifacts in BucketFS
 
 ### Extension Definitions
 `dsn~extension-definition~1`
@@ -183,7 +207,7 @@ Covers:
 
 Needs: impl, utest, itest
 
-#### Storage for extension definitions
+#### Storage for Extension Definitions
 `dsn~extension-definitions-storage~1`
 
 The extension definitions are placed in a storage that is accessible from the extension-manager backend. Access from inside the database is not required.

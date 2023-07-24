@@ -87,6 +87,7 @@ func (suite *ExtensionApiSuite) TestInstall() {
 	suite.NoError(err)
 }
 
+/* [itest -> dsn~resolving-files-in-bucketfs~1] */
 func (suite *ExtensionApiSuite) TestInstallResolveBucketFsPath() {
 	version := "extVersion"
 	absolutePath := "/absolute/file/path"

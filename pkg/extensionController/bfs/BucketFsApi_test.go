@@ -36,13 +36,14 @@ func (suite *BucketFsAPIUTestSuite) AfterTest(suiteName, testName string) {
 
 // ListFiles
 
+/* [utest -> dsn~configure-bucketfs-path~1] */
 func (suite *BucketFsAPIUTestSuite) TestListFiles() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
 	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
 	suite.dbMock.ExpectPrepare(`SELECT "INTERNAL_.* ORDER BY FULL_PATH`).
 		WillBeClosed().
-		ExpectQuery().WillReturnRows(sqlmock.NewRows([]string{"FILE_NAME", "FULL_PATH", "SIZE"}).
+		ExpectQuery().WithArgs(BUCKETFS_BASE_PATH).WillReturnRows(sqlmock.NewRows([]string{"FILE_NAME", "FULL_PATH", "SIZE"}).
 		AddRow("file1.txt", "/base/file1.txt", 10).
 		AddRow("file2.txt", "/base2/file2.txt", 20)).
 		RowsWillBeClosed()
@@ -140,6 +141,8 @@ func (suite *BucketFsAPIUTestSuite) listFiles() ([]BfsFile, error) {
 
 // FindAbsolutePath
 
+/* [utest -> dsn~configure-bucketfs-path~1] */
+/* [utest -> dsn~resolving-files-in-bucketfs~1] */
 func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePath() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
