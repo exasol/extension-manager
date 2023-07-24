@@ -1,14 +1,20 @@
 # Extension Manager 0.5.0, released 2023-??-??
 
-Code name:
+Code name: Upgrade Extensions
 
 ## Summary
 
-This release allows configuring the BucketFS base path where EM expects extension files to be located. EM searches this path recursively, so files are also found in subdirectories.
+This release supports upgrading installed extensions to their latest version. Extensions must implement the latest `extension-manager-interface` version 0.3.0 to support this.
 
-This release improves error handling when using extensions not implementing all functions required by EM. EM now returns a helpful error message instead of failing with a `nil`-pointer error.
+This release also allows configuring the BucketFS base path where EM expects extension files to be located. EM searches this path recursively, so files are also found in subdirectories.
+
+This release also improves error handling when using extensions not implementing all functions required by EM. EM now returns a helpful error message instead of failing with a `nil`-pointer error.
 
 A common scenario for an extension not implementing a required function is when the extension had been built using an older version of EM's extension interface.
+
+## Features
+
+* #101 Added support for upgrading installed extensions
 
 ## Bugfixes
 
