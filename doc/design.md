@@ -166,7 +166,7 @@ EM allows configuring the BucketFS path where extensions artifacts like JAR file
 
 Rationale:
 
-As described in [`dsn~extension-components~1`](#components-of-an-extension) an extensions may require files in BucketFS. The path to the BucketFS location depends on the Exasol database deployment.
+As described in [`dsn~extension-components~1`](#components-of-an-extension) an extension may require files in BucketFS. The path to the BucketFS location depends on the Exasol database deployment.
 
 Needs: impl, utest, itest
 
