@@ -224,6 +224,20 @@ func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePathNoResult() {
 	suite.Equal("", result)
 }
 
+func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePathRowError() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectPrepare(`SELECT FULL_PATH FROM.*`).
+		WillBeClosed().
+		ExpectQuery().WithArgs(BUCKETFS_BASE_PATH, "file.txt").WillReturnRows(sqlmock.NewRows([]string{"FULL_PATH"}).AddRow("/abs/path/file.txt").RowError(0, fmt.Errorf("mock error"))).
+		RowsWillBeClosed()
+	suite.dbMock.ExpectRollback()
+	result, err := suite.findAbsolutePath("file.txt")
+	suite.EqualError(err, "failed iterating absolute path results. Cause: mock error")
+	suite.Equal("", result)
+}
+
 func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePathWrongResultColumnCount() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))

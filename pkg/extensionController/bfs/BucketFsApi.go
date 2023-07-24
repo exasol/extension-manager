@@ -57,7 +57,7 @@ func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB) (files []B
 	return bfs.queryBucketFsContent(transaction, udfScriptName)
 }
 
-/* [impl -> dsn~resolving-files-in-bucketfs~1] */
+/* [impl -> dsn~resolving-files-in-bucketfs~1]. */
 func (bfs bucketFsAPIImpl) FindAbsolutePath(ctx context.Context, db *sql.DB, fileName string) (absolutePath string, retErr error) {
 	transaction, err := db.BeginTx(ctx, nil)
 	if err != nil {
@@ -113,9 +113,6 @@ func (bfs bucketFsAPIImpl) queryBucketFsContent(transaction *sql.Tx, udfScriptNa
 func readQueryResult(result *sql.Rows) ([]BfsFile, error) {
 	var files []BfsFile
 	for result.Next() {
-		if result.Err() != nil {
-			return nil, fmt.Errorf("failed iterating BucketFS list UDF. Cause: %w", result.Err())
-		}
 		var file BfsFile
 		var fileSize float64
 		err := result.Scan(&file.Name, &file.Path, &fileSize)
