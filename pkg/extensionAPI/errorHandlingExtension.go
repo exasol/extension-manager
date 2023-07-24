@@ -5,6 +5,8 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/exasol/extension-manager/pkg/apiErrors"
+	"github.com/exasol/extension-manager/pkg/extensionAPI/context"
+	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
 )
 
 type JsExtension struct {
@@ -46,7 +48,7 @@ func convertVersions(versions []rawJsExtensionVersion) []JsExtensionVersion {
 	return result
 }
 
-func (e *JsExtension) GetParameterDefinitions(context *ExtensionContext, version string) (definitions []interface{}, errorResult error) {
+func (e *JsExtension) GetParameterDefinitions(context *context.ExtensionContext, version string) (definitions []interface{}, errorResult error) {
 	defer func() {
 		if err := recover(); err != nil {
 			errorResult = e.convertError(fmt.Sprintf("failed to get parameter definitions for extension %q", e.Id), err)
@@ -55,7 +57,7 @@ func (e *JsExtension) GetParameterDefinitions(context *ExtensionContext, version
 	return e.extension.GetParameterDefinitions(context, version), nil
 }
 
-func (e *JsExtension) Install(context *ExtensionContext, version string) (errorResult error) {
+func (e *JsExtension) Install(context *context.ExtensionContext, version string) (errorResult error) {
 	if e.extension.Install == nil {
 		return e.unsupportedFunction("install")
 	}
@@ -68,7 +70,7 @@ func (e *JsExtension) Install(context *ExtensionContext, version string) (errorR
 	return nil
 }
 
-func (e *JsExtension) Uninstall(context *ExtensionContext, version string) (errorResult error) {
+func (e *JsExtension) Uninstall(context *context.ExtensionContext, version string) (errorResult error) {
 	if e.extension.Uninstall == nil {
 		return e.unsupportedFunction("uninstall")
 	}
@@ -81,7 +83,7 @@ func (e *JsExtension) Uninstall(context *ExtensionContext, version string) (erro
 	return nil
 }
 
-func (e *JsExtension) FindInstallations(context *ExtensionContext, metadata *ExaMetadata) (installations []*JsExtInstallation, errorResult error) {
+func (e *JsExtension) FindInstallations(context *context.ExtensionContext, metadata *exaMetadata.ExaMetadata) (installations []*JsExtInstallation, errorResult error) {
 	if e.extension.FindInstallations == nil {
 		return nil, e.unsupportedFunction("findInstallations")
 	}
@@ -93,7 +95,7 @@ func (e *JsExtension) FindInstallations(context *ExtensionContext, metadata *Exa
 	return e.extension.FindInstallations(context, metadata), nil
 }
 
-func (e *JsExtension) AddInstance(context *ExtensionContext, version string, params *ParameterValues) (instance *JsExtInstance, errorResult error) {
+func (e *JsExtension) AddInstance(context *context.ExtensionContext, version string, params *ParameterValues) (instance *JsExtInstance, errorResult error) {
 	if e.extension.AddInstance == nil {
 		return nil, e.unsupportedFunction("addInstance")
 	}
@@ -105,7 +107,7 @@ func (e *JsExtension) AddInstance(context *ExtensionContext, version string, par
 	return e.extension.AddInstance(context, version, params), nil
 }
 
-func (e *JsExtension) ListInstances(context *ExtensionContext, version string) (instances []*JsExtInstance, errorResult error) {
+func (e *JsExtension) ListInstances(context *context.ExtensionContext, version string) (instances []*JsExtInstance, errorResult error) {
 	if e.extension.FindInstances == nil {
 		return nil, e.unsupportedFunction("findInstances")
 	}
@@ -117,7 +119,7 @@ func (e *JsExtension) ListInstances(context *ExtensionContext, version string) (
 	return e.extension.FindInstances(context, version), nil
 }
 
-func (e *JsExtension) DeleteInstance(context *ExtensionContext, extensionVersion, instanceId string) (errorResult error) {
+func (e *JsExtension) DeleteInstance(context *context.ExtensionContext, extensionVersion, instanceId string) (errorResult error) {
 	if e.extension.DeleteInstance == nil {
 		return e.unsupportedFunction("deleteInstance")
 	}

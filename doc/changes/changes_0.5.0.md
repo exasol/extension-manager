@@ -1,8 +1,10 @@
-# Extension Manager 0.4.1, released 2023-??-??
+# Extension Manager 0.5.0, released 2023-??-??
 
 Code name:
 
 ## Summary
+
+This release allows configuring the BucketFS base path where EM expects extension files to be located. EM searches this path recursively, so files are also found in subdirectories.
 
 This release improves error handling when using extensions not implementing all functions required by EM. EM now returns a helpful error message instead of failing with a `nil`-pointer error.
 
@@ -15,7 +17,30 @@ A common scenario for an extension not implementing a required function is when 
 
 ## Dependency Updates
 
+### Extension-manager
+
+#### Compile Dependency Updates
+
+* Updated `github.com/dop251/goja:v0.0.0-20230626124041-ba8a63e79201` to `v0.0.0-20230707174833-636fdf960de1`
+* Updated `github.com/go-chi/chi/v5:v5.0.8` to `v5.0.10`
+
+#### Test Dependency Updates
+
+* Updated `golang.org/x/mod:v0.11.0` to `v0.12.0`
+
 ### Extension Manager Java Client
+
+#### Compile Dependency Updates
+
+* Updated `io.swagger.core.v3:swagger-annotations:2.2.14` to `2.2.15`
+* Updated `org.glassfish.jersey.core:jersey-client:2.39.1` to `2.40`
+* Updated `org.glassfish.jersey.inject:jersey-hk2:2.39.1` to `2.40`
+* Updated `org.glassfish.jersey.media:jersey-media-json-jackson:2.39.1` to `2.40`
+* Updated `org.glassfish.jersey.media:jersey-media-multipart:2.39.1` to `2.40`
+
+#### Test Dependency Updates
+
+* Updated `nl.jqno.equalsverifier:equalsverifier:3.14.3` to `3.15`
 
 #### Plugin Dependency Updates
 
@@ -24,6 +49,7 @@ A common scenario for an extension not implementing a required function is when 
 * Updated `org.apache.maven.plugins:maven-gpg-plugin:3.0.1` to `3.1.0`
 * Updated `org.apache.maven.plugins:maven-surefire-plugin:3.0.0` to `3.1.2`
 * Updated `org.basepom.maven:duplicate-finder-maven-plugin:1.5.1` to `2.0.1`
+* Updated `org.codehaus.mojo:build-helper-maven-plugin:3.3.0` to `3.4.0`
 * Updated `org.codehaus.mojo:flatten-maven-plugin:1.4.1` to `1.5.0`
 * Updated `org.codehaus.mojo:versions-maven-plugin:2.15.0` to `2.16.0`
 * Updated `org.jacoco:jacoco-maven-plugin:0.8.9` to `0.8.10`
@@ -32,7 +58,13 @@ A common scenario for an extension not implementing a required function is when 
 
 #### Compile Dependency Updates
 
-* Updated `com.exasol:extension-manager-client-java:0.4.0` to `0.4.1`
+* Updated `com.exasol:exasol-test-setup-abstraction-java:2.0.1` to `2.0.2`
+* Updated `com.exasol:extension-manager-client-java:0.4.0` to `0.5.0`
+* Removed `io.netty:netty-handler:4.1.94.Final`
+
+#### Test Dependency Updates
+
+* Updated `com.exasol:udf-debugging-java:0.6.8` to `0.6.10`
 
 #### Plugin Dependency Updates
 

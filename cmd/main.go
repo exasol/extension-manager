@@ -31,7 +31,11 @@ func main() {
 
 func startServer(pathToExtensionFolder string, serverAddress string) {
 	log.Printf("Starting extension manager with extension folder %q", pathToExtensionFolder)
-	restApi := restAPI.Create(extensionController.Create(pathToExtensionFolder, restAPI.EXTENSION_SCHEMA_NAME), serverAddress)
+	controller := extensionController.CreateWithConfig(extensionController.ExtensionManagerConfig{
+		ExtensionRegistryURL: pathToExtensionFolder,
+		ExtensionSchema:      restAPI.EXTENSION_SCHEMA_NAME,
+		BucketFSBasePath:     "/buckets/bfsdefault/default/"})
+	restApi := restAPI.Create(controller, serverAddress)
 	restApi.Serve()
 }
 
@@ -62,7 +66,7 @@ func generateOpenAPIJson() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = restAPI.AddPublicEndpoints(api, restAPI.ExtensionManagerConfig{})
+	err = restAPI.AddPublicEndpoints(api, extensionController.ExtensionManagerConfig{})
 	if err != nil {
 		return nil, err
 	}

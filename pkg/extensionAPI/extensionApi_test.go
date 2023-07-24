@@ -1,10 +1,14 @@
 package extensionAPI
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/exasol/extension-manager/pkg/backend"
+	"github.com/exasol/extension-manager/pkg/extensionAPI/context"
+	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
+	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/integrationTesting"
 
 	"github.com/stretchr/testify/mock"
@@ -13,7 +17,8 @@ import (
 
 type ExtensionApiSuite struct {
 	suite.Suite
-	mockSQLClient sqlClientMock
+	mockSQLClient      sqlClientMock
+	mockBucketFsClient bfs.BucketFsMock
 }
 
 func TestExtensionApiSuite(t *testing.T) {
@@ -26,10 +31,12 @@ func (suite *ExtensionApiSuite) SetupSuite() {
 
 func (suite *ExtensionApiSuite) SetupTest() {
 	suite.mockSQLClient = sqlClientMock{}
+	suite.mockBucketFsClient = bfs.BucketFsMock{}
 }
 
 func (suite *ExtensionApiSuite) TearDownTest() {
 	suite.mockSQLClient.AssertExpectations(suite.T())
+	suite.mockBucketFsClient.AssertExpectations(suite.T())
 }
 
 /* [utest -> dsn~extension-definition~1] */
@@ -80,19 +87,52 @@ func (suite *ExtensionApiSuite) TestInstall() {
 	suite.NoError(err)
 }
 
+/* [itest -> dsn~resolving-files-in-bucketfs~1] */
 func (suite *ExtensionApiSuite) TestInstallResolveBucketFsPath() {
+	version := "extVersion"
+	absolutePath := "/absolute/file/path"
+	suite.mockBucketFsClient.SimulateAbsolutePath("my-adapter-"+version+".jar", absolutePath)
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithInstallFunc("context.sqlClient.execute(`create script path ${context.bucketFs.resolvePath('my-adapter-'+version+'.jar')}`)").
 		Build().AsString()
 	extension := suite.loadExtension(extensionContent)
-	suite.mockSQLClient.On("Execute", "create script path /buckets/bfsdefault/default/my-adapter-extensionVersion.jar", []any{}).Return()
+	suite.mockSQLClient.On("Execute", "create script path "+absolutePath, []any{}).Return()
+	err := extension.Install(suite.mockContext(), version)
+	suite.NoError(err)
+}
+
+func (suite *ExtensionApiSuite) TestInstallResolveBucketFsPathFails() {
+	version := "extVersion"
+	suite.mockBucketFsClient.SimulateAbsolutePathError("my-adapter-"+version+".jar", fmt.Errorf("mock error"))
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithInstallFunc("context.sqlClient.execute(`create script path ${context.bucketFs.resolvePath('my-adapter-'+version+'.jar')}`)").
+		Build().AsString()
+	extension := suite.loadExtension(extensionContent)
+	err := extension.Install(suite.mockContext(), version)
+	suite.EqualError(err, `failed to install extension "ext-id": failed to find absolute path for file "my-adapter-extVersion.jar": mock error`)
+}
+
+func (suite *ExtensionApiSuite) TestJavaScriptConsoleLog() {
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithInstallFunc("console.log('test log message')").
+		Build().AsString()
+	extension := suite.loadExtension(extensionContent)
 	err := extension.Install(suite.mockContext(), "extensionVersion")
 	suite.NoError(err)
 }
 
-func (suite *ExtensionApiSuite) TestInstallConsoleLog() {
+func (suite *ExtensionApiSuite) TestJavaScriptConsoleWarn() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithInstallFunc("console.log('test log message')").
+		WithInstallFunc("console.warn('test warning message')").
+		Build().AsString()
+	extension := suite.loadExtension(extensionContent)
+	err := extension.Install(suite.mockContext(), "extensionVersion")
+	suite.NoError(err)
+}
+
+func (suite *ExtensionApiSuite) TestJavaScriptConsoleError() {
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithInstallFunc("console.error('test error message')").
 		Build().AsString()
 	extension := suite.loadExtension(extensionContent)
 	err := extension.Install(suite.mockContext(), "extensionVersion")
@@ -150,9 +190,9 @@ func (suite *ExtensionApiSuite) TestDeleteInstance() {
 	suite.NoError(err)
 }
 
-func createMockMetadata() *ExaMetadata {
-	exaAllScripts := ExaScriptTable{Rows: []ExaScriptRow{{Name: "test"}}}
-	return &ExaMetadata{AllScripts: exaAllScripts}
+func createMockMetadata() *exaMetadata.ExaMetadata {
+	exaAllScripts := exaMetadata.ExaScriptTable{Rows: []exaMetadata.ExaScriptRow{{Name: "test"}}}
+	return &exaMetadata.ExaMetadata{AllScripts: exaAllScripts}
 }
 
 func (suite *ExtensionApiSuite) TestFindInstallationsCanReadAllScriptsTable() {
@@ -244,8 +284,8 @@ func (suite *ExtensionApiSuite) TestLoadExtensionInvalidJavaScript() {
 	suite.Nil(extension)
 }
 
-func (suite *ExtensionApiSuite) mockContext() *ExtensionContext {
-	return createMockContextWithSqlClient(&suite.mockSQLClient)
+func (suite *ExtensionApiSuite) mockContext() *context.ExtensionContext {
+	return createMockContextWithClients(&suite.mockSQLClient, &suite.mockBucketFsClient)
 }
 
 func (suite *ExtensionApiSuite) loadExtension(content string) *JsExtension {

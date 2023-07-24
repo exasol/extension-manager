@@ -13,8 +13,8 @@
         <!-- ProjectKeeper already included in root project -->
         <project-keeper.skip>true</project-keeper.skip>
         <!-- Generated code dependencies -->
-        <swagger-core-version>2.2.14</swagger-core-version>
-        <jersey-version>2.39.1</jersey-version>
+        <swagger-core-version>2.2.15</swagger-core-version>
+        <jersey-version>2.40</jersey-version>
         <jackson-version>2.15.2</jackson-version>
     </properties>
     <distributionManagement>
@@ -86,7 +86,7 @@
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>3.14.3</version>
+            <version>3.15</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -161,7 +161,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <id>add-generated-source</id>

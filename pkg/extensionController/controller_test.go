@@ -11,6 +11,8 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/exasol/extension-manager/pkg/apiErrors"
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
+	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
+	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/registry"
 	"github.com/exasol/extension-manager/pkg/integrationTesting"
 	"github.com/exasol/extension-manager/pkg/parameterValidator"
@@ -24,8 +26,8 @@ type ControllerUTestSuite struct {
 	controller        TransactionController
 	db                *sql.DB
 	dbMock            sqlmock.Sqlmock
-	bucketFsMock      bucketFsMock
-	metaDataMock      exaMetaDataReaderMock
+	bucketFsMock      bfs.BucketFsMock
+	metaDataMock      exaMetadata.ExaMetaDataReaderMock
 }
 
 func TestControllerUTestSuite(t *testing.T) {
@@ -40,11 +42,14 @@ func (suite *ControllerUTestSuite) BeforeTest(suiteName, testName string) {
 }
 
 func (suite *ControllerUTestSuite) createController() {
-	suite.bucketFsMock = createBucketFsMock()
-	suite.metaDataMock = createExaMetaDataReaderMock(EXTENSION_SCHEMA)
+	suite.bucketFsMock = bfs.BucketFsMock{}
+	suite.metaDataMock = exaMetadata.CreateExaMetaDataReaderMock(EXTENSION_SCHEMA)
 	ctrl := &controllerImpl{
-		registry:       registry.NewRegistry(suite.tempExtensionRepo),
-		schema:         EXTENSION_SCHEMA,
+		registry: registry.NewRegistry(suite.tempExtensionRepo),
+		config: ExtensionManagerConfig{
+			ExtensionSchema:      EXTENSION_SCHEMA,
+			ExtensionRegistryURL: "registryUrl",
+			BucketFSBasePath:     "bfsBasePath"},
 		metaDataReader: &suite.metaDataMock,
 	}
 	suite.controller = &transactionControllerImpl{controller: ctrl, bucketFs: &suite.bucketFsMock}
@@ -69,7 +74,7 @@ func (suite *ControllerUTestSuite) AfterTest(suiteName, testName string) {
 /* [utest -> dsn~list-extensions~1] */
 func (suite *ControllerUTestSuite) TestGetAllExtensions() {
 	suite.writeDefaultExtension()
-	suite.bucketFsMock.simulateFiles([]BfsFile{{Name: "my-extension.1.2.3.jar", Size: 3}})
+	suite.bucketFsMock.SimulateFiles([]bfs.BfsFile{{Name: "my-extension.1.2.3.jar", Size: 3}})
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
 	suite.NoError(err)
 	suite.Equal([]*Extension{{Name: "MyDemoExtension", Id: "testing-extension.js", Category: "Demo category", Description: "An extension for testing.",
@@ -79,7 +84,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensions() {
 /* [utest -> dsn~list-extensions~1] */
 func (suite *ControllerUTestSuite) TestGetAllExtensionsWithMissingJar() {
 	suite.writeDefaultExtension()
-	suite.bucketFsMock.simulateFiles([]BfsFile{})
+	suite.bucketFsMock.SimulateFiles([]bfs.BfsFile{})
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
 	suite.NoError(err)
 	suite.Empty(extensions)
@@ -87,7 +92,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsWithMissingJar() {
 
 func (suite *ControllerUTestSuite) TestGetAllExtensionsFailsForInvalidExtension() {
 	suite.writeFile("broken-extension.js", "invalid javascript")
-	suite.bucketFsMock.simulateFiles([]BfsFile{})
+	suite.bucketFsMock.SimulateFiles([]bfs.BfsFile{})
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
 	suite.ErrorContains(err, `failed to load extension "broken-extension.js": failed to run extension "broken-extension.js" with content "invalid javascript": SyntaxError`)
 	suite.Empty(extensions)
@@ -122,7 +127,7 @@ func (suite *ControllerUTestSuite) TestGetAllInstallationsFails() {
 				WithFindInstallationsFunc(t.throwCommand).
 				Build().
 				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-			suite.metaDataMock.simulateExaMetaData(extensionAPI.ExaMetadata{})
+			suite.metaDataMock.SimulateExaMetaData(exaMetadata.ExaMetadata{})
 			suite.initDbMock()
 			suite.dbMock.ExpectBegin()
 			suite.dbMock.ExpectRollback()
@@ -140,7 +145,7 @@ func (suite *ControllerUTestSuite) TestFindInstancesFails() {
 				WithFindInstancesFunc(t.throwCommand).
 				Build().
 				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-			suite.metaDataMock.simulateExaMetaData(extensionAPI.ExaMetadata{})
+			suite.metaDataMock.SimulateExaMetaData(exaMetadata.ExaMetadata{})
 			suite.initDbMock()
 			suite.dbMock.ExpectBegin()
 			suite.dbMock.ExpectRollback()
@@ -200,7 +205,7 @@ func (suite *ControllerUTestSuite) assertError(t errorTest, actualError error) {
 
 func (suite *ControllerUTestSuite) TestGetAllInstallations() {
 	suite.writeDefaultExtension()
-	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{{Schema: "schema", Name: "script"}})
+	suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{{Schema: "schema", Name: "script"}})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
 	installations, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
@@ -321,7 +326,7 @@ func (suite *ControllerUTestSuite) TestCreateInstance_invalidParameters() {
 		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string", required: true}]`).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
+	suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectRollback()
@@ -338,7 +343,7 @@ func (suite *ControllerUTestSuite) TestCreateInstanceFails() {
 				WithAddInstanceFunc(t.throwCommand).
 				Build().
 				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-			suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
+			suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{})
 			suite.dbMock.ExpectBegin()
 			suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 			suite.dbMock.ExpectRollback()
@@ -355,7 +360,7 @@ func (suite *ControllerUTestSuite) TestCreateInstance_validParameters() {
 		WithAddInstanceFunc("return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
+	suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()
@@ -387,7 +392,7 @@ func (suite *ControllerUTestSuite) TestDeleteInstanceSucceeds() {
 		WithDeleteInstanceFunc("context.sqlClient.execute(`delete instance ${instanceId}`)").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	suite.metaDataMock.simulateExaAllScripts([]extensionAPI.ExaScriptRow{})
+	suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec("delete instance instId").WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()

@@ -7,6 +7,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
+	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -18,7 +19,7 @@ type extCtrlUnitTestSuite struct {
 	db       *sql.DB
 	dbMock   sqlmock.Sqlmock
 	mockCtrl mockControllerImpl
-	mockBfs  bucketFsMock
+	mockBfs  bfs.BucketFsMock
 }
 
 func TestExtensionControllerUnitTestSuite(t *testing.T) {
@@ -27,7 +28,7 @@ func TestExtensionControllerUnitTestSuite(t *testing.T) {
 
 func (suite *extCtrlUnitTestSuite) SetupTest() {
 	suite.mockCtrl = mockControllerImpl{}
-	suite.mockBfs = bucketFsMock{}
+	suite.mockBfs = bfs.BucketFsMock{}
 	suite.ctrl = &transactionControllerImpl{controller: &suite.mockCtrl, bucketFs: &suite.mockBfs}
 	db, dbMock, err := sqlmock.New()
 	if err != nil {
@@ -47,7 +48,7 @@ func (suite *extCtrlUnitTestSuite) AfterTest(suiteName, testName string) {
 // GetAllExtensions
 
 func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_Success() {
-	suite.mockBfs.On("ListFiles", mock.Anything, mock.Anything, "default").Return([]BfsFile{}, nil)
+	suite.mockBfs.SimulateFiles([]bfs.BfsFile{})
 	suite.mockCtrl.On("GetAllExtensions", mock.Anything).Return([]*Extension{}, nil)
 	extensions, err := suite.ctrl.GetAllExtensions(mockContext(), suite.db)
 	suite.NoError(err)
@@ -55,14 +56,14 @@ func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_Success() {
 }
 
 func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_BucketFsListFails() {
-	suite.mockBfs.On("ListFiles", mock.Anything, mock.Anything, "default").Return(nil, fmt.Errorf("mock"))
+	suite.mockBfs.SimulateFilesError(fmt.Errorf("mock"))
 	extensions, err := suite.ctrl.GetAllExtensions(mockContext(), suite.db)
 	suite.EqualError(err, "failed to search for required files in BucketFS. Cause: mock")
 	suite.Nil(extensions)
 }
 
 func (suite *extCtrlUnitTestSuite) TestGetAllExtensions_GetFails() {
-	suite.mockBfs.On("ListFiles", mock.Anything, mock.Anything, "default").Return([]BfsFile{}, nil)
+	suite.mockBfs.SimulateFiles([]bfs.BfsFile{})
 	suite.mockCtrl.On("GetAllExtensions", mock.Anything).Return(nil, fmt.Errorf("mock"))
 	extensions, err := suite.ctrl.GetAllExtensions(mockContext(), suite.db)
 	suite.EqualError(err, "mock")
