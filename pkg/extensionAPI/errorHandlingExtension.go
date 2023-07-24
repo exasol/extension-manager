@@ -83,6 +83,18 @@ func (e *JsExtension) Uninstall(context *context.ExtensionContext, version strin
 	return nil
 }
 
+func (e *JsExtension) Upgrade(context *context.ExtensionContext) (result *JsUpgradeResult, errorResult error) {
+	if e.extension.Uninstall == nil {
+		return nil, e.unsupportedFunction("upgrade")
+	}
+	defer func() {
+		if err := recover(); err != nil {
+			errorResult = e.convertError(fmt.Sprintf("failed to upgrade extension %q", e.Id), err)
+		}
+	}()
+	return e.extension.Upgrade(context), nil
+}
+
 func (e *JsExtension) FindInstallations(context *context.ExtensionContext, metadata *exaMetadata.ExaMetadata) (installations []*JsExtInstallation, errorResult error) {
 	if e.extension.FindInstallations == nil {
 		return nil, e.unsupportedFunction("findInstallations")

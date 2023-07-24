@@ -27,6 +27,9 @@ function createExtension(): ExasolExtension {
         uninstall(context: Context, version: string): void {
             $UNINSTALL_EXTENSION$
         },
+        upgrade(context: Context): void {
+            $UPGRADE_EXTENSION$
+        },
         deleteInstance(context: Context, extensionVersion: string, instanceId: string): void {
             $DELETE_INSTANCE$
         },

@@ -39,6 +39,11 @@ type TransactionController interface {
 	// extensionVersion is the version of the extension to uninstall
 	UninstallExtension(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) error
 
+	// UpgradeExtension upgrades an installed extension to the latest version.
+	// db is a connection to the Exasol DB
+	// extensionId is the ID of the extension to uninstall
+	UpgradeExtension(ctx context.Context, db *sql.DB, extensionId string) (*extensionAPI.JsUpgradeResult, error)
+
 	// CreateInstance creates a new instance of an extension, e.g. a virtual schema and returns it's name.
 	// db is a connection to the Exasol DB
 	CreateInstance(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error)
@@ -149,6 +154,22 @@ func (c *transactionControllerImpl) UninstallExtension(ctx context.Context, db *
 		}
 	}
 	return err
+}
+
+func (c *transactionControllerImpl) UpgradeExtension(ctx context.Context, db *sql.DB, extensionId string) (result *extensionAPI.JsUpgradeResult, returnErr error) {
+	tx, err := transaction.BeginTransaction(ctx, db)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+	result, err = c.controller.UpgradeExtension(tx, extensionId)
+	if err == nil {
+		err = tx.Commit()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return result, err
 }
 
 func (c *transactionControllerImpl) GetInstalledExtensions(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {

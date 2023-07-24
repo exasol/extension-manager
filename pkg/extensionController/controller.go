@@ -37,6 +37,10 @@ type controller interface {
 	// extensionVersion is the version of the extension to uninstall
 	UninstallExtension(txCtx *transaction.TransactionContext, extensionId string, extensionVersion string) error
 
+	// UpgradeExtension upgrades an installed extension to the latest version.
+	// extensionId is the ID of the extension to uninstall
+	UpgradeExtension(txCtx *transaction.TransactionContext, extensionId string) (*extensionAPI.JsUpgradeResult, error)
+
 	// CreateInstance creates a new instance of an extension, e.g. a virtual schema and returns it's name.
 	CreateInstance(txCtx *transaction.TransactionContext, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error)
 
@@ -192,6 +196,14 @@ func (c *controllerImpl) UninstallExtension(txCtx *transaction.TransactionContex
 		return extensionLoadingFailed(extensionId, err)
 	}
 	return extension.Uninstall(c.createExtensionContext(txCtx), extensionVersion)
+}
+
+func (c *controllerImpl) UpgradeExtension(txCtx *transaction.TransactionContext, extensionId string) (*extensionAPI.JsUpgradeResult, error) {
+	extension, err := c.loadExtensionById(extensionId)
+	if err != nil {
+		return nil, extensionLoadingFailed(extensionId, err)
+	}
+	return extension.Upgrade(c.createExtensionContext(txCtx))
 }
 
 func (c *controllerImpl) CreateInstance(txCtx *transaction.TransactionContext, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {

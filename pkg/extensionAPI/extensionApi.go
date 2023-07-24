@@ -85,6 +85,7 @@ type rawJsExtension struct {
 	GetParameterDefinitions func(context *context.ExtensionContext, version string) []interface{}                           `json:"getInstanceParameters"`
 	Install                 func(context *context.ExtensionContext, version string)                                         `json:"install"`
 	Uninstall               func(context *context.ExtensionContext, version string)                                         `json:"uninstall"`
+	Upgrade                 func(context *context.ExtensionContext) *JsUpgradeResult                                        `json:"upgrade"`
 	FindInstallations       func(context *context.ExtensionContext, metadata *exaMetadata.ExaMetadata) []*JsExtInstallation `json:"findInstallations"`
 	AddInstance             func(context *context.ExtensionContext, version string, params *ParameterValues) *JsExtInstance `json:"addInstance"`
 	FindInstances           func(context *context.ExtensionContext, version string) []*JsExtInstance                        `json:"findInstances"`
@@ -108,6 +109,11 @@ type BucketFsUpload struct {
 type JsExtInstallation struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
+}
+
+type JsUpgradeResult struct {
+	PreviousVersion string `json:"previousVersion"`
+	NewVersion      string `json:"newVersion"`
 }
 
 type JsExtInstance struct {
