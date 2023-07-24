@@ -108,4 +108,4 @@ A common scenario for an extension not implementing a required function is when 
 #### Development Dependency Updates
 
 * Updated `typescript:5.0.3` to `5.1.6`
-* Updated `esbuild:0.17.15` to `0.18.13`
+* Updated `esbuild:0.17.15` to `0.18.16`
