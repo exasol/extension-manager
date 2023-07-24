@@ -85,10 +85,10 @@ func getExasolMajorVersion(tx *sql.Tx) (string, error) {
 	}
 	defer result.Close()
 	if !result.Next() {
+		if result.Err() != nil {
+			return "", fmt.Errorf("failed to iterate exasol version: %w", result.Err())
+		}
 		return "", fmt.Errorf("no result found for exasol version query")
-	}
-	if result.Err() != nil {
-		return "", fmt.Errorf("failed to iterate exasol version: %w", result.Err())
 	}
 	var majorVersion string
 	err = result.Scan(&majorVersion)
