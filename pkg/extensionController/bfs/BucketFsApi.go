@@ -30,6 +30,7 @@ type BfsFile struct {
 //
 // The current implementation uses a Python UDF for accessing BucketFS.
 // In the future that implementation might be replaced by direct access.
+/* [impl -> dsn~configure-bucketfs-path~1]. */
 func CreateBucketFsAPI(bucketFsBasePath string) BucketFsAPI {
 	return &bucketFsAPIImpl{bucketFsBasePath: bucketFsBasePath}
 }
@@ -56,6 +57,7 @@ func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB) (files []B
 	return bfs.queryBucketFsContent(transaction, udfScriptName)
 }
 
+/* [impl -> dsn~resolving-files-in-bucketfs~1]. */
 func (bfs bucketFsAPIImpl) FindAbsolutePath(ctx context.Context, db *sql.DB, fileName string) (absolutePath string, retErr error) {
 	transaction, err := db.BeginTx(ctx, nil)
 	if err != nil {
@@ -89,7 +91,7 @@ func (bfs bucketFsAPIImpl) createUdfScript(transaction *sql.Tx) (string, error) 
 /`, udfScriptName, listFilesRecursivelyUdfContent)
 	_, err = transaction.Exec(script)
 	if err != nil {
-		return "", fmt.Errorf("failed to create script for listing bucket. Cause: %w", err)
+		return "", fmt.Errorf("failed to create UDF script for listing bucket. Cause: %w", err)
 	}
 	return udfScriptName, nil
 }
@@ -111,9 +113,6 @@ func (bfs bucketFsAPIImpl) queryBucketFsContent(transaction *sql.Tx, udfScriptNa
 func readQueryResult(result *sql.Rows) ([]BfsFile, error) {
 	var files []BfsFile
 	for result.Next() {
-		if result.Err() != nil {
-			return nil, fmt.Errorf("failed iterating BucketFS list UDF. Cause: %w", result.Err())
-		}
 		var file BfsFile
 		var fileSize float64
 		err := result.Scan(&file.Name, &file.Path, &fileSize)
@@ -127,14 +126,14 @@ func readQueryResult(result *sql.Rows) ([]BfsFile, error) {
 }
 
 func (bfs bucketFsAPIImpl) queryAbsoluteFilePath(transaction *sql.Tx, udfScriptName string, fileName string) (string, error) {
-	statement, err := transaction.Prepare(`SELECT FULL_PATH FROM (SELECT ` + udfScriptName + `(?)) ORDER BY FULL_PATH LIMIT 1`) //nolint:gosec // SQL string concatenation is safe here
+	statement, err := transaction.Prepare(`SELECT FULL_PATH FROM (SELECT ` + udfScriptName + `(?)) WHERE FILE_NAME = ? ORDER BY FULL_PATH LIMIT 1`) //nolint:gosec // SQL string concatenation is safe here
 	if err != nil {
 		return "", fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
 	}
 	defer statement.Close()
-	result, err := statement.Query(bfs.bucketFsBasePath)
+	result, err := statement.Query(bfs.bucketFsBasePath, fileName)
 	if err != nil {
-		return "", fmt.Errorf("failed to list files in BucketFS using UDF. Cause: %w", err)
+		return "", fmt.Errorf("failed to find absolute path in BucketFS using UDF. Cause: %w", err)
 	}
 	defer result.Close()
 	if !result.Next() {
@@ -146,7 +145,7 @@ func (bfs bucketFsAPIImpl) queryAbsoluteFilePath(transaction *sql.Tx, udfScriptN
 	var absolutePath string
 	err = result.Scan(&absolutePath)
 	if err != nil {
-		return "", fmt.Errorf("failed reading absolute. Cause: %w", err)
+		return "", fmt.Errorf("failed reading absolute path. Cause: %w", err)
 	}
 	return absolutePath, nil
 }

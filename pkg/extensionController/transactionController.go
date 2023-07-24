@@ -71,6 +71,7 @@ type ExtInstallation struct {
 type ExtensionManagerConfig struct {
 	// URL of the extension registry index used to find available extensions.
 	// This can also be the path of a local directory for local testing.
+	/* [impl -> dsn~configure-bucketfs-path~1] */
 	ExtensionRegistryURL string
 	// BucketFS base path where to search for extension files, e.g. "/buckets/bfsdefault/default/".
 	BucketFSBasePath string

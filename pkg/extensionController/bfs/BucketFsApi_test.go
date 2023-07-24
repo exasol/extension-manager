@@ -2,119 +2,256 @@ package bfs
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
-	"time"
-
 	"testing"
 
-	"github.com/exasol/extension-manager/pkg/integrationTesting"
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/suite"
 )
 
-const DEFAULT_BUCKET_PATH = "/buckets/bfsdefault/default/"
+const BUCKETFS_BASE_PATH = "/basePath/"
 
-type BucketFsAPISuite struct {
+type BucketFsAPIUTestSuite struct {
 	suite.Suite
-	exasol integrationTesting.DbTestSetup
+	db     *sql.DB
+	dbMock sqlmock.Sqlmock
 }
 
-func TestBucketFsApiSuite(t *testing.T) {
-	suite.Run(t, new(BucketFsAPISuite))
+func TestBucketFsApiUTestSuite(t *testing.T) {
+	suite.Run(t, new(BucketFsAPIUTestSuite))
 }
 
-func (suite *BucketFsAPISuite) SetupSuite() {
-	suite.exasol = *integrationTesting.StartDbSetup(&suite.Suite)
+func (suite *BucketFsAPIUTestSuite) SetupTest() {
+	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherRegexp))
+	suite.NoError(err)
+	suite.db = db
+	suite.dbMock = mock
+	suite.dbMock.MatchExpectationsInOrder(true)
 }
 
-func (suite *BucketFsAPISuite) TeardownSuite() {
-	suite.exasol.StopDb()
+func (suite *BucketFsAPIUTestSuite) AfterTest(suiteName, testName string) {
+	suite.NoError(suite.dbMock.ExpectationsWereMet())
 }
 
-func (suite *BucketFsAPISuite) BeforeTest(suiteName, testName string) {
-	suite.exasol.CreateConnection()
-	suite.T().Cleanup(func() {
-		suite.exasol.CloseConnection()
-	})
-}
+// ListFiles
 
-/* [utest -> dsn~extension-components~1] */
-func (suite *BucketFsAPISuite) TestListEmptyDir() {
+/* [utest -> dsn~configure-bucketfs-path~1] */
+func (suite *BucketFsAPIUTestSuite) TestListFiles() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectPrepare(`SELECT "INTERNAL_.* ORDER BY FULL_PATH`).
+		WillBeClosed().
+		ExpectQuery().WithArgs(BUCKETFS_BASE_PATH).WillReturnRows(sqlmock.NewRows([]string{"FILE_NAME", "FULL_PATH", "SIZE"}).
+		AddRow("file1.txt", "/base/file1.txt", 10).
+		AddRow("file2.txt", "/base2/file2.txt", 20)).
+		RowsWillBeClosed()
+	suite.dbMock.ExpectRollback()
 	result, err := suite.listFiles()
 	suite.NoError(err)
+	suite.Equal([]BfsFile{{Name: "file1.txt", Path: "/base/file1.txt", Size: 10}, {Name: "file2.txt", Path: "/base2/file2.txt", Size: 20}}, result)
+}
+
+func (suite *BucketFsAPIUTestSuite) TestListFilesBeginTransactionFails() {
+	suite.dbMock.ExpectBegin().WillReturnError(fmt.Errorf("mock error"))
+	result, err := suite.listFiles()
+	suite.EqualError(err, "failed to create a transaction. Cause: mock error")
 	suite.Empty(result)
 }
 
-func (suite *BucketFsAPISuite) TestListSingleFile() {
-	fileName := fmt.Sprintf("myFile-%d.txt", time.Now().Unix())
-	suite.uploadStringContent(fileName, "12345")
+func (suite *BucketFsAPIUTestSuite) TestListFilesCreateSchemaFails() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnError(fmt.Errorf("mock error"))
+	suite.dbMock.ExpectRollback()
 	result, err := suite.listFiles()
-	suite.NoError(err)
-	suite.Len(result, 1)
-	suite.Equal([]BfsFile{{Name: fileName, Path: DEFAULT_BUCKET_PATH + fileName, Size: 5}}, result)
+	suite.EqualError(err, "failed to create a schema for BucketFS list script. Cause: mock error")
+	suite.Empty(result)
 }
 
-func (suite *BucketFsAPISuite) TestListFilesRecursively() {
-	file1 := "file1"
-	file2 := "dir1/file2"
-	file3 := "dir2/file2"
-	suite.uploadStringContent(file1, "1")
-	suite.uploadStringContent(file2, "12")
-	suite.uploadStringContent(file3, "123")
+func (suite *BucketFsAPIUTestSuite) TestListFilesCreateUDFScriptFails() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnError(fmt.Errorf("mock error"))
+	suite.dbMock.ExpectRollback()
 	result, err := suite.listFiles()
-	suite.NoError(err)
-	suite.Len(result, 3)
-	suite.Equal([]BfsFile{
-		{Name: "file2", Path: DEFAULT_BUCKET_PATH + file2, Size: 2},
-		{Name: "file2", Path: DEFAULT_BUCKET_PATH + file3, Size: 3},
-		{Name: "file1", Path: DEFAULT_BUCKET_PATH + file1, Size: 1}}, result)
+	suite.EqualError(err, "failed to create UDF script for listing bucket. Cause: mock error")
+	suite.Empty(result)
 }
 
-func (suite *BucketFsAPISuite) TestFindAbsolutePathNoFileFound() {
-	time.Sleep(3 * time.Second)
-	result, err := suite.findAbsolutePath("no-such-file")
-	suite.EqualError(err, `file "no-such-file" not found in BucketFS`)
+func (suite *BucketFsAPIUTestSuite) TestListFilesRollbackFails() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectPrepare(`SELECT "INTERNAL_.* ORDER BY FULL_PATH`).
+		WillBeClosed().
+		ExpectQuery().WillReturnRows(sqlmock.NewRows([]string{"FILE_NAME", "FULL_PATH", "SIZE"}).
+		AddRow("file1.txt", "/base/file1.txt", 10).
+		AddRow("file2.txt", "/base2/file2.txt", 20)).
+		RowsWillBeClosed()
+	suite.dbMock.ExpectRollback().WillReturnError(fmt.Errorf("mock error"))
+	result, err := suite.listFiles()
+	suite.EqualError(err, "failed to rollback transaction. Cause: mock error")
+	suite.Equal([]BfsFile{{Name: "file1.txt", Path: "/base/file1.txt", Size: 10}, {Name: "file2.txt", Path: "/base2/file2.txt", Size: 20}}, result)
+}
+
+func (suite *BucketFsAPIUTestSuite) TestListFilesPrepareQueryFails() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectPrepare(`SELECT "INTERNAL_.* ORDER BY FULL_PATH`).WillReturnError(fmt.Errorf("mock error"))
+	suite.dbMock.ExpectRollback()
+	result, err := suite.listFiles()
+	suite.EqualError(err, "failed to create prepared statement for running list files UDF. Cause: mock error")
+	suite.Empty(result)
+}
+
+func (suite *BucketFsAPIUTestSuite) TestListFilesExecuteQueryFails() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectPrepare(`SELECT "INTERNAL_.* ORDER BY FULL_PATH`).
+		WillBeClosed().
+		ExpectQuery().WillReturnError(fmt.Errorf("mock error"))
+	suite.dbMock.ExpectRollback()
+	result, err := suite.listFiles()
+	suite.EqualError(err, "failed to list files in BucketFS using UDF. Cause: mock error")
+	suite.Empty(result)
+}
+
+func (suite *BucketFsAPIUTestSuite) TestListFilesWrongResultColumnCount() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectPrepare(`SELECT "INTERNAL_.* ORDER BY FULL_PATH`).
+		WillBeClosed().
+		ExpectQuery().WillReturnRows(sqlmock.NewRows([]string{"FILE_NAME", "FULL_PATH"}).
+		AddRow("file1.txt", "/base/file1.txt").
+		AddRow("file2.txt", "/base2/file2.txt")).
+		RowsWillBeClosed()
+	suite.dbMock.ExpectRollback()
+	result, err := suite.listFiles()
+	suite.EqualError(err, "failed reading result of BucketFS list UDF. Cause: sql: expected 2 destination arguments in Scan, not 3")
+	suite.Empty(result)
+}
+
+func (suite *BucketFsAPIUTestSuite) listFiles() ([]BfsFile, error) {
+	return CreateBucketFsAPI(BUCKETFS_BASE_PATH).ListFiles(context.Background(), suite.db)
+}
+
+// FindAbsolutePath
+
+/* [utest -> dsn~configure-bucketfs-path~1] */
+/* [utest -> dsn~resolving-files-in-bucketfs~1] */
+func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePath() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectPrepare(`SELECT FULL_PATH FROM.*`).
+		WillBeClosed().
+		ExpectQuery().WithArgs(BUCKETFS_BASE_PATH, "file.txt").WillReturnRows(sqlmock.NewRows([]string{"FULL_PATH"}).AddRow("/abs/path/file.txt")).
+		RowsWillBeClosed()
+	suite.dbMock.ExpectRollback()
+	result, err := suite.findAbsolutePath("file.txt")
+	suite.NoError(err)
+	suite.Equal("/abs/path/file.txt", result)
+}
+
+func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePathBeginTransactionFails() {
+	suite.dbMock.ExpectBegin().WillReturnError(fmt.Errorf("mock error"))
+	result, err := suite.findAbsolutePath("file.txt")
+	suite.EqualError(err, "failed to create a transaction. Cause: mock error")
 	suite.Equal("", result)
 }
 
-func (suite *BucketFsAPISuite) TestFindAbsolutePathFileInRoot() {
-	fileName := "file.txt"
-	suite.uploadStringContent(fileName, "123")
-	result, err := suite.findAbsolutePath(fileName)
-	suite.NoError(err)
-	suite.Equal("/buckets/bfsdefault/default/"+fileName, result)
-}
-
-func (suite *BucketFsAPISuite) TestFindAbsolutePathFileInSubDir() {
-	suite.uploadStringContent("dir/file.txt", "123")
+func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePathRollbackFails() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectPrepare(`SELECT FULL_PATH FROM.*`).
+		WillBeClosed().
+		ExpectQuery().WithArgs(BUCKETFS_BASE_PATH, "file.txt").WillReturnRows(sqlmock.NewRows([]string{"FULL_PATH"}).AddRow("/abs/path/file.txt")).
+		RowsWillBeClosed()
+	suite.dbMock.ExpectRollback().WillReturnError(fmt.Errorf("mock error"))
 	result, err := suite.findAbsolutePath("file.txt")
-	suite.NoError(err)
-	suite.Equal("/buckets/bfsdefault/default/dir/file.txt", result)
+	suite.EqualError(err, "failed to rollback transaction. Cause: mock error")
+	suite.Equal("/abs/path/file.txt", result)
 }
 
-func (suite *BucketFsAPISuite) TestFindAbsolutePathMultipleFiles() {
-	suite.uploadStringContent("dirA/file.txt", "123")
-	suite.uploadStringContent("dirB/file.txt", "98765")
+func (suite *BucketFsAPIUTestSuite) TestFindAbsoluteCreateSchemaFails() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnError(fmt.Errorf("mock error"))
+	suite.dbMock.ExpectRollback()
 	result, err := suite.findAbsolutePath("file.txt")
-	suite.NoError(err)
-	suite.Equal("/buckets/bfsdefault/default/dirA/file.txt", result)
+	suite.EqualError(err, "failed to create a schema for BucketFS list script. Cause: mock error")
+	suite.Equal("", result)
 }
 
-func (suite *BucketFsAPISuite) listFiles() ([]BfsFile, error) {
-	bfsClient := CreateBucketFsAPI(DEFAULT_BUCKET_PATH)
-	return bfsClient.ListFiles(context.Background(), suite.exasol.GetConnection())
+func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePathPrepareQueryFails() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectPrepare(`SELECT FULL_PATH FROM.*`).WillReturnError(fmt.Errorf("mock error"))
+	suite.dbMock.ExpectRollback()
+	result, err := suite.findAbsolutePath("file.txt")
+	suite.EqualError(err, "failed to create prepared statement for running list files UDF. Cause: mock error")
+	suite.Equal("", result)
 }
 
-func (suite *BucketFsAPISuite) findAbsolutePath(fileName string) (string, error) {
-	bfsClient := CreateBucketFsAPI(DEFAULT_BUCKET_PATH)
-	return bfsClient.FindAbsolutePath(context.Background(), suite.exasol.GetConnection(), fileName)
+func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePathExecuteQueryFails() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectPrepare(`SELECT FULL_PATH FROM.*`).
+		WillBeClosed().
+		ExpectQuery().WithArgs(BUCKETFS_BASE_PATH, "file.txt").WillReturnError(fmt.Errorf("mock error"))
+	suite.dbMock.ExpectRollback()
+	result, err := suite.findAbsolutePath("file.txt")
+	suite.EqualError(err, "failed to find absolute path in BucketFS using UDF. Cause: mock error")
+	suite.Equal("", result)
 }
 
-func (suite *BucketFsAPISuite) uploadStringContent(fileName string, fileContent string) {
-	err := suite.exasol.Exasol.UploadStringContent(fileContent, fileName)
-	if err != nil {
-		suite.FailNowf("Failed to upload file %q. Cause: %w", fileName, err)
-	}
-	suite.T().Cleanup(func() {
-		suite.NoError(suite.exasol.Exasol.DeleteFile(fileName))
-	})
+func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePathNoResult() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectPrepare(`SELECT FULL_PATH FROM.*`).
+		WillBeClosed().
+		ExpectQuery().WithArgs(BUCKETFS_BASE_PATH, "file.txt").WillReturnRows(sqlmock.NewRows([]string{"FULL_PATH"})).RowsWillBeClosed()
+	suite.dbMock.ExpectRollback()
+	result, err := suite.findAbsolutePath("file.txt")
+	suite.EqualError(err, `file "file.txt" not found in BucketFS`)
+	suite.Equal("", result)
+}
+
+func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePathRowError() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectPrepare(`SELECT FULL_PATH FROM.*`).
+		WillBeClosed().
+		ExpectQuery().WithArgs(BUCKETFS_BASE_PATH, "file.txt").WillReturnRows(sqlmock.NewRows([]string{"FULL_PATH"}).AddRow("/abs/path/file.txt").RowError(0, fmt.Errorf("mock error"))).
+		RowsWillBeClosed()
+	suite.dbMock.ExpectRollback()
+	result, err := suite.findAbsolutePath("file.txt")
+	suite.EqualError(err, "failed iterating absolute path results. Cause: mock error")
+	suite.Equal("", result)
+}
+
+func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePathWrongResultColumnCount() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
+	suite.dbMock.ExpectPrepare(`SELECT FULL_PATH FROM.*`).
+		WillBeClosed().
+		ExpectQuery().WithArgs(BUCKETFS_BASE_PATH, "file.txt").WillReturnRows(sqlmock.NewRows([]string{"FULL_PATH", "Additional Column"}).AddRow("/abs/path/file.txt", "a")).
+		RowsWillBeClosed()
+	suite.dbMock.ExpectRollback()
+	result, err := suite.findAbsolutePath("file.txt")
+	suite.EqualError(err, `failed reading absolute path. Cause: sql: expected 2 destination arguments in Scan, not 1`)
+	suite.Equal("", result)
+}
+
+func (suite *BucketFsAPIUTestSuite) findAbsolutePath(fileName string) (string, error) {
+	return CreateBucketFsAPI(BUCKETFS_BASE_PATH).FindAbsolutePath(context.Background(), suite.db, fileName)
 }

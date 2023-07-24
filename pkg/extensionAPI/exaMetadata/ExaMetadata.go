@@ -81,19 +81,19 @@ func readExaAllVirtualSchemasTable(tx *sql.Tx) (*ExaVirtualSchemasTable, error) 
 func getExasolMajorVersion(tx *sql.Tx) (string, error) {
 	result, err := tx.Query("SELECT PARAM_VALUE FROM SYS.EXA_METADATA WHERE PARAM_NAME='databaseMajorVersion'")
 	if err != nil {
-		return "", fmt.Errorf("query failed: %w", err)
+		return "", fmt.Errorf("querying exasol version failed: %w", err)
 	}
 	defer result.Close()
 	if !result.Next() {
-		return "", fmt.Errorf("no result found for query")
-	}
-	if result.Err() != nil {
-		return "", fmt.Errorf("failed to iterate SYS.EXA_METADATA: %w", result.Err())
+		if result.Err() != nil {
+			return "", fmt.Errorf("failed to iterate exasol version: %w", result.Err())
+		}
+		return "", fmt.Errorf("no result found for exasol version query")
 	}
 	var majorVersion string
 	err = result.Scan(&majorVersion)
 	if err != nil {
-		return "", fmt.Errorf("failed to read result: %w", err)
+		return "", fmt.Errorf("failed to read exasol version result: %w", err)
 	}
 	return majorVersion, nil
 }
