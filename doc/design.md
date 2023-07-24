@@ -619,13 +619,14 @@ Needs: impl, utest, itest
 
 #### Updates
 `dsn~update-extension~1`
-Status: draft
 
 EM can update an installed extensions and its instances to the latest version.
 
 Covers:
 * [`req~update-extension~1`](system_requirements.md#uninstalling-extensions)
 * [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+
+Needs: impl, utest, itest
 
 ## Cross-cutting Concerns
 
