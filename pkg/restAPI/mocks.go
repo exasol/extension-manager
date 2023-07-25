@@ -24,6 +24,14 @@ func (m *mockExtensionController) UninstallExtension(ctx context.Context, db *sq
 	return args.Error(0)
 }
 
+func (m *mockExtensionController) UpgradeExtension(ctx context.Context, db *sql.DB, extensionId string) (*extensionAPI.JsUpgradeResult, error) {
+	args := m.Called(ctx, db, extensionId)
+	if result, ok := args.Get(0).(*extensionAPI.JsUpgradeResult); ok {
+		return result, args.Error(1)
+	}
+	return nil, args.Error(1)
+}
+
 func (m *mockExtensionController) GetInstalledExtensions(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
 	args := m.Called(ctx, db)
 	if installations, ok := args.Get(0).([]*extensionAPI.JsExtInstallation); ok {
