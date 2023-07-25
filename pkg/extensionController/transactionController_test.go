@@ -132,7 +132,7 @@ func (suite *extCtrlUnitTestSuite) TestInstallExtensionCommitFailure() {
 
 // UninstallExtension
 
-func (suite *extCtrlUnitTestSuite) TestUninstallExtension_BeginTransactionFailure() {
+func (suite *extCtrlUnitTestSuite) TestUninstallExtensionBeginTransactionFailure() {
 	suite.dbMock.ExpectBegin().WillReturnError(fmt.Errorf("mock"))
 	err := suite.ctrl.UninstallExtension(mockContext(), suite.db, "extId", "extVer")
 	suite.EqualError(err, "failed to begin transaction: mock")
@@ -163,6 +163,40 @@ func (suite *extCtrlUnitTestSuite) TestUninstallExtensionCommitFailure() {
 }
 
 // Upgrade
+
+func (suite *extCtrlUnitTestSuite) TestUpgradeBeginTransactionFailure() {
+	suite.dbMock.ExpectBegin().WillReturnError(fmt.Errorf("mock"))
+	result, err := suite.ctrl.UpgradeExtension(mockContext(), suite.db, "extId")
+	suite.EqualError(err, "failed to begin transaction: mock")
+	suite.Nil(result)
+}
+
+func (suite *extCtrlUnitTestSuite) TestUpgradeSuccess() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("UpgradeExtension", mock.Anything, "extId").Return(&extensionAPI.JsUpgradeResult{PreviousVersion: "old", NewVersion: "new"}, nil)
+	suite.dbMock.ExpectCommit()
+	result, err := suite.ctrl.UpgradeExtension(mockContext(), suite.db, "extId")
+	suite.NoError(err)
+	suite.Equal(&extensionAPI.JsUpgradeResult{PreviousVersion: "old", NewVersion: "new"}, result)
+}
+
+func (suite *extCtrlUnitTestSuite) TestUpgradeFailure() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("UpgradeExtension", mock.Anything, "extId").Return(nil, fmt.Errorf("mock"))
+	suite.dbMock.ExpectRollback()
+	result, err := suite.ctrl.UpgradeExtension(mockContext(), suite.db, "extId")
+	suite.EqualError(err, "mock")
+	suite.Nil(result)
+}
+
+func (suite *extCtrlUnitTestSuite) TestUpgradeCommitFailure() {
+	suite.dbMock.ExpectBegin()
+	suite.mockCtrl.On("UpgradeExtension", mock.Anything, "extId").Return(&extensionAPI.JsUpgradeResult{PreviousVersion: "old", NewVersion: "new"}, nil)
+	suite.dbMock.ExpectCommit().WillReturnError(fmt.Errorf("mock"))
+	result, err := suite.ctrl.UpgradeExtension(mockContext(), suite.db, "extId")
+	suite.EqualError(err, "mock")
+	suite.Nil(result)
+}
 
 // CreateInstance
 
