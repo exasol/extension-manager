@@ -47,6 +47,7 @@ A common scenario for an extension not implementing a required function is when 
 #### Test Dependency Updates
 
 * Updated `nl.jqno.equalsverifier:equalsverifier:3.14.3` to `3.15`
+* Updated `org.junit.jupiter:junit-jupiter-api:5.9.3` to `5.10.0`
 
 #### Plugin Dependency Updates
 
@@ -67,10 +68,12 @@ A common scenario for an extension not implementing a required function is when 
 * Updated `com.exasol:exasol-test-setup-abstraction-java:2.0.1` to `2.0.2`
 * Updated `com.exasol:extension-manager-client-java:0.4.0` to `0.5.0`
 * Removed `io.netty:netty-handler:4.1.94.Final`
+* Updated `org.junit.jupiter:junit-jupiter-api:5.9.3` to `5.10.0`
 
 #### Test Dependency Updates
 
 * Updated `com.exasol:udf-debugging-java:0.6.8` to `0.6.10`
+* Updated `org.junit.jupiter:junit-jupiter-params:5.9.3` to `5.10.0`
 
 #### Plugin Dependency Updates
 
