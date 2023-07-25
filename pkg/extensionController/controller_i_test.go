@@ -148,6 +148,21 @@ func (suite *ControllerITestSuite) TestUninstallSucceeds() {
 	suite.NoError(err)
 }
 
+// Upgrade
+
+func (suite *ControllerITestSuite) TestUpgradeFailsForUnknownExtensionId() {
+	result, err := suite.createController().UpgradeExtension(mockContext(), suite.exasol.GetConnection(), "unknown-extension-id")
+	suite.ErrorContains(err, "failed to load extension \"unknown-extension-id\"")
+	suite.Nil(result)
+}
+
+func (suite *ControllerITestSuite) TestUpgradeSucceeds() {
+	suite.writeDefaultExtension()
+	result, err := suite.createController().UpgradeExtension(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID)
+	suite.NoError(err)
+	suite.Equal(&extensionAPI.JsUpgradeResult{PreviousVersion: "0.1.0", NewVersion: "0.2.0"}, result)
+}
+
 /* [itest -> const~use-reserved-schema~1] */
 func (suite *ControllerITestSuite) TestEnsureSchemaExistsCreatesSchemaIfItDoesNotExist() {
 	suite.writeDefaultExtension()
@@ -276,4 +291,12 @@ func (suite *ControllerITestSuite) uploadBucketFsFile(content, fileName string) 
 	suite.T().Cleanup(func() {
 		suite.NoError(suite.exasol.Exasol.DeleteFile(fileName))
 	})
+}
+
+func (suite *ControllerITestSuite) createControllerWithSchema(schema string) TransactionController {
+	return Create(suite.tempExtensionRepo, schema)
+}
+
+func (suite *ControllerITestSuite) createController() TransactionController {
+	return suite.createControllerWithSchema(EXTENSION_SCHEMA)
 }

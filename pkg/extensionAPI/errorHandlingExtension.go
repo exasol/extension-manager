@@ -84,7 +84,7 @@ func (e *JsExtension) Uninstall(context *context.ExtensionContext, version strin
 }
 
 func (e *JsExtension) Upgrade(context *context.ExtensionContext) (result *JsUpgradeResult, errorResult error) {
-	if e.extension.Uninstall == nil {
+	if e.extension.Upgrade == nil {
 		return nil, e.unsupportedFunction("upgrade")
 	}
 	defer func() {
