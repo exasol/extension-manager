@@ -329,8 +329,7 @@ func (suite *ControllerUTestSuite) TestUpgradeFailsForUnknownExtensionId() {
 
 func (suite *ControllerUTestSuite) TestUpgradeSucceeds() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithUpgradeFunc("context.sqlClient.execute(`upgrade extension`);" +
-			"return { previousVersion: 'old', newVersion: 'new' };").
+		WithUpgradeFunc("context.sqlClient.execute(`upgrade extension`); return { previousVersion: 'old', newVersion: 'new' };").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.dbMock.ExpectBegin()
@@ -343,8 +342,7 @@ func (suite *ControllerUTestSuite) TestUpgradeSucceeds() {
 
 func (suite *ControllerUTestSuite) TestUpgradeQueryFails() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithUpgradeFunc("context.sqlClient.execute(`upgrade extension`);" +
-			"return { previousVersion: 'old', newVersion: 'new' };").
+		WithUpgradeFunc("context.sqlClient.execute(`upgrade extension`); return { previousVersion: 'old', newVersion: 'new' };").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.dbMock.ExpectBegin()

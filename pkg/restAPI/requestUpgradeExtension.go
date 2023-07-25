@@ -26,7 +26,8 @@ func UpgradeExtension(apiContext *ApiContext) *openapi.Post {
 		},
 		Path: newPathWithDbQueryParams().
 			Add("installations").
-			AddParameter("extensionId", openapi.STRING, "The ID of the installed extension to upgrade"),
+			AddParameter("extensionId", openapi.STRING, "The ID of the installed extension to upgrade").
+			Add("upgrade"),
 		HandlerFunc: adaptDbHandler(handleUpgradeExtension(apiContext)),
 	}
 }
