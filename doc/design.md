@@ -340,7 +340,7 @@ Rationale: Parameters can change over time, see [Updates](#updates).
 
 Covers:
 * [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
-* [`req~update-extension~1`](system_requirements.md#uninstalling-extensions)
+* [`req~upgrade-extension~1`](system_requirements.md#uninstalling-extensions)
 
 Needs: impl, utest
 
@@ -617,13 +617,13 @@ Covers:
 
 Needs: impl, utest, itest
 
-#### Updates
-`dsn~update-extension~1`
+#### Upgrades
+`dsn~upgrade-extension~1`
 
-EM can update an installed extensions and its instances to the latest version.
+EM can upgrade an installed extensions and its instances to the latest version.
 
 Covers:
-* [`req~update-extension~1`](system_requirements.md#uninstalling-extensions)
+* [`req~upgrade-extension~1`](system_requirements.md#uninstalling-extensions)
 * [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
 
 Needs: impl, utest, itest

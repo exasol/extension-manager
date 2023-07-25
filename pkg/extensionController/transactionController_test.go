@@ -171,6 +171,7 @@ func (suite *extCtrlUnitTestSuite) TestUpgradeBeginTransactionFailure() {
 	suite.Nil(result)
 }
 
+/* [utest -> dsn~upgrade-extension~1] */
 func (suite *extCtrlUnitTestSuite) TestUpgradeSuccess() {
 	suite.dbMock.ExpectBegin()
 	suite.mockCtrl.On("UpgradeExtension", mock.Anything, "extId").Return(&extensionAPI.JsUpgradeResult{PreviousVersion: "old", NewVersion: "new"}, nil)

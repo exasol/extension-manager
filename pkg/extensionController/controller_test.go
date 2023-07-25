@@ -327,6 +327,7 @@ func (suite *ControllerUTestSuite) TestUpgradeFailsForUnknownExtensionId() {
 	suite.Nil(result)
 }
 
+/* [utest -> dsn~upgrade-extension~1] */
 func (suite *ControllerUTestSuite) TestUpgradeSucceeds() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUpgradeFunc("context.sqlClient.execute(`upgrade extension`); return { previousVersion: 'old', newVersion: 'new' };").

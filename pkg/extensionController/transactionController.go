@@ -156,6 +156,7 @@ func (c *transactionControllerImpl) UninstallExtension(ctx context.Context, db *
 	return err
 }
 
+/* [impl -> dsn~upgrade-extension~1]. */
 func (c *transactionControllerImpl) UpgradeExtension(ctx context.Context, db *sql.DB, extensionId string) (result *extensionAPI.JsUpgradeResult, returnErr error) {
 	tx, err := transaction.BeginTransaction(ctx, db)
 	if err != nil {

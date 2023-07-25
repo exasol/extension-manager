@@ -159,6 +159,7 @@ func (suite *RestAPISuite) TestUninstallExtensionsFailed() {
 
 // Upgrade extension
 
+/* [itest -> dsn~upgrade-extension~1] */
 func (suite *RestAPISuite) TestUpgradeExtensionsSuccessfully() {
 	suite.controller.On("UpgradeExtension", mock.Anything, mock.Anything, "ext-id").Return(&extensionAPI.JsUpgradeResult{PreviousVersion: "old", NewVersion: "new"}, nil)
 	for _, test := range authSuccessTests {

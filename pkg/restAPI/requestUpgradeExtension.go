@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+/* [impl -> dsn~upgrade-extension~1]. */
 func UpgradeExtension(apiContext *ApiContext) *openapi.Post {
 	return &openapi.Post{
 		Summary:        "Upgrade an extension.",

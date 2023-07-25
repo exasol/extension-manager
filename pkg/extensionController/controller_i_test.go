@@ -152,6 +152,7 @@ func (suite *ControllerITestSuite) TestUpgradeFailsForUnknownExtensionId() {
 	suite.Nil(result)
 }
 
+/* [itest -> dsn~upgrade-extension~1] */
 func (suite *ControllerITestSuite) TestUpgradeSucceeds() {
 	suite.writeDefaultExtension()
 	result, err := suite.createController().UpgradeExtension(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID)

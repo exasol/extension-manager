@@ -198,6 +198,7 @@ func (c *controllerImpl) UninstallExtension(txCtx *transaction.TransactionContex
 	return extension.Uninstall(c.createExtensionContext(txCtx), extensionVersion)
 }
 
+/* [impl -> dsn~upgrade-extension~1]. */
 func (c *controllerImpl) UpgradeExtension(txCtx *transaction.TransactionContext, extensionId string) (*extensionAPI.JsUpgradeResult, error) {
 	extension, err := c.loadExtensionById(extensionId)
 	if err != nil {

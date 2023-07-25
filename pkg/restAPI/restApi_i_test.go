@@ -192,6 +192,7 @@ func (suite *RestAPIIntegrationTestSuite) TestUninstallExtensionFailsForUnknownE
 
 // Upgrade
 
+/* [itest -> dsn~upgrade-extension~1] */
 func (suite *RestAPIIntegrationTestSuite) TestUpgradeExtensionSuccessfully() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUpgradeFunc("context.sqlClient.execute('select 1'); return { previousVersion: 'old', newVersion: 'new' };").
