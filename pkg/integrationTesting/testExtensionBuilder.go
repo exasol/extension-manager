@@ -69,6 +69,11 @@ func (builder *TestExtensionBuilder) WithUninstallFunc(tsFunctionCode string) *T
 	return builder
 }
 
+func (builder *TestExtensionBuilder) WithUpgradeFunc(tsFunctionCode string) *TestExtensionBuilder {
+	builder.upgradeFunc = tsFunctionCode
+	return builder
+}
+
 func (builder *TestExtensionBuilder) WithAddInstanceFunc(tsFunctionCode string) *TestExtensionBuilder {
 	builder.addInstanceFunc = tsFunctionCode
 	return builder
