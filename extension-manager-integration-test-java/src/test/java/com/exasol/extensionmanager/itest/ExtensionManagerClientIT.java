@@ -83,6 +83,16 @@ class ExtensionManagerClientIT {
     }
 
     @Test
+    void uninstall() {
+        assertDoesNotThrow(() -> client.uninstall());
+    }
+
+    @Test
+    void upgrade() {
+        assertDoesNotThrow(() -> client.upgrade());
+    }
+
+    @Test
     void createInstanceFailsForMissingParam() {
         final List<ParameterValue> params = emptyList();
         final ApiException exception = assertThrows(ApiException.class, () -> client.createInstance(params));
