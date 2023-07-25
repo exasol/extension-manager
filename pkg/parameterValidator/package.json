@@ -10,7 +10,7 @@
     "@exasol/extension-parameter-validator": "0.2.1"
   },
   "devDependencies": {
-    "esbuild": "0.18.13",
+    "esbuild": "0.18.16",
     "typescript": "5.1.6"
   }
 }

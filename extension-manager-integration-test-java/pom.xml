@@ -8,7 +8,7 @@
     <description>Library for creating integration tests for the Extensions.</description>
     <url>https://github.com/exasol/extension-manager/</url>
     <properties>
-        <junit.version>5.9.3</junit.version>
+        <junit.version>5.10.0</junit.version>
         <!-- ProjectKeeper already included in root project -->
         <project-keeper.skip>true</project-keeper.skip>
     </properties>

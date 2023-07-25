@@ -65,8 +65,8 @@ EM allows the DBA to configure an extension, e.g. in order to set up a Virtual S
 
 Needs: req
 
-#### Updating an Extension
-`feat~update-extension~1`
+#### Upgrading an Extension
+`feat~upgrade-extension~1`
 
 EM allows DBA to install a new version of an extension that was already installed in an older version.
 
@@ -160,22 +160,22 @@ Covers:
 
 Needs: dsn
 
-#### Update extension
-`req~update-extension~1`
+#### Upgrade Extension
+`req~upgrade-extension~1`
 
-When updating an extension that is already installed in an older version, EM runs code provided by the extension.
+When upgrading an extension that is already installed in an older version, EM runs code provided by the extension.
 
 Rationale:
 
-* Updating to a new version requires actions specific for a concrete extension. Thus a general implementation in EM is not feasible.
-* Extensions usually update themselves by updating referenced files in `ADAPTER SCRIPT`s and `SET SCRIPT`s. This will automatically update all instances (e.g. virtual schemas) using these scripts.
-* If necessary the extension's update code may list and modify individual instances of the extension, e.g. when parameters of a virtual schema change between versions and can be converted automatically.
-  * The extension's update code must fail with a meaningful error message if automatic modification is not possible.
-  * EM currently does not allow reading parameter values from a `CONNECTION`. This means that updates requiring modifying parameters are not possible at the moment.
+* Upgrading to a new version requires actions specific for a concrete extension. Thus a general implementation in EM is not feasible.
+* Extensions usually upgrade themselves by updating referenced files in `ADAPTER SCRIPT`s and `SET SCRIPT`s. This will automatically upgrade all instances (e.g. virtual schemas) using these scripts.
+* If necessary the extension's upgrade code may list and modify individual instances of the extension, e.g. when parameters of a virtual schema change between versions and can be converted automatically.
+  * The extension's upgrade code must fail with a meaningful error message if automatic modification is not possible.
+  * EM currently does not allow reading parameter values from a `CONNECTION`. This means that upgrades requiring modifying parameters are not possible at the moment.
   * If necessary, we can implement this using a [Lua UDF](https://docs.exasol.com/db/latest/database_concepts/udf_scripts/lua.htm#AccessingConnectionDefinitions) and provide a context method to the extension's code.
 
 Covers:
-* [`feat~update-extension~1`](#uninstall-an-extension)
+* [`feat~upgrade-extension~1`](#upgrading-an-extension)
 
 Needs: dsn
 

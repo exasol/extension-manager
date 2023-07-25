@@ -157,6 +157,33 @@ func (suite *ErrorHandlingExtensionSuite) TestUninstallUnsupported() {
 	suite.EqualError(err, `extension "id" does not support operation "uninstall"`)
 }
 
+// Upgrade
+
+func (suite *ErrorHandlingExtensionSuite) TestUpgradeSuccessful() {
+	suite.rawExtension.Upgrade = func(context *context.ExtensionContext) *JsUpgradeResult {
+		return &JsUpgradeResult{PreviousVersion: "old", NewVersion: "new"}
+	}
+	result, err := suite.extension.Upgrade(createMockContext())
+	suite.NoError(err)
+	suite.Equal(&JsUpgradeResult{PreviousVersion: "old", NewVersion: "new"}, result)
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestUpgradeFails() {
+	suite.rawExtension.Upgrade = func(context *context.ExtensionContext) *JsUpgradeResult {
+		panic("mock error")
+	}
+	result, err := suite.extension.Upgrade(createMockContext())
+	suite.EqualError(err, "failed to upgrade extension \"id\": mock error")
+	suite.Nil(result)
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestUpgradeUnsupported() {
+	suite.rawExtension.Upgrade = nil
+	instance, err := suite.extension.Upgrade(createMockContext())
+	suite.EqualError(err, `extension "id" does not support operation "upgrade"`)
+	suite.Nil(instance)
+}
+
 // AddInstance
 
 func (suite *ErrorHandlingExtensionSuite) TestAddInstanceSuccessful() {

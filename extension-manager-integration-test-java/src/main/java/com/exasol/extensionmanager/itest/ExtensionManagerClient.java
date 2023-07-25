@@ -124,7 +124,7 @@ public class ExtensionManagerClient {
     }
 
     /**
-     * Calls {@link InstallationApi#uninstallExtension(String, String, String, Integer)}.
+     * Calls {@link InstallationApi#uninstallExtension(String, String, String, Integer)} with the current version.
      */
     public void uninstall() {
         final Extension extension = getExtension();
@@ -133,6 +133,17 @@ public class ExtensionManagerClient {
 
     private void uninstall(final String extensionId, final String extensionVersion) {
         this.installationApi.uninstallExtension(extensionId, extensionVersion, getDbHost(), getDbPort());
+    }
+
+    /**
+     * Calls {@link InstallationApi#upgradeExtension(String, String, Integer)}.
+     */
+    public void upgrade() {
+        this.upgrade(getExtension().getId());
+    }
+
+    private void upgrade(final String extensionId) {
+        this.installationApi.upgradeExtension(extensionId, getDbHost(), getDbPort());
     }
 
     /**

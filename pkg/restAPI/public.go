@@ -49,6 +49,9 @@ func addPublicEndpointsWithController(api *openapi.API, controller extensionCont
 	if err := api.Delete(UninstallExtension(apiContext)); err != nil {
 		return err
 	}
+	if err := api.Post(UpgradeExtension(apiContext)); err != nil {
+		return err
+	}
 	if err := api.Post(CreateInstance(apiContext)); err != nil {
 		return err
 	}

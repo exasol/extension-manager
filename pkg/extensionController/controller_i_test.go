@@ -48,8 +48,7 @@ func (suite *ControllerITestSuite) SetupTest() {
 func (suite *ControllerITestSuite) TestGetAllExtensions() {
 	suite.writeDefaultExtension()
 	suite.uploadBucketFsFile("123", "my-extension.1.2.3.jar") // create file with 3B size
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	extensions, err := controller.GetAllExtensions(mockContext(), suite.exasol.GetConnection())
+	extensions, err := suite.createController().GetAllExtensions(mockContext(), suite.exasol.GetConnection())
 	suite.NoError(err)
 	suite.Equal(1, len(extensions))
 	suite.Equal("MyDemoExtension", extensions[0].Name, "name")
@@ -72,13 +71,12 @@ func (suite *ControllerITestSuite) TestGetAllExtensionsWithMissingJar() {
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "missing-jar.jar", FileSize: 3}).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	extensions, err := controller.GetAllExtensions(mockContext(), suite.exasol.GetConnection())
+	extensions, err := suite.createController().GetAllExtensions(mockContext(), suite.exasol.GetConnection())
 	suite.NoError(err)
 	suite.Empty(extensions)
 }
 
-func (suite *ControllerITestSuite) GetInstalledExtensions_failsWithGenericError() {
+func (suite *ControllerITestSuite) GetInstalledExtensionsFailsWithGenericError() {
 	const jarName = "my-failing-extension-1.2.3.jar"
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: jarName, FileSize: 3}).
@@ -86,13 +84,12 @@ func (suite *ControllerITestSuite) GetInstalledExtensions_failsWithGenericError(
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.uploadBucketFsFile("123", jarName) // create file with 3B size
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	extensions, err := controller.GetInstalledExtensions(mockContext(), suite.exasol.GetConnection())
+	extensions, err := suite.createController().GetInstalledExtensions(mockContext(), suite.exasol.GetConnection())
 	suite.ErrorContains(err, `failed to find installations: failed to find installations for extension "testing-extension.js": Error: mock error from js at`)
 	suite.Nil(extensions)
 }
 
-func (suite *ControllerITestSuite) GetInstalledExtensions_failsWithApiError() {
+func (suite *ControllerITestSuite) GetInstalledExtensionsFailsWithApiError() {
 	const jarName = "my-failing-extension-1.2.3.jar"
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: jarName, FileSize: 3}).
@@ -100,8 +97,7 @@ func (suite *ControllerITestSuite) GetInstalledExtensions_failsWithApiError() {
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.uploadBucketFsFile("123", jarName)
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	extensions, err := controller.GetInstalledExtensions(mockContext(), suite.exasol.GetConnection())
+	extensions, err := suite.createController().GetInstalledExtensions(mockContext(), suite.exasol.GetConnection())
 	if apiError, ok := err.(*apiErrors.APIError); ok {
 		suite.Equal("mock error from js", apiError.Message)
 		suite.Equal(400, apiError.Status)
@@ -114,38 +110,54 @@ func (suite *ControllerITestSuite) GetInstalledExtensions_failsWithApiError() {
 func (suite *ControllerITestSuite) TestGetAllInstallations() {
 	suite.writeDefaultExtension()
 	fixture := integrationTesting.CreateLuaScriptFixture(suite.exasol.GetConnection())
-	controller := Create(suite.tempExtensionRepo, fixture.GetSchemaName())
 	fixture.Cleanup(suite.T())
-	installations, err := controller.GetInstalledExtensions(mockContext(), suite.exasol.GetConnection())
+	installations, err := suite.createControllerWithSchema(fixture.GetSchemaName()).
+		GetInstalledExtensions(mockContext(), suite.exasol.GetConnection())
 	suite.NoError(err)
 	suite.Equal(1, len(installations))
 	suite.Equal(fixture.GetSchemaName()+".MY_SCRIPT", installations[0].Name)
 }
 
+// Install
+
 func (suite *ControllerITestSuite) TestInstallFailsForUnknownExtensionId() {
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	err := controller.InstallExtension(mockContext(), suite.exasol.GetConnection(), "unknown-extension-id", "ver")
+	err := suite.createController().InstallExtension(mockContext(), suite.exasol.GetConnection(), "unknown-extension-id", "ver")
 	suite.ErrorContains(err, "failed to load extension \"unknown-extension-id\"")
 }
 
 func (suite *ControllerITestSuite) TestInstallSucceeds() {
 	suite.writeDefaultExtension()
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	err := controller.InstallExtension(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "ver")
+	err := suite.createController().InstallExtension(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "ver")
 	suite.NoError(err)
 }
 
+// Uninstall
+
 func (suite *ControllerITestSuite) TestUninstallFailsForUnknownExtensionId() {
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	err := controller.UninstallExtension(mockContext(), suite.exasol.GetConnection(), "unknown-extension-id", "ver")
+	err := suite.createController().UninstallExtension(mockContext(), suite.exasol.GetConnection(), "unknown-extension-id", "ver")
 	suite.ErrorContains(err, "failed to load extension \"unknown-extension-id\"")
 }
 
 func (suite *ControllerITestSuite) TestUninstallSucceeds() {
 	suite.writeDefaultExtension()
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	err := controller.UninstallExtension(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "ver")
+	err := suite.createController().UninstallExtension(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "ver")
 	suite.NoError(err)
+}
+
+// Upgrade
+
+func (suite *ControllerITestSuite) TestUpgradeFailsForUnknownExtensionId() {
+	result, err := suite.createController().UpgradeExtension(mockContext(), suite.exasol.GetConnection(), "unknown-extension-id")
+	suite.ErrorContains(err, "failed to load extension \"unknown-extension-id\"")
+	suite.Nil(result)
+}
+
+/* [itest -> dsn~upgrade-extension~1] */
+func (suite *ControllerITestSuite) TestUpgradeSucceeds() {
+	suite.writeDefaultExtension()
+	result, err := suite.createController().UpgradeExtension(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID)
+	suite.NoError(err)
+	suite.Equal(&extensionAPI.JsUpgradeResult{PreviousVersion: "0.1.0", NewVersion: "0.2.0"}, result)
 }
 
 /* [itest -> const~use-reserved-schema~1] */
@@ -154,9 +166,8 @@ func (suite *ControllerITestSuite) TestEnsureSchemaExistsCreatesSchemaIfItDoesNo
 	const schemaName = "my_testing_schema"
 	suite.dropSchema(schemaName)
 	defer suite.dropSchema(schemaName)
-	controller := Create(suite.tempExtensionRepo, schemaName)
 	suite.NotContains(suite.getAllSchemaNames(), schemaName)
-	err := controller.InstallExtension(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "ver")
+	err := suite.createControllerWithSchema(schemaName).InstallExtension(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "ver")
 	suite.NoError(err)
 	suite.Contains(suite.getAllSchemaNames(), schemaName)
 }
@@ -165,36 +176,33 @@ func (suite *ControllerITestSuite) TestEnsureSchemaDoesNotFailIfSchemaAlreadyExi
 	suite.writeDefaultExtension()
 	const schemaName = "my_testing_schema"
 	defer suite.dropSchema(schemaName)
-	controller := Create(suite.tempExtensionRepo, schemaName)
 	suite.createSchema(schemaName)
-	err := controller.InstallExtension(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "ver")
+	err := suite.createControllerWithSchema(schemaName).InstallExtension(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "ver")
 	suite.NoError(err)
 	suite.Contains(suite.getAllSchemaNames(), schemaName)
 }
 
 /* [itest -> dsn~validate-parameters~1] */
 /* [itest -> dsn~parameter-definitions~1] */
-func (suite *ControllerITestSuite) TestAddInstance_invalidParameters() {
+func (suite *ControllerITestSuite) TestAddInstanceInvalidParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
 		WithAddInstanceFunc("context.sqlClient.execute('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string", required: true}]`).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instance, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0", []ParameterValue{})
+	instance, err := suite.createController().CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0", []ParameterValue{})
 	suite.EqualError(err, `invalid parameters: Failed to validate parameter 'My param': This is a required parameter.`)
 	suite.Nil(instance)
 }
 
-func (suite *ControllerITestSuite) TestAddInstance_validParameters() {
+func (suite *ControllerITestSuite) TestAddInstanceValidParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
 		WithAddInstanceFunc("context.sqlClient.execute('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instance, err := controller.CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p1", Value: "val"}})
+	instance, err := suite.createController().CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p1", Value: "val"}})
 	suite.NoError(err)
 	suite.Equal(&extensionAPI.JsExtInstance{Id: "instId", Name: "ext_0.1.0_p1_val"}, instance)
 }
@@ -203,13 +211,12 @@ func (suite *ControllerITestSuite) TestFindInstances() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstancesFunc("context.sqlClient.execute('select 1'); return [{id: 'instId', name: 'instName_ver'+version}]").
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instances, err := controller.FindInstances(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0")
+	instances, err := suite.createController().FindInstances(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0")
 	suite.NoError(err)
 	suite.Equal([]*extensionAPI.JsExtInstance{{Id: "instId", Name: "instName_ver0.1.0"}}, instances)
 }
 
-func (suite *ControllerITestSuite) TestFindInstances_useSqlQueryResult() {
+func (suite *ControllerITestSuite) TestFindInstancesUseSqlQueryResult() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstancesFunc(`const result=context.sqlClient.query("select 1 as c1, 'a' as c2 from dual where 1=?", 1);
 			const col1 = result.columns[0];
@@ -217,27 +224,24 @@ func (suite *ControllerITestSuite) TestFindInstances_useSqlQueryResult() {
 			const row1 = result.rows[0];` +
 			"return [{id: 'instId', name: `${col1.name}: ${col1.typeName}/${typeof(row1[0])} = ${row1[0]}, ${col2.name}: ${col2.typeName}/${typeof(row1[1])} = ${row1[1]}`}]").
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	instances, err := controller.FindInstances(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0")
+	instances, err := suite.createController().FindInstances(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0")
 	suite.NoError(err)
 	suite.Equal([]*extensionAPI.JsExtInstance{{Id: "instId", Name: "C1: DECIMAL/number = 1, C2: CHAR/string = a"}}, instances)
 }
 
-func (suite *ControllerITestSuite) TestDeleteInstances_failsWithInvalidQuery() {
+func (suite *ControllerITestSuite) TestDeleteInstancesFailsWithInvalidQuery() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithDeleteInstanceFunc("context.sqlClient.execute('drop instance')").
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	err := controller.DeleteInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "extVersion", "instId")
+	err := suite.createController().DeleteInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "extVersion", "instId")
 	suite.ErrorContains(err, `failed to delete instance "instId" for extension "testing-extension.js": error executing statement "drop instance"`)
 }
 
-func (suite *ControllerITestSuite) TestDeleteInstances_succeeds() {
+func (suite *ControllerITestSuite) TestDeleteInstancesSucceeds() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithDeleteInstanceFunc("context.sqlClient.execute('select 1')").
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	controller := Create(suite.tempExtensionRepo, EXTENSION_SCHEMA)
-	err := controller.DeleteInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "extVersion", "instId")
+	err := suite.createController().DeleteInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "extVersion", "instId")
 	suite.NoError(err)
 }
 
@@ -276,4 +280,12 @@ func (suite *ControllerITestSuite) uploadBucketFsFile(content, fileName string) 
 	suite.T().Cleanup(func() {
 		suite.NoError(suite.exasol.Exasol.DeleteFile(fileName))
 	})
+}
+
+func (suite *ControllerITestSuite) createControllerWithSchema(schema string) TransactionController {
+	return Create(suite.tempExtensionRepo, schema)
+}
+
+func (suite *ControllerITestSuite) createController() TransactionController {
+	return suite.createControllerWithSchema(EXTENSION_SCHEMA)
 }
