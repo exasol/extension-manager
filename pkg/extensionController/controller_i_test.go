@@ -160,13 +160,13 @@ func (suite *ControllerITestSuite) TestUpgradeSucceeds() {
 	suite.Equal(&extensionAPI.JsUpgradeResult{PreviousVersion: "0.1.0", NewVersion: "0.2.0"}, result)
 }
 
-func (suite *ControllerITestSuite) TestUpgradeFailsReadingScript() {
+func (suite *ControllerITestSuite) TestUpgradeGettingScriptReturnsNil() {
 	suite.createExtensionBuilder().
-		WithUpgradeFunc("const text = context.metadata.getScriptByName('script').text; return {previousVersion:'0.1.0',newVersion:text};").
+		WithUpgradeFunc("const script = context.metadata.getScriptByName('script'); return {previousVersion:'0.1.0',newVersion:'script is null = '+(script===null)};").
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	result, err := suite.createController().UpgradeExtension(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID)
-	suite.EqualError(err, `failed to upgrade extension "testing-extension.js": no script found in schema "test" for name "script"`)
-	suite.Nil(result)
+	suite.NoError(err)
+	suite.Equal(&extensionAPI.JsUpgradeResult{PreviousVersion: "0.1.0", NewVersion: "script is null = true"}, result)
 }
 
 /* [itest -> const~use-reserved-schema~1] */

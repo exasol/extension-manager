@@ -106,7 +106,21 @@ func (suite *ContextSuite) TestBucketFsResolvePathError() {
 func (suite *ContextSuite) TestMetadataGetScriptByName() {
 	ctx := suite.createContextWithClients()
 	suite.metadataReaderMock.SimulateGetScriptByNameScriptText("script", "scriptText")
-	suite.Equal(exaMetadata.ExaScriptRow{Schema: "?", Name: "script", Type: "", InputType: "", ResultType: "", Text: "scriptText", Comment: ""}, ctx.Metadata.GetScriptByName("script"))
+	suite.Equal(&exaMetadata.ExaScriptRow{Schema: "?", Name: "script", Type: "", InputType: "", ResultType: "", Text: "scriptText", Comment: ""}, ctx.Metadata.GetScriptByName("script"))
+}
+
+func (suite *ContextSuite) TestMetadataGetScriptByNameNoScriptFound() {
+	ctx := suite.createContextWithClients()
+	suite.metadataReaderMock.SimulateGetScriptByName("script", nil)
+	suite.Nil(ctx.Metadata.GetScriptByName("script"))
+}
+
+func (suite *ContextSuite) TestMetadataGetScriptByNameFails() {
+	ctx := suite.createContextWithClients()
+	suite.metadataReaderMock.SimulateGetScriptByNameFails("script", fmt.Errorf("mock error"))
+	suite.PanicsWithError(`failed to find script "EXT_SCHEMA"."script". Caused by: mock error`, func() {
+		ctx.Metadata.GetScriptByName("script")
+	})
 }
 
 func (suite *ContextSuite) createContext() *ExtensionContext {

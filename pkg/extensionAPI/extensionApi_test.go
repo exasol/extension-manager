@@ -225,7 +225,7 @@ func (suite *ExtensionApiSuite) TestUpgradeReadMetadataFails() {
 	extension := suite.loadExtension(extensionContent)
 	suite.mockMetadataReader.SimulateGetScriptByNameFails("script", fmt.Errorf("mock error"))
 	result, err := extension.Upgrade(suite.createMockContext())
-	suite.EqualError(err, `failed to upgrade extension "ext-id": mock error`)
+	suite.EqualError(err, `failed to upgrade extension "ext-id": failed to find script "extension_schema"."script". Caused by: mock error`)
 	suite.Nil(result)
 }
 

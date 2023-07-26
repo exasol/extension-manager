@@ -283,7 +283,7 @@ func (suite *ExaMetadataUTestSuite) TestGetScriptByNameNoResult() {
 			NewRows([]string{"SCRIPT_SCHEMA", "SCRIPT_NAME", "SCRIPT_TYPE", "SCRIPT_INPUT_TYPE", "SCRIPT_RESULT_TYPE", "SCRIPT_TEXT", "SCRIPT_COMMENT"})).
 		RowsWillBeClosed()
 	result, err := CreateExaMetaDataReader().GetScriptByName(tx, SCHEMA_NAME, "script")
-	suite.EqualError(err, `no script found in schema "EXA_SCHEMA_NAME" for name "script"`)
+	suite.NoError(err)
 	suite.Nil(result)
 }
 

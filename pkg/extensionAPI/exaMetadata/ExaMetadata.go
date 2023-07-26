@@ -6,8 +6,14 @@ import (
 	"strings"
 )
 
+// ExaMetadataReader allows accessing the Exasol metadata tables.
 type ExaMetadataReader interface {
+	// Reads all metadata tables.
 	ReadMetadataTables(tx *sql.Tx, schemaName string) (*ExaMetadata, error)
+
+	// Get a row from the SYS.EXA_ALL_SCRIPTS table for the given schema and script name.
+	//
+	// Returns `(nil, nil)` when no script exists with the given name.
 	GetScriptByName(tx *sql.Tx, schemaName, scriptName string) (*ExaScriptRow, error)
 }
 
@@ -37,7 +43,7 @@ func (r *metaDataReaderImpl) ReadMetadataTables(tx *sql.Tx, schemaName string) (
 	return &ExaMetadata{AllScripts: *allScripts, AllVirtualSchemas: *allVirtualSchemas}, nil
 }
 
-/* [impl -> dsn~extension-context-metadata~1] */
+/* [impl -> dsn~extension-context-metadata~1]. */
 func (r *metaDataReaderImpl) GetScriptByName(tx *sql.Tx, schemaName, scriptName string) (*ExaScriptRow, error) {
 	result, err := tx.Query(`
 SELECT SCRIPT_SCHEMA, SCRIPT_NAME, SCRIPT_TYPE, SCRIPT_INPUT_TYPE, SCRIPT_RESULT_TYPE, SCRIPT_TEXT, SCRIPT_COMMENT
@@ -48,7 +54,7 @@ WHERE SCRIPT_SCHEMA=? AND SCRIPT_NAME=?`, schemaName, scriptName)
 	}
 	defer result.Close()
 	if !result.Next() {
-		return nil, fmt.Errorf("no script found in schema %q for name %q", schemaName, scriptName)
+		return nil, nil
 	}
 	row, err := readScriptRow(result)
 	if err != nil {
