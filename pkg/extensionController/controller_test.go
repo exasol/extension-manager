@@ -27,7 +27,7 @@ type ControllerUTestSuite struct {
 	db                *sql.DB
 	dbMock            sqlmock.Sqlmock
 	bucketFsMock      bfs.BucketFsMock
-	metaDataMock      exaMetadata.ExaMetaDataReaderMock
+	metaDataMock      *exaMetadata.ExaMetaDataReaderMock
 }
 
 func TestControllerUTestSuite(t *testing.T) {
@@ -50,7 +50,7 @@ func (suite *ControllerUTestSuite) createController() {
 			ExtensionSchema:      EXTENSION_SCHEMA,
 			ExtensionRegistryURL: "registryUrl",
 			BucketFSBasePath:     "bfsBasePath"},
-		metaDataReader: &suite.metaDataMock,
+		metaDataReader: suite.metaDataMock,
 	}
 	suite.controller = &transactionControllerImpl{controller: ctrl, bucketFs: &suite.bucketFsMock}
 }
@@ -67,6 +67,8 @@ func (suite *ControllerUTestSuite) initDbMock() {
 
 func (suite *ControllerUTestSuite) AfterTest(suiteName, testName string) {
 	suite.NoError(suite.dbMock.ExpectationsWereMet())
+	suite.bucketFsMock.AssertExpectations(suite.T())
+	suite.metaDataMock.AssertExpectations(suite.T())
 }
 
 // GetAllExtensions
@@ -134,6 +136,7 @@ func (suite *ControllerUTestSuite) TestGetAllInstallationsFails() {
 			extensions, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
 			suite.assertError(t, err)
 			suite.Nil(extensions)
+			suite.metaDataMock.AssertExpectations(suite.T())
 		})
 	}
 }
@@ -145,7 +148,6 @@ func (suite *ControllerUTestSuite) TestFindInstancesFails() {
 				WithFindInstancesFunc(t.throwCommand).
 				Build().
 				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-			suite.metaDataMock.SimulateExaMetaData(exaMetadata.ExaMetadata{})
 			suite.initDbMock()
 			suite.dbMock.ExpectBegin()
 			suite.dbMock.ExpectRollback()
@@ -381,7 +383,6 @@ func (suite *ControllerUTestSuite) TestCreateInstanceInvalidParameters() {
 		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string", required: true}]`).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectRollback()
@@ -398,7 +399,6 @@ func (suite *ControllerUTestSuite) TestCreateInstanceFails() {
 				WithAddInstanceFunc(t.throwCommand).
 				Build().
 				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-			suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{})
 			suite.dbMock.ExpectBegin()
 			suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 			suite.dbMock.ExpectRollback()
@@ -415,7 +415,6 @@ func (suite *ControllerUTestSuite) TestCreateInstanceValidParameters() {
 		WithAddInstanceFunc("return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()
@@ -447,7 +446,6 @@ func (suite *ControllerUTestSuite) TestDeleteInstanceSucceeds() {
 		WithDeleteInstanceFunc("context.sqlClient.execute(`delete instance ${instanceId}`)").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec("delete instance instId").WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()

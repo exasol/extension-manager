@@ -8,6 +8,7 @@ import (
 
 type ExaMetadataReader interface {
 	ReadMetadataTables(tx *sql.Tx, schemaName string) (*ExaMetadata, error)
+	GetScriptByName(tx *sql.Tx, schemaName, scriptName string) (*ExaScriptRow, error)
 }
 
 type ExaMetadata struct {
@@ -36,6 +37,26 @@ func (r *metaDataReaderImpl) ReadMetadataTables(tx *sql.Tx, schemaName string) (
 	return &ExaMetadata{AllScripts: *allScripts, AllVirtualSchemas: *allVirtualSchemas}, nil
 }
 
+/* [impl -> dsn~extension-context-metadata~1] */
+func (r *metaDataReaderImpl) GetScriptByName(tx *sql.Tx, schemaName, scriptName string) (*ExaScriptRow, error) {
+	result, err := tx.Query(`
+SELECT SCRIPT_SCHEMA, SCRIPT_NAME, SCRIPT_TYPE, SCRIPT_INPUT_TYPE, SCRIPT_RESULT_TYPE, SCRIPT_TEXT, SCRIPT_COMMENT
+FROM SYS.EXA_ALL_SCRIPTS
+WHERE SCRIPT_SCHEMA=? AND SCRIPT_NAME=?`, schemaName, scriptName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read SYS.EXA_ALL_SCRIPTS: %w", err)
+	}
+	defer result.Close()
+	if !result.Next() {
+		return nil, fmt.Errorf("no script found in schema %q for name %q", schemaName, scriptName)
+	}
+	row, err := readScriptRow(result)
+	if err != nil {
+		return nil, err
+	}
+	return row, nil
+}
+
 func readExaAllScriptTable(tx *sql.Tx, schemaName string) (*ExaScriptTable, error) {
 	result, err := tx.Query(`
 SELECT SCRIPT_SCHEMA, SCRIPT_NAME, SCRIPT_TYPE, SCRIPT_INPUT_TYPE, SCRIPT_RESULT_TYPE, SCRIPT_TEXT, SCRIPT_COMMENT
@@ -50,20 +71,28 @@ WHERE SCRIPT_SCHEMA=?`, schemaName)
 		if result.Err() != nil {
 			return nil, fmt.Errorf("failed to iterate SYS.EXA_ALL_SCRIPTS: %w", result.Err())
 		}
-		var row ExaScriptRow
-		var inputType sql.NullString
-		var resultType sql.NullString
-		var comment sql.NullString
-		err := result.Scan(&row.Schema, &row.Name, &row.Type, &inputType, &resultType, &row.Text, &comment)
+		row, err := readScriptRow(result)
 		if err != nil {
-			return nil, fmt.Errorf("failed to read row of SYS.EXA_ALL_SCRIPTS: %w", err)
+			return nil, err
 		}
-		row.InputType = inputType.String
-		row.ResultType = resultType.String
-		row.Comment = comment.String
-		rows = append(rows, row)
+		rows = append(rows, *row)
 	}
 	return &ExaScriptTable{Rows: rows}, nil
+}
+
+func readScriptRow(result *sql.Rows) (*ExaScriptRow, error) {
+	var row ExaScriptRow
+	var inputType sql.NullString
+	var resultType sql.NullString
+	var comment sql.NullString
+	err := result.Scan(&row.Schema, &row.Name, &row.Type, &inputType, &resultType, &row.Text, &comment)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read row of SYS.EXA_ALL_SCRIPTS: %w", err)
+	}
+	row.InputType = inputType.String
+	row.ResultType = resultType.String
+	row.Comment = comment.String
+	return &row, nil
 }
 
 func readExaAllVirtualSchemasTable(tx *sql.Tx) (*ExaVirtualSchemasTable, error) {

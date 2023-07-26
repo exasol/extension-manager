@@ -96,7 +96,6 @@ func (suite *ExaMetadataUTestSuite) TestReadMetadataTablesExasol7() {
 }
 
 func (suite *ExaMetadataUTestSuite) TestReadMetadataTablesExasol8() {
-	reader := &metaDataReaderImpl{}
 	tx := suite.beginTransaction()
 	suite.dbMock.ExpectQuery("(?m)SELECT .*FROM SYS.EXA_ALL_SCRIPTS .*").WithArgs(SCHEMA_NAME).
 		WillReturnRows(sqlmock.
@@ -111,7 +110,7 @@ func (suite *ExaMetadataUTestSuite) TestReadMetadataTablesExasol8() {
 		AddRow("schema2", "owner2", "scriptSchema2", "script2", "notes2")).
 		RowsWillBeClosed()
 
-	metadata, err := reader.ReadMetadataTables(tx, SCHEMA_NAME)
+	metadata, err := CreateExaMetaDataReader().ReadMetadataTables(tx, SCHEMA_NAME)
 	suite.NoError(err)
 	suite.Equal(&ExaMetadata{AllScripts: ExaScriptTable{Rows: []ExaScriptRow{
 		{Schema: "schema1", Name: "script1", Type: "type1", InputType: "input_type1", ResultType: "result_type1", Text: "text1", Comment: "comment1"},
@@ -123,17 +122,15 @@ func (suite *ExaMetadataUTestSuite) TestReadMetadataTablesExasol8() {
 }
 
 func (suite *ExaMetadataUTestSuite) TestReadMetadataTablesAllScriptsFails() {
-	reader := &metaDataReaderImpl{}
 	tx := suite.beginTransaction()
 	suite.dbMock.ExpectQuery("(?m)SELECT .*FROM SYS.EXA_ALL_SCRIPTS .*").WithArgs(SCHEMA_NAME).WillReturnError(fmt.Errorf("mock error"))
 
-	metadata, err := reader.ReadMetadataTables(tx, SCHEMA_NAME)
+	metadata, err := CreateExaMetaDataReader().ReadMetadataTables(tx, SCHEMA_NAME)
 	suite.EqualError(err, "failed to read SYS.EXA_ALL_SCRIPTS: mock error")
 	suite.Nil(metadata)
 }
 
 func (suite *ExaMetadataUTestSuite) TestReadMetadataTablesAllVirtualSchemasFails() {
-	reader := &metaDataReaderImpl{}
 	tx := suite.beginTransaction()
 	suite.dbMock.ExpectQuery("(?m)SELECT .*FROM SYS.EXA_ALL_SCRIPTS .*").WithArgs(SCHEMA_NAME).
 		WillReturnRows(sqlmock.
@@ -144,7 +141,7 @@ func (suite *ExaMetadataUTestSuite) TestReadMetadataTablesAllVirtualSchemasFails
 	suite.simulateExasolMajorVersion("8")
 	suite.dbMock.ExpectQuery("SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT_SCHEMA, ADAPTER_SCRIPT_NAME, ADAPTER_NOTES\\s+FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS").WillReturnError(fmt.Errorf("mock error"))
 
-	metadata, err := reader.ReadMetadataTables(tx, SCHEMA_NAME)
+	metadata, err := CreateExaMetaDataReader().ReadMetadataTables(tx, SCHEMA_NAME)
 	suite.EqualError(err, "failed to read SYS.EXA_ALL_VIRTUAL_SCHEMAS: mock error")
 	suite.Nil(metadata)
 }
@@ -252,6 +249,51 @@ func (suite *ExaMetadataUTestSuite) TestReadExaAllVirtualSchemasTableV7InvalidSc
 		RowsWillBeClosed()
 	result, err := readExaAllVirtualSchemasTableV7(tx)
 	suite.EqualError(err, `invalid format for adapter script: "invalid_script_name"`)
+	suite.Nil(result)
+}
+
+// GetScriptByName
+
+/* [utest -> dsn~extension-context-metadata~1] */
+func (suite *ExaMetadataUTestSuite) TestGetScriptByName() {
+	tx := suite.beginTransaction()
+	suite.dbMock.ExpectQuery("(?m)SELECT .*FROM SYS.EXA_ALL_SCRIPTS .*WHERE SCRIPT_SCHEMA=\\? AND SCRIPT_NAME=\\?").WithArgs(SCHEMA_NAME, "script").
+		WillReturnRows(sqlmock.
+			NewRows([]string{"SCRIPT_SCHEMA", "SCRIPT_NAME", "SCRIPT_TYPE", "SCRIPT_INPUT_TYPE", "SCRIPT_RESULT_TYPE", "SCRIPT_TEXT", "SCRIPT_COMMENT"}).
+			AddRow("schema1", "script1", "type1", "input_type1", "result_type1", "text1", "comment1")).
+		RowsWillBeClosed()
+	result, err := CreateExaMetaDataReader().GetScriptByName(tx, SCHEMA_NAME, "script")
+	suite.NoError(err)
+	suite.Equal(&ExaScriptRow{Schema: "schema1", Name: "script1", Type: "type1", InputType: "input_type1", ResultType: "result_type1", Text: "text1", Comment: "comment1"}, result)
+}
+
+func (suite *ExaMetadataUTestSuite) TestGetScriptByNameQueryFails() {
+	tx := suite.beginTransaction()
+	suite.dbMock.ExpectQuery("(?m)SELECT .*FROM SYS.EXA_ALL_SCRIPTS .*WHERE SCRIPT_SCHEMA=\\? AND SCRIPT_NAME=\\?").WithArgs(SCHEMA_NAME, "script").
+		WillReturnError(fmt.Errorf("mock error"))
+	result, err := CreateExaMetaDataReader().GetScriptByName(tx, SCHEMA_NAME, "script")
+	suite.EqualError(err, "failed to read SYS.EXA_ALL_SCRIPTS: mock error")
+	suite.Nil(result)
+}
+
+func (suite *ExaMetadataUTestSuite) TestGetScriptByNameNoResult() {
+	tx := suite.beginTransaction()
+	suite.dbMock.ExpectQuery("(?m)SELECT .*FROM SYS.EXA_ALL_SCRIPTS .*WHERE SCRIPT_SCHEMA=\\? AND SCRIPT_NAME=\\?").WithArgs(SCHEMA_NAME, "script").
+		WillReturnRows(sqlmock.
+			NewRows([]string{"SCRIPT_SCHEMA", "SCRIPT_NAME", "SCRIPT_TYPE", "SCRIPT_INPUT_TYPE", "SCRIPT_RESULT_TYPE", "SCRIPT_TEXT", "SCRIPT_COMMENT"})).
+		RowsWillBeClosed()
+	result, err := CreateExaMetaDataReader().GetScriptByName(tx, SCHEMA_NAME, "script")
+	suite.EqualError(err, `no script found in schema "EXA_SCHEMA_NAME" for name "script"`)
+	suite.Nil(result)
+}
+
+func (suite *ExaMetadataUTestSuite) TestGetScriptByNameReadingFails() {
+	tx := suite.beginTransaction()
+	suite.dbMock.ExpectQuery("(?m)SELECT .*FROM SYS.EXA_ALL_SCRIPTS .*WHERE SCRIPT_SCHEMA=\\? AND SCRIPT_NAME=\\?").WithArgs(SCHEMA_NAME, "script").
+		WillReturnRows(sqlmock.NewRows([]string{"invalid"}).AddRow("invalid")).
+		RowsWillBeClosed()
+	result, err := CreateExaMetaDataReader().GetScriptByName(tx, SCHEMA_NAME, "script")
+	suite.EqualError(err, `failed to read row of SYS.EXA_ALL_SCRIPTS: sql: expected 1 destination arguments in Scan, not 7`)
 	suite.Nil(result)
 }
 
