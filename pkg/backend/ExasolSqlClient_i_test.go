@@ -1,16 +1,17 @@
-package backend
+package backend_test
 
 import (
 	"context"
 	"testing"
 
+	"github.com/exasol/extension-manager/pkg/backend"
 	"github.com/exasol/extension-manager/pkg/integrationTesting"
 	"github.com/stretchr/testify/suite"
 )
 
 type ExasolSqlClientITestSuite struct {
 	suite.Suite
-	client *ExasolSqlClient
+	client backend.SimpleSQLClient
 	exasol *integrationTesting.DbTestSetup
 }
 
@@ -39,44 +40,56 @@ func (suite *ExasolSqlClientITestSuite) SetupTest() {
 		err := tx.Rollback()
 		suite.NoError(err, "failed to rollback transaction")
 	})
-	suite.client = NewSqlClient(context.Background(), tx)
+	suite.client = backend.NewSqlClient(context.Background(), tx)
 }
 
-func (suite *ExasolSqlClientITestSuite) TestExecute_Succeeds() {
-	suite.NotPanics(func() { suite.client.Execute("select 1") })
+func (suite *ExasolSqlClientITestSuite) TestExecuteSucceeds() {
+	result, err := suite.client.Execute("select 1")
+	suite.NoError(err)
+	suite.NotNil(result)
 }
 
-func (suite *ExasolSqlClientITestSuite) TestExecute_WithArgumentSucceeds() {
-	suite.NotPanics(func() { suite.client.Execute("select 1 from dual where 1 = ?", 1) })
+func (suite *ExasolSqlClientITestSuite) TestExecuteWithArgumentSucceeds() {
+	result, err := suite.client.Execute("select 1 from dual where 1 = ?", 1)
+	suite.NoError(err)
+	suite.NotNil(result)
 }
 
-func (suite *ExasolSqlClientITestSuite) TestExecute_fails() {
-	suite.Panics(func() { suite.client.Execute("invalid") })
+func (suite *ExasolSqlClientITestSuite) TestExecuteFails() {
+	result, err := suite.client.Execute("invalid")
+	suite.ErrorContains(err, "error executing statement \"invalid\": E-EGOD-11: execution failed")
+	suite.Nil(result)
 }
 
-func (suite *ExasolSqlClientITestSuite) TestQuery_fails() {
-	suite.Panics(func() { suite.client.Query("invalid") })
+func (suite *ExasolSqlClientITestSuite) TestQueryFails() {
+	result, err := suite.client.Query("invalid")
+	suite.ErrorContains(err, "error executing statement \"invalid\": E-EGOD-11: execution failed")
+	suite.Nil(result)
 }
 
-func (suite *ExasolSqlClientITestSuite) TestQuery_Succeeds() {
-	result := suite.client.Query("select 1 as col")
-	suite.Equal(QueryResult{Columns: []Column{{Name: "COL", TypeName: "DECIMAL"}}, Rows: []Row{{(float64(1))}}}, result)
+func (suite *ExasolSqlClientITestSuite) TestQuerySucceeds() {
+	result, err := suite.client.Query("select 1 as col")
+	suite.NoError(err)
+	suite.Equal(&backend.QueryResult{Columns: []backend.Column{{Name: "COL", TypeName: "DECIMAL"}}, Rows: []backend.Row{{(float64(1))}}}, result)
 }
 
-func (suite *ExasolSqlClientITestSuite) TestQuery_WithArgument() {
-	result := suite.client.Query("select 1 as col from dual where 1 = ?", 1)
-	suite.Equal(QueryResult{Columns: []Column{{Name: "COL", TypeName: "DECIMAL"}}, Rows: []Row{{(float64(1))}}}, result)
+func (suite *ExasolSqlClientITestSuite) TestQueryWithArgument() {
+	result, err := suite.client.Query("select 1 as col from dual where 1 = ?", 1)
+	suite.NoError(err)
+	suite.Equal(&backend.QueryResult{Columns: []backend.Column{{Name: "COL", TypeName: "DECIMAL"}}, Rows: []backend.Row{{(float64(1))}}}, result)
 }
 
-func (suite *ExasolSqlClientITestSuite) TestQuery_NoRow() {
-	result := suite.client.Query("select 1 as col from dual where 1=2")
-	suite.Equal(QueryResult{Columns: []Column{{Name: "COL", TypeName: "DECIMAL"}}, Rows: []Row{}}, result)
+func (suite *ExasolSqlClientITestSuite) TestQueryNoRow() {
+	result, err := suite.client.Query("select 1 as col from dual where 1=2")
+	suite.NoError(err)
+	suite.Equal(&backend.QueryResult{Columns: []backend.Column{{Name: "COL", TypeName: "DECIMAL"}}, Rows: []backend.Row{}}, result)
 }
 
-func (suite *ExasolSqlClientITestSuite) TestQuery_MultipleRows() {
-	result := suite.client.Query("select t.* from (values (1, 'a'), (2, 'b'), (3, 'c')) as t(num, txt)")
-	suite.Equal(QueryResult{
-		Columns: []Column{{Name: "NUM", TypeName: "DECIMAL"}, {Name: "TXT", TypeName: "VARCHAR"}},
-		Rows:    []Row{{float64(1), "a"}, {float64(2), "b"}, {float64(3), "c"}},
+func (suite *ExasolSqlClientITestSuite) TestQueryMultipleRows() {
+	result, err := suite.client.Query("select t.* from (values (1, 'a'), (2, 'b'), (3, 'c')) as t(num, txt)")
+	suite.NoError(err)
+	suite.Equal(&backend.QueryResult{
+		Columns: []backend.Column{{Name: "NUM", TypeName: "DECIMAL"}, {Name: "TXT", TypeName: "VARCHAR"}},
+		Rows:    []backend.Row{{float64(1), "a"}, {float64(2), "b"}, {float64(3), "c"}},
 	}, result)
 }

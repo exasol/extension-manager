@@ -78,6 +78,7 @@ func (suite *ContextSuite) TestSqlClientExecuteFailure() {
 	})
 }
 
+/* [utest -> dsn~extension-context-bucketfs~1] */
 func (suite *ContextSuite) TestBucketFsResolvePath() {
 	ctx := suite.createContextWithClients()
 	suite.bucketFSMock.SimulateAbsolutePath("file.txt", "/absolute/path/file.txt")
