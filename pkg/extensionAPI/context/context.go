@@ -66,7 +66,7 @@ func (c *contextSqlClient) Query(query string, args ...any) backend.QueryResult 
 }
 
 // BucketFsContext allows extensions to interact with BucketFS.
-/* [impl -> dsn~extension-context-bucketfs~1] */
+/* [impl -> dsn~extension-context-bucketfs~1]. */
 type BucketFsContext interface {
 	// ResolvePath returns an absolute path for the given filename in BucketFS.
 	ResolvePath(fileName string) string

@@ -170,19 +170,6 @@ As described in [`dsn~extension-components~1`](#components-of-an-extension) an e
 
 Needs: impl, utest, itest
 
-#### Resolving Files in BucketFS
-`dsn~resolving-files-in-bucketfs~1`
-
-EM resolves filenames to absolute paths in BucketFS.
-
-Rationale:
-
-Extensions require files in BucketFS. The exact location in BucketFS of the files is not known when creating an extension, only the file name (e.g. `document-files-virtual-schema-dist-7.3.3-s3-2.6.2.jar`). In order to create adapter scripts, the extension must know the absolute path of the file in BucketFS (e.g. `/buckets/bfsdefault/default/document-files-virtual-schema-dist-7.3.3-s3-2.6.2.jar`). So EM must allow the extension to resolve file names to an absolute path in BucketFS.
-
-Needs: impl, utest, itest
-
-#### Resolving Artifacts in BucketFS
-
 ### Extension Definitions
 `dsn~extension-definition~1`
 
@@ -624,6 +611,65 @@ EM can upgrade an installed extensions and its instances to the latest version.
 
 Covers:
 * [`req~upgrade-extension~1`](system_requirements.md#uninstalling-extensions)
+* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+
+Needs: impl, utest, itest
+
+### Extension Context
+
+The extension context allows extension definitions to interact with the database and extension manager e.g. by executing queries.
+
+#### Extension Context SQL Client
+`dsn~extension-context-sql-client~1`
+
+The SQL client in the extension context allows extension definitions to execute statements and run queries against the database and process query results.
+
+Rationale:
+
+* This allows extensions to create necessary database objects like `SCRIPT`s, `CONNECTION`s and `VIRTUAL SCHEMA`s.
+* Extensions can also run arbitrary queries in order to read required information about their installations (e.g. scripts) and instances (e.g. virtual schemas).
+* While EM also provides [access to metadata](#extension-context-metadata) via the context, this information may not be sufficient. Executing arbitrary queries ensures maximum flexibility for extensions.
+
+Covers:
+* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+
+Needs: impl, utest, itest
+
+#### Extension Context BucketFS
+`dsn~extension-context-bucketfs~1`
+
+The BucketFS client in the extension context allows extension definitions to interact with BucketFS.
+
+Covers:
+* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+
+Needs: impl, utest, itest
+
+##### Resolving Files in BucketFS
+`dsn~resolving-files-in-bucketfs~1`
+
+EM resolves filenames to absolute paths in BucketFS.
+
+Rationale:
+
+Extensions require files in BucketFS. The exact location in BucketFS of the files is not known when creating an extension, only the file name (e.g. `document-files-virtual-schema-dist-7.3.3-s3-2.6.2.jar`). In order to create adapter scripts, the extension must know the absolute path of the file in BucketFS (e.g. `/buckets/bfsdefault/default/document-files-virtual-schema-dist-7.3.3-s3-2.6.2.jar`). So EM must allow the extension to resolve file names to an absolute path in BucketFS.
+
+Needs: impl, utest, itest
+
+#### Extension Context Metadata
+`dsn~extension-context-metadata~1`
+
+The Metadata client in the extension context allows extension definitions to read Metadata (e.g. tables `SYS.EXA_ALL_SCRIPTS` or `SYS.EXA_ALL_VIRTUAL_SCHEMAS`) from the database.
+
+Rationale:
+
+* This information is necessary for extensions to find installations (e.g. scripts) and instances (e.g. virtual schemas).
+* As an alternative extensions could also use the [SQL client](#extension-context-sql-client) included in the context, but this would require duplicating SQL queries across many extensions.
+* The schema for metadata table `SYS.EXA_ALL_VIRTUAL_SCHEMAS` has changed between Exasol v7 and v8. So the code for reading this table requires distinction between the two versions.
+  * Moving this code to the extensions would cause even more code duplication that is hard to maintain.
+  * **Note:** EM will only need to work with Exasol v8, so support for v7 is actually not necessary. However the Docker container for v8 currently does not support running Python and Java UDFs. Until this is fixed we still need v7 for integration testing.
+
+Covers:
 * [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
 
 Needs: impl, utest, itest

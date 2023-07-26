@@ -27,7 +27,7 @@ func NewSqlClient(ctx context.Context, tx *sql.Tx) SimpleSQLClient {
 }
 
 // Execute executes a statement like `CREATE VIRTUAL SCHEMA`.
-/* [impl -> dsn~extension-context-sql-client~1] */
+/* [impl -> dsn~extension-context-sql-client~1]. */
 func (c *exasolSqlClient) Execute(query string, args ...any) (sql.Result, error) {
 	err := validateQuery(query)
 	if err != nil {
@@ -42,7 +42,7 @@ func (c *exasolSqlClient) Execute(query string, args ...any) (sql.Result, error)
 }
 
 // Query runs a query like `SELECT` and returns the result.
-/* [impl -> dsn~extension-context-sql-client~1] */
+/* [impl -> dsn~extension-context-sql-client~1]. */
 func (c *exasolSqlClient) Query(query string, args ...any) (result *QueryResult, errResult error) {
 	err := validateQuery(query)
 	if err != nil {
@@ -124,7 +124,7 @@ type Column struct {
 	TypeName string `json:"typeName"` // Column type
 }
 
-// Row of a database query result
+// Row of a database query result.
 type Row []any
 
 var transactionStatements = []string{"commit", "rollback"}
