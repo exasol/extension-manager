@@ -59,9 +59,19 @@ func (suite *ExasolSqlClientUTestSuite) TestExecuteFails() {
 var forbiddenCommandTests = []struct {
 	statement        string
 	forbiddenCommand string
-}{{"select 1", ""}, {"com mit", ""}, {"roll back", ""},
-	{"commit", "commit"}, {"rollback", "rollback"}, {"COMMIT", "commit"}, {"ROLLBACK", "rollback"},
-	{" commit; ", "commit"}, {"\t\r\n ; commit \t\r\n ; ", "commit"}, {"\t\r\n ; COMMIT \t\r\n ; ", "commit"}}
+}{
+	{"select 1", ""},
+	{"com mit", ""},
+	{"roll back", ""},
+	{"do rollback", ""},
+	{"do commit", ""},
+	{"commit", "commit"},
+	{"rollback", "rollback"},
+	{"COMMIT", "commit"},
+	{"ROLLBACK", "rollback"},
+	{" commit; ", "commit"},
+	{"\t\r\n ; commit \t\r\n ; ", "commit"},
+	{"\t\r\n ; COMMIT \t\r\n ; ", "commit"}}
 
 func (suite *ExasolSqlClientUTestSuite) TestExecuteValidation() {
 	for _, test := range forbiddenCommandTests {
@@ -106,6 +116,14 @@ func (suite *ExasolSqlClientUTestSuite) TestQueryRowFails() {
 	suite.dbMock.ExpectQuery("query").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).AddRow(2, "b").RowError(0, fmt.Errorf("mock"))).RowsWillBeClosed()
 	result, err := client.Query("query")
 	suite.EqualError(err, "error while iterating result: mock")
+	suite.Nil(result)
+}
+
+func (suite *ExasolSqlClientUTestSuite) TestQueryCloseFails() {
+	client := suite.createClient()
+	suite.dbMock.ExpectQuery("query").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).CloseError(fmt.Errorf("mock error"))).RowsWillBeClosed()
+	result, err := client.Query("query")
+	suite.EqualError(err, "error while iterating result: mock error")
 	suite.Nil(result)
 }
 
