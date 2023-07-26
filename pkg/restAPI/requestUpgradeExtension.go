@@ -19,10 +19,13 @@ func UpgradeExtension(apiContext *ApiContext) *openapi.Post {
 		Authentication: authentication,
 		Response: map[string]openapi.MethodResponse{
 			"200": {
-				Description: "OK",
+				Description: "Extension upgraded successfully",
 				Value:       UpgradeExtensionResponse{PreviousVersion: "1.2.3", NewVersion: "1.3.0"}},
+			"304": {
+				Description: "Extension already installed in the latest version",
+				Value:       apiErrors.NewNotFoundErrorF("Latest version 1.3.0 is already installed")},
 			"404": {
-				Description: "Extension not found",
+				Description: "Extension not found or not installed",
 				Value:       apiErrors.NewNotFoundErrorF("Extension not found")},
 		},
 		Path: newPathWithDbQueryParams().
