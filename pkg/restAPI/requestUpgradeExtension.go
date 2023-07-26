@@ -7,6 +7,7 @@ import (
 	"github.com/Nightapes/go-rest/pkg/openapi"
 	"github.com/exasol/extension-manager/pkg/apiErrors"
 	"github.com/go-chi/chi/v5"
+	"github.com/sirupsen/logrus"
 )
 
 /* [impl -> dsn~upgrade-extension~1]. */
@@ -41,9 +42,11 @@ func handleUpgradeExtension(apiContext *ApiContext) dbHandler {
 		extensionId := chi.URLParam(request, "extensionId")
 		result, err := apiContext.Controller.UpgradeExtension(request.Context(), db, extensionId)
 		if err != nil {
+			logrus.Warnf("Upgrading of extension %q failed: %v", extensionId, err)
 			HandleError(request.Context(), writer, err)
 			return
 		}
+		logrus.Infof("Successfully upgraded extension %q from version %s to %s", extensionId, result.PreviousVersion, result.NewVersion)
 		SendJSON(request.Context(), writer, UpgradeExtensionResponse{
 			PreviousVersion: result.PreviousVersion,
 			NewVersion:      result.NewVersion})
