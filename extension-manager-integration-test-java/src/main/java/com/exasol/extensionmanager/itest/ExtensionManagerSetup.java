@@ -182,6 +182,15 @@ public class ExtensionManagerSetup implements AutoCloseable {
         this.cleanupCallbacks.add(runnableStatement("DROP CONNECTION IF EXISTS \"" + name + "\""));
     }
 
+    /**
+     * Delete the file when calling {@link #close()}.
+     * 
+     * @param fileToDelete file to delete at cleanup
+     */
+    private void addFileCleanupQueue(final Path fileToDelete) {
+        this.cleanupCallbacks.add(deleteFileRunnable(fileToDelete));
+    }
+
     private Runnable runnableStatement(final String statement) {
         return () -> {
             try {
@@ -190,6 +199,20 @@ public class ExtensionManagerSetup implements AutoCloseable {
             } catch (final SQLException exception) {
                 throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-23")
                         .message("Failed to execute statement {{sql statement}}: {{error message}}", statement,
+                                exception.getMessage())
+                        .toString(), exception);
+            }
+        };
+    }
+
+    private Runnable deleteFileRunnable(final Path fileToDelete) {
+        return () -> {
+            try {
+                LOGGER.fine(() -> "Deleting file '" + fileToDelete + "'");
+                Files.delete(fileToDelete);
+            } catch (final IOException exception) {
+                throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-31")
+                        .message("Failed to delete file {{path}}: {{error message}}", fileToDelete,
                                 exception.getMessage())
                         .toString(), exception);
             }
@@ -212,6 +235,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
         final HttpRequest request = HttpRequest.newBuilder(url).GET().build();
         try {
             final Path extensionFile = Files.createTempFile(extensionFolder, "ext-", ".js");
+            addFileCleanupQueue(extensionFile);
             LOGGER.info(() -> "Downloading " + url + " to " + extensionFile + "...");
             final HttpResponse<Path> response = httpClient.send(request, BodyHandlers.ofFile(extensionFile));
             final long fileSize = Files.size(extensionFile);
