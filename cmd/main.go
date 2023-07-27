@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 
@@ -19,6 +21,7 @@ func main() {
 	var openAPIOutputPath = flag.String("openAPIOutputPath", "", "Generate the OpenAPI spec at the given path instead of starting the server")
 	flag.Parse()
 	log.SetLevel(log.DebugLevel)
+	log.SetFormatter(&simpleFormatter{})
 	if openAPIOutputPath != nil && *openAPIOutputPath != "" {
 		err := generateOpenAPISpec(*openAPIOutputPath)
 		if err != nil {
@@ -75,4 +78,18 @@ func generateOpenAPIJson() ([]byte, error) {
 		return nil, err
 	}
 	return json, err
+}
+
+type simpleFormatter struct {
+}
+
+func (f *simpleFormatter) Format(entry *log.Entry) ([]byte, error) {
+	b := &bytes.Buffer{}
+	levelText := strings.ToUpper(entry.Level.String())
+	levelText = fmt.Sprintf("%-5s", levelText[0:5])
+	b.WriteString(levelText)
+	b.WriteString(" ")
+	b.WriteString(entry.Message)
+	b.WriteByte('\n')
+	return b.Bytes(), nil
 }
