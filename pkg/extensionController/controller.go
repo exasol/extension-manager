@@ -156,6 +156,12 @@ func (c *controllerImpl) GetAllInstallations(txCtx *transaction.TransactionConte
 		if err != nil {
 			return nil, apiErrors.NewAPIErrorWithCause(fmt.Sprintf("failed to find installations for extension %q", extension.Name), err)
 		} else {
+			log.Debugf("Found %d installations for extension %q", len(installations), extension.Id)
+			if log.IsLevelEnabled(log.DebugLevel) {
+				for _, installation := range installations {
+					log.Debugf("- %q: version %s", installation.Name, installation.Version)
+				}
+			}
 			allInstallations = append(allInstallations, installations...)
 		}
 	}

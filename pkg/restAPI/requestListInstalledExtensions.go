@@ -6,8 +6,6 @@ import (
 
 	"github.com/Nightapes/go-rest/pkg/openapi"
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func ListInstalledExtensions(apiContext *ApiContext) *openapi.Get {
@@ -37,7 +35,6 @@ func handleListInstalledExtensions(apiContext *ApiContext) dbHandler {
 			return
 		}
 		response := createResponse(installations)
-		log.Debugf("Installed extensions: %d", len(response.Installations))
 		SendJSON(request.Context(), writer, response)
 	}
 }
