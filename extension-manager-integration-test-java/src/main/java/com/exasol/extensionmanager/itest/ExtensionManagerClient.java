@@ -1,6 +1,7 @@
 package com.exasol.extensionmanager.itest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -9,6 +10,7 @@ import java.util.logging.Logger;
 
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.function.Executable;
+import org.opentest4j.MultipleFailuresError;
 
 import com.exasol.errorreporting.ExaError;
 import com.exasol.exasoltestsetup.SqlConnectionInfo;
@@ -223,15 +225,33 @@ public class ExtensionManagerClient {
     public void assertRequestFails(final Executable executable, final Matcher<String> messageMatcher,
             final Matcher<Integer> statusMatcher) {
         final ApiException exception = assertThrows(ApiException.class, executable);
+        final String errorMessage = exception.getMessage();
+        final JsonObject error = parseErrorMessageJson(errorMessage);
+        assertAll(() -> assertThat(error.getJsonString("message").getString(), messageMatcher),
+                () -> assertThat(error.getJsonNumber("code").intValue(), statusMatcher));
+    }
+
+    private JsonObject parseErrorMessageJson(final String errorMessage) throws MultipleFailuresError {
         try (Jsonb jsonb = JsonbBuilder.create()) {
-            final JsonObject error = jsonb.fromJson(exception.getMessage(), JsonObject.class);
-            assertAll(() -> assertThat(error.getJsonString("message").getString(), messageMatcher),
-                    () -> assertThat(error.getJsonNumber("code").intValue(), statusMatcher));
-        } catch (final Exception jsonbCloseException) {
+            return jsonb.fromJson(errorMessage, JsonObject.class);
+        } catch (final Exception jsonbException) {
             throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-15")
-                    .message("Failed to close jsonb: {{error message}}.", exception.getMessage()).ticketMitigation()
-                    .toString(), exception);
+                    .message("Failed to parse error message {{error message}} as JSON")
+                    .parameter("error message", errorMessage, "messaged to be parsed as JSON").ticketMitigation()
+                    .toString(), jsonbException);
         }
+    }
+
+    /**
+     * Verify that the given executable throws an {@link ApiException} with a given error message and HTTP status code.
+     * 
+     * @param executable      executable to run
+     * @param expectedMessage expected response error message
+     * @param expectedStatus  expected response status code
+     */
+    public void assertRequestFails(final Executable executable, final String expectedMessage,
+            final int expectedStatus) {
+        this.assertRequestFails(executable, equalTo(expectedMessage), equalTo(expectedStatus));
     }
 
     private ExtensionsResponseExtension getSingleExtension() {
