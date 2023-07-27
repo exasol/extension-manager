@@ -29,7 +29,7 @@ func (suite *ExasolSqlClientUTestSuite) SetupTest() {
 	suite.dbMock = mock
 }
 
-func (suite *ExasolSqlClientUTestSuite) createClient() *ExasolSqlClient {
+func (suite *ExasolSqlClientUTestSuite) createClient() SimpleSQLClient {
 	return NewSqlClient(context.Background(), suite.createMockTransaction())
 }
 
@@ -40,72 +40,108 @@ func (suite *ExasolSqlClientUTestSuite) createMockTransaction() *sql.Tx {
 	return tx
 }
 
-func (suite *ExasolSqlClientUTestSuite) TestExecute_succeeds() {
+/* [utest -> dsn~extension-context-sql-client~1] */
+func (suite *ExasolSqlClientUTestSuite) TestExecuteSucceeds() {
 	client := suite.createClient()
 	suite.dbMock.ExpectExec("select 1").WillReturnResult(sqlmock.NewResult(1, 1))
-	client.Execute("select 1")
+	result, err := client.Execute("select 1")
+	suite.NoError(err)
+	suite.NotNil(result)
 }
 
-func (suite *ExasolSqlClientUTestSuite) TestExecute_fails() {
+func (suite *ExasolSqlClientUTestSuite) TestExecuteFails() {
 	client := suite.createClient()
 	suite.dbMock.ExpectExec("invalid").WillReturnError(fmt.Errorf("expected"))
-	suite.PanicsWithError("error executing statement \"invalid\": expected", func() { client.Execute("invalid") })
+	result, err := client.Execute("invalid")
+	suite.EqualError(err, "error executing statement \"invalid\": expected")
+	suite.Nil(result)
 }
 
 var forbiddenCommandTests = []struct {
 	statement        string
 	forbiddenCommand string
-}{{"select 1", ""}, {"com mit", ""}, {"roll back", ""},
-	{"commit", "commit"}, {"rollback", "rollback"}, {"COMMIT", "commit"}, {"ROLLBACK", "rollback"},
-	{" commit; ", "commit"}, {"\t\r\n ; commit \t\r\n ; ", "commit"}, {"\t\r\n ; COMMIT \t\r\n ; ", "commit"}}
+}{
+	{"select 1", ""},
+	{"com mit", ""},
+	{"roll back", ""},
+	{"do rollback", ""},
+	{"do commit", ""},
+	{"commit", "commit"},
+	{"rollback", "rollback"},
+	{"COMMIT", "commit"},
+	{"ROLLBACK", "rollback"},
+	{" commit; ", "commit"},
+	{"\t\r\n ; commit \t\r\n ; ", "commit"},
+	{"\t\r\n ; COMMIT \t\r\n ; ", "commit"}}
 
-func (suite *ExasolSqlClientUTestSuite) TestExecute_validation() {
+func (suite *ExasolSqlClientUTestSuite) TestExecuteValidation() {
 	for _, test := range forbiddenCommandTests {
 		suite.Run(fmt.Sprintf("running statement %q contains forbidden command %q", test.statement, test.forbiddenCommand), func() {
 			client := suite.createClient()
 			if test.forbiddenCommand != "" {
 				expectedError := fmt.Sprintf("statement %q contains forbidden command %q. Transaction handling is done by extension manager", test.statement, test.forbiddenCommand)
-				suite.PanicsWithError(expectedError, func() { client.Execute(test.statement) })
+				result, err := client.Execute(test.statement)
+				suite.EqualError(err, expectedError)
+				suite.Nil(result)
 			} else {
 				suite.dbMock.ExpectExec(test.statement).WillReturnResult(sqlmock.NewResult(1, 0))
-				client.Execute(test.statement)
+				result, err := client.Execute(test.statement)
+				suite.NoError(err)
+				suite.NotNil(result)
 			}
 		})
 	}
 }
 
-func (suite *ExasolSqlClientUTestSuite) TestQuery_fails() {
+func (suite *ExasolSqlClientUTestSuite) TestQueryFails() {
 	client := suite.createClient()
 	suite.dbMock.ExpectQuery("invalid").WillReturnError(fmt.Errorf("expected")).RowsWillBeClosed()
-	suite.PanicsWithError("error executing statement \"invalid\": expected", func() { client.Query("invalid") })
+	result, err := client.Query("invalid")
+	suite.EqualError(err, "error executing statement \"invalid\": expected")
+	suite.Nil(result)
 }
 
-func (suite *ExasolSqlClientUTestSuite) TestQuery_succeeds() {
+/* [utest -> dsn~extension-context-sql-client~1] */
+func (suite *ExasolSqlClientUTestSuite) TestQuerySucceeds() {
 	client := suite.createClient()
 	suite.dbMock.ExpectQuery("query").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).AddRow(1, "a").AddRow(2, "b")).RowsWillBeClosed()
-	result := client.Query("query")
+	result, err := client.Query("query")
+	suite.NoError(err)
 	suite.NotNil(result)
-	suite.Equal(QueryResult{
+	suite.Equal(&QueryResult{
 		Columns: []Column{{Name: "col1"}, {Name: "col2"}},
 		Rows:    []Row{{int64(1), "a"}, {int64(2), "b"}}}, result)
 }
 
-func (suite *ExasolSqlClientUTestSuite) TestQuery_rowFails() {
+func (suite *ExasolSqlClientUTestSuite) TestQueryRowFails() {
 	client := suite.createClient()
 	suite.dbMock.ExpectQuery("query").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).AddRow(2, "b").RowError(0, fmt.Errorf("mock"))).RowsWillBeClosed()
-	suite.PanicsWithError("error while iterating result: mock", func() { client.Query("query") })
+	result, err := client.Query("query")
+	suite.EqualError(err, "error while iterating result: mock")
+	suite.Nil(result)
 }
 
-func (suite *ExasolSqlClientUTestSuite) TestQuery_validation() {
+func (suite *ExasolSqlClientUTestSuite) TestQueryCloseFails() {
+	client := suite.createClient()
+	suite.dbMock.ExpectQuery("query").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).CloseError(fmt.Errorf("mock error"))).RowsWillBeClosed()
+	result, err := client.Query("query")
+	suite.EqualError(err, "error while iterating result: mock error")
+	suite.Nil(result)
+}
+
+func (suite *ExasolSqlClientUTestSuite) TestQueryValidation() {
 	for _, test := range forbiddenCommandTests {
 		suite.Run(fmt.Sprintf("running statement %q contains forbidden command %q", test.statement, test.forbiddenCommand), func() {
 			client := suite.createClient()
 			if test.forbiddenCommand != "" {
 				expectedError := fmt.Sprintf("statement %q contains forbidden command %q. Transaction handling is done by extension manager", test.statement, test.forbiddenCommand)
-				suite.PanicsWithError(expectedError, func() { client.Query(test.statement) })
+				result, err := client.Query(test.statement)
+				suite.EqualError(err, expectedError)
+				suite.Nil(result)
 			} else {
 				suite.dbMock.ExpectQuery(test.statement).WillReturnRows(sqlmock.NewRows([]string{"col1"})).RowsWillBeClosed()
-				result := client.Query(test.statement)
+				result, err := client.Query(test.statement)
+				suite.NoError(err)
 				suite.NotNil(result)
 			}
 		})

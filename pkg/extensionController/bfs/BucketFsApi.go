@@ -58,6 +58,7 @@ func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB) (files []B
 }
 
 /* [impl -> dsn~resolving-files-in-bucketfs~1]. */
+/* [impl -> dsn~extension-context-bucketfs~1]. */
 func (bfs bucketFsAPIImpl) FindAbsolutePath(ctx context.Context, db *sql.DB, fileName string) (absolutePath string, retErr error) {
 	transaction, err := db.BeginTx(ctx, nil)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/exasol/extension-manager/pkg/apiErrors"
+	"github.com/exasol/extension-manager/pkg/backend"
 	"github.com/exasol/extension-manager/pkg/extensionAPI/context"
 	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
@@ -42,13 +43,13 @@ func (suite *ErrorHandlingExtensionSuite) TestProperties() {
 		suite.extension)
 }
 
-func createMockContextWithClients(sqlClient context.SimpleSQLClient, bucketFsClientMock bfs.BucketFsAPI) *context.ExtensionContext {
+func createMockContextWithClients(sqlClient backend.SimpleSQLClient, bucketFsClientMock bfs.BucketFsAPI) *context.ExtensionContext {
 	txCtx := &transaction.TransactionContext{}
 	return context.CreateContextWithClient("extension_schema", txCtx, sqlClient, bucketFsClientMock)
 }
 
 func createMockContext() *context.ExtensionContext {
-	var sqlClientMock context.SimpleSQLClient = &sqlClientMock{}
+	var sqlClientMock backend.SimpleSQLClient = &backend.SimpleSqlClientMock{}
 	var bucketFsClientMock bfs.BucketFsAPI = &bfs.BucketFsMock{}
 	return createMockContextWithClients(sqlClientMock, bucketFsClientMock)
 }

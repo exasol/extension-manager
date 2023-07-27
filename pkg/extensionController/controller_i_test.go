@@ -184,6 +184,7 @@ func (suite *ControllerITestSuite) TestEnsureSchemaDoesNotFailIfSchemaAlreadyExi
 
 /* [itest -> dsn~validate-parameters~1] */
 /* [itest -> dsn~parameter-definitions~1] */
+/* [itest -> dsn~extension-context-sql-client~1] */
 func (suite *ControllerITestSuite) TestAddInstanceInvalidParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
@@ -216,6 +217,7 @@ func (suite *ControllerITestSuite) TestFindInstances() {
 	suite.Equal([]*extensionAPI.JsExtInstance{{Id: "instId", Name: "instName_ver0.1.0"}}, instances)
 }
 
+/* [itest -> dsn~extension-context-sql-client~1] */
 func (suite *ControllerITestSuite) TestFindInstancesUseSqlQueryResult() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstancesFunc(`const result=context.sqlClient.query("select 1 as c1, 'a' as c2 from dual where 1=?", 1);
