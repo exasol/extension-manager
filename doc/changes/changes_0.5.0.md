@@ -48,6 +48,7 @@ A common scenario for an extension not implementing a required function is when 
 
 * Updated `nl.jqno.equalsverifier:equalsverifier:3.14.3` to `3.15`
 * Updated `org.junit.jupiter:junit-jupiter-api:5.9.3` to `5.10.0`
+* Added `org.junit.jupiter:junit-jupiter-params:5.10.0`
 
 #### Plugin Dependency Updates
 
