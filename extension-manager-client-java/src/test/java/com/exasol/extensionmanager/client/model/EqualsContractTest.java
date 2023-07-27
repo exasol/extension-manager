@@ -11,7 +11,8 @@ class EqualsContractTest {
                 .forClasses(APIError.class, CreateInstanceRequest.class, CreateInstanceResponse.class,
                         ExtensionsResponseExtension.class, ExtensionsResponse.class, ExtensionVersion.class,
                         InstallationsResponse.class, InstallationsResponseInstallation.class, Instance.class,
-                        ListInstancesResponse.class, ParamDefinition.class, ParameterValue.class)
+                        ListInstancesResponse.class, ParamDefinition.class, ParameterValue.class,
+                        UpgradeExtensionResponse.class)
                 .verify();
     }
 }

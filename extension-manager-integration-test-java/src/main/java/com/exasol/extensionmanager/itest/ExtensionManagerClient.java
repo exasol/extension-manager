@@ -145,13 +145,21 @@ public class ExtensionManagerClient {
 
     /**
      * Calls {@link InstallationApi#upgradeExtension(String, String, Integer)}.
+     * 
+     * @return upgrade response
      */
-    public void upgrade() {
-        this.upgrade(getExtension().getId());
+    public UpgradeExtensionResponse upgrade() {
+        return this.upgrade(getExtension().getId());
     }
 
-    private void upgrade(final String extensionId) {
-        this.installationApi.upgradeExtension(extensionId, getDbHost(), getDbPort());
+    /**
+     * Calls {@link InstallationApi#upgradeExtension(String, String, Integer)}.
+     * 
+     * @param extensionId extension id
+     * @return upgrade response
+     */
+    public UpgradeExtensionResponse upgrade(final String extensionId) {
+        return this.installationApi.upgradeExtension(extensionId, getDbHost(), getDbPort());
     }
 
     /**
@@ -162,13 +170,22 @@ public class ExtensionManagerClient {
      */
     public String createInstance(final List<ParameterValue> parameterValues) {
         final Extension extension = getExtension();
-        return createInstance(extension.getId(), extension.getCurrentVersion(), parameterValues).getInstanceName();
+        return createInstance(extension.getId(), extension.getCurrentVersion(), parameterValues);
     }
 
-    private CreateInstanceResponse createInstance(final String extensionId, final String extensionVersion,
+    /**
+     * Calls {@link InstanceApi#createInstance(CreateInstanceRequest, String, Integer, String, String)}.
+     * 
+     * @param extensionId      extension id
+     * @param extensionVersion extension version
+     * @param parameterValues  parameter name
+     * @return name of the new instance
+     */
+    public String createInstance(final String extensionId, final String extensionVersion,
             final List<ParameterValue> parameterValues) {
         final CreateInstanceRequest request = new CreateInstanceRequest().parameterValues(parameterValues);
-        return this.instanceClient.createInstance(request, getDbHost(), getDbPort(), extensionId, extensionVersion);
+        return this.instanceClient.createInstance(request, getDbHost(), getDbPort(), extensionId, extensionVersion)
+                .getInstanceName();
     }
 
     /**

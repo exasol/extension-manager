@@ -31,15 +31,17 @@ public class ExtensionManagerSetup implements AutoCloseable {
     private final List<Runnable> cleanupCallbacks = new ArrayList<>();
     private final ExtensionManagerClient client;
     private final Path extensionFolder;
+    private final HttpClient httpClient;
 
     private ExtensionManagerSetup(final ExtensionManagerProcess extensionManager, final Connection connection,
             final ExasolObjectFactory exasolObjectFactory, final ExtensionManagerClient client,
-            final Path extensionFolder) {
+            final Path extensionFolder, final HttpClient httpClient) {
         this.extensionManager = extensionManager;
         this.connection = connection;
         this.exasolObjectFactory = exasolObjectFactory;
         this.client = client;
         this.extensionFolder = extensionFolder;
+        this.httpClient = httpClient;
     }
 
     /**
@@ -57,7 +59,8 @@ public class ExtensionManagerSetup implements AutoCloseable {
         final ExtensionTestConfig config = ExtensionTestConfig.read();
         final ExtensionManagerProcess extensionManager = startExtensionManager(extensionBuilder, extensionFolder,
                 config);
-        return create(exasolTestSetup, extensionFolder, extensionManager);
+        final HttpClient httpClient = HttpClient.newBuilder().followRedirects(Redirect.NORMAL).build();
+        return create(exasolTestSetup, extensionFolder, extensionManager, httpClient);
     }
 
     private static ExtensionManagerProcess startExtensionManager(final ExtensionBuilder extensionBuilder,
@@ -69,13 +72,14 @@ public class ExtensionManagerSetup implements AutoCloseable {
     }
 
     private static ExtensionManagerSetup create(final ExasolTestSetup exasolTestSetup, final Path extensionFolder,
-            final ExtensionManagerProcess extensionManager) {
+            final ExtensionManagerProcess extensionManager, final HttpClient httpClient) {
         final ExtensionManagerClient client = ExtensionManagerClient.create(extensionManager.getServerBasePath(),
                 exasolTestSetup.getConnectionInfo());
         final Connection connection = createConnection(exasolTestSetup);
         final ExasolObjectFactory exasolObjectFactory = new ExasolObjectFactory(connection,
                 ExasolObjectConfiguration.builder().build());
-        return new ExtensionManagerSetup(extensionManager, connection, exasolObjectFactory, client, extensionFolder);
+        return new ExtensionManagerSetup(extensionManager, connection, exasolObjectFactory, client, extensionFolder,
+                httpClient);
     }
 
     private static Connection createConnection(final ExasolTestSetup exasolTestSetup) {
@@ -197,7 +201,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
     }
 
     /**
-     * Downloads an additional extension (e.g. the previous version of the extension under test).
+     * Downloads an additional extension definition (e.g. the previous version of the extension under test).
      * <p>
      * This will allow installing a previous version of the extension and use it for testing the upgrade process.
      * 
@@ -205,7 +209,6 @@ public class ExtensionManagerSetup implements AutoCloseable {
      * @return the ID of the downloaded extension
      */
     public String fetchExtension(final URI url) {
-        final HttpClient httpClient = HttpClient.newBuilder().followRedirects(Redirect.NORMAL).build();
         final HttpRequest request = HttpRequest.newBuilder(url).GET().build();
         try {
             final Path extensionFile = Files.createTempFile(extensionFolder, "ext-", ".js");
