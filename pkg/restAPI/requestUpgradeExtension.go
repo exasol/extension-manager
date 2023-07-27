@@ -22,7 +22,7 @@ func UpgradeExtension(apiContext *ApiContext) *openapi.Post {
 			"200": {
 				Description: "Extension upgraded successfully",
 				Value:       UpgradeExtensionResponse{PreviousVersion: "1.2.3", NewVersion: "1.3.0"}},
-			"304": {
+			"412": {
 				Description: "Extension already installed in the latest version",
 				Value:       apiErrors.NewNotFoundErrorF("Latest version 1.3.0 is already installed")},
 			"404": {
