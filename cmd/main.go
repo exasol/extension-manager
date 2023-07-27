@@ -86,7 +86,6 @@ type simpleFormatter struct {
 func (f *simpleFormatter) Format(entry *log.Entry) ([]byte, error) {
 	b := &bytes.Buffer{}
 	levelText := strings.ToUpper(entry.Level.String())
-	levelText = fmt.Sprintf("%-5s", levelText[0:5])
 	b.WriteString(levelText)
 	b.WriteString(" ")
 	b.WriteString(entry.Message)
