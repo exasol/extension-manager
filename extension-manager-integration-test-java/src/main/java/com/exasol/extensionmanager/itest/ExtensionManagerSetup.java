@@ -1,6 +1,10 @@
 package com.exasol.extensionmanager.itest;
 
 import java.io.*;
+import java.net.URI;
+import java.net.http.*;
+import java.net.http.HttpClient.Redirect;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.*;
@@ -190,6 +194,36 @@ public class ExtensionManagerSetup implements AutoCloseable {
 
     private Statement createStatement() throws SQLException {
         return this.connection.createStatement();
+    }
+
+    /**
+     * Downloads an additional extension (e.g. the previous version of the extension under test).
+     * <p>
+     * This will allow installing a previous version of the extension and use it for testing the upgrade process.
+     * 
+     * @param url URL of the extension file to download, e.g. from a GitHub release
+     * @return the ID of the downloaded extension
+     */
+    public String fetchExtension(final URI url) {
+        final HttpClient httpClient = HttpClient.newBuilder().followRedirects(Redirect.NORMAL).build();
+        final HttpRequest request = HttpRequest.newBuilder(url).GET().build();
+        try {
+            final Path extensionFile = Files.createTempFile(extensionFolder, "ext-", ".js");
+            LOGGER.info(() -> "Downloading " + url + " to " + extensionFile + "...");
+            final HttpResponse<Path> response = httpClient.send(request, BodyHandlers.ofFile(extensionFile));
+            final long fileSize = Files.size(extensionFile);
+            LOGGER.info(() -> "Got response status " + response.statusCode() + ", file size: " + fileSize + " bytes");
+            return extensionFile.getFileName().toString();
+        } catch (final IOException exception) {
+            throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-29")
+                    .message("Failed to download {{url}} to local folder {{folder}}", url, extensionFolder).toString(),
+                    exception);
+        } catch (final InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(
+                    ExaError.messageBuilder("E-EMIT-30").message("Download of {{url}} was interrupted", url).toString(),
+                    exception);
+        }
     }
 
     /**

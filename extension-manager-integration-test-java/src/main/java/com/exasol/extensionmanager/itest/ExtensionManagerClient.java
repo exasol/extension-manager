@@ -111,7 +111,13 @@ public class ExtensionManagerClient {
         install(getExtension().getCurrentVersion());
     }
 
-    private void install(final String extensionId, final String extensionVersion) {
+    /**
+     * Calls {@link ExtensionApi#installExtension(InstallExtensionRequest, String, Integer, String, String)}.
+     * 
+     * @param extensionId extension id
+     * @param version     extension version
+     */
+    public void install(final String extensionId, final String extensionVersion) {
         this.extensionClient.installExtension(new InstallExtensionRequest(), getDbHost(), getDbPort(), extensionId,
                 extensionVersion);
     }
