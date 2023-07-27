@@ -617,17 +617,17 @@ Needs: impl, utest, itest
 
 ### Extension Context
 
-The extension context allows extension definitions to interact with the database and extension manager e.g. by executing queries.
+The extension context allows extension definitions to interact with the extension manager and the database (e.g. by executing queries).
 
 #### Extension Context SQL Client
 `dsn~extension-context-sql-client~1`
 
-The SQL client in the extension context allows extension definitions to execute statements and run queries against the database and process query results.
+The SQL client in the extension context allows the extension definition to execute statements and run queries against the database and process query results.
 
 Rationale:
 
-* This allows extensions to create necessary database objects like `SCRIPT`s, `CONNECTION`s and `VIRTUAL SCHEMA`s.
-* Extensions can also run arbitrary queries in order to read required information about their installations (e.g. scripts) and instances (e.g. virtual schemas).
+* This allows the extension to create necessary database objects like `SCRIPT`s, `CONNECTION`s and `VIRTUAL SCHEMA`s.
+* The extension can also run arbitrary queries in order to read required information about their installations (e.g. scripts) and instances (e.g. virtual schemas).
 * While EM also provides [access to metadata](#extension-context-metadata) via the context, this information may not be sufficient. Executing arbitrary queries ensures maximum flexibility for extensions.
 
 Covers:
@@ -638,7 +638,7 @@ Needs: impl, utest, itest
 #### Extension Context BucketFS
 `dsn~extension-context-bucketfs~1`
 
-The BucketFS client in the extension context allows extension definitions to interact with BucketFS.
+The BucketFS client in the extension context allows the extension definition to interact with BucketFS.
 
 Covers:
 * [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
@@ -659,11 +659,11 @@ Needs: impl, utest, itest
 #### Extension Context Metadata
 `dsn~extension-context-metadata~1`
 
-The Metadata client in the extension context allows extension definitions to read Metadata (e.g. tables `SYS.EXA_ALL_SCRIPTS` or `SYS.EXA_ALL_VIRTUAL_SCHEMAS`) from the database.
+The Metadata client in the extension context allows the extension definition to read Metadata (e.g. tables `SYS.EXA_ALL_SCRIPTS` or `SYS.EXA_ALL_VIRTUAL_SCHEMAS`) from the database.
 
 Rationale:
 
-* This information is necessary for extensions to find installations (e.g. scripts) and instances (e.g. virtual schemas).
+* This information is necessary for the extension to find its installations (e.g. scripts) and instances (e.g. virtual schemas).
 * As an alternative extensions could also use the [SQL client](#extension-context-sql-client) included in the context, but this would require duplicating SQL queries across many extensions.
 * The schema for metadata table `SYS.EXA_ALL_VIRTUAL_SCHEMAS` has changed between Exasol v7 and v8. So the code for reading this table requires distinction between the two versions.
   * Moving this code to the extensions would cause even more code duplication that is hard to maintain.
