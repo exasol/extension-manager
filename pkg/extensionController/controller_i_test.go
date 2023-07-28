@@ -162,11 +162,14 @@ func (suite *ControllerITestSuite) TestUpgradeSucceeds() {
 
 func (suite *ControllerITestSuite) TestUpgradeGettingScriptReturnsNil() {
 	suite.createExtensionBuilder().
-		WithUpgradeFunc("const script = context.metadata.getScriptByName('script'); return {previousVersion:'0.1.0',newVersion:'script is null = '+(script===null)};").
+		WithUpgradeFunc(`
+const script = context.metadata.getScriptByName('not-existing-script')
+const result = script === null ? "result is null" : "expected null but was " + script
+return {previousVersion:'0.1.0', newVersion: result}`).
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	result, err := suite.createController().UpgradeExtension(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID)
 	suite.NoError(err)
-	suite.Equal(&extensionAPI.JsUpgradeResult{PreviousVersion: "0.1.0", NewVersion: "script is null = true"}, result)
+	suite.Equal("result is null", result.NewVersion)
 }
 
 /* [itest -> const~use-reserved-schema~1] */
