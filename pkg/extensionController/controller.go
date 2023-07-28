@@ -164,7 +164,7 @@ func (c *controllerImpl) GetAllInstallations(txCtx *transaction.TransactionConte
 }
 
 func (*controllerImpl) logInstallations(extension *extensionAPI.JsExtension, installations []*extensionAPI.JsExtInstallation) {
-	if len(installations == 0) {
+	if len(installations) == 0 {
 		log.Debugf("Found no installations for extension %q", extension.Id)
 		return
 	}
