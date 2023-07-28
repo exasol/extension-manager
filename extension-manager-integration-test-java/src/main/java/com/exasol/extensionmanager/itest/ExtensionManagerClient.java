@@ -40,7 +40,7 @@ public class ExtensionManagerClient {
     private final InstanceApi instanceClient;
     private final SqlConnectionInfo dbConnectionInfo;
 
-    private ExtensionManagerClient(final ExtensionApi extensionClient, final InstallationApi installationApi,
+    ExtensionManagerClient(final ExtensionApi extensionClient, final InstallationApi installationApi,
             final InstanceApi instanceClient, final SqlConnectionInfo dbConnectionInfo) {
         this.extensionClient = extensionClient;
         this.installationApi = installationApi;
@@ -254,14 +254,15 @@ public class ExtensionManagerClient {
                 () -> assertThat(error.getJsonNumber("code").intValue(), statusMatcher));
     }
 
-    private JsonObject parseErrorMessageJson(final String errorMessage) throws MultipleFailuresError {
+    JsonObject parseErrorMessageJson(final String errorMessage) throws MultipleFailuresError {
         try (Jsonb jsonb = JsonbBuilder.create()) {
             return jsonb.fromJson(errorMessage, JsonObject.class);
         } catch (final Exception jsonbException) {
-            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-15")
-                    .message("Failed to parse error message {{error message}} as JSON")
-                    .parameter("error message", errorMessage, "messaged to be parsed as JSON").ticketMitigation()
-                    .toString(), jsonbException);
+            throw new IllegalArgumentException(
+                    ExaError.messageBuilder("E-EMIT-15")
+                            .message("Failed to parse error message {{error message}} as JSON")
+                            .parameter("error message", errorMessage, "messaged to be parsed as JSON").toString(),
+                    jsonbException);
         }
     }
 
@@ -277,7 +278,7 @@ public class ExtensionManagerClient {
         this.assertRequestFails(executable, equalTo(expectedMessage), equalTo(expectedStatus));
     }
 
-    private ExtensionsResponseExtension getSingleExtension() {
+    ExtensionsResponseExtension getSingleExtension() {
         final List<ExtensionsResponseExtension> extensions = this.getExtensions();
         if (extensions.size() != 1) {
             throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-28")
@@ -289,7 +290,7 @@ public class ExtensionManagerClient {
         return extensions.get(0);
     }
 
-    private Extension getExtension() {
+    Extension getExtension() {
         final ExtensionsResponseExtension extension = getSingleExtension();
         if (extension.getInstallableVersions().size() != 1) {
             throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-16").message(
@@ -299,7 +300,7 @@ public class ExtensionManagerClient {
         return new Extension(extension.getId(), extension.getInstallableVersions().get(0).getName());
     }
 
-    private static class Extension {
+    static class Extension {
         private final String id;
         private final String currentVersion;
 

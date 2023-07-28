@@ -8,8 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -24,6 +23,8 @@ import com.exasol.extensionmanager.itest.builder.ExtensionBuilder;
 
 class ExtensionManagerClientIT {
 
+    private static final String EXTENSION_ID = "testing-extension.js";
+    private static final String EXTENSION_VERSION = "0.0.0";
     private static ExasolTestSetup exasolTestSetup;
     private static Connection connection;
     private static ExtensionManagerClient client;
@@ -33,11 +34,16 @@ class ExtensionManagerClientIT {
     static void setupExasol() throws SQLException, IOException {
         exasolTestSetup = IntegrationTestCommon.createExasolTestSetup();
         connection = exasolTestSetup.createConnection();
-        Files.writeString(IntegrationTestCommon.CONFIG_FILE,
-                "localExtensionManager = " + Paths.get("..").toAbsolutePath().normalize() + "\n");
+        createTestConfigFile();
         extensionManager = ExtensionManagerSetup.create(exasolTestSetup, ExtensionBuilder.createDefaultNpmBuilder(
-                TESTING_EXTENSION_SOURCE_DIR, TESTING_EXTENSION_SOURCE_DIR.resolve("dist/testing-extension.js")));
+                TESTING_EXTENSION_SOURCE_DIR, TESTING_EXTENSION_SOURCE_DIR.resolve("dist").resolve(EXTENSION_ID)));
         client = extensionManager.client();
+    }
+
+    private static void createTestConfigFile() throws IOException {
+        final Path extensionManagerProjectPath = Paths.get("..").toAbsolutePath().normalize();
+        Files.writeString(IntegrationTestCommon.CONFIG_FILE,
+                "localExtensionManager = " + extensionManagerProjectPath.toString() + "\n");
     }
 
     @AfterAll
@@ -50,26 +56,27 @@ class ExtensionManagerClientIT {
 
     @Test
     void listExtensions() {
-        final ExtensionsResponseExtension expected = new ExtensionsResponseExtension().id("testing-extension.js")
+        final ExtensionsResponseExtension expected = new ExtensionsResponseExtension().id(EXTENSION_ID)
                 .name("Testing Extension").category("testing")
-                .description("Extension for testing EM integration test setup")
-                .addInstallableVersionsItem(new ExtensionVersion().name("0.0.0").latest(true).deprecated(false));
+                .description("Extension for testing EM integration test setup").addInstallableVersionsItem(
+                        new ExtensionVersion().name(EXTENSION_VERSION).latest(true).deprecated(false));
         assertThat(client.getExtensions(), contains(expected));
     }
 
     @Test
     void getInstallations() {
         final InstallationsResponseInstallation expected = new InstallationsResponseInstallation()
-                .name("Testing Extension").version("0.0.0");
+                .name("Testing Extension").version(EXTENSION_VERSION);
         assertThat(client.getInstallations(), contains(expected));
     }
 
     @Test
     void getDetails() {
-        final ExtensionDetailsResponse expected = new ExtensionDetailsResponse().id("testing-extension.js")
-                .version("0.0.0").addParameterDefinitionsItem(new ParamDefinition().id("param1").name("Param 1")
+        final ExtensionDetailsResponse expected = new ExtensionDetailsResponse().id(EXTENSION_ID)
+                .version(EXTENSION_VERSION)
+                .addParameterDefinitionsItem(new ParamDefinition().id("param1").name("Param 1")
                         .definition(Map.of("id", "param1", "name", "Param 1", "type", "string", "required", true)));
-        assertThat(client.getExtensionDetails("0.0.0"), equalTo(expected));
+        assertThat(client.getExtensionDetails(EXTENSION_VERSION), equalTo(expected));
     }
 
     @Test
@@ -85,6 +92,11 @@ class ExtensionManagerClientIT {
     @Test
     void uninstall() {
         assertDoesNotThrow(() -> client.uninstall());
+    }
+
+    @Test
+    void uninstallWithExtensionVersion() {
+        assertDoesNotThrow(() -> client.uninstall(EXTENSION_VERSION));
     }
 
     @Test
@@ -109,8 +121,7 @@ class ExtensionManagerClientIT {
     @Test
     void assertRequestFails() {
         client.assertRequestFails(() -> client.createInstance(emptyList()),
-                equalTo("invalid parameters: Failed to validate parameter 'Param 1': This is a required parameter."),
-                equalTo(400));
+                "invalid parameters: Failed to validate parameter 'Param 1': This is a required parameter.", 400);
     }
 
     @Test

@@ -30,8 +30,13 @@ public class ExtensionManagerSetup implements AutoCloseable {
     private final Connection connection;
     private final List<Runnable> cleanupCallbacks = new ArrayList<>();
     private final ExtensionManagerClient client;
-    private final Path extensionFolder;
     private final HttpClient httpClient;
+    /**
+     * Temp folder containing extension definitions (= JS files).
+     * <p>
+     * This is package private to allow access from tests.
+     */
+    final Path extensionFolder;
 
     private ExtensionManagerSetup(final ExtensionManagerProcess extensionManager, final Connection connection,
             final ExasolObjectFactory exasolObjectFactory, final ExtensionManagerClient client,
@@ -183,11 +188,11 @@ public class ExtensionManagerSetup implements AutoCloseable {
     }
 
     /**
-     * Delete the file when calling {@link #close()}.
+     * Mark the given file for deletion. Calling {@link #close()} will delete it.
      * 
      * @param fileToDelete file to delete at cleanup
      */
-    private void addFileCleanupQueue(final Path fileToDelete) {
+    public void addFileToCleanupQueue(final Path fileToDelete) {
         this.cleanupCallbacks.add(deleteFileRunnable(fileToDelete));
     }
 
@@ -235,7 +240,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
         final HttpRequest request = HttpRequest.newBuilder(url).GET().build();
         try {
             final Path extensionFile = Files.createTempFile(extensionFolder, "ext-", ".js");
-            addFileCleanupQueue(extensionFile);
+            addFileToCleanupQueue(extensionFile);
             LOGGER.info(() -> "Downloading " + url + " to " + extensionFile + "...");
             final HttpResponse<Path> response = httpClient.send(request, BodyHandlers.ofFile(extensionFile));
             final long fileSize = Files.size(extensionFile);
