@@ -31,7 +31,7 @@ class ExtensionManagerClientIT {
     private static ExtensionManagerSetup extensionManager;
 
     @BeforeAll
-    static void setupExasol() throws SQLException, IOException {
+    static void setup() throws SQLException, IOException {
         exasolTestSetup = IntegrationTestCommon.createExasolTestSetup();
         connection = exasolTestSetup.createConnection();
         createTestConfigFile();
@@ -47,7 +47,7 @@ class ExtensionManagerClientIT {
     }
 
     @AfterAll
-    static void tearDownExasol() throws Exception {
+    static void tearDown() throws Exception {
         connection.close();
         extensionManager.close();
         exasolTestSetup.close();
