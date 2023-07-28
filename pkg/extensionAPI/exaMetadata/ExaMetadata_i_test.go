@@ -107,7 +107,7 @@ func (suite *ExaMetadataITestSuite) TestGetScriptByName() {
 
 func (suite *ExaMetadataITestSuite) TestGetScriptByNameNoResult() {
 	result, err := suite.getScriptByName("schema", "script")
-	suite.Nil(err)
+	suite.NoError(err)
 	suite.Nil(result)
 }
 
