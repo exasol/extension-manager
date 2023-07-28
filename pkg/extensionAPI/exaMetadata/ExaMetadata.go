@@ -8,10 +8,10 @@ import (
 
 // ExaMetadataReader allows accessing the Exasol metadata tables.
 type ExaMetadataReader interface {
-	// Reads all metadata tables.
+	// ReadMetadataTables reads all metadata tables.
 	ReadMetadataTables(tx *sql.Tx, schemaName string) (*ExaMetadata, error)
 
-	// Get a row from the SYS.EXA_ALL_SCRIPTS table for the given schema and script name.
+	// GetScriptByName gets a row from the SYS.EXA_ALL_SCRIPTS table for the given schema and script name.
 	//
 	// Returns `(nil, nil)` when no script exists with the given name.
 	GetScriptByName(tx *sql.Tx, schemaName, scriptName string) (*ExaScriptRow, error)

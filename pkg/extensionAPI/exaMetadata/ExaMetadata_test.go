@@ -267,6 +267,19 @@ func (suite *ExaMetadataUTestSuite) TestGetScriptByName() {
 	suite.Equal(&ExaScriptRow{Schema: "schema1", Name: "script1", Type: "type1", InputType: "input_type1", ResultType: "result_type1", Text: "text1", Comment: "comment1"}, result)
 }
 
+func (suite *ExaMetadataUTestSuite) TestGetScriptByNameIgnoresSecondLine() {
+	tx := suite.beginTransaction()
+	suite.dbMock.ExpectQuery("(?m)SELECT .*FROM SYS.EXA_ALL_SCRIPTS .*WHERE SCRIPT_SCHEMA=\\? AND SCRIPT_NAME=\\?").WithArgs(SCHEMA_NAME, "script").
+		WillReturnRows(sqlmock.
+			NewRows([]string{"SCRIPT_SCHEMA", "SCRIPT_NAME", "SCRIPT_TYPE", "SCRIPT_INPUT_TYPE", "SCRIPT_RESULT_TYPE", "SCRIPT_TEXT", "SCRIPT_COMMENT"}).
+			AddRow("schema1", "script1", "type1", "input_type1", "result_type1", "text1", "comment1").
+			AddRow("ignored-schema1", "ignored-script1", "ignored-type1", "ignored-input_type1", "ignored-result_type1", "ignored-text1", "ignored-comment1")).
+		RowsWillBeClosed()
+	result, err := CreateExaMetaDataReader().GetScriptByName(tx, SCHEMA_NAME, "script")
+	suite.NoError(err)
+	suite.Equal(&ExaScriptRow{Schema: "schema1", Name: "script1", Type: "type1", InputType: "input_type1", ResultType: "result_type1", Text: "text1", Comment: "comment1"}, result)
+}
+
 func (suite *ExaMetadataUTestSuite) TestGetScriptByNameQueryFails() {
 	tx := suite.beginTransaction()
 	suite.dbMock.ExpectQuery("(?m)SELECT .*FROM SYS.EXA_ALL_SCRIPTS .*WHERE SCRIPT_SCHEMA=\\? AND SCRIPT_NAME=\\?").WithArgs(SCHEMA_NAME, "script").

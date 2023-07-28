@@ -13,7 +13,7 @@ type MetadataContext interface {
 	//
 	// Returns `nil` when no script exists with the given name.
 	// The JS runtime will convert `nil` to `null` in JavaScript code, so extensions can
-	// check if a script was found by comparing the result to `null`.
+	// check if a script was found by testing the result with `=== null`.
 	GetScriptByName(name string) *exaMetadata.ExaScriptRow
 }
 

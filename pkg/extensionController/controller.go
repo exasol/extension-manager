@@ -156,16 +156,24 @@ func (c *controllerImpl) GetAllInstallations(txCtx *transaction.TransactionConte
 		if err != nil {
 			return nil, apiErrors.NewAPIErrorWithCause(fmt.Sprintf("failed to find installations for extension %q", extension.Name), err)
 		} else {
-			log.Debugf("Found %d installations for extension %q", len(installations), extension.Id)
-			if log.IsLevelEnabled(log.DebugLevel) {
-				for _, installation := range installations {
-					log.Debugf("- %q: version %s", installation.Name, installation.Version)
-				}
-			}
+			c.logInstallations(extension, installations)
 			allInstallations = append(allInstallations, installations...)
 		}
 	}
 	return allInstallations, nil
+}
+
+func (*controllerImpl) logInstallations(extension *extensionAPI.JsExtension, installations []*extensionAPI.JsExtInstallation) {
+	if len(installations == 0) {
+		log.Debugf("Found no installations for extension %q", extension.Id)
+		return
+	}
+	log.Debugf("Found %d installations for extension %q", len(installations), extension.Id)
+	if log.IsLevelEnabled(log.DebugLevel) {
+		for _, installation := range installations {
+			log.Debugf("- %q: version %s", installation.Name, installation.Version)
+		}
+	}
 }
 
 func (c *controllerImpl) GetParameterDefinitions(txCtx *transaction.TransactionContext, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
