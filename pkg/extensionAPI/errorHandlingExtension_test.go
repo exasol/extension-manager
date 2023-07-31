@@ -43,15 +43,18 @@ func (suite *ErrorHandlingExtensionSuite) TestProperties() {
 		suite.extension)
 }
 
-func createMockContextWithClients(sqlClient backend.SimpleSQLClient, bucketFsClientMock bfs.BucketFsAPI) *context.ExtensionContext {
+const EXTENSION_SCHEMA = "extension_schema"
+
+func createMockContextWithClients(sqlClient backend.SimpleSQLClient, bucketFsClient bfs.BucketFsAPI, metadataReader exaMetadata.ExaMetadataReader) *context.ExtensionContext {
 	txCtx := &transaction.TransactionContext{}
-	return context.CreateContextWithClient("extension_schema", txCtx, sqlClient, bucketFsClientMock)
+	return context.CreateContextWithClient(EXTENSION_SCHEMA, txCtx, sqlClient, bucketFsClient, metadataReader)
 }
 
 func createMockContext() *context.ExtensionContext {
 	var sqlClientMock backend.SimpleSQLClient = &backend.SimpleSqlClientMock{}
 	var bucketFsClientMock bfs.BucketFsAPI = &bfs.BucketFsMock{}
-	return createMockContextWithClients(sqlClientMock, bucketFsClientMock)
+	var metadataReader exaMetadata.ExaMetadataReader = exaMetadata.CreateExaMetaDataReaderMock(EXTENSION_SCHEMA)
+	return createMockContextWithClients(sqlClientMock, bucketFsClientMock, metadataReader)
 }
 
 // FindInstallations

@@ -56,7 +56,7 @@ func (suite *ControllerITestSuite) TestGetAllExtensions() {
 }
 
 func (suite *ControllerITestSuite) writeDefaultExtension() {
-	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	suite.createExtensionBuilder().
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "my-extension.1.2.3.jar", FileSize: 3}).
 		WithFindInstallationsFunc(`
 		return metadata.allScripts.rows.map(row => {
@@ -67,7 +67,7 @@ func (suite *ControllerITestSuite) writeDefaultExtension() {
 }
 
 func (suite *ControllerITestSuite) TestGetAllExtensionsWithMissingJar() {
-	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	suite.createExtensionBuilder().
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "missing-jar.jar", FileSize: 3}).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
@@ -78,7 +78,7 @@ func (suite *ControllerITestSuite) TestGetAllExtensionsWithMissingJar() {
 
 func (suite *ControllerITestSuite) GetInstalledExtensionsFailsWithGenericError() {
 	const jarName = "my-failing-extension-1.2.3.jar"
-	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	suite.createExtensionBuilder().
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: jarName, FileSize: 3}).
 		WithFindInstallationsFunc("throw Error(`mock error from js`)").
 		Build().
@@ -91,7 +91,7 @@ func (suite *ControllerITestSuite) GetInstalledExtensionsFailsWithGenericError()
 
 func (suite *ControllerITestSuite) GetInstalledExtensionsFailsWithApiError() {
 	const jarName = "my-failing-extension-1.2.3.jar"
-	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	suite.createExtensionBuilder().
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: jarName, FileSize: 3}).
 		WithFindInstallationsFunc("throw new ApiError(400, `mock error from js`)").
 		Build().
@@ -160,6 +160,18 @@ func (suite *ControllerITestSuite) TestUpgradeSucceeds() {
 	suite.Equal(&extensionAPI.JsUpgradeResult{PreviousVersion: "0.1.0", NewVersion: "0.2.0"}, result)
 }
 
+func (suite *ControllerITestSuite) TestUpgradeGettingScriptReturnsNil() {
+	suite.createExtensionBuilder().
+		WithUpgradeFunc(`
+const script = context.metadata.getScriptByName('not-existing-script')
+const result = script === null ? "result is null" : "expected null but was " + script
+return {previousVersion:'0.1.0', newVersion: result}`).
+		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	result, err := suite.createController().UpgradeExtension(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID)
+	suite.NoError(err)
+	suite.Equal("result is null", result.NewVersion)
+}
+
 /* [itest -> const~use-reserved-schema~1] */
 func (suite *ControllerITestSuite) TestEnsureSchemaExistsCreatesSchemaIfItDoesNotExist() {
 	suite.writeDefaultExtension()
@@ -186,7 +198,7 @@ func (suite *ControllerITestSuite) TestEnsureSchemaDoesNotFailIfSchemaAlreadyExi
 /* [itest -> dsn~parameter-definitions~1] */
 /* [itest -> dsn~extension-context-sql-client~1] */
 func (suite *ControllerITestSuite) TestAddInstanceInvalidParameters() {
-	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	suite.createExtensionBuilder().
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
 		WithAddInstanceFunc("context.sqlClient.execute('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string", required: true}]`).
@@ -198,7 +210,7 @@ func (suite *ControllerITestSuite) TestAddInstanceInvalidParameters() {
 }
 
 func (suite *ControllerITestSuite) TestAddInstanceValidParameters() {
-	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	suite.createExtensionBuilder().
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
 		WithAddInstanceFunc("context.sqlClient.execute('select 1'); return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
@@ -209,7 +221,7 @@ func (suite *ControllerITestSuite) TestAddInstanceValidParameters() {
 }
 
 func (suite *ControllerITestSuite) TestFindInstances() {
-	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	suite.createExtensionBuilder().
 		WithFindInstancesFunc("context.sqlClient.execute('select 1'); return [{id: 'instId', name: 'instName_ver'+version}]").
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	instances, err := suite.createController().FindInstances(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0")
@@ -219,7 +231,7 @@ func (suite *ControllerITestSuite) TestFindInstances() {
 
 /* [itest -> dsn~extension-context-sql-client~1] */
 func (suite *ControllerITestSuite) TestFindInstancesUseSqlQueryResult() {
-	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	suite.createExtensionBuilder().
 		WithFindInstancesFunc(`const result=context.sqlClient.query("select 1 as c1, 'a' as c2 from dual where 1=?", 1);
 			const col1 = result.columns[0];
 			const col2 = result.columns[1];
@@ -232,7 +244,7 @@ func (suite *ControllerITestSuite) TestFindInstancesUseSqlQueryResult() {
 }
 
 func (suite *ControllerITestSuite) TestDeleteInstancesFailsWithInvalidQuery() {
-	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	suite.createExtensionBuilder().
 		WithDeleteInstanceFunc("context.sqlClient.execute('drop instance')").
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	err := suite.createController().DeleteInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "extVersion", "instId")
@@ -240,7 +252,7 @@ func (suite *ControllerITestSuite) TestDeleteInstancesFailsWithInvalidQuery() {
 }
 
 func (suite *ControllerITestSuite) TestDeleteInstancesSucceeds() {
-	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+	suite.createExtensionBuilder().
 		WithDeleteInstanceFunc("context.sqlClient.execute('select 1')").
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	err := suite.createController().DeleteInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "extVersion", "instId")
@@ -290,4 +302,8 @@ func (suite *ControllerITestSuite) createControllerWithSchema(schema string) Tra
 
 func (suite *ControllerITestSuite) createController() TransactionController {
 	return suite.createControllerWithSchema(EXTENSION_SCHEMA)
+}
+
+func (suite *ControllerITestSuite) createExtensionBuilder() *integrationTesting.TestExtensionBuilder {
+	return integrationTesting.CreateTestExtensionBuilder(suite.T())
 }

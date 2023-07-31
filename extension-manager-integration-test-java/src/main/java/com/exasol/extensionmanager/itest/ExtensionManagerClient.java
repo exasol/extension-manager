@@ -1,6 +1,7 @@
 package com.exasol.extensionmanager.itest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -9,6 +10,7 @@ import java.util.logging.Logger;
 
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.function.Executable;
+import org.opentest4j.MultipleFailuresError;
 
 import com.exasol.errorreporting.ExaError;
 import com.exasol.exasoltestsetup.SqlConnectionInfo;
@@ -38,7 +40,7 @@ public class ExtensionManagerClient {
     private final InstanceApi instanceClient;
     private final SqlConnectionInfo dbConnectionInfo;
 
-    private ExtensionManagerClient(final ExtensionApi extensionClient, final InstallationApi installationApi,
+    ExtensionManagerClient(final ExtensionApi extensionClient, final InstallationApi installationApi,
             final InstanceApi instanceClient, final SqlConnectionInfo dbConnectionInfo) {
         this.extensionClient = extensionClient;
         this.installationApi = installationApi;
@@ -109,7 +111,13 @@ public class ExtensionManagerClient {
         install(getExtension().getCurrentVersion());
     }
 
-    private void install(final String extensionId, final String extensionVersion) {
+    /**
+     * Calls {@link ExtensionApi#installExtension(InstallExtensionRequest, String, Integer, String, String)}.
+     * 
+     * @param extensionId      extension id
+     * @param extensionVersion extension version
+     */
+    public void install(final String extensionId, final String extensionVersion) {
         this.extensionClient.installExtension(new InstallExtensionRequest(), getDbHost(), getDbPort(), extensionId,
                 extensionVersion);
     }
@@ -137,13 +145,21 @@ public class ExtensionManagerClient {
 
     /**
      * Calls {@link InstallationApi#upgradeExtension(String, String, Integer)}.
+     * 
+     * @return upgrade response
      */
-    public void upgrade() {
-        this.upgrade(getExtension().getId());
+    public UpgradeExtensionResponse upgrade() {
+        return this.upgrade(getExtension().getId());
     }
 
-    private void upgrade(final String extensionId) {
-        this.installationApi.upgradeExtension(extensionId, getDbHost(), getDbPort());
+    /**
+     * Calls {@link InstallationApi#upgradeExtension(String, String, Integer)}.
+     * 
+     * @param extensionId extension id
+     * @return upgrade response
+     */
+    public UpgradeExtensionResponse upgrade(final String extensionId) {
+        return this.installationApi.upgradeExtension(extensionId, getDbHost(), getDbPort());
     }
 
     /**
@@ -154,13 +170,22 @@ public class ExtensionManagerClient {
      */
     public String createInstance(final List<ParameterValue> parameterValues) {
         final Extension extension = getExtension();
-        return createInstance(extension.getId(), extension.getCurrentVersion(), parameterValues).getInstanceName();
+        return createInstance(extension.getId(), extension.getCurrentVersion(), parameterValues);
     }
 
-    private CreateInstanceResponse createInstance(final String extensionId, final String extensionVersion,
+    /**
+     * Calls {@link InstanceApi#createInstance(CreateInstanceRequest, String, Integer, String, String)}.
+     * 
+     * @param extensionId      extension id
+     * @param extensionVersion extension version
+     * @param parameterValues  parameter name
+     * @return name of the new instance
+     */
+    public String createInstance(final String extensionId, final String extensionVersion,
             final List<ParameterValue> parameterValues) {
         final CreateInstanceRequest request = new CreateInstanceRequest().parameterValues(parameterValues);
-        return this.instanceClient.createInstance(request, getDbHost(), getDbPort(), extensionId, extensionVersion);
+        return this.instanceClient.createInstance(request, getDbHost(), getDbPort(), extensionId, extensionVersion)
+                .getInstanceName();
     }
 
     /**
@@ -223,18 +248,37 @@ public class ExtensionManagerClient {
     public void assertRequestFails(final Executable executable, final Matcher<String> messageMatcher,
             final Matcher<Integer> statusMatcher) {
         final ApiException exception = assertThrows(ApiException.class, executable);
+        final String errorMessage = exception.getMessage();
+        final JsonObject error = parseErrorMessageJson(errorMessage);
+        assertAll(() -> assertThat(error.getJsonString("message").getString(), messageMatcher),
+                () -> assertThat(error.getJsonNumber("code").intValue(), statusMatcher));
+    }
+
+    JsonObject parseErrorMessageJson(final String errorMessage) throws MultipleFailuresError {
         try (Jsonb jsonb = JsonbBuilder.create()) {
-            final JsonObject error = jsonb.fromJson(exception.getMessage(), JsonObject.class);
-            assertAll(() -> assertThat(error.getJsonString("message").getString(), messageMatcher),
-                    () -> assertThat(error.getJsonNumber("code").intValue(), statusMatcher));
-        } catch (final Exception jsonbCloseException) {
-            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-15")
-                    .message("Failed to close jsonb: {{error message}}.", exception.getMessage()).ticketMitigation()
-                    .toString(), exception);
+            return jsonb.fromJson(errorMessage, JsonObject.class);
+        } catch (final Exception jsonbException) {
+            throw new IllegalArgumentException(
+                    ExaError.messageBuilder("E-EMIT-15")
+                            .message("Failed to parse error message {{error message}} as JSON")
+                            .parameter("error message", errorMessage, "messaged to be parsed as JSON").toString(),
+                    jsonbException);
         }
     }
 
-    private ExtensionsResponseExtension getSingleExtension() {
+    /**
+     * Verify that the given executable throws an {@link ApiException} with a given error message and HTTP status code.
+     * 
+     * @param executable      executable to run
+     * @param expectedMessage expected response error message
+     * @param expectedStatus  expected response status code
+     */
+    public void assertRequestFails(final Executable executable, final String expectedMessage,
+            final int expectedStatus) {
+        this.assertRequestFails(executable, equalTo(expectedMessage), equalTo(expectedStatus));
+    }
+
+    ExtensionsResponseExtension getSingleExtension() {
         final List<ExtensionsResponseExtension> extensions = this.getExtensions();
         if (extensions.size() != 1) {
             throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-28")
@@ -246,7 +290,7 @@ public class ExtensionManagerClient {
         return extensions.get(0);
     }
 
-    private Extension getExtension() {
+    Extension getExtension() {
         final ExtensionsResponseExtension extension = getSingleExtension();
         if (extension.getInstallableVersions().size() != 1) {
             throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-16").message(
@@ -256,7 +300,7 @@ public class ExtensionManagerClient {
         return new Extension(extension.getId(), extension.getInstallableVersions().get(0).getName());
     }
 
-    private static class Extension {
+    static class Extension {
         private final String id;
         private final String currentVersion;
 

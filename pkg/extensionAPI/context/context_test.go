@@ -8,6 +8,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/exasol/extension-manager/pkg/backend"
+	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/transaction"
 	"github.com/stretchr/testify/suite"
@@ -15,14 +16,17 @@ import (
 
 type ContextSuite struct {
 	suite.Suite
-	db           *sql.DB
-	dbMock       sqlmock.Sqlmock
-	bucketFSMock *bfs.BucketFsMock
+	db                 *sql.DB
+	dbMock             sqlmock.Sqlmock
+	bucketFSMock       *bfs.BucketFsMock
+	metadataReaderMock *exaMetadata.ExaMetaDataReaderMock
 }
 
 func TestContextSuite(t *testing.T) {
 	suite.Run(t, new(ContextSuite))
 }
+
+const EXTENSION_SCHEMA = "EXT_SCHEMA"
 
 func (suite *ContextSuite) SetupTest() {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherRegexp))
@@ -31,10 +35,13 @@ func (suite *ContextSuite) SetupTest() {
 	suite.dbMock = mock
 	suite.dbMock.MatchExpectationsInOrder(true)
 	suite.bucketFSMock = &bfs.BucketFsMock{}
+	suite.metadataReaderMock = exaMetadata.CreateExaMetaDataReaderMock(EXTENSION_SCHEMA)
 }
 
 func (suite *ContextSuite) AfterTest(suiteName, testName string) {
 	suite.NoError(suite.dbMock.ExpectationsWereMet())
+	suite.bucketFSMock.AssertExpectations(suite.T())
+	suite.metadataReaderMock.AssertExpectations(suite.T())
 }
 
 func (suite *ContextSuite) TestCreate() {
@@ -95,6 +102,27 @@ func (suite *ContextSuite) TestBucketFsResolvePathError() {
 	})
 }
 
+/* [utest -> dsn~extension-context-metadata~1] */
+func (suite *ContextSuite) TestMetadataGetScriptByName() {
+	ctx := suite.createContextWithClients()
+	suite.metadataReaderMock.SimulateGetScriptByNameScriptText("script", "scriptText")
+	suite.Equal(&exaMetadata.ExaScriptRow{Schema: "?", Name: "script", Type: "", InputType: "", ResultType: "", Text: "scriptText", Comment: ""}, ctx.Metadata.GetScriptByName("script"))
+}
+
+func (suite *ContextSuite) TestMetadataGetScriptByNameNoScriptFound() {
+	ctx := suite.createContextWithClients()
+	suite.metadataReaderMock.SimulateGetScriptByName("script", nil)
+	suite.Nil(ctx.Metadata.GetScriptByName("script"))
+}
+
+func (suite *ContextSuite) TestMetadataGetScriptByNameFails() {
+	ctx := suite.createContextWithClients()
+	suite.metadataReaderMock.SimulateGetScriptByNameFails("script", fmt.Errorf("mock error"))
+	suite.PanicsWithError(`failed to find script "EXT_SCHEMA"."script". Caused by: mock error`, func() {
+		ctx.Metadata.GetScriptByName("script")
+	})
+}
+
 func (suite *ContextSuite) createContext() *ExtensionContext {
 	suite.dbMock.ExpectBegin()
 	txCtx, err := transaction.BeginTransaction(context.Background(), suite.db)
@@ -106,5 +134,5 @@ func (suite *ContextSuite) createContextWithClients() *ExtensionContext {
 	suite.dbMock.ExpectBegin()
 	txCtx, err := transaction.BeginTransaction(context.Background(), suite.db)
 	suite.NoError(err)
-	return CreateContextWithClient("EXT_SCHEMA", txCtx, nil, suite.bucketFSMock)
+	return CreateContextWithClient("EXT_SCHEMA", txCtx, nil, suite.bucketFSMock, suite.metadataReaderMock)
 }

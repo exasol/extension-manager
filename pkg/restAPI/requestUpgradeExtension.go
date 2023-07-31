@@ -7,6 +7,7 @@ import (
 	"github.com/Nightapes/go-rest/pkg/openapi"
 	"github.com/exasol/extension-manager/pkg/apiErrors"
 	"github.com/go-chi/chi/v5"
+	"github.com/sirupsen/logrus"
 )
 
 /* [impl -> dsn~upgrade-extension~1]. */
@@ -19,10 +20,13 @@ func UpgradeExtension(apiContext *ApiContext) *openapi.Post {
 		Authentication: authentication,
 		Response: map[string]openapi.MethodResponse{
 			"200": {
-				Description: "OK",
+				Description: "Extension upgraded successfully",
 				Value:       UpgradeExtensionResponse{PreviousVersion: "1.2.3", NewVersion: "1.3.0"}},
+			"412": {
+				Description: "Extension already installed in the latest version",
+				Value:       apiErrors.NewNotFoundErrorF("Latest version 1.3.0 is already installed")},
 			"404": {
-				Description: "Extension not found",
+				Description: "Extension not found or not installed",
 				Value:       apiErrors.NewNotFoundErrorF("Extension not found")},
 		},
 		Path: newPathWithDbQueryParams().
@@ -38,9 +42,11 @@ func handleUpgradeExtension(apiContext *ApiContext) dbHandler {
 		extensionId := chi.URLParam(request, "extensionId")
 		result, err := apiContext.Controller.UpgradeExtension(request.Context(), db, extensionId)
 		if err != nil {
+			logrus.Warnf("Upgrading of extension %q failed: %v", extensionId, err)
 			HandleError(request.Context(), writer, err)
 			return
 		}
+		logrus.Infof("Successfully upgraded extension %q from version %s to %s", extensionId, result.PreviousVersion, result.NewVersion)
 		SendJSON(request.Context(), writer, UpgradeExtensionResponse{
 			PreviousVersion: result.PreviousVersion,
 			NewVersion:      result.NewVersion})

@@ -754,3 +754,15 @@ TypeScript adds a bit of complexity at build time for transpiling TypeScript to 
 ## Quality Scenarios
 
 ## Risks
+
+### Multiple Versions of the Same Extension Definition
+
+When multiple versions of the same extension definition (i.e. JavaScript files) are present in the extension registry, EM will query all of them when listing installations. For each version EM will find the same installations (e.g. adapter script). In result EM might return multiple installations where only one is present.
+
+#### Mitigation
+
+A possible mitigation could be that EM filters the registry and for each extension definition keeps only the latest version.
+
+#### Decision
+
+We accept the risk for now and ensure that the registry only contains a single version of each extension definition.

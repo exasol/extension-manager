@@ -8,7 +8,6 @@
     <description>Java Client for the Extension Manager</description>
     <url>https://github.com/exasol/extension-manager/</url>
     <properties>
-        <junit.version>5.9.0</junit.version>
         <openapi.spec.path>${project.basedir}/target/extension-manager-swagger.json</openapi.spec.path>
         <!-- ProjectKeeper already included in root project -->
         <project-keeper.skip>true</project-keeper.skip>
@@ -80,7 +79,13 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.10.0</version>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

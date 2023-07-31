@@ -48,8 +48,8 @@ func SendJSONWithStatus(ctx context.Context, status int, writer http.ResponseWri
 		if encodeErr != nil {
 			logger.Warnf("Could not send json: %s", encodeErr.Error())
 		}
-	} else {
-		logger.Warnf("No data")
+	} else if status != http.StatusNoContent {
+		logger.Warnf("No response data for status %d", status)
 	}
 }
 

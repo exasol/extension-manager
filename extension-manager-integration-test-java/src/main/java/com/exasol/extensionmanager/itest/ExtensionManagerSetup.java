@@ -1,6 +1,10 @@
 package com.exasol.extensionmanager.itest;
 
 import java.io.*;
+import java.net.URI;
+import java.net.http.*;
+import java.net.http.HttpClient.Redirect;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.*;
@@ -26,16 +30,23 @@ public class ExtensionManagerSetup implements AutoCloseable {
     private final Connection connection;
     private final List<Runnable> cleanupCallbacks = new ArrayList<>();
     private final ExtensionManagerClient client;
-    private final Path extensionFolder;
+    private final HttpClient httpClient;
+    /**
+     * Temp folder containing extension definitions (= JS files).
+     * <p>
+     * This is package private to allow access from tests.
+     */
+    final Path extensionFolder;
 
     private ExtensionManagerSetup(final ExtensionManagerProcess extensionManager, final Connection connection,
             final ExasolObjectFactory exasolObjectFactory, final ExtensionManagerClient client,
-            final Path extensionFolder) {
+            final Path extensionFolder, final HttpClient httpClient) {
         this.extensionManager = extensionManager;
         this.connection = connection;
         this.exasolObjectFactory = exasolObjectFactory;
         this.client = client;
         this.extensionFolder = extensionFolder;
+        this.httpClient = httpClient;
     }
 
     /**
@@ -53,7 +64,8 @@ public class ExtensionManagerSetup implements AutoCloseable {
         final ExtensionTestConfig config = ExtensionTestConfig.read();
         final ExtensionManagerProcess extensionManager = startExtensionManager(extensionBuilder, extensionFolder,
                 config);
-        return create(exasolTestSetup, extensionFolder, extensionManager);
+        final HttpClient httpClient = HttpClient.newBuilder().followRedirects(Redirect.NORMAL).build();
+        return create(exasolTestSetup, extensionFolder, extensionManager, httpClient);
     }
 
     private static ExtensionManagerProcess startExtensionManager(final ExtensionBuilder extensionBuilder,
@@ -65,13 +77,14 @@ public class ExtensionManagerSetup implements AutoCloseable {
     }
 
     private static ExtensionManagerSetup create(final ExasolTestSetup exasolTestSetup, final Path extensionFolder,
-            final ExtensionManagerProcess extensionManager) {
+            final ExtensionManagerProcess extensionManager, final HttpClient httpClient) {
         final ExtensionManagerClient client = ExtensionManagerClient.create(extensionManager.getServerBasePath(),
                 exasolTestSetup.getConnectionInfo());
         final Connection connection = createConnection(exasolTestSetup);
         final ExasolObjectFactory exasolObjectFactory = new ExasolObjectFactory(connection,
                 ExasolObjectConfiguration.builder().build());
-        return new ExtensionManagerSetup(extensionManager, connection, exasolObjectFactory, client, extensionFolder);
+        return new ExtensionManagerSetup(extensionManager, connection, exasolObjectFactory, client, extensionFolder,
+                httpClient);
     }
 
     private static Connection createConnection(final ExasolTestSetup exasolTestSetup) {
@@ -174,6 +187,15 @@ public class ExtensionManagerSetup implements AutoCloseable {
         this.cleanupCallbacks.add(runnableStatement("DROP CONNECTION IF EXISTS \"" + name + "\""));
     }
 
+    /**
+     * Mark the given file for deletion. Calling {@link #close()} will delete it.
+     * 
+     * @param fileToDelete file to delete at cleanup
+     */
+    public void addFileToCleanupQueue(final Path fileToDelete) {
+        this.cleanupCallbacks.add(deleteFileRunnable(fileToDelete));
+    }
+
     private Runnable runnableStatement(final String statement) {
         return () -> {
             try {
@@ -188,8 +210,52 @@ public class ExtensionManagerSetup implements AutoCloseable {
         };
     }
 
+    private Runnable deleteFileRunnable(final Path fileToDelete) {
+        return () -> {
+            try {
+                LOGGER.fine(() -> "Deleting file '" + fileToDelete + "'");
+                Files.delete(fileToDelete);
+            } catch (final IOException exception) {
+                throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-31")
+                        .message("Failed to delete file {{path}}: {{error message}}", fileToDelete,
+                                exception.getMessage())
+                        .toString(), exception);
+            }
+        };
+    }
+
     private Statement createStatement() throws SQLException {
         return this.connection.createStatement();
+    }
+
+    /**
+     * Downloads an additional extension definition (e.g. the previous version of the extension under test).
+     * <p>
+     * This will allow installing a previous version of the extension and use it for testing the upgrade process.
+     * 
+     * @param url URL of the extension file to download, e.g. from a GitHub release
+     * @return the ID of the downloaded extension
+     */
+    public String fetchExtension(final URI url) {
+        final HttpRequest request = HttpRequest.newBuilder(url).GET().build();
+        try {
+            final Path extensionFile = Files.createTempFile(extensionFolder, "ext-", ".js");
+            addFileToCleanupQueue(extensionFile);
+            LOGGER.info(() -> "Downloading " + url + " to " + extensionFile + "...");
+            final HttpResponse<Path> response = httpClient.send(request, BodyHandlers.ofFile(extensionFile));
+            final long fileSize = Files.size(extensionFile);
+            LOGGER.info(() -> "Got response status " + response.statusCode() + ", file size: " + fileSize + " bytes");
+            return extensionFile.getFileName().toString();
+        } catch (final IOException exception) {
+            throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-29")
+                    .message("Failed to download {{url}} to local folder {{folder}}", url, extensionFolder).toString(),
+                    exception);
+        } catch (final InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(
+                    ExaError.messageBuilder("E-EMIT-30").message("Download of {{url}} was interrupted", url).toString(),
+                    exception);
+        }
     }
 
     /**
