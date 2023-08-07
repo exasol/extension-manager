@@ -1,10 +1,6 @@
 package com.exasol.extensionmanager.itest;
 
 import java.io.*;
-import java.net.URI;
-import java.net.http.*;
-import java.net.http.HttpClient.Redirect;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.*;
@@ -30,7 +26,8 @@ public class ExtensionManagerSetup implements AutoCloseable {
     private final Connection connection;
     private final List<Runnable> cleanupCallbacks = new ArrayList<>();
     private final ExtensionManagerClient client;
-    private final HttpClient httpClient;
+    private final PreviousVersionManager previousVersionManager;
+
     /**
      * Temp folder containing extension definitions (= JS files).
      * <p>
@@ -38,15 +35,15 @@ public class ExtensionManagerSetup implements AutoCloseable {
      */
     final Path extensionFolder;
 
-    private ExtensionManagerSetup(final ExtensionManagerProcess extensionManager, final Connection connection,
-            final ExasolObjectFactory exasolObjectFactory, final ExtensionManagerClient client,
-            final Path extensionFolder, final HttpClient httpClient) {
+    private ExtensionManagerSetup(final ExtensionManagerProcess extensionManager, final ExasolTestSetup exasolTestSetup,
+            final Connection connection, final ExasolObjectFactory exasolObjectFactory,
+            final ExtensionManagerClient client, final Path extensionFolder) {
         this.extensionManager = extensionManager;
         this.connection = connection;
         this.exasolObjectFactory = exasolObjectFactory;
         this.client = client;
         this.extensionFolder = extensionFolder;
-        this.httpClient = httpClient;
+        this.previousVersionManager = PreviousVersionManager.create(this, exasolTestSetup, extensionFolder);
     }
 
     /**
@@ -64,8 +61,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
         final ExtensionTestConfig config = ExtensionTestConfig.read();
         final ExtensionManagerProcess extensionManager = startExtensionManager(extensionBuilder, extensionFolder,
                 config);
-        final HttpClient httpClient = HttpClient.newBuilder().followRedirects(Redirect.NORMAL).build();
-        return create(exasolTestSetup, extensionFolder, extensionManager, httpClient);
+        return create(exasolTestSetup, extensionFolder, extensionManager);
     }
 
     private static ExtensionManagerProcess startExtensionManager(final ExtensionBuilder extensionBuilder,
@@ -77,14 +73,14 @@ public class ExtensionManagerSetup implements AutoCloseable {
     }
 
     private static ExtensionManagerSetup create(final ExasolTestSetup exasolTestSetup, final Path extensionFolder,
-            final ExtensionManagerProcess extensionManager, final HttpClient httpClient) {
+            final ExtensionManagerProcess extensionManager) {
         final ExtensionManagerClient client = ExtensionManagerClient.create(extensionManager.getServerBasePath(),
                 exasolTestSetup.getConnectionInfo());
         final Connection connection = createConnection(exasolTestSetup);
         final ExasolObjectFactory exasolObjectFactory = new ExasolObjectFactory(connection,
                 ExasolObjectConfiguration.builder().build());
-        return new ExtensionManagerSetup(extensionManager, connection, exasolObjectFactory, client, extensionFolder,
-                httpClient);
+        return new ExtensionManagerSetup(extensionManager, exasolTestSetup, connection, exasolObjectFactory, client,
+                extensionFolder);
     }
 
     private static Connection createConnection(final ExasolTestSetup exasolTestSetup) {
@@ -140,6 +136,15 @@ public class ExtensionManagerSetup implements AutoCloseable {
     }
 
     /**
+     * Get the {@link PreviousVersionManager}.
+     * 
+     * @return the {@link PreviousVersionManager}
+     */
+    public PreviousVersionManager createPreviousVersionManager() {
+        return this.previousVersionManager;
+    }
+
+    /**
      * Get the client for accessing the extension manager via its REST API. Use this for calling and testing methods of
      * the extension under test.
      * 
@@ -187,15 +192,6 @@ public class ExtensionManagerSetup implements AutoCloseable {
         this.cleanupCallbacks.add(runnableStatement("DROP CONNECTION IF EXISTS \"" + name + "\""));
     }
 
-    /**
-     * Mark the given file for deletion. Calling {@link #close()} will delete it.
-     * 
-     * @param fileToDelete file to delete at cleanup
-     */
-    public void addFileToCleanupQueue(final Path fileToDelete) {
-        this.cleanupCallbacks.add(deleteFileRunnable(fileToDelete));
-    }
-
     private Runnable runnableStatement(final String statement) {
         return () -> {
             try {
@@ -210,61 +206,39 @@ public class ExtensionManagerSetup implements AutoCloseable {
         };
     }
 
-    private Runnable deleteFileRunnable(final Path fileToDelete) {
-        return () -> {
-            try {
-                LOGGER.fine(() -> "Deleting file '" + fileToDelete + "'");
-                Files.delete(fileToDelete);
-            } catch (final IOException exception) {
-                throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-31")
-                        .message("Failed to delete file {{path}}: {{error message}}", fileToDelete,
-                                exception.getMessage())
-                        .toString(), exception);
-            }
-        };
-    }
-
     private Statement createStatement() throws SQLException {
         return this.connection.createStatement();
     }
 
     /**
-     * Downloads an additional extension definition (e.g. the previous version of the extension under test).
+     * Cleanup resources after each test in order to have a clean state. Usually you call this in an
+     * {@link org.junit.jupiter.api.AfterEach} method.
      * <p>
-     * This will allow installing a previous version of the extension and use it for testing the upgrade process.
-     * 
-     * @param url URL of the extension file to download, e.g. from a GitHub release
-     * @return the ID of the downloaded extension
+     * Don't mix this up with {@link #close()} which must be called in {@link org.junit.jupiter.api.AfterAll}.
      */
-    public String fetchExtension(final URI url) {
-        final HttpRequest request = HttpRequest.newBuilder(url).GET().build();
+    public void cleanup() {
+        this.cleanupCallbacks.forEach(Runnable::run);
+        this.cleanupCallbacks.clear();
+        this.previousVersionManager.cleanup();
         try {
-            final Path extensionFile = Files.createTempFile(extensionFolder, "ext-", ".js");
-            addFileToCleanupQueue(extensionFile);
-            LOGGER.info(() -> "Downloading " + url + " to " + extensionFile + "...");
-            final HttpResponse<Path> response = httpClient.send(request, BodyHandlers.ofFile(extensionFile));
-            final long fileSize = Files.size(extensionFile);
-            LOGGER.info(() -> "Got response status " + response.statusCode() + ", file size: " + fileSize + " bytes");
-            return extensionFile.getFileName().toString();
-        } catch (final IOException exception) {
-            throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-29")
-                    .message("Failed to download {{url}} to local folder {{folder}}", url, extensionFolder).toString(),
-                    exception);
-        } catch (final InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException(
-                    ExaError.messageBuilder("E-EMIT-30").message("Download of {{url}} was interrupted", url).toString(),
+            createStatement().execute("DROP SCHEMA IF EXISTS \"" + EXTENSION_SCHEMA_NAME + "\" CASCADE");
+        } catch (final SQLException exception) {
+            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-25")
+                    .message("Failed to delete extension schema {{schema name}}", EXTENSION_SCHEMA_NAME).toString(),
                     exception);
         }
     }
 
     /**
-     * Cleanup resources after running tests. Call this in a {@link org.junit.jupiter.api.AfterAll} method.
+     * Cleanup resources after running all tests. Call this in a {@link org.junit.jupiter.api.AfterAll} method.
+     * <p>
+     * Don't mix this up with {@link #cleanup()} which must be called in {@link org.junit.jupiter.api.AfterEach}.
      */
     @Override
     public void close() {
         LOGGER.fine("Closing extension manager setup");
         cleanup();
+        previousVersionManager.close();
         extensionManager.close();
         deleteTempDir();
     }
@@ -277,22 +251,6 @@ public class ExtensionManagerSetup implements AutoCloseable {
         } catch (final IOException exception) {
             throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-24")
                     .message("Failed to extension folder {{folder}}", extensionFolder).toString(), exception);
-        }
-    }
-
-    /**
-     * Cleanup resources after a test in order to have a clean state. Usually you call this in an
-     * {@link org.junit.jupiter.api.AfterEach} method.
-     */
-    public void cleanup() {
-        this.cleanupCallbacks.forEach(Runnable::run);
-        this.cleanupCallbacks.clear();
-        try {
-            createStatement().execute("DROP SCHEMA IF EXISTS \"" + EXTENSION_SCHEMA_NAME + "\" CASCADE");
-        } catch (final SQLException exception) {
-            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-25")
-                    .message("Failed to delete extension schema {{schema name}}", EXTENSION_SCHEMA_NAME).toString(),
-                    exception);
         }
     }
 }
