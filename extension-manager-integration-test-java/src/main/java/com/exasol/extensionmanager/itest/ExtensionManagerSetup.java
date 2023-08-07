@@ -140,7 +140,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
      * 
      * @return the {@link PreviousVersionManager}
      */
-    public PreviousVersionManager createPreviousVersionManager() {
+    public PreviousVersionManager previousVersionManager() {
         return this.previousVersionManager;
     }
 

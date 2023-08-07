@@ -34,7 +34,7 @@ public class PreviousVersionManager {
         return new PreviousVersionManager(setup, exasolTestSetup, httpClient, extensionFolder);
     }
 
-    public PreviousVersion.Builder create() {
+    public PreviousVersion.Builder newVersion() {
         if (previousVersion != null) {
             throw new IllegalStateException(
                     ExaError.messageBuilder("E-EMIT-38").message("Previous version already prepared.")

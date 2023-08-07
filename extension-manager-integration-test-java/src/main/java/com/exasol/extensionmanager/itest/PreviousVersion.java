@@ -1,17 +1,21 @@
 package com.exasol.extensionmanager.itest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.*;
 import java.net.URI;
 import java.net.http.*;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.errorreporting.ExaError;
 import com.exasol.exasoltestsetup.ExasolTestSetup;
+import com.exasol.extensionmanager.client.model.UpgradeExtensionResponse;
 
 /**
  * This represents a previous version of an extension.
@@ -24,25 +28,27 @@ public class PreviousVersion {
     private final PreviousVersionManager previousVersionManager;
     private final String project;
     private final String extensionFileName;
-    private final String version;
+    private final String currentVersion;
+    private final String previousVersion;
     private final Path extensionFolder;
     private final String adapterFileName;
     private Path extensionFile;
 
     private PreviousVersion(final Builder builder) {
-        this.setup = builder.setup;
-        this.exasolTestSetup = builder.exasolTestSetup;
-        this.httpClient = builder.httpClient;
-        this.extensionFolder = builder.extensionFolder;
-        this.previousVersionManager = builder.previousVersionManager;
-        this.project = builder.project;
-        this.extensionFileName = builder.extensionFileName;
-        this.version = builder.version;
-        this.adapterFileName = builder.adapterFileName;
+        this.setup = Objects.requireNonNull(builder.setup);
+        this.exasolTestSetup = Objects.requireNonNull(builder.exasolTestSetup);
+        this.httpClient = Objects.requireNonNull(builder.httpClient);
+        this.extensionFolder = Objects.requireNonNull(builder.extensionFolder);
+        this.previousVersionManager = Objects.requireNonNull(builder.previousVersionManager, "previousVersionManager");
+        this.project = Objects.requireNonNull(builder.project, "project");
+        this.extensionFileName = Objects.requireNonNull(builder.extensionFileName, "extensionFileName");
+        this.currentVersion = Objects.requireNonNull(builder.currentVersion, "currentVersion");
+        this.previousVersion = Objects.requireNonNull(builder.previousVersion, "previousVersion");
+        this.adapterFileName = Objects.requireNonNull(builder.adapterFileName, "adapterFileName");
     }
 
     /**
-     * Prepare the previous version by downloading extension JavaScript definition and the adapter file.
+     * Prepare this previous version by downloading extension JavaScript definition and the adapter file.
      */
     public void prepare() {
         fetchExtension(getDownloadUrl(this.extensionFileName));
@@ -55,6 +61,24 @@ public class PreviousVersion {
                             adapterTempFile, adapterTempFile)
                     .toString(), exception);
         }
+    }
+
+    /**
+     * Install this version by calling {@link ExtensionManagerClient#install()}.
+     */
+    public void install() {
+        this.setup.client().install(getExtensionId(), previousVersion);
+    }
+
+    /**
+     * Upgrade the previous version to the current version by calling {@link ExtensionManagerClient#upgrade()} and
+     * verify that it returns the expected versions.
+     */
+    public void upgrade() {
+        final UpgradeExtensionResponse upgradeResult = setup.client().upgrade(this.extensionFileName);
+        assertEquals(
+                new UpgradeExtensionResponse().previousVersion(this.previousVersion).newVersion(this.currentVersion),
+                upgradeResult);
     }
 
     /**
@@ -72,8 +96,18 @@ public class PreviousVersion {
             LOGGER.info(() -> "Downloading " + url + " to " + extensionFile + "...");
             final HttpResponse<Path> response = httpClient.send(request, BodyHandlers.ofFile(extensionFile));
             final long fileSize = Files.size(extensionFile);
+            if (response.statusCode() / 100 != 2) {
+                deleteFile(this.extensionFile);
+                this.extensionFile = null;
+                throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-39")
+                        .message("Download of {{url}} failed with non-OK status {{status code}}", url,
+                                response.statusCode())
+                        .toString());
+            }
             LOGGER.info(() -> "Got response status " + response.statusCode() + ", file size: " + fileSize + " bytes");
         } catch (final IOException exception) {
+            deleteFile(this.extensionFile);
+            this.extensionFile = null;
             throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-29")
                     .message("Failed to download {{url}} to local folder {{folder}}", url, extensionFolder).toString(),
                     exception);
@@ -105,7 +139,12 @@ public class PreviousVersion {
         }
     }
 
-    String getExtensionId() {
+    /**
+     * The the temporary ID of the installed extension. This ID will only be valid until {@link #close()} is called.
+     * 
+     * @return the temporary ID.
+     */
+    public String getExtensionId() {
         if (extensionFile == null) {
             throw new IllegalStateException(
                     ExaError.messageBuilder("E-EMIT-37").message("Previous version not prepared").toString());
@@ -114,8 +153,8 @@ public class PreviousVersion {
     }
 
     private URI getDownloadUrl(final String fileName) {
-        return URI.create(
-                "https://extensions-internal.exasol.com/com.exasol/" + project + "/" + version + "/" + fileName);
+        return URI.create("https://extensions-internal.exasol.com/com.exasol/" + project + "/" + previousVersion + "/"
+                + fileName);
     }
 
     public static class Builder {
@@ -126,7 +165,8 @@ public class PreviousVersion {
         private final HttpClient httpClient;
         private final ExasolTestSetup exasolTestSetup;
         private String adapterFileName;
-        private String version;
+        private String currentVersion;
+        private String previousVersion;
         private String extensionFileName;
         private String project;
         private PreviousVersion builtVersion;
@@ -153,16 +193,28 @@ public class PreviousVersion {
         }
 
         /**
-         * The version of the adapter that was published previously. E.g. if the currently developed version is
-         * {@code 2.7.0} then this should be {@code 2.6.0} or {@code 2.6.2}. This version is used to build the download
-         * URLs for the extension repository, e.g.
+         * The version currently under development, e.g. {@code 2.7.0}. This is used to verify that upgrading from the
+         * previous version was successful.
+         * 
+         * @param version the current version
+         * @return {@code this} for method chaining
+         */
+        public Builder currentVersion(final String version) {
+            this.currentVersion = version;
+            return this;
+        }
+
+        /**
+         * The version of the adapter that was published previously. E.g. if the currently developed version specified
+         * as {@link #currentVersion(String)} is {@code 2.7.0} then this could be {@code 2.6.0} or {@code 2.6.2}. This
+         * version is used to build the download URLs for the extension repository, e.g.
          * {@code https://extensions-internal.exasol.com/com.exasol/$PROJECT/$VERSION/$FILENAME}
          * 
          * @param version the previous version
          * @return {@code this} for method chaining
          */
-        public Builder version(final String version) {
-            this.version = version;
+        public Builder previousVersion(final String version) {
+            this.previousVersion = version;
             return this;
         }
 
@@ -172,7 +224,7 @@ public class PreviousVersion {
          * @param extensionFileName the extension file name
          * @return {@code this} for method chaining
          */
-        public Builder setExtensionFileName(final String extensionFileName) {
+        public Builder extensionFileName(final String extensionFileName) {
             this.extensionFileName = extensionFileName;
             return this;
         }
@@ -186,7 +238,7 @@ public class PreviousVersion {
          * @return
          * @return {@code this} for method chaining
          */
-        public Builder setProject(final String project) {
+        public Builder project(final String project) {
             this.project = project;
             return this;
         }
@@ -219,11 +271,16 @@ public class PreviousVersion {
      * Called by {@link Builder#close()}.
      */
     void close() {
+        deleteFile(this.extensionFile);
+    }
+
+    private static void deleteFile(final Path file) {
         try {
-            Files.delete(this.extensionFile);
+            Files.delete(file);
         } catch (final IOException exception) {
-            throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-34")
-                    .message("Error deleting file {{file}}", this.extensionFile).toString(), exception);
+            throw new UncheckedIOException(
+                    ExaError.messageBuilder("E-EMIT-34").message("Error deleting file {{file}}", file).toString(),
+                    exception);
         }
     }
 }

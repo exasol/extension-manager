@@ -1,8 +1,8 @@
 package com.exasol.extensionmanager.itest;
 
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
@@ -28,12 +28,16 @@ class PreviousVersionTest {
     private ExtensionManagerSetup setupMock;
     @Mock
     private ExasolTestSetup exasolTestSetupMock;
+    @Mock
+    private PreviousVersionManager previousVersionManagerMock;
     @TempDir
     private Path tempDir;
 
     PreviousVersion.Builder builder() {
         final HttpClient httpClient = HttpClient.newBuilder().followRedirects(Redirect.NORMAL).build();
-        return new PreviousVersion.Builder(setupMock, exasolTestSetupMock, httpClient, null, tempDir);
+        return new PreviousVersion.Builder(setupMock, exasolTestSetupMock, httpClient, previousVersionManagerMock,
+                tempDir).adapterFileName("adapter").currentVersion("currentVersion").previousVersion("previousVersion")
+                .extensionFileName("extensionFileName").project("project");
     }
 
     @Test
@@ -49,11 +53,23 @@ class PreviousVersionTest {
     }
 
     @Test
+    void fetchExtensionFailsForMissingFile() throws IOException {
+        final URI uri = URI.create("https://extensions-internal.exasol.com/no-such-file");
+        final PreviousVersion testee = builder().build();
+        final IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> testee.fetchExtension(uri));
+        assertThat(exception.getMessage(),
+                equalTo("E-EMIT-39: Download of '" + uri + "' failed with non-OK status 404"));
+        assertThat(Files.list(tempDir).collect(toList()), empty());
+    }
+
+    @Test
     void fetchExtensionFails() throws IOException {
         final URI uri = URI.create("https://invalid-url");
         final PreviousVersion testee = builder().build();
         final UncheckedIOException exception = assertThrows(UncheckedIOException.class,
                 () -> testee.fetchExtension(uri));
         assertThat(exception.getMessage(), startsWith("E-EMIT-29: Failed to download"));
+        assertThat(Files.list(tempDir).collect(toList()), empty());
     }
 }
