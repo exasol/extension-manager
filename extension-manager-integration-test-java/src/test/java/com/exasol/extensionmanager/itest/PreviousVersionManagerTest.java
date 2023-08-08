@@ -62,10 +62,10 @@ class PreviousVersionManagerTest {
 
     @Test
     void fetchExtensionFails() throws IOException {
-        final URI uri = URI.create("https://invalid-url");
+        final URI url = URI.create("https://invalid-url");
         final UncheckedIOException exception = assertThrows(UncheckedIOException.class,
-                () -> testee.fetchExtension(uri));
-        assertThat(exception.getMessage(), startsWith("E-EMIT-31: Failed to download"));
+                () -> testee.fetchExtension(url));
+        assertThat(exception.getMessage(), startsWith("E-EMIT-42: Failed to download '" + url + "' to"));
         assertThat(Files.list(tempDir).collect(toList()), empty());
     }
 }
