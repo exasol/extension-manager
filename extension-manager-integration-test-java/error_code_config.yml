@@ -2,4 +2,4 @@ error-tags:
   EMIT:
     packages:
       - com.exasol.extensionmanager.itest
-    highest-index: 39
+    highest-index: 42

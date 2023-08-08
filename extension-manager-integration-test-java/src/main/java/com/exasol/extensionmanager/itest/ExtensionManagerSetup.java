@@ -206,6 +206,29 @@ public class ExtensionManagerSetup implements AutoCloseable {
         };
     }
 
+    /**
+     * Mark the given file for deletion. Calling {@link #close()} will delete it.
+     * 
+     * @param fileToDelete file to delete at cleanup
+     */
+    void addFileToCleanupQueue(final Path fileToDelete) {
+        this.cleanupCallbacks.add(deleteFileRunnable(fileToDelete));
+    }
+
+    private Runnable deleteFileRunnable(final Path fileToDelete) {
+        return () -> {
+            try {
+                LOGGER.fine(() -> "Deleting file '" + fileToDelete + "'");
+                Files.delete(fileToDelete);
+            } catch (final IOException exception) {
+                throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-31")
+                        .message("Failed to delete file {{path}}: {{error message}}", fileToDelete,
+                                exception.getMessage())
+                        .toString(), exception);
+            }
+        };
+    }
+
     private Statement createStatement() throws SQLException {
         return this.connection.createStatement();
     }
@@ -219,7 +242,6 @@ public class ExtensionManagerSetup implements AutoCloseable {
     public void cleanup() {
         this.cleanupCallbacks.forEach(Runnable::run);
         this.cleanupCallbacks.clear();
-        this.previousVersionManager.cleanup();
         try {
             createStatement().execute("DROP SCHEMA IF EXISTS \"" + EXTENSION_SCHEMA_NAME + "\" CASCADE");
         } catch (final SQLException exception) {
@@ -238,7 +260,6 @@ public class ExtensionManagerSetup implements AutoCloseable {
     public void close() {
         LOGGER.fine("Closing extension manager setup");
         cleanup();
-        previousVersionManager.close();
         extensionManager.close();
         deleteTempDir();
     }
