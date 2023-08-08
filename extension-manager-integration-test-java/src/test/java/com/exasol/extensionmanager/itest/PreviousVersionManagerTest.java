@@ -6,8 +6,8 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.io.*;
 import java.net.URI;
@@ -44,7 +44,7 @@ class PreviousVersionManagerTest {
     @BeforeEach
     void setup() {
         final HttpClient httpClient = HttpClient.newBuilder().followRedirects(Redirect.NORMAL).build();
-        when(exasolTestSetupMock.getDefaultBucket()).thenReturn(bucketMock);
+        lenient().when(exasolTestSetupMock.getDefaultBucket()).thenReturn(bucketMock);
         testee = new PreviousVersionManager(setupMock, exasolTestSetupMock, httpClient, tempDir);
     }
 
