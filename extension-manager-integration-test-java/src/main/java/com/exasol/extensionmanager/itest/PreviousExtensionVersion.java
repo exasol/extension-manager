@@ -60,7 +60,8 @@ public class PreviousExtensionVersion {
     }
 
     /**
-     * The the temporary ID of the installed extension. This ID will only be valid until {@link #close()} is called.
+     * The the temporary ID of the installed extension. This ID will only be valid for the currently running test. The
+     * extension definition file will be automatically deleted after the test.
      * 
      * @return the temporary ID.
      */
