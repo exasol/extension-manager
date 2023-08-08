@@ -34,6 +34,11 @@ public class PreviousVersionManager {
         return new PreviousVersionManager(setup, exasolTestSetup, httpClient, extensionFolder);
     }
 
+    /**
+     * Create a new previous version.
+     * 
+     * @return a new previous version
+     */
     public PreviousVersion.Builder newVersion() {
         if (previousVersion != null) {
             throw new IllegalStateException(

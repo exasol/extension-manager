@@ -157,8 +157,10 @@ public class PreviousVersion {
                 + fileName);
     }
 
+    /**
+     * Builder for {@link PreviousVersion} instances.
+     */
     public static class Builder {
-
         private final ExtensionManagerSetup setup;
         private final PreviousVersionManager previousVersionManager;
         private final Path extensionFolder;
@@ -171,9 +173,8 @@ public class PreviousVersion {
         private String project;
         private PreviousVersion builtVersion;
 
-        public Builder(final ExtensionManagerSetup setup, final ExasolTestSetup exasolTestSetup,
-                final HttpClient httpClient, final PreviousVersionManager previousVersionManager,
-                final Path extensionFolder) {
+        Builder(final ExtensionManagerSetup setup, final ExasolTestSetup exasolTestSetup, final HttpClient httpClient,
+                final PreviousVersionManager previousVersionManager, final Path extensionFolder) {
             this.setup = setup;
             this.exasolTestSetup = exasolTestSetup;
             this.httpClient = httpClient;
@@ -235,7 +236,6 @@ public class PreviousVersion {
          * {@code https://extensions-internal.exasol.com/com.exasol/$PROJECT/$VERSION/$FILENAME}.
          * 
          * @param project project name in the extension repository
-         * @return
          * @return {@code this} for method chaining
          */
         public Builder project(final String project) {
