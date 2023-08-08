@@ -4,15 +4,18 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Redirect;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +24,8 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.exasol.bucketfs.Bucket;
+import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.exasoltestsetup.ExasolTestSetup;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,6 +35,8 @@ class PreviousVersionManagerTest {
     private ExtensionManagerSetup setupMock;
     @Mock
     private ExasolTestSetup exasolTestSetupMock;
+    @Mock
+    private Bucket bucketMock;
     @TempDir
     private Path tempDir;
     private PreviousVersionManager testee;
@@ -37,6 +44,7 @@ class PreviousVersionManagerTest {
     @BeforeEach
     void setup() {
         final HttpClient httpClient = HttpClient.newBuilder().followRedirects(Redirect.NORMAL).build();
+        when(exasolTestSetupMock.getDefaultBucket()).thenReturn(bucketMock);
         testee = new PreviousVersionManager(setupMock, exasolTestSetupMock, httpClient, tempDir);
     }
 
@@ -73,5 +81,13 @@ class PreviousVersionManagerTest {
                 () -> testee.fetchExtension(url));
         assertThat(exception.getMessage(), startsWith("E-EMIT-42: Failed to download '" + url + "' to"));
         assertThat(Files.list(tempDir).collect(toList()), empty());
+    }
+
+    @Test
+    void prepareBucketFsFile() throws FileNotFoundException, BucketAccessException, TimeoutException {
+        testee.prepareBucketFsFile(URI.create(
+                "https://extensions-internal.exasol.com/com.exasol/s3-document-files-virtual-schema/2.6.2/s3-vs-extension.js"),
+                "filename");
+        verify(bucketMock).uploadFile(any(), eq("filename"));
     }
 }

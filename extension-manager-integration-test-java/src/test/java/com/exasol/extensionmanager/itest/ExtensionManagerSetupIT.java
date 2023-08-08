@@ -5,11 +5,8 @@ import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -56,15 +53,6 @@ class ExtensionManagerSetupIT {
     void cleanupVirtualSchema() {
         extensionManager.addVirtualSchemaToCleanupQueue("virtualSchemaToDelete");
         assertDoesNotThrow(extensionManager::cleanup);
-    }
-
-    @Test
-    void cleanupFile() throws IOException {
-        final Path file = Files.createTempFile(getClass().getName(), ".tmp");
-        extensionManager.addFileToCleanupQueue(file);
-        assertTrue(Files.exists(file), "file still exists after adding it to the cleanup queue");
-        extensionManager.cleanup();
-        assertFalse(Files.exists(file), "file was deleted during cleanup");
     }
 
     @Test
