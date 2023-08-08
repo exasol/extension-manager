@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.errorreporting.ExaError;
 import com.exasol.exasoltestsetup.ExasolTestSetup;
-import com.exasol.extensionmanager.itest.PreviousExtensionVersion.Builder;
 
 /**
  * This class manages previous extension versions. This is useful for testing the upgrade process.
@@ -24,7 +23,6 @@ public class PreviousVersionManager {
     private final Path extensionFolder;
     private final ExtensionManagerSetup setup;
     private final ExasolTestSetup exasolTestSetup;
-    private Builder previousVersion;
 
     PreviousVersionManager(final ExtensionManagerSetup setup, final ExasolTestSetup exasolTestSetup,
             final HttpClient httpClient, final Path extensionFolder) {
@@ -46,13 +44,7 @@ public class PreviousVersionManager {
      * @return a new previous version
      */
     public PreviousExtensionVersion.Builder newVersion() {
-        if (previousVersion != null) {
-            throw new IllegalStateException(
-                    ExaError.messageBuilder("E-EMIT-38").message("Previous version already prepared.")
-                            .mitigation("Call this only once per test case").toString());
-        }
-        this.previousVersion = new PreviousExtensionVersion.Builder(setup, this);
-        return this.previousVersion;
+        return new PreviousExtensionVersion.Builder(setup, this);
     }
 
     /**

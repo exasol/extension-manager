@@ -41,6 +41,12 @@ class PreviousVersionManagerTest {
     }
 
     @Test
+    void newVersion() {
+        assertThat(testee.newVersion().adapterFileName("adapter").currentVersion("current").previousVersion("previous")
+                .project("project").extensionFileName("extensionFilename").build(), notNullValue());
+    }
+
+    @Test
     void fetchExtension() throws IOException {
         final String extensionId = testee.fetchExtension(URI.create(
                 "https://extensions-internal.exasol.com/com.exasol/s3-document-files-virtual-schema/2.6.2/s3-vs-extension.js"));

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URI;
 import java.util.Objects;
-import java.util.logging.Logger;
 
 import com.exasol.errorreporting.ExaError;
 import com.exasol.extensionmanager.client.model.UpgradeExtensionResponse;
@@ -13,7 +12,6 @@ import com.exasol.extensionmanager.client.model.UpgradeExtensionResponse;
  * This represents a previous version of an extension.
  */
 public class PreviousExtensionVersion {
-    private static final Logger LOGGER = Logger.getLogger(PreviousExtensionVersion.class.getName());
     private final ExtensionManagerSetup setup;
     private final PreviousVersionManager previousVersionManager;
     private final String project;
@@ -67,8 +65,8 @@ public class PreviousExtensionVersion {
      */
     public String getExtensionId() {
         if (tempExtensionId == null) {
-            throw new IllegalStateException(
-                    ExaError.messageBuilder("E-EMIT-37").message("Previous version not prepared").toString());
+            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-37")
+                    .message("Previous version not prepared.").mitigation("Call method prepare first.").toString());
         }
         return tempExtensionId;
     }
