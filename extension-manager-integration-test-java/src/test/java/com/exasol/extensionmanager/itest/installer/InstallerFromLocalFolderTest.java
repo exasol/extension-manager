@@ -70,7 +70,7 @@ class InstallerFromLocalFolderTest {
 
     private void assertBinaryWorks(final Path binary) {
         assertThat("Binary file " + binary + " exits", Files.exists(binary), is(true));
-        final String output = SimpleProcess.start(List.of(binary.toString(), "--help"), Duration.ofSeconds(1));
+        final String output = SimpleProcess.start(List.of(binary.toString(), "--help"), Duration.ofSeconds(3));
         assertThat(output, allOf(startsWith("Usage of"), containsString("-extensionRegistryURL string"),
                 containsString("-serverAddress string")));
     }

@@ -117,7 +117,7 @@ public class ExtensionManagerClient {
      * @param extensionId      extension id
      * @param extensionVersion extension version
      */
-    public void install(final String extensionId, final String extensionVersion) {
+    void install(final String extensionId, final String extensionVersion) {
         this.extensionClient.installExtension(new InstallExtensionRequest(), getDbHost(), getDbPort(), extensionId,
                 extensionVersion);
     }

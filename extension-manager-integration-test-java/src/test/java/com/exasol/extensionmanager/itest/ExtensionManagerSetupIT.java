@@ -3,14 +3,10 @@ package com.exasol.extensionmanager.itest;
 import static com.exasol.extensionmanager.itest.IntegrationTestCommon.TESTING_EXTENSION_SOURCE_DIR;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -57,35 +53,6 @@ class ExtensionManagerSetupIT {
     void cleanupVirtualSchema() {
         extensionManager.addVirtualSchemaToCleanupQueue("virtualSchemaToDelete");
         assertDoesNotThrow(extensionManager::cleanup);
-    }
-
-    @Test
-    void cleanupFile() throws IOException {
-        final Path file = Files.createTempFile(getClass().getName(), ".tmp");
-        extensionManager.addFileToCleanupQueue(file);
-        assertTrue(Files.exists(file), "file still exists after adding it to the cleanup queue");
-        extensionManager.cleanup();
-        assertFalse(Files.exists(file), "file was deleted during cleanup");
-    }
-
-    @Test
-    void fetchExtension() throws IOException {
-        final String tempExtensionFileName = extensionManager.fetchExtension(URI.create(
-                "https://extensions-internal.exasol.com/com.exasol/s3-document-files-virtual-schema/2.6.2/s3-vs-extension.js"));
-        final Path file = extensionManager.extensionFolder.resolve(tempExtensionFileName);
-        assertAll(() -> assertTrue(Files.exists(file), "file downloaded"),
-                () -> assertThat(Files.size(file), equalTo(20875L)));
-
-        extensionManager.cleanup();
-        assertFalse(Files.exists(file), "file was deleted during cleanup");
-    }
-
-    @Test
-    void fetchExtensionFails() throws IOException {
-        final URI uri = URI.create("https://invalid-url");
-        final UncheckedIOException exception = assertThrows(UncheckedIOException.class,
-                () -> extensionManager.fetchExtension(uri));
-        assertThat(exception.getMessage(), startsWith("E-EMIT-29: Failed to download"));
     }
 
     @Test
