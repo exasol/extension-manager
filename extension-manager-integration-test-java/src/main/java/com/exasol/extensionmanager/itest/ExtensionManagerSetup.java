@@ -260,7 +260,6 @@ public class ExtensionManagerSetup implements AutoCloseable {
     public void close() {
         LOGGER.fine("Closing extension manager setup");
         cleanup();
-        previousVersionManager.close();
         extensionManager.close();
         deleteTempDir();
     }

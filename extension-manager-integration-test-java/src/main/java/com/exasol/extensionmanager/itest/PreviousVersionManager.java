@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.errorreporting.ExaError;
 import com.exasol.exasoltestsetup.ExasolTestSetup;
-import com.exasol.extensionmanager.itest.PreviousVersion.Builder;>>>>>>>0 cc6a29be87f24834cce8a3e9986c6a40123df37
+import com.exasol.extensionmanager.itest.PreviousVersion.Builder;
 
 /**
  * This class manages previous extension versions. This is useful for testing the upgrade process.
