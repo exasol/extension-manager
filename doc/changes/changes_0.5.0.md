@@ -1,4 +1,4 @@
-# Extension Manager 0.5.0, released 2023-??-??
+# Extension Manager 0.5.0, released 2023-08-10
 
 Code name: Upgrade Extensions
 
