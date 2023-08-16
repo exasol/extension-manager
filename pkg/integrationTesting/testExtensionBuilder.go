@@ -23,6 +23,7 @@ func CreateTestExtensionBuilder(t *testing.T) *TestExtensionBuilder {
 	builder.findInstallationsFunc = "return []"
 	builder.installFunc = "context.sqlClient.execute('select 1')"
 	builder.uninstallFunc = ""
+	builder.upgradeFunc = "return { previousVersion: '0.1.0', newVersion: '0.2.0' }"
 	builder.addInstanceFunc = "return undefined"
 	builder.findInstancesFunc = "return []"
 	builder.deleteInstanceFunc = "context.sqlClient.execute(`drop instance ${instanceId}`)"
@@ -37,6 +38,7 @@ type TestExtensionBuilder struct {
 	findInstallationsFunc               string
 	installFunc                         string
 	uninstallFunc                       string
+	upgradeFunc                         string
 	addInstanceFunc                     string
 	findInstancesFunc                   string
 	deleteInstanceFunc                  string
@@ -64,6 +66,11 @@ func (builder *TestExtensionBuilder) WithInstallFunc(tsFunctionCode string) *Tes
 
 func (builder *TestExtensionBuilder) WithUninstallFunc(tsFunctionCode string) *TestExtensionBuilder {
 	builder.uninstallFunc = tsFunctionCode
+	return builder
+}
+
+func (builder *TestExtensionBuilder) WithUpgradeFunc(tsFunctionCode string) *TestExtensionBuilder {
+	builder.upgradeFunc = tsFunctionCode
 	return builder
 }
 
@@ -151,6 +158,7 @@ func (builder TestExtensionBuilder) createExtensionTsContent() string {
 	content = strings.Replace(content, "$FIND_INSTALLATIONS$", builder.findInstallationsFunc, 1)
 	content = strings.Replace(content, "$INSTALL_EXTENSION$", builder.installFunc, 1)
 	content = strings.Replace(content, "$UNINSTALL_EXTENSION$", builder.uninstallFunc, 1)
+	content = strings.Replace(content, "$UPGRADE_EXTENSION$", builder.upgradeFunc, 1)
 	content = strings.Replace(content, "$ADD_INSTANCE$", builder.addInstanceFunc, 1)
 	content = strings.Replace(content, "$FIND_INSTANCES$", builder.findInstancesFunc, 1)
 	content = strings.Replace(content, "$DELETE_INSTANCE$", builder.deleteInstanceFunc, 1)

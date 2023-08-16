@@ -11,14 +11,14 @@ import (
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/integrationTesting"
 
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
 type ExtensionApiSuite struct {
 	suite.Suite
-	mockSQLClient      sqlClientMock
+	mockSQLClient      backend.SimpleSqlClientMock
 	mockBucketFsClient bfs.BucketFsMock
+	mockMetadataReader *exaMetadata.ExaMetaDataReaderMock
 }
 
 func TestExtensionApiSuite(t *testing.T) {
@@ -30,13 +30,15 @@ func (suite *ExtensionApiSuite) SetupSuite() {
 }
 
 func (suite *ExtensionApiSuite) SetupTest() {
-	suite.mockSQLClient = sqlClientMock{}
+	suite.mockSQLClient = backend.SimpleSqlClientMock{}
 	suite.mockBucketFsClient = bfs.BucketFsMock{}
+	suite.mockMetadataReader = exaMetadata.CreateExaMetaDataReaderMock(EXTENSION_SCHEMA)
 }
 
 func (suite *ExtensionApiSuite) TearDownTest() {
 	suite.mockSQLClient.AssertExpectations(suite.T())
 	suite.mockBucketFsClient.AssertExpectations(suite.T())
+	suite.mockMetadataReader.AssertExpectations(suite.T())
 }
 
 /* [utest -> dsn~extension-definition~1] */
@@ -45,19 +47,6 @@ func (suite *ExtensionApiSuite) TestLoadExtension() {
 	extension := suite.loadExtension(extensionContent)
 	suite.Equal("MyDemoExtension", extension.Name)
 	suite.Equal("Demo category", extension.Category)
-}
-
-type sqlClientMock struct {
-	mock.Mock
-}
-
-func (mock *sqlClientMock) Execute(query string, args ...any) {
-	mock.Called(query, args)
-}
-
-func (mock *sqlClientMock) Query(query string, args ...any) backend.QueryResult {
-	mockArgs := mock.Called(query, args)
-	return mockArgs.Get(0).(backend.QueryResult)
 }
 
 func (suite *ExtensionApiSuite) TestGetParameterDefinitionsEmptyResult() {
@@ -82,12 +71,13 @@ func (suite *ExtensionApiSuite) TestGetParameterDefinitions() {
 func (suite *ExtensionApiSuite) TestInstall() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).Build().AsString()
 	extension := suite.loadExtension(extensionContent)
-	suite.mockSQLClient.On("Execute", "select 1", []any{}).Return()
+	suite.mockSQLClient.SimulateExecuteSuccess("select 1")
 	err := extension.Install(suite.mockContext(), "extVersion")
 	suite.NoError(err)
 }
 
 /* [itest -> dsn~resolving-files-in-bucketfs~1] */
+/* [itest -> dsn~extension-context-bucketfs~1] */
 func (suite *ExtensionApiSuite) TestInstallResolveBucketFsPath() {
 	version := "extVersion"
 	absolutePath := "/absolute/file/path"
@@ -96,7 +86,7 @@ func (suite *ExtensionApiSuite) TestInstallResolveBucketFsPath() {
 		WithInstallFunc("context.sqlClient.execute(`create script path ${context.bucketFs.resolvePath('my-adapter-'+version+'.jar')}`)").
 		Build().AsString()
 	extension := suite.loadExtension(extensionContent)
-	suite.mockSQLClient.On("Execute", "create script path "+absolutePath, []any{}).Return()
+	suite.mockSQLClient.SimulateExecuteSuccess("create script path " + absolutePath)
 	err := extension.Install(suite.mockContext(), version)
 	suite.NoError(err)
 }
@@ -144,7 +134,7 @@ func (suite *ExtensionApiSuite) TestUninstall() {
 		WithUninstallFunc("context.sqlClient.execute(`uninstall version ${version}`)").
 		Build().AsString()
 	extension := suite.loadExtension(extensionContent)
-	suite.mockSQLClient.On("Execute", "uninstall version extVersion", []any{}).Return()
+	suite.mockSQLClient.SimulateExecuteSuccess("uninstall version extVersion")
 	err := extension.Uninstall(suite.mockContext(), "extVersion")
 	suite.NoError(err)
 }
@@ -155,7 +145,7 @@ func (suite *ExtensionApiSuite) TestAddInstanceValidParameters() {
 			"return {id: 'instId', name: `instance_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().AsString()
 	extension := suite.loadExtension(extensionContent)
-	suite.mockSQLClient.On("Execute", "create vs", []any{}).Return()
+	suite.mockSQLClient.SimulateExecuteSuccess("create vs")
 	instance, err := extension.AddInstance(suite.mockContext(), "extensionVersion", &ParameterValues{Values: []ParameterValue{{Name: "p1", Value: "v1"}}})
 	suite.NoError(err)
 	suite.Equal(&JsExtInstance{Id: "instId", Name: "instance_extensionVersion_p1_v1"}, instance)
@@ -185,7 +175,7 @@ func (suite *ExtensionApiSuite) TestDeleteInstance() {
 		WithDeleteInstanceFunc("context.sqlClient.execute(`drop instance ${instanceId}`)").
 		Build().AsString()
 	extension := suite.loadExtension(extensionContent)
-	suite.mockSQLClient.On("Execute", "drop instance instId", []any{}).Return()
+	suite.mockSQLClient.SimulateExecuteSuccess("drop instance instId")
 	err := extension.DeleteInstance(suite.mockContext(), "extVersion", "instId")
 	suite.NoError(err)
 }
@@ -202,7 +192,7 @@ func (suite *ExtensionApiSuite) TestFindInstallationsCanReadAllScriptsTable() {
 			return {name: row.name, version: "0.1.0"}
 		});`).Build().AsString()
 	extension := suite.loadExtension(extensionContent)
-	result, err := extension.FindInstallations(createMockContext(), createMockMetadata())
+	result, err := extension.FindInstallations(suite.createMockContext(), createMockMetadata())
 	suite.Equal([]*JsExtInstallation{{Name: "test", Version: "0.1.0"}}, result)
 	suite.NoError(err)
 }
@@ -212,9 +202,31 @@ func (suite *ExtensionApiSuite) TestFindInstallationsReturningParameters() {
 		WithFindInstallationsFunc(integrationTesting.
 			MockFindInstallationsFunction("test", "0.1.0")).Build().AsString()
 	extension := suite.loadExtension(extensionContent)
-	result, err := extension.FindInstallations(createMockContext(), createMockMetadata())
+	result, err := extension.FindInstallations(suite.createMockContext(), createMockMetadata())
 	suite.Equal([]*JsExtInstallation{{Name: "test", Version: "0.1.0"}}, result)
 	suite.NoError(err)
+}
+
+/* [itest -> dsn~extension-context-metadata~1] */
+func (suite *ExtensionApiSuite) TestUpgradeReadsMetadata() {
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithUpgradeFunc("const text = context.metadata.getScriptByName('script').text; return {previousVersion:'0.1.0',newVersion:text};").Build().AsString()
+	extension := suite.loadExtension(extensionContent)
+	fmt.Printf("Using mock %v\n", suite.mockMetadataReader)
+	suite.mockMetadataReader.SimulateGetScriptByNameScriptText("script", "scriptText")
+	result, err := extension.Upgrade(suite.createMockContext())
+	suite.NoError(err)
+	suite.Equal(&JsUpgradeResult{PreviousVersion: "0.1.0", NewVersion: "scriptText"}, result)
+}
+
+func (suite *ExtensionApiSuite) TestUpgradeReadMetadataFails() {
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithUpgradeFunc("const text = context.metadata.getScriptByName('script').text; return {previousVersion:'0.1.0',newVersion:text};").Build().AsString()
+	extension := suite.loadExtension(extensionContent)
+	suite.mockMetadataReader.SimulateGetScriptByNameFails("script", fmt.Errorf("mock error"))
+	result, err := extension.Upgrade(suite.createMockContext())
+	suite.EqualError(err, `failed to upgrade extension "ext-id": failed to find script "extension_schema"."script". Caused by: mock error`)
+	suite.Nil(result)
 }
 
 /* [itest -> dsn~extension-compatibility~1] */
@@ -285,7 +297,11 @@ func (suite *ExtensionApiSuite) TestLoadExtensionInvalidJavaScript() {
 }
 
 func (suite *ExtensionApiSuite) mockContext() *context.ExtensionContext {
-	return createMockContextWithClients(&suite.mockSQLClient, &suite.mockBucketFsClient)
+	return createMockContextWithClients(&suite.mockSQLClient, &suite.mockBucketFsClient, suite.mockMetadataReader)
+}
+
+func (suite *ExtensionApiSuite) createMockContext() *context.ExtensionContext {
+	return createMockContextWithClients(&suite.mockSQLClient, &suite.mockBucketFsClient, suite.mockMetadataReader)
 }
 
 func (suite *ExtensionApiSuite) loadExtension(content string) *JsExtension {

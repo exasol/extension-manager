@@ -6,6 +6,7 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/exasol/extension-manager/pkg/apiErrors"
+	"github.com/exasol/extension-manager/pkg/backend"
 	"github.com/exasol/extension-manager/pkg/extensionAPI/context"
 	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
@@ -42,15 +43,18 @@ func (suite *ErrorHandlingExtensionSuite) TestProperties() {
 		suite.extension)
 }
 
-func createMockContextWithClients(sqlClient context.SimpleSQLClient, bucketFsClientMock bfs.BucketFsAPI) *context.ExtensionContext {
+const EXTENSION_SCHEMA = "extension_schema"
+
+func createMockContextWithClients(sqlClient backend.SimpleSQLClient, bucketFsClient bfs.BucketFsAPI, metadataReader exaMetadata.ExaMetadataReader) *context.ExtensionContext {
 	txCtx := &transaction.TransactionContext{}
-	return context.CreateContextWithClient("extension_schema", txCtx, sqlClient, bucketFsClientMock)
+	return context.CreateContextWithClient(EXTENSION_SCHEMA, txCtx, sqlClient, bucketFsClient, metadataReader)
 }
 
 func createMockContext() *context.ExtensionContext {
-	var sqlClientMock context.SimpleSQLClient = &sqlClientMock{}
+	var sqlClientMock backend.SimpleSQLClient = &backend.SimpleSqlClientMock{}
 	var bucketFsClientMock bfs.BucketFsAPI = &bfs.BucketFsMock{}
-	return createMockContextWithClients(sqlClientMock, bucketFsClientMock)
+	var metadataReader exaMetadata.ExaMetadataReader = exaMetadata.CreateExaMetaDataReaderMock(EXTENSION_SCHEMA)
+	return createMockContextWithClients(sqlClientMock, bucketFsClientMock, metadataReader)
 }
 
 // FindInstallations
@@ -155,6 +159,33 @@ func (suite *ErrorHandlingExtensionSuite) TestUninstallUnsupported() {
 	suite.rawExtension.Uninstall = nil
 	err := suite.extension.Uninstall(createMockContext(), "version")
 	suite.EqualError(err, `extension "id" does not support operation "uninstall"`)
+}
+
+// Upgrade
+
+func (suite *ErrorHandlingExtensionSuite) TestUpgradeSuccessful() {
+	suite.rawExtension.Upgrade = func(context *context.ExtensionContext) *JsUpgradeResult {
+		return &JsUpgradeResult{PreviousVersion: "old", NewVersion: "new"}
+	}
+	result, err := suite.extension.Upgrade(createMockContext())
+	suite.NoError(err)
+	suite.Equal(&JsUpgradeResult{PreviousVersion: "old", NewVersion: "new"}, result)
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestUpgradeFails() {
+	suite.rawExtension.Upgrade = func(context *context.ExtensionContext) *JsUpgradeResult {
+		panic("mock error")
+	}
+	result, err := suite.extension.Upgrade(createMockContext())
+	suite.EqualError(err, "failed to upgrade extension \"id\": mock error")
+	suite.Nil(result)
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestUpgradeUnsupported() {
+	suite.rawExtension.Upgrade = nil
+	instance, err := suite.extension.Upgrade(createMockContext())
+	suite.EqualError(err, `extension "id" does not support operation "upgrade"`)
+	suite.Nil(instance)
 }
 
 // AddInstance

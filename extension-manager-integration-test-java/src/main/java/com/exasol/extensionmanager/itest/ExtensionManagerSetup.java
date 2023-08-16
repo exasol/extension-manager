@@ -26,16 +26,24 @@ public class ExtensionManagerSetup implements AutoCloseable {
     private final Connection connection;
     private final List<Runnable> cleanupCallbacks = new ArrayList<>();
     private final ExtensionManagerClient client;
-    private final Path extensionFolder;
+    private final PreviousVersionManager previousVersionManager;
 
-    private ExtensionManagerSetup(final ExtensionManagerProcess extensionManager, final Connection connection,
-            final ExasolObjectFactory exasolObjectFactory, final ExtensionManagerClient client,
-            final Path extensionFolder) {
+    /**
+     * Temp folder containing extension definitions (= JS files).
+     * <p>
+     * This is package private to allow access from tests.
+     */
+    final Path extensionFolder;
+
+    private ExtensionManagerSetup(final ExtensionManagerProcess extensionManager, final ExasolTestSetup exasolTestSetup,
+            final Connection connection, final ExasolObjectFactory exasolObjectFactory,
+            final ExtensionManagerClient client, final Path extensionFolder) {
         this.extensionManager = extensionManager;
         this.connection = connection;
         this.exasolObjectFactory = exasolObjectFactory;
         this.client = client;
         this.extensionFolder = extensionFolder;
+        this.previousVersionManager = PreviousVersionManager.create(this, exasolTestSetup, extensionFolder);
     }
 
     /**
@@ -71,7 +79,8 @@ public class ExtensionManagerSetup implements AutoCloseable {
         final Connection connection = createConnection(exasolTestSetup);
         final ExasolObjectFactory exasolObjectFactory = new ExasolObjectFactory(connection,
                 ExasolObjectConfiguration.builder().build());
-        return new ExtensionManagerSetup(extensionManager, connection, exasolObjectFactory, client, extensionFolder);
+        return new ExtensionManagerSetup(extensionManager, exasolTestSetup, connection, exasolObjectFactory, client,
+                extensionFolder);
     }
 
     private static Connection createConnection(final ExasolTestSetup exasolTestSetup) {
@@ -124,6 +133,15 @@ public class ExtensionManagerSetup implements AutoCloseable {
                             sourceFile, targetFile, exception.getMessage())
                     .toString(), exception);
         }
+    }
+
+    /**
+     * Get the {@link PreviousVersionManager}.
+     * 
+     * @return the {@link PreviousVersionManager}
+     */
+    public PreviousVersionManager previousVersionManager() {
+        return this.previousVersionManager;
     }
 
     /**
@@ -188,12 +206,55 @@ public class ExtensionManagerSetup implements AutoCloseable {
         };
     }
 
+    /**
+     * Mark the given file for deletion. Calling {@link #close()} will delete it.
+     * 
+     * @param fileToDelete file to delete at cleanup
+     */
+    void addFileToCleanupQueue(final Path fileToDelete) {
+        this.cleanupCallbacks.add(deleteFileRunnable(fileToDelete));
+    }
+
+    private Runnable deleteFileRunnable(final Path fileToDelete) {
+        return () -> {
+            try {
+                LOGGER.fine(() -> "Deleting file '" + fileToDelete + "'");
+                Files.delete(fileToDelete);
+            } catch (final IOException exception) {
+                throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-31")
+                        .message("Failed to delete file {{path}}: {{error message}}", fileToDelete,
+                                exception.getMessage())
+                        .toString(), exception);
+            }
+        };
+    }
+
     private Statement createStatement() throws SQLException {
         return this.connection.createStatement();
     }
 
     /**
-     * Cleanup resources after running tests. Call this in a {@link org.junit.jupiter.api.AfterAll} method.
+     * Cleanup resources after each test in order to have a clean state. Usually you call this in an
+     * {@link org.junit.jupiter.api.AfterEach} method.
+     * <p>
+     * Don't mix this up with {@link #close()} which must be called in {@link org.junit.jupiter.api.AfterAll}.
+     */
+    public void cleanup() {
+        this.cleanupCallbacks.forEach(Runnable::run);
+        this.cleanupCallbacks.clear();
+        try {
+            createStatement().execute("DROP SCHEMA IF EXISTS \"" + EXTENSION_SCHEMA_NAME + "\" CASCADE");
+        } catch (final SQLException exception) {
+            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-25")
+                    .message("Failed to delete extension schema {{schema name}}", EXTENSION_SCHEMA_NAME).toString(),
+                    exception);
+        }
+    }
+
+    /**
+     * Cleanup resources after running all tests. Call this in a {@link org.junit.jupiter.api.AfterAll} method.
+     * <p>
+     * Don't mix this up with {@link #cleanup()} which must be called in {@link org.junit.jupiter.api.AfterEach}.
      */
     @Override
     public void close() {
@@ -211,22 +272,6 @@ public class ExtensionManagerSetup implements AutoCloseable {
         } catch (final IOException exception) {
             throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-24")
                     .message("Failed to extension folder {{folder}}", extensionFolder).toString(), exception);
-        }
-    }
-
-    /**
-     * Cleanup resources after a test in order to have a clean state. Usually you call this in an
-     * {@link org.junit.jupiter.api.AfterEach} method.
-     */
-    public void cleanup() {
-        this.cleanupCallbacks.forEach(Runnable::run);
-        this.cleanupCallbacks.clear();
-        try {
-            createStatement().execute("DROP SCHEMA IF EXISTS \"" + EXTENSION_SCHEMA_NAME + "\" CASCADE");
-        } catch (final SQLException exception) {
-            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-25")
-                    .message("Failed to delete extension schema {{schema name}}", EXTENSION_SCHEMA_NAME).toString(),
-                    exception);
         }
     }
 }

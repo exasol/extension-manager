@@ -37,6 +37,10 @@ type controller interface {
 	// extensionVersion is the version of the extension to uninstall
 	UninstallExtension(txCtx *transaction.TransactionContext, extensionId string, extensionVersion string) error
 
+	// UpgradeExtension upgrades an installed extension to the latest version.
+	// extensionId is the ID of the extension to uninstall
+	UpgradeExtension(txCtx *transaction.TransactionContext, extensionId string) (*extensionAPI.JsUpgradeResult, error)
+
 	// CreateInstance creates a new instance of an extension, e.g. a virtual schema and returns it's name.
 	CreateInstance(txCtx *transaction.TransactionContext, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error)
 
@@ -152,10 +156,24 @@ func (c *controllerImpl) GetAllInstallations(txCtx *transaction.TransactionConte
 		if err != nil {
 			return nil, apiErrors.NewAPIErrorWithCause(fmt.Sprintf("failed to find installations for extension %q", extension.Name), err)
 		} else {
+			c.logInstallations(extension, installations)
 			allInstallations = append(allInstallations, installations...)
 		}
 	}
 	return allInstallations, nil
+}
+
+func (*controllerImpl) logInstallations(extension *extensionAPI.JsExtension, installations []*extensionAPI.JsExtInstallation) {
+	if len(installations) == 0 {
+		log.Debugf("Found no installations for extension %q", extension.Id)
+		return
+	}
+	log.Debugf("Found %d installations for extension %q", len(installations), extension.Id)
+	if log.IsLevelEnabled(log.DebugLevel) {
+		for _, installation := range installations {
+			log.Debugf("- %q: version %s", installation.Name, installation.Version)
+		}
+	}
 }
 
 func (c *controllerImpl) GetParameterDefinitions(txCtx *transaction.TransactionContext, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
@@ -192,6 +210,15 @@ func (c *controllerImpl) UninstallExtension(txCtx *transaction.TransactionContex
 		return extensionLoadingFailed(extensionId, err)
 	}
 	return extension.Uninstall(c.createExtensionContext(txCtx), extensionVersion)
+}
+
+/* [impl -> dsn~upgrade-extension~1]. */
+func (c *controllerImpl) UpgradeExtension(txCtx *transaction.TransactionContext, extensionId string) (*extensionAPI.JsUpgradeResult, error) {
+	extension, err := c.loadExtensionById(extensionId)
+	if err != nil {
+		return nil, extensionLoadingFailed(extensionId, err)
+	}
+	return extension.Upgrade(c.createExtensionContext(txCtx))
 }
 
 func (c *controllerImpl) CreateInstance(txCtx *transaction.TransactionContext, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {

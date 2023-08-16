@@ -46,6 +46,14 @@ func (mock *mockControllerImpl) UninstallExtension(txCtx *transaction.Transactio
 	return args.Error(0)
 }
 
+func (mock *mockControllerImpl) UpgradeExtension(txCtx *transaction.TransactionContext, extensionId string) (*extensionAPI.JsUpgradeResult, error) {
+	args := mock.Called(txCtx, extensionId)
+	if result, ok := args.Get(0).(*extensionAPI.JsUpgradeResult); ok {
+		return result, args.Error(1)
+	}
+	return nil, args.Error(1)
+}
+
 func (mock *mockControllerImpl) CreateInstance(txCtx *transaction.TransactionContext, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {
 	args := mock.Called(txCtx, extensionId, extensionVersion, parameterValues)
 	if result, ok := args.Get(0).(*extensionAPI.JsExtInstance); ok {

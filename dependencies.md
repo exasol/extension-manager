@@ -43,10 +43,11 @@
 
 ### Test Dependencies
 
-| Dependency                                | License                           |
-| ----------------------------------------- | --------------------------------- |
-| [JUnit Jupiter API][32]                   | [Eclipse Public License v2.0][33] |
-| [EqualsVerifier | release normal jar][34] | [Apache License, Version 2.0][28] |
+| Dependency                                 | License                           |
+| ------------------------------------------ | --------------------------------- |
+| [JUnit Jupiter API][32]                    | [Eclipse Public License v2.0][33] |
+| [JUnit Jupiter Params][32]                 | [Eclipse Public License v2.0][33] |
+| [EqualsVerifier \| release normal jar][34] | [Apache License, Version 2.0][28] |
 
 ### Plugin Dependencies
 

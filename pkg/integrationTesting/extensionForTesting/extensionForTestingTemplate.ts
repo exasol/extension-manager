@@ -2,6 +2,7 @@ import {
     BadRequestError, Context, ExaMetadata, ExasolExtension,
     Installation,
     Instance, InternalServerError, Parameter, ParameterValues,
+    UpgradeResult,
     registerExtension
 } from "@exasol/extension-manager-interface";
 
@@ -26,6 +27,9 @@ function createExtension(): ExasolExtension {
         },
         uninstall(context: Context, version: string): void {
             $UNINSTALL_EXTENSION$
+        },
+        upgrade(context: Context): UpgradeResult {
+            $UPGRADE_EXTENSION$
         },
         deleteInstance(context: Context, extensionVersion: string, instanceId: string): void {
             $DELETE_INSTANCE$

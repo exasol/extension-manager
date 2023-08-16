@@ -1,5 +1,6 @@
 *.sh text eol=lf
 
+.github/workflows/broken_links_checker.yml          linguist-generated=true
 .github/workflows/project-keeper.sh                 linguist-generated=true
 .github/workflows/project-keeper-verify.yml         linguist-generated=true
 dependencies.md                                     linguist-generated=true
@@ -15,3 +16,6 @@ extension-manager-integration-test-java/pk_generated_parent.pom               li
 extension-manager-integration-test-java/versionsMavenPluginRules.xml          linguist-generated=true
 extension-manager-integration-test-java/.settings/org.eclipse.jdt.core.prefs  linguist-generated=true
 extension-manager-integration-test-java/.settings/org.eclipse.jdt.ui.prefs    linguist-generated=true
+
+registry/package-lock.json                                                    linguist-generated=true
+extension-manager-integration-test-java/testing-extension/package-lock.json   linguist-generated=true

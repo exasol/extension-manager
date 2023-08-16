@@ -27,7 +27,7 @@ type ControllerUTestSuite struct {
 	db                *sql.DB
 	dbMock            sqlmock.Sqlmock
 	bucketFsMock      bfs.BucketFsMock
-	metaDataMock      exaMetadata.ExaMetaDataReaderMock
+	metaDataMock      *exaMetadata.ExaMetaDataReaderMock
 }
 
 func TestControllerUTestSuite(t *testing.T) {
@@ -50,7 +50,7 @@ func (suite *ControllerUTestSuite) createController() {
 			ExtensionSchema:      EXTENSION_SCHEMA,
 			ExtensionRegistryURL: "registryUrl",
 			BucketFSBasePath:     "bfsBasePath"},
-		metaDataReader: &suite.metaDataMock,
+		metaDataReader: suite.metaDataMock,
 	}
 	suite.controller = &transactionControllerImpl{controller: ctrl, bucketFs: &suite.bucketFsMock}
 }
@@ -67,6 +67,8 @@ func (suite *ControllerUTestSuite) initDbMock() {
 
 func (suite *ControllerUTestSuite) AfterTest(suiteName, testName string) {
 	suite.NoError(suite.dbMock.ExpectationsWereMet())
+	suite.bucketFsMock.AssertExpectations(suite.T())
+	suite.metaDataMock.AssertExpectations(suite.T())
 }
 
 // GetAllExtensions
@@ -114,10 +116,10 @@ type errorTest struct {
 }
 
 var errorTests = []errorTest{
-	{testName: "generic", throwCommand: "throw Error(`mock error from js`)", expectedStatus: -1},
-	{testName: "internal server error", throwCommand: "throw new InternalServerError(`mock error from js`)", expectedStatus: -1},
-	{testName: "bad request", throwCommand: "throw new BadRequestError(`mock error from js`)", expectedStatus: 400},
-	{testName: "null pointer", throwCommand: `(<any>{}).a.b; throw Error("mock")`, expectedStatus: -1, expectedMessage: "TypeError: Cannot read property 'b' of undefined"},
+	{testName: "generic", throwCommand: "throw Error(`mock error from js`);", expectedStatus: -1},
+	{testName: "internal server error", throwCommand: "throw new InternalServerError(`mock error from js`);", expectedStatus: -1},
+	{testName: "bad request", throwCommand: "throw new BadRequestError(`mock error from js`);", expectedStatus: 400},
+	{testName: "null pointer", throwCommand: `(<any>{}).a.b; throw Error("mock");`, expectedStatus: -1, expectedMessage: "TypeError: Cannot read property 'b' of undefined"},
 }
 
 func (suite *ControllerUTestSuite) TestGetAllInstallationsFails() {
@@ -134,6 +136,7 @@ func (suite *ControllerUTestSuite) TestGetAllInstallationsFails() {
 			extensions, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
 			suite.assertError(t, err)
 			suite.Nil(extensions)
+			suite.metaDataMock.AssertExpectations(suite.T())
 		})
 	}
 }
@@ -145,7 +148,6 @@ func (suite *ControllerUTestSuite) TestFindInstancesFails() {
 				WithFindInstancesFunc(t.throwCommand).
 				Build().
 				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-			suite.metaDataMock.SimulateExaMetaData(exaMetadata.ExaMetadata{})
 			suite.initDbMock()
 			suite.dbMock.ExpectBegin()
 			suite.dbMock.ExpectRollback()
@@ -236,7 +238,7 @@ func (suite *ControllerUTestSuite) TestInstallSucceeds() {
 	suite.NoError(err)
 }
 
-func (suite *ControllerUTestSuite) TestInstall_QueryFails() {
+func (suite *ControllerUTestSuite) TestInstallQueryFails() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithInstallFunc("context.sqlClient.execute('install extension')").
 		Build().
@@ -288,7 +290,7 @@ func (suite *ControllerUTestSuite) TestUninstallSucceeds() {
 	suite.NoError(err)
 }
 
-func (suite *ControllerUTestSuite) TestUninstall_QueryFails() {
+func (suite *ControllerUTestSuite) TestUninstallQueryFails() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUninstallFunc("context.sqlClient.execute(`uninstall extension version ${version}`)").
 		Build().
@@ -316,17 +318,71 @@ func (suite *ControllerUTestSuite) TestUninstallFails() {
 	}
 }
 
+// Upgrade
+
+func (suite *ControllerUTestSuite) TestUpgradeFailsForUnknownExtensionId() {
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectRollback()
+	result, err := suite.controller.UpgradeExtension(mockContext(), suite.db, "unknown-extension-id")
+	suite.ErrorContains(err, `failed to load extension "unknown-extension-id"`)
+	suite.ErrorContains(err, `unknown-extension-id" not found`)
+	suite.Nil(result)
+}
+
+/* [utest -> dsn~upgrade-extension~1] */
+func (suite *ControllerUTestSuite) TestUpgradeSucceeds() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithUpgradeFunc("context.sqlClient.execute(`upgrade extension`); return { previousVersion: 'old', newVersion: 'new' };").
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("upgrade extension").WillReturnResult(sqlmock.NewResult(0, 0))
+	suite.dbMock.ExpectCommit()
+	result, err := suite.controller.UpgradeExtension(mockContext(), suite.db, EXTENSION_ID)
+	suite.NoError(err)
+	suite.Equal(&extensionAPI.JsUpgradeResult{PreviousVersion: "old", NewVersion: "new"}, result)
+}
+
+func (suite *ControllerUTestSuite) TestUpgradeQueryFails() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithUpgradeFunc("context.sqlClient.execute(`upgrade extension`); return { previousVersion: 'old', newVersion: 'new' };").
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("upgrade extension").WillReturnError(fmt.Errorf("mock"))
+	suite.dbMock.ExpectRollback()
+	result, err := suite.controller.UpgradeExtension(mockContext(), suite.db, EXTENSION_ID)
+	suite.EqualError(err, "failed to upgrade extension \"testing-extension.js\": error executing statement \"upgrade extension\": mock")
+	suite.Nil(result)
+}
+
+func (suite *ControllerUTestSuite) TestUpgradeFails() {
+	for _, t := range errorTests {
+		suite.Run(t.testName, func() {
+			integrationTesting.CreateTestExtensionBuilder(suite.T()).
+				WithUpgradeFunc(t.throwCommand).
+				Build().
+				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+			suite.initDbMock()
+			suite.dbMock.ExpectBegin()
+			suite.dbMock.ExpectRollback()
+			result, err := suite.controller.UpgradeExtension(mockContext(), suite.db, EXTENSION_ID)
+			suite.assertError(t, err)
+			suite.Nil(result)
+		})
+	}
+}
+
 // CreateInstance
 
 /* [utest -> dsn~parameter-types~1] */
-func (suite *ControllerUTestSuite) TestCreateInstance_invalidParameters() {
+func (suite *ControllerUTestSuite) TestCreateInstanceInvalidParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
 		WithAddInstanceFunc("throw new Error('This should not be called.')").
 		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string", required: true}]`).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectRollback()
@@ -343,7 +399,6 @@ func (suite *ControllerUTestSuite) TestCreateInstanceFails() {
 				WithAddInstanceFunc(t.throwCommand).
 				Build().
 				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-			suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{})
 			suite.dbMock.ExpectBegin()
 			suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 			suite.dbMock.ExpectRollback()
@@ -354,13 +409,12 @@ func (suite *ControllerUTestSuite) TestCreateInstanceFails() {
 	}
 }
 
-func (suite *ControllerUTestSuite) TestCreateInstance_validParameters() {
+func (suite *ControllerUTestSuite) TestCreateInstanceValidParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
 		WithAddInstanceFunc("return {id: 'instId', name: `ext_${version}_${params.values[0].name}_${params.values[0].value}`};").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()
@@ -392,7 +446,6 @@ func (suite *ControllerUTestSuite) TestDeleteInstanceSucceeds() {
 		WithDeleteInstanceFunc("context.sqlClient.execute(`delete instance ${instanceId}`)").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
-	suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec("delete instance instId").WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()

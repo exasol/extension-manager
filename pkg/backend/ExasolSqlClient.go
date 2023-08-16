@@ -7,55 +7,76 @@ import (
 	"strings"
 )
 
-type ExasolSqlClient struct {
+// SimpleSQLClient allows extensions to execute statements and queries against the database.
+type SimpleSQLClient interface {
+	// Execute runs a query that does not return rows, e.g. INSERT or UPDATE.
+	Execute(query string, args ...any) (sql.Result, error)
+
+	// Query runs a query that returns rows, typically a SELECT.
+	Query(query string, args ...any) (*QueryResult, error)
+}
+
+type exasolSqlClient struct {
 	transaction *sql.Tx
 	ctx         context.Context
 }
 
-func NewSqlClient(ctx context.Context, tx *sql.Tx) *ExasolSqlClient {
-	return &ExasolSqlClient{ctx: ctx, transaction: tx}
+// NewSqlClient creates a new [SimpleSQLClient].
+func NewSqlClient(ctx context.Context, tx *sql.Tx) SimpleSQLClient {
+	return &exasolSqlClient{ctx: ctx, transaction: tx}
 }
 
-func (c *ExasolSqlClient) Execute(query string, args ...any) {
+// Execute executes a statement like `CREATE VIRTUAL SCHEMA`.
+/* [impl -> dsn~extension-context-sql-client~1]. */
+func (c *exasolSqlClient) Execute(query string, args ...any) (sql.Result, error) {
 	err := validateQuery(query)
 	if err != nil {
-		reportError(err)
+		return nil, err
 	}
 
-	_, err = c.transaction.ExecContext(c.ctx, query, args...)
+	result, err := c.transaction.ExecContext(c.ctx, query, args...)
 	if err != nil {
-		reportError(fmt.Errorf("error executing statement %q: %w", query, err))
+		return nil, fmt.Errorf("error executing statement %q: %w", query, err)
 	}
+	return result, nil
 }
 
-func (c *ExasolSqlClient) Query(query string, args ...any) QueryResult {
+// Query runs a query like `SELECT` and returns the result.
+/* [impl -> dsn~extension-context-sql-client~1]. */
+func (c *exasolSqlClient) Query(query string, args ...any) (result *QueryResult, errResult error) {
 	err := validateQuery(query)
 	if err != nil {
-		reportError(err)
+		return nil, err
 	}
 	rows, err := c.transaction.QueryContext(c.ctx, query, args...)
 	if err != nil {
-		reportError(fmt.Errorf("error executing statement %q: %w", query, err))
+		return nil, fmt.Errorf("error executing statement %q: %w", query, err)
 	}
-	defer closeRows(rows)
-	result, err := c.extractResult(rows)
-	if err != nil || result == nil {
-		reportError(fmt.Errorf("error reading result from statement %q: %w", query, err))
+	defer func() {
+		if err := closeRows(rows); err != nil {
+			errResult = err
+			result = nil
+		}
+	}()
+	result, err = c.extractResult(rows)
+	if err != nil {
+		return nil, fmt.Errorf("error reading result from statement %q: %w", query, err)
 	}
-	return *result
+	return result, nil
 }
 
-func closeRows(rows *sql.Rows) {
+func closeRows(rows *sql.Rows) error {
 	err := rows.Close()
 	if err != nil {
-		reportError(fmt.Errorf("error closing result: %w", err))
+		return fmt.Errorf("error closing result: %w", err)
 	}
 	if err = rows.Err(); err != nil {
-		reportError(fmt.Errorf("error while iterating result: %w", err))
+		return fmt.Errorf("error while iterating result: %w", err)
 	}
+	return nil
 }
 
-func (c ExasolSqlClient) extractResult(rows *sql.Rows) (*QueryResult, error) {
+func (c exasolSqlClient) extractResult(rows *sql.Rows) (*QueryResult, error) {
 	colTypes, err := rows.ColumnTypes()
 	if err != nil {
 		return nil, err
@@ -91,16 +112,19 @@ func extractRows(rows *sql.Rows, columnCount int) ([]Row, error) {
 	return resultRows, nil
 }
 
+// Result of a database query.
 type QueryResult struct {
-	Columns []Column `json:"columns"`
-	Rows    []Row    `json:"rows"`
+	Columns []Column `json:"columns"` // Column definitions of the query result
+	Rows    []Row    `json:"rows"`    // The result rows
 }
 
+// Column definition of a query result.
 type Column struct {
-	Name     string `json:"name"`
-	TypeName string `json:"typeName"`
+	Name     string `json:"name"`     // Column name
+	TypeName string `json:"typeName"` // Column type
 }
 
+// Row of a database query result.
 type Row []any
 
 var transactionStatements = []string{"commit", "rollback"}
@@ -114,9 +138,4 @@ func validateQuery(originalQuery string) error {
 		}
 	}
 	return nil
-}
-
-func reportError(err error) {
-	// Panic to signal a failure to the JavaScript extension code.
-	panic(err)
 }

@@ -78,14 +78,37 @@ func (suite *ExaMetadataITestSuite) TestReadMetadataOfJavaSetScript() {
 			Comment:    ""}}}, result.AllScripts)
 }
 
-func (suite *ExaMetadataITestSuite) TestReadMetadataScripts_NoResult() {
+func (suite *ExaMetadataITestSuite) TestReadMetadataScriptsNoResult() {
 	result := suite.readMetaDataTables("dummy")
 	suite.Equal(exaMetadata.ExaScriptTable{Rows: []exaMetadata.ExaScriptRow{}}, result.AllScripts)
 }
 
-func (suite *ExaMetadataITestSuite) TestReadMetadataVirtualSchemas_Empty() {
+func (suite *ExaMetadataITestSuite) TestReadMetadataVirtualSchemasEmpty() {
 	result := suite.readMetaDataTables("dummy")
 	suite.Equal(exaMetadata.ExaVirtualSchemasTable{Rows: []exaMetadata.ExaVirtualSchemaRow{}}, result.AllVirtualSchemas)
+}
+
+/* [itest -> dsn~extension-context-metadata~1] */
+func (suite *ExaMetadataITestSuite) TestGetScriptByName() {
+	fixture := integrationTesting.CreateJavaAdapterScriptFixture(suite.exasol.GetConnection())
+	fixture.Cleanup(suite.T())
+	result, err := suite.getScriptByName(fixture.GetSchemaName(), "VS_ADAPTER")
+	suite.NoError(err)
+	suite.Equal(
+		&exaMetadata.ExaScriptRow{
+			Schema:     "TEST",
+			Name:       "VS_ADAPTER",
+			Type:       "ADAPTER",
+			InputType:  "",
+			ResultType: "",
+			Text:       "CREATE JAVA  ADAPTER SCRIPT \"VS_ADAPTER\" AS\n%scriptclass com.exasol.adapter.RequestDispatcher;\n%jar /buckets/bfsdefault/default/vs.jar;",
+			Comment:    ""}, result)
+}
+
+func (suite *ExaMetadataITestSuite) TestGetScriptByNameNoResult() {
+	result, err := suite.getScriptByName("schema", "script")
+	suite.NoError(err)
+	suite.Nil(result)
 }
 
 func (suite *ExaMetadataITestSuite) readMetaDataTables(schemaName string) *exaMetadata.ExaMetadata {
@@ -94,4 +117,10 @@ func (suite *ExaMetadataITestSuite) readMetaDataTables(schemaName string) *exaMe
 	metaData, err := exaMetadata.CreateExaMetaDataReader().ReadMetadataTables(tx, schemaName)
 	suite.NoError(err)
 	return metaData
+}
+
+func (suite *ExaMetadataITestSuite) getScriptByName(schemaName, scriptName string) (*exaMetadata.ExaScriptRow, error) {
+	tx, err := suite.exasol.GetConnection().Begin()
+	suite.NoError(err)
+	return exaMetadata.CreateExaMetaDataReader().GetScriptByName(tx, schemaName, scriptName)
 }

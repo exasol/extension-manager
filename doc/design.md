@@ -170,19 +170,6 @@ As described in [`dsn~extension-components~1`](#components-of-an-extension) an e
 
 Needs: impl, utest, itest
 
-#### Resolving Files in BucketFS
-`dsn~resolving-files-in-bucketfs~1`
-
-EM resolves filenames to absolute paths in BucketFS.
-
-Rationale:
-
-Extensions require files in BucketFS. The exact location in BucketFS of the files is not known when creating an extension, only the file name (e.g. `document-files-virtual-schema-dist-7.3.3-s3-2.6.2.jar`). In order to create adapter scripts, the extension must know the absolute path of the file in BucketFS (e.g. `/buckets/bfsdefault/default/document-files-virtual-schema-dist-7.3.3-s3-2.6.2.jar`). So EM must allow the extension to resolve file names to an absolute path in BucketFS.
-
-Needs: impl, utest, itest
-
-#### Resolving Artifacts in BucketFS
-
 ### Extension Definitions
 `dsn~extension-definition~1`
 
@@ -340,7 +327,7 @@ Rationale: Parameters can change over time, see [Updates](#updates).
 
 Covers:
 * [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
-* [`req~update-extension~1`](system_requirements.md#uninstalling-extensions)
+* [`req~upgrade-extension~1`](system_requirements.md#uninstalling-extensions)
 
 Needs: impl, utest
 
@@ -617,15 +604,75 @@ Covers:
 
 Needs: impl, utest, itest
 
-#### Updates
-`dsn~update-extension~1`
-Status: draft
+#### Upgrades
+`dsn~upgrade-extension~1`
 
-EM can update an installed extensions and its instances to the latest version.
+EM can upgrade an installed extensions and its instances to the latest version.
 
 Covers:
-* [`req~update-extension~1`](system_requirements.md#uninstalling-extensions)
+* [`req~upgrade-extension~1`](system_requirements.md#uninstalling-extensions)
 * [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+
+Needs: impl, utest, itest
+
+### Extension Context
+
+The extension context allows extension definitions to interact with the extension manager and the database (e.g. by executing queries).
+
+#### Extension Context SQL Client
+`dsn~extension-context-sql-client~1`
+
+The SQL client in the extension context allows the extension definition to execute statements and run queries against the database and process query results.
+
+Rationale:
+
+* This allows the extension to create necessary database objects like `SCRIPT`s, `CONNECTION`s and `VIRTUAL SCHEMA`s.
+* The extension can also run arbitrary queries in order to read required information about their installations (e.g. scripts) and instances (e.g. virtual schemas).
+* While EM also provides [access to metadata](#extension-context-metadata) via the context, this information may not be sufficient. Executing arbitrary queries ensures maximum flexibility for extensions.
+
+Covers:
+* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+
+Needs: impl, utest, itest
+
+#### Extension Context BucketFS
+`dsn~extension-context-bucketfs~1`
+
+The BucketFS client in the extension context allows the extension definition to interact with BucketFS.
+
+Covers:
+* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+
+Needs: impl, utest, itest
+
+##### Resolving Files in BucketFS
+`dsn~resolving-files-in-bucketfs~1`
+
+EM resolves filenames to absolute paths in BucketFS.
+
+Rationale:
+
+Extensions require files in BucketFS. The exact location in BucketFS of the files is not known when creating an extension, only the file name (e.g. `document-files-virtual-schema-dist-7.3.3-s3-2.6.2.jar`). In order to create adapter scripts, the extension must know the absolute path of the file in BucketFS (e.g. `/buckets/bfsdefault/default/document-files-virtual-schema-dist-7.3.3-s3-2.6.2.jar`). So EM must allow the extension to resolve file names to an absolute path in BucketFS.
+
+Needs: impl, utest, itest
+
+#### Extension Context Metadata
+`dsn~extension-context-metadata~1`
+
+The Metadata client in the extension context allows the extension definition to read Metadata (e.g. tables `SYS.EXA_ALL_SCRIPTS` or `SYS.EXA_ALL_VIRTUAL_SCHEMAS`) from the database.
+
+Rationale:
+
+* This information is necessary for the extension to find its installations (e.g. scripts) and instances (e.g. virtual schemas).
+* As an alternative extensions could also use the [SQL client](#extension-context-sql-client) included in the context, but this would require duplicating SQL queries across many extensions.
+* The schema for metadata table `SYS.EXA_ALL_VIRTUAL_SCHEMAS` has changed between Exasol v7 and v8. So the code for reading this table requires distinction between the two versions.
+  * Moving this code to the extensions would cause even more code duplication that is hard to maintain.
+  * **Note:** EM will only need to work with Exasol v8, so support for v7 is actually not necessary. However the Docker container for v8 currently does not support running Python and Java UDFs. Until this is fixed we still need v7 for integration testing.
+
+Covers:
+* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+
+Needs: impl, utest, itest
 
 ## Cross-cutting Concerns
 
@@ -707,3 +754,15 @@ TypeScript adds a bit of complexity at build time for transpiling TypeScript to 
 ## Quality Scenarios
 
 ## Risks
+
+### Multiple Versions of the Same Extension Definition
+
+When multiple versions of the same extension definition (i.e. JavaScript files) are present in the extension registry, EM will query all of them when listing installations. For each version EM will find the same installations (e.g. adapter script). In result EM might return multiple installations where only one is present.
+
+#### Mitigation
+
+A possible mitigation could be that EM filters the registry and for each extension definition keeps only the latest version.
+
+#### Decision
+
+We accept the risk for now and ensure that the registry only contains a single version of each extension definition.

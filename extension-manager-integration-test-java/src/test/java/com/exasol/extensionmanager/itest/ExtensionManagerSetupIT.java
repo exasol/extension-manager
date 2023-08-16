@@ -65,6 +65,10 @@ class ExtensionManagerSetupIT {
     void cleanup() throws SQLException {
         extensionManager.createExtensionSchema();
         extensionManager.cleanup();
+        assertNoSchemaExists();
+    }
+
+    private void assertNoSchemaExists() throws SQLException {
         try (PreparedStatement statement = exasolTestSetup.createConnection()
                 .prepareStatement("select schema_name from EXA_ALL_SCHEMAS")) {
             assertThat(statement.executeQuery(), table("VARCHAR").matches());
