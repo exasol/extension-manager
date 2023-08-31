@@ -43,6 +43,10 @@
                         CVE-2020-36641 is reported to be fixed in aXMLRPC 1.12.1. We use version 1.13.0, so this is a false
                         positive. -->
                         <exclude>CVE-2020-36641</exclude>
+                        <!-- Transitive dependency io.netty:netty-handler used by software.amazon.awssdk/exasol-test-setup-abstraction-java.
+                        Vulnerability still present in latest version 4.1.97.Final.
+                        We assume that the AWS SDK's usage of netty is not affected. -->
+                        <exclude>CVE-2023-4586</exclude>
                     </excludeVulnerabilityIds>
                 </configuration>
             </plugin>
