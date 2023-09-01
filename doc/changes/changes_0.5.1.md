@@ -4,9 +4,9 @@ Code name:
 
 ## Summary
 
-## Features
+## Documentation
 
-* ISSUE_NUMBER: description
+* #129: Improved description of deployment process
 
 ## Dependency Updates
 
