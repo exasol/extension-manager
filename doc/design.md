@@ -467,8 +467,8 @@ The [extension registry](#extension-registry) contains references to all availab
 
 When a new version of an extension is released, the following steps are required for deployment:
 
-* (1) Update extension registry to point to the new version's extension definition .js file.
-* (2) Copy the adapter .jar file to the Exasol SaaS BucketFS.
+* (1) Update extension registry to point to the new version's extension definition `.js` file.
+* (2) Copy the adapter `.jar` file to the Exasol SaaS BucketFS.
 
 Notes:
 * Both processes (1) and (2) are not yet automated.
