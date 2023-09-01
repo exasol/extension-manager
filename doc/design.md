@@ -426,49 +426,76 @@ Release assets:
 ```
 postgresql-vs-2.0.2.jar
 postgresql-vs-2.0.2.jar.sha256
-postgres-extension-def-2.0.2.js
-postgres-extension-def-2.0.2.js.sha256
+postgresql-vs-extension.js
+postgresql-vs-extension.js.sha256
 ```
 
-A crawler collects the JARs and extension definitions and copies them to BucketFS at scheduled interval.
-
-**This crawler is at the moment not part of this project.**
+The following diagrams shows the deployment of the adapter JAR and the extension definition:
 
 ```plantuml
 @startuml
 storage "prostgres-virtual-schema release 2.0.2" {
-  file installerInRepo as "postgres-extension-def-2.0.2.js"
+  file installerInRepo as "postgresql-vs-extension.js"
   file jarV2InRepo as "postgresql-vs-2.0.2.jar"
 }
 
 storage "prostgres-virtual-schema release 1.0.0" {
-  file "postgres-extension-def-1.0.0.js"
+  file "postgresql-vs-extension.js"
   file jarV1InRepo as "postgresql-vs-1.0.0.jar"
 }
 
-node "Exasol SaaS backend" {
-  storage Installers {
-    file installerInBucketFS as "postgres-extension-def-2.0.2.js"
+node "Extension Registry" {
+  storage "Extension Definitions" {
+    file installerInBucketFS as "postgresql-vs-extension.js"
   }
 }
 
-node "Exasol cluster (per customer)" {
+node "Exasol SaaS" {
   storage BucketFS {
     file jarV2InBucketFs as "postgresql-vs-2.0.2.jar"
     file jarV1InBucketFS as "postgresql-vs-1.0.0.jar"
   }
 }
 
-installerInRepo --> installerInBucketFS
-jarV2InRepo --> jarV2InBucketFs
-jarV1InRepo --> jarV1InBucketFS
+installerInBucketFS --> installerInRepo : Update reference during deployment (1)
+jarV2InRepo --> jarV2InBucketFs : Copy during deployment (2)
+jarV1InRepo --> jarV1InBucketFS : Copy during deployment (2)
 @enduml
 ```
+
+The [extension registry](#extension-registry) contains references to all available extension definitions.
+
+When a new version of an extension is released, the following steps are required for deployment:
+
+* (1) Update extension registry to point to the new version's extension definition `.js` file.
+* (2) Copy the adapter `.jar` file to the Exasol SaaS BucketFS.
+
+Notes:
+* Both processes (1) and (2) are not yet automated.
+* See details about [BucketsFS Buckets in Exasol SaaS](#bucketsfs-buckets-in-exasol-saas) in the next section.
 
 Covers:
 * [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
 * [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
 * [`req~uninstall-extension~1`](system_requirements.md#uninstalling-extensions)
+
+#### BucketsFS Buckets in Exasol SaaS
+
+An Exasol SaaS instance has access to the following BucketFS buckets:
+
+* `/buckets/bfssaas/default/`
+* `/buckets/bfssaas/advanced/`
+* `/buckets/uploads/default/`
+
+The `bfssaas` BucketFS is managed globally for all Exasol SaaS instances by the SaaS team. All SaaS instances have read-only access to buckets `/buckets/bfssaas/default/` and `/buckets/bfssaas/advanced/` depending on the subscription. These buckets contain pre-loaded files for selected extensions.
+
+Bucket `/buckets/uploads/default/` is manged by end-users individually per SaaS instances. Users can upload files on their own.
+
+Currently Extension Manager does not have write access to BucketFS. That's why all required files (e.g. adapter JAR files, JDBC drivers etc.) must be managed with a separate manual or automated process.
+
+This means that new releases of adapter JARs must be uploaded manually to one of the `bfssaas` buckets before end-users can install the extension in EM.
+
+In the future we might have an additional bucket for each SaaS instance where EM can upload adapter JARs on demand during the installation.
 
 ### Configure an Extension
 
