@@ -1,8 +1,14 @@
 # Extension Manager 0.5.1, released 2023-??-??
 
-Code name:
+Code name: Support `select` parameter type
 
 ## Summary
+
+This release adds support for the `select` parameter type.
+
+## Features
+
+* #132: Added support for the `select` parameter type
 
 ## Documentation
 
@@ -37,3 +43,14 @@ Code name:
 
 * Updated `com.exasol:project-keeper-maven-plugin:2.9.10` to `2.9.11`
 * Updated `org.apache.maven.plugins:maven-enforcer-plugin:3.3.0` to `3.4.0`
+
+### ParameterValidator
+
+#### Compile Dependency Updates
+
+* Updated `@exasol/extension-parameter-validator:0.2.1` to `0.3.0`
+
+#### Development Dependency Updates
+
+* Updated `typescript:5.1.6` to `5.2.2`
+* Updated `esbuild:0.18.16` to `0.19.2`
