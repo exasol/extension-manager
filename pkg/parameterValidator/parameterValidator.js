@@ -1,5 +1,5 @@
 (() => {
-  // ../../../extension-parameter-validator/dist/extensionParameterValidator.js
+  // node_modules/@exasol/extension-parameter-validator/dist/extensionParameterValidator.js
   var SUCCESS_RESULT = { success: true };
   function validationError(errorMessage) {
     return { success: false, message: errorMessage };
@@ -41,7 +41,8 @@
     if (possibleValues.includes(value)) {
       return SUCCESS_RESULT;
     }
-    return validationError(`The value is not allowed. Possible values are ${possibleValues.join(", ")}`);
+    const quotedValues = possibleValues.map((value2) => `'${value2}'`).join(", ");
+    return validationError(`The value is not allowed. Possible values are ${quotedValues}.`);
   }
   function validateBooleanParameter(value) {
     if (value === "true" || value === "false") {
