@@ -89,6 +89,18 @@ func (suite *ParameterValidatorSuite) TestValidateParameters() {
 			definitions: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "boolean"}},
 			params:      []extensionAPI.ParameterValue{{Name: "param1", Value: "true"}},
 			expected:    []ValidationResult{}},
+		{name: "valid select parameter",
+			definitions: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "select", "options": []interface{}{map[string]string{"id": "a", "name": "Value a"}, map[string]string{"id": "b", "name": "Value b"}}}},
+			params:      []extensionAPI.ParameterValue{{Name: "param1", Value: "a"}},
+			expected:    []ValidationResult{}},
+		{name: "invalid select parameter",
+			definitions: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "select", "options": []interface{}{map[string]string{"id": "a", "name": "Value a"}, map[string]string{"id": "b", "name": "Value b"}}}},
+			params:      []extensionAPI.ParameterValue{{Name: "param1", Value: "c"}},
+			expected:    []ValidationResult{{Success: false, Message: `Failed to validate parameter 'My param': The value is not allowed. Possible values are a, b`}}},
+		{name: "unknown parameter type",
+			definitions: []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "unknown"}},
+			params:      []extensionAPI.ParameterValue{{Name: "param1", Value: "c"}},
+			expected:    []ValidationResult{{Success: false, Message: `Failed to validate parameter 'My param': unsupported parameter type 'unknown'`}}},
 	}
 
 	for _, t := range tests {

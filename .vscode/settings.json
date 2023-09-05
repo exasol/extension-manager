@@ -22,5 +22,8 @@
     "vmArgs": [
       "-Djava.util.logging.config.file=src/test/resources/logging.properties"
     ]
+  },
+  "[json]": {
+    "editor.tabSize": 2
   }
 }

@@ -1,6 +1,6 @@
 (() => {
-  // node_modules/@exasol/extension-parameter-validator/dist/extensionParameterValidator.js
-  var SUCCESS_RESULT = { success: true, message: "" };
+  // ../../../extension-parameter-validator/dist/extensionParameterValidator.js
+  var SUCCESS_RESULT = { success: true };
   function validationError(errorMessage) {
     return { success: false, message: errorMessage };
   }
@@ -12,13 +12,16 @@
         return SUCCESS_RESULT;
       }
     } else {
+      const definitionType = definition.type;
       switch (definition.type) {
         case "string":
           return validateStringParameter(definition, value);
         case "boolean":
           return validateBooleanParameter(value);
+        case "select":
+          return validateSelectParameter(definition, value);
         default:
-          return validationError("unsupported parameter type '" + definition.type + "'");
+          return validationError(`unsupported parameter type '${definitionType}'`);
       }
     }
   }
@@ -29,6 +32,16 @@
       }
     }
     return SUCCESS_RESULT;
+  }
+  function validateSelectParameter(definition, value) {
+    const possibleValues = definition.options.map((option) => option.id);
+    if (possibleValues.length === 0) {
+      return validationError("No option available for this parameter.");
+    }
+    if (possibleValues.includes(value)) {
+      return SUCCESS_RESULT;
+    }
+    return validationError(`The value is not allowed. Possible values are ${possibleValues.join(", ")}`);
   }
   function validateBooleanParameter(value) {
     if (value === "true" || value === "false") {

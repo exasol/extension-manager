@@ -1,8 +1,14 @@
 # Extension Manager 0.5.1, released 2023-??-??
 
-Code name:
+Code name: Support `select` parameter type
 
 ## Summary
+
+This release adds support for the `select` parameter type.
+
+## Features
+
+* #132: Added support for the `select` parameter type
 
 ## Documentation
 
