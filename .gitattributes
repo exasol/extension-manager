@@ -19,3 +19,5 @@ extension-manager-integration-test-java/.settings/org.eclipse.jdt.ui.prefs    li
 
 registry/package-lock.json                                                    linguist-generated=true
 extension-manager-integration-test-java/testing-extension/package-lock.json   linguist-generated=true
+
+pkg/parameterValidator/parameterValidator.js linguist-generated=true
