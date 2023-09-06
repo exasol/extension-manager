@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URI;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 import com.exasol.errorreporting.ExaError;
 import com.exasol.extensionmanager.client.model.UpgradeExtensionResponse;
@@ -12,6 +13,7 @@ import com.exasol.extensionmanager.client.model.UpgradeExtensionResponse;
  * This represents a previous version of an extension.
  */
 public class PreviousExtensionVersion {
+    private static final Logger LOGGER = Logger.getLogger(PreviousExtensionVersion.class.getName());
     private final ExtensionManagerSetup setup;
     private final PreviousVersionManager previousVersionManager;
     private final String project;
@@ -28,15 +30,21 @@ public class PreviousExtensionVersion {
         this.extensionFileName = Objects.requireNonNull(builder.extensionFileName, "extensionFileName");
         this.currentVersion = Objects.requireNonNull(builder.currentVersion, "currentVersion");
         this.previousVersion = Objects.requireNonNull(builder.previousVersion, "previousVersion");
-        this.adapterFileName = Objects.requireNonNull(builder.adapterFileName, "adapterFileName");
+        this.adapterFileName = builder.adapterFileName;
     }
 
     /**
      * Prepare this previous version by downloading extension JavaScript definition and the adapter file.
      */
     public void prepare() {
+        LOGGER.fine(() -> "Preparing extension file '" + extensionFileName + "' in BucketFS...");
         this.tempExtensionId = previousVersionManager.fetchExtension(getDownloadUrl(this.extensionFileName));
-        previousVersionManager.prepareBucketFsFile(getDownloadUrl(adapterFileName), adapterFileName);
+        if (this.adapterFileName != null) {
+            LOGGER.fine(() -> "Preparing adapter file '" + adapterFileName + "' in BucketFS...");
+            previousVersionManager.prepareBucketFsFile(getDownloadUrl(adapterFileName), adapterFileName);
+        } else {
+            LOGGER.fine("No adapter file name given, skipping adapter.");
+        }
     }
 
     /**
@@ -96,6 +104,8 @@ public class PreviousExtensionVersion {
 
         /**
          * Set the adapter file name, e.g. {@code document-files-virtual-schema-dist-7.3.3-s3-2.6.2.jar}.
+         * <p>
+         * This is optional. If the adapter file name is {@code null}, no adapter file will be downloaded.
          * 
          * @param adapterFileName adapter file name
          * @return {@code this} for method chaining

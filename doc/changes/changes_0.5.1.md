@@ -4,11 +4,14 @@ Code name: Support `select` parameter type
 
 ## Summary
 
-This release adds support for the `select` parameter type.
+This release contains the following changes:
+* It adds support for the `select` parameter type.
+* In Integration test class `PreviousExtensionVersion` the builder property `adapterFileName` is now optional. This is useful for extensions that don't need an adapter file.
 
 ## Features
 
 * #132: Added support for the `select` parameter type
+* #134: Made adapter file optional for `PreviousExtensionVersion`
 
 ## Documentation
 
