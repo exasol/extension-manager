@@ -15,21 +15,24 @@ import (
 )
 
 type generalHandlerFunc = func(writer http.ResponseWriter, request *http.Request)
-type dbHandler = func(db *sql.DB, writer http.ResponseWriter, request *http.Request)
+type dbHandler = func(db *sql.DB, writer http.ResponseWriter, request *http.Request) error
 
-func adaptDbHandler(f dbHandler) generalHandlerFunc {
+func adaptDbHandler(handler dbHandler) generalHandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
-		db, err := opendbRequest(request)
+		db, err := openDBRequest(request)
 		if err != nil {
 			HandleError(request.Context(), writer, err)
 			return
 		}
-		defer closedbRequest(db)
-		f(db, writer, request)
+		defer closeDBRequest(db)
+		err = handler(db, writer, request)
+		if err != nil {
+			HandleError(request.Context(), writer, err)
+		}
 	}
 }
 
-func opendbRequest(request *http.Request) (*sql.DB, error) {
+func openDBRequest(request *http.Request) (*sql.DB, error) {
 	config, err := createDbConfig(request)
 	if err != nil {
 		return nil, err
@@ -111,7 +114,7 @@ func extractUserPassword(basicAuthCredentials string) (string, string, error) {
 	return user, password, nil
 }
 
-func closedbRequest(db *sql.DB) {
+func closeDBRequest(db *sql.DB) {
 	err := db.Close()
 	if err != nil {
 		// Strange but not critical. So we just log it and go on.

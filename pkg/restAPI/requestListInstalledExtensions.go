@@ -28,14 +28,13 @@ func ListInstalledExtensions(apiContext *ApiContext) *openapi.Get {
 }
 
 func handleListInstalledExtensions(apiContext *ApiContext) dbHandler {
-	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) {
+	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) error {
 		installations, err := apiContext.Controller.GetInstalledExtensions(request.Context(), db)
 		if err != nil {
-			HandleError(request.Context(), writer, err)
-			return
+			return err
 		}
 		response := createResponse(installations)
-		SendJSON(request.Context(), writer, response)
+		return SendJSON(request.Context(), writer, response)
 	}
 }
 

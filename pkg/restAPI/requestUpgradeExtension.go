@@ -38,16 +38,15 @@ func UpgradeExtension(apiContext *ApiContext) *openapi.Post {
 }
 
 func handleUpgradeExtension(apiContext *ApiContext) dbHandler {
-	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) {
+	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) error {
 		extensionId := chi.URLParam(request, "extensionId")
 		result, err := apiContext.Controller.UpgradeExtension(request.Context(), db, extensionId)
 		if err != nil {
 			logrus.Warnf("Upgrading of extension %q failed: %v", extensionId, err)
-			HandleError(request.Context(), writer, err)
-			return
+			return err
 		}
 		logrus.Infof("Successfully upgraded extension %q from version %s to %s", extensionId, result.PreviousVersion, result.NewVersion)
-		SendJSON(request.Context(), writer, UpgradeExtensionResponse{
+		return SendJSON(request.Context(), writer, UpgradeExtensionResponse{
 			PreviousVersion: result.PreviousVersion,
 			NewVersion:      result.NewVersion})
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -20,15 +21,15 @@ const (
 )
 
 // SendJSON converts the given data to JSON and sends it to the writer.
-func SendJSON(ctx context.Context, writer http.ResponseWriter, data interface{}) {
-	SendJSONWithStatus(ctx, 200, writer, data)
+func SendJSON(ctx context.Context, writer http.ResponseWriter, data interface{}) error {
+	return SendJSONWithStatus(ctx, 200, writer, data)
 }
 
-func SendNoContent(ctx context.Context, writer http.ResponseWriter) {
-	SendJSONWithStatus(ctx, http.StatusNoContent, writer, nil)
+func SendNoContent(ctx context.Context, writer http.ResponseWriter) error {
+	return SendJSONWithStatus(ctx, http.StatusNoContent, writer, nil)
 }
 
-func SendJSONWithStatus(ctx context.Context, status int, writer http.ResponseWriter, data interface{}) {
+func SendJSONWithStatus(ctx context.Context, status int, writer http.ResponseWriter, data interface{}) error {
 	logger := GetLogger(ctx)
 	writer.Header().Set(HeaderContentType, ContentTypeJson)
 	writer.WriteHeader(status)
@@ -46,11 +47,15 @@ func SendJSONWithStatus(ctx context.Context, status int, writer http.ResponseWri
 		encoder.SetEscapeHTML(false)
 		encodeErr := encoder.Encode(data)
 		if encodeErr != nil {
-			logger.Warnf("Could not send json: %s", encodeErr.Error())
+			err := fmt.Errorf("Could not send json: %w", encodeErr)
+			logger.Warnf(err.Error())
+			return err
+
 		}
 	} else if status != http.StatusNoContent {
 		logger.Warnf("No response data for status %d", status)
 	}
+	return nil
 }
 
 func HandleError(context context.Context, writer http.ResponseWriter, err error) {

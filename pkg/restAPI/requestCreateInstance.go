@@ -38,12 +38,11 @@ func CreateInstance(apiContext *ApiContext) *openapi.Post {
 }
 
 func handleCreateInstance(apiContext *ApiContext) dbHandler {
-	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) {
+	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) error {
 		requestBody := CreateInstanceRequest{}
 		err := DecodeJSONBody(writer, request, &requestBody)
 		if err != nil {
-			HandleError(request.Context(), writer, err)
-			return
+			return err
 		}
 		var parameters []extensionController.ParameterValue
 		for _, p := range requestBody.ParameterValues {
@@ -53,11 +52,10 @@ func handleCreateInstance(apiContext *ApiContext) dbHandler {
 		extensionVersion := chi.URLParam(request, "extensionVersion")
 		instance, err := apiContext.Controller.CreateInstance(request.Context(), db, extensionId, extensionVersion, parameters)
 		if err != nil {
-			HandleError(request.Context(), writer, err)
-			return
+			return err
 		}
 		logrus.Debugf("Created instance %q", instance)
-		SendJSON(request.Context(), writer, CreateInstanceResponse{InstanceId: instance.Id, InstanceName: instance.Name})
+		return SendJSON(request.Context(), writer, CreateInstanceResponse{InstanceId: instance.Id, InstanceName: instance.Name})
 	}
 }
 

@@ -27,14 +27,13 @@ func UninstallExtension(apiContext *ApiContext) *openapi.Delete {
 }
 
 func handleUninstallExtension(apiContext *ApiContext) dbHandler {
-	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) {
+	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) error {
 		extensionId := chi.URLParam(request, "extensionId")
 		version := chi.URLParam(request, "extensionVersion")
 		err := apiContext.Controller.UninstallExtension(request.Context(), db, extensionId, version)
 		if err != nil {
-			HandleError(request.Context(), writer, err)
-			return
+			return err
 		}
-		SendNoContent(request.Context(), writer)
+		return SendNoContent(request.Context(), writer)
 	}
 }

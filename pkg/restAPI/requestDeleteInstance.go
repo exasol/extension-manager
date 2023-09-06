@@ -32,15 +32,14 @@ func DeleteInstance(apiContext *ApiContext) *openapi.Delete {
 }
 
 func handleDeleteInstance(apiContext *ApiContext) dbHandler {
-	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) {
+	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) error {
 		extensionId := chi.URLParam(request, "extensionId")
 		extensionVersion := chi.URLParam(request, "extensionVersion")
 		instanceId := chi.URLParam(request, "instanceId")
 		err := apiContext.Controller.DeleteInstance(request.Context(), db, extensionId, extensionVersion, instanceId)
 		if err != nil {
-			HandleError(request.Context(), writer, err)
-			return
+			return err
 		}
-		SendNoContent(request.Context(), writer)
+		return SendNoContent(request.Context(), writer)
 	}
 }
