@@ -6,7 +6,7 @@ Code name: Support `select` parameter type
 
 This release contains the following changes:
 * It adds support for the `select` parameter type.
-* In Integration test class `PreviousExtensionVersion` the builder property `adapterFileName` is now optional. This is useful for extensions that don't need an adapter file.
+* In Integration test class `PreviousExtensionVersion` the builder property `adapterFileName` is now optional. This is useful for extensions that don't need an adapter file like Lua based virtual schemas.
 
 ## Features
 
