@@ -47,6 +47,7 @@ This release contains the following changes:
 #### Test Dependency Updates
 
 * Updated `org.mockito:mockito-junit-jupiter:5.4.0` to `5.5.0`
+* Updated `org.slf4j:slf4j-jdk14:2.0.7` to `2.0.9`
 
 #### Plugin Dependency Updates
 
