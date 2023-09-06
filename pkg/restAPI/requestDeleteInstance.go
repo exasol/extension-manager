@@ -27,7 +27,7 @@ func DeleteInstance(apiContext *ApiContext) *openapi.Delete {
 			AddParameter("extensionVersion", openapi.STRING, "The version of the installed extension for which to delete an instance").
 			Add("instances").
 			AddParameter("instanceId", openapi.STRING, "The ID of the instance to delete"),
-		HandlerFunc: adaptDbHandler(handleDeleteInstance(apiContext)),
+		HandlerFunc: adaptDbHandler(apiContext, handleDeleteInstance(apiContext)),
 	}
 }
 

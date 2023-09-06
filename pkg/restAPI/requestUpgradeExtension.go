@@ -33,7 +33,7 @@ func UpgradeExtension(apiContext *ApiContext) *openapi.Post {
 			Add("installations").
 			AddParameter("extensionId", openapi.STRING, "The ID of the installed extension to upgrade").
 			Add("upgrade"),
-		HandlerFunc: adaptDbHandler(handleUpgradeExtension(apiContext)),
+		HandlerFunc: adaptDbHandler(apiContext, handleUpgradeExtension(apiContext)),
 	}
 }
 

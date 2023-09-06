@@ -26,7 +26,7 @@ func ListInstances(apiContext *ApiContext) *openapi.Get {
 			AddParameter("extensionId", openapi.STRING, "The ID of the installed extension for which to get the instances").
 			AddParameter("extensionVersion", openapi.STRING, "The version of the installed extension for which to get the instances").
 			Add("instances"),
-		HandlerFunc: adaptDbHandler(handleListInstances(apiContext)),
+		HandlerFunc: adaptDbHandler(apiContext, handleListInstances(apiContext)),
 	}
 }
 

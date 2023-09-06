@@ -28,7 +28,7 @@ func InstallExtension(apiContext *ApiContext) *openapi.Put {
 			AddParameter("extensionId", openapi.STRING, "ID of the extension to install").
 			AddParameter("extensionVersion", openapi.STRING, "Version of the extension to install").
 			Add("install"),
-		HandlerFunc: adaptDbHandler(handleInstallExtension(apiContext)),
+		HandlerFunc: adaptDbHandler(apiContext, handleInstallExtension(apiContext)),
 	}
 }
 

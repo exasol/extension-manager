@@ -23,7 +23,7 @@ func ListInstalledExtensions(apiContext *ApiContext) *openapi.Get {
 			}},
 		},
 		Path:        newPathWithDbQueryParams().Add("installations"),
-		HandlerFunc: adaptDbHandler(handleListInstalledExtensions(apiContext)),
+		HandlerFunc: adaptDbHandler(apiContext, handleListInstalledExtensions(apiContext)),
 	}
 }
 

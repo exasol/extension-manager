@@ -17,7 +17,7 @@ import (
 type generalHandlerFunc = func(writer http.ResponseWriter, request *http.Request)
 type dbHandler = func(db *sql.DB, writer http.ResponseWriter, request *http.Request) error
 
-func adaptDbHandler(handler dbHandler) generalHandlerFunc {
+func adaptDbHandler(apiContext *ApiContext, handler dbHandler) generalHandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		db, err := openDBRequest(request)
 		if err != nil {

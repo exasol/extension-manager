@@ -32,7 +32,7 @@ func GetExtensionDetails(apiContext *ApiContext) *openapi.Get {
 			Add("extensions").
 			AddParameter("extensionId", openapi.STRING, "ID of the extension").
 			AddParameter("extensionVersion", openapi.STRING, "Version of the extension"),
-		HandlerFunc: adaptDbHandler(handleGetParameterDefinitions(apiContext)),
+		HandlerFunc: adaptDbHandler(apiContext, handleGetParameterDefinitions(apiContext)),
 	}
 }
 

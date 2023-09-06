@@ -33,7 +33,7 @@ func CreateInstance(apiContext *ApiContext) *openapi.Post {
 			AddParameter("extensionId", openapi.STRING, "ID of the installed extension for which to create an instance").
 			AddParameter("extensionVersion", openapi.STRING, "Version of the installed extension for which to create an instance").
 			Add("instances"),
-		HandlerFunc: adaptDbHandler(handleCreateInstance(apiContext)),
+		HandlerFunc: adaptDbHandler(apiContext, handleCreateInstance(apiContext)),
 	}
 }
 

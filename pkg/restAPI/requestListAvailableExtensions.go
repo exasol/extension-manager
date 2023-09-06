@@ -31,7 +31,7 @@ func ListAvailableExtensions(apiContext *ApiContext) *openapi.Get {
 			}},
 		},
 		Path:        newPathWithDbQueryParams().Add("extensions"),
-		HandlerFunc: adaptDbHandler(handleListAvailableExtensions(apiContext)),
+		HandlerFunc: adaptDbHandler(apiContext, handleListAvailableExtensions(apiContext)),
 	}
 }
 
