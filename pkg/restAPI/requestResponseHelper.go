@@ -58,13 +58,13 @@ func SendJSONWithStatus(ctx context.Context, status int, writer http.ResponseWri
 	return nil
 }
 
-func HandleError(context context.Context, writer http.ResponseWriter, err error) {
+func handleError(context context.Context, apiContext *ApiContext, writer http.ResponseWriter, err error) {
 	log.Errorf("Error processing request: %v", err)
 	errorToSend := apiErrors.UnwrapAPIError(err)
-	sendError(errorToSend, context, writer)
+	sendError(errorToSend, context, apiContext, writer)
 }
 
-func sendError(a *apiErrors.APIError, context context.Context, writer http.ResponseWriter) {
+func sendError(a *apiErrors.APIError, context context.Context, apiContext *ApiContext, writer http.ResponseWriter) {
 	writer.Header().Set(HeaderContentType, ContentTypeJson)
 	writer.WriteHeader(a.Status)
 	if context != nil && a.Status != http.StatusUnauthorized {
@@ -74,7 +74,9 @@ func sendError(a *apiErrors.APIError, context context.Context, writer http.Respo
 		}
 		a.APIID = getContextValue(context, APIIDKey)
 	}
-
+	if apiContext.addCauseToInternalServerError && a.Status == http.StatusInternalServerError && a.OriginalError != nil {
+		a.Message = a.Message + ": " + a.OriginalError.Error()
+	}
 	err := json.NewEncoder(writer).Encode(a)
 	if err != nil {
 		logger := GetLogger(context)

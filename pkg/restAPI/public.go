@@ -22,17 +22,17 @@ const (
 /* [impl -> dsn~go-library~1]. */
 func AddPublicEndpoints(api *openapi.API, config extensionController.ExtensionManagerConfig) error {
 	controller := extensionController.CreateWithConfig(config)
-	return addPublicEndpointsWithController(api, controller)
+	return addPublicEndpointsWithController(api, false, controller)
 }
 
 /* [impl -> dsn~rest-interface~1] */
 /* [impl -> dsn~openapi-spec~1]. */
-func addPublicEndpointsWithController(api *openapi.API, controller extensionController.TransactionController) error {
+func addPublicEndpointsWithController(api *openapi.API, addCauseToInternalServerError bool, controller extensionController.TransactionController) error {
 	api.AddTag(TagExtension, "List and install extensions")
 	api.AddTag(TagInstallation, "List and uninstall installed extensions")
 	api.AddTag(TagInstance, "Calls to list, create and remove instances of an extension")
 
-	apiContext := NewApiContext(controller)
+	apiContext := NewApiContext(controller, addCauseToInternalServerError)
 
 	if err := api.Get(ListAvailableExtensions(apiContext)); err != nil {
 		return err

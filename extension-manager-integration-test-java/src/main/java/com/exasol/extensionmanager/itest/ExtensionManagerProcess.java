@@ -33,7 +33,7 @@ class ExtensionManagerProcess implements AutoCloseable {
         LOGGER.info(() -> "Starting extension manager " + extensionManagerBinary + " on port " + port
                 + " with extension folder " + extensionFolder + "...");
         final List<String> command = List.of(extensionManagerBinary.toString(), "-extensionRegistryURL",
-                extensionFolder.toString(), "-serverAddress", "localhost:" + port);
+                extensionFolder.toString(), "-serverAddress", "localhost:" + port, "-addCauseToInternalServerError");
 
         final ServerStartupConsumer serverPortConsumer = new ServerStartupConsumer();
         final SimpleProcess process = SimpleProcess.start(command,

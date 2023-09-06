@@ -21,13 +21,13 @@ func adaptDbHandler(apiContext *ApiContext, handler dbHandler) generalHandlerFun
 	return func(writer http.ResponseWriter, request *http.Request) {
 		db, err := openDBRequest(request)
 		if err != nil {
-			HandleError(request.Context(), writer, err)
+			handleError(request.Context(), apiContext, writer, err)
 			return
 		}
 		defer closeDBRequest(db)
 		err = handler(db, writer, request)
 		if err != nil {
-			HandleError(request.Context(), writer, err)
+			handleError(request.Context(), apiContext, writer, err)
 		}
 	}
 }

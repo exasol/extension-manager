@@ -44,7 +44,7 @@ func (suite *RestAPIIntegrationTestSuite) TearDownSuite() {
 func (suite *RestAPIIntegrationTestSuite) SetupTest() {
 	// [itest -> dsn~extension-registry~1]
 	ctrl := extensionController.Create(suite.registryServer.IndexUrl(), EXTENSION_SCHEMA)
-	suite.restApi = startRestApi(&suite.Suite, ctrl)
+	suite.restApi = startRestApi(&suite.Suite, false, ctrl)
 	suite.registryServer.Reset()
 	suite.registryServer.SetRegistryContent(`{"extensions":[]}`)
 }

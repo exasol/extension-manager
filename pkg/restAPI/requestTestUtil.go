@@ -12,11 +12,11 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-func startRestApi(suite *suite.Suite, controller extensionController.TransactionController) *baseRestAPITest {
+func startRestApi(suite *suite.Suite, addCauseToInternalServerError bool, controller extensionController.TransactionController) *baseRestAPITest {
 	hostAndPort := "localhost:8081"
 	api := baseRestAPITest{
 		suite:   suite,
-		restAPI: Create(controller, hostAndPort),
+		restAPI: Create(controller, hostAndPort, addCauseToInternalServerError),
 		baseUrl: fmt.Sprintf("http://%s", hostAndPort)}
 	api.restAPI.StartInBackground()
 	return &api
