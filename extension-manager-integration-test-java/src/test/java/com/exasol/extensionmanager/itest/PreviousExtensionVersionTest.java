@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.net.URI;
@@ -43,6 +44,15 @@ class PreviousExtensionVersionTest {
         final PreviousExtensionVersion testee = builder().build();
         testee.prepare();
         verify(previousVersionManagerMock).prepareBucketFsFile(URI.create("https://extensions-internal.exasol.com/com.exasol/project/previousVersion/adapter"), "adapter");
+        assertThat(testee.getExtensionId(),equalTo("extId"));
+    }
+
+    @Test
+    void prepareWithoutAdapter() {
+        when(previousVersionManagerMock.fetchExtension(URI.create("https://extensions-internal.exasol.com/com.exasol/project/previousVersion/extensionFileName"))).thenReturn("extId");
+        final PreviousExtensionVersion testee = builder().adapterFileName(null).build();
+        testee.prepare();
+        verify(previousVersionManagerMock, never()).prepareBucketFsFile(any(), any());
         assertThat(testee.getExtensionId(),equalTo("extId"));
     }
 
