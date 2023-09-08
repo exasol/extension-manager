@@ -28,21 +28,19 @@ func InstallExtension(apiContext *ApiContext) *openapi.Put {
 			AddParameter("extensionId", openapi.STRING, "ID of the extension to install").
 			AddParameter("extensionVersion", openapi.STRING, "Version of the extension to install").
 			Add("install"),
-		HandlerFunc: adaptDbHandler(handleInstallExtension(apiContext)),
+		HandlerFunc: adaptDbHandler(apiContext, handleInstallExtension(apiContext)),
 	}
 }
 
 func handleInstallExtension(apiContext *ApiContext) dbHandler {
-	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) {
+	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) error {
 		extensionId := chi.URLParam(request, "extensionId")
 		extensionVersion := chi.URLParam(request, "extensionVersion")
 		err := apiContext.Controller.InstallExtension(request.Context(), db, extensionId, extensionVersion)
-
 		if err != nil {
-			HandleError(request.Context(), writer, err)
-			return
+			return err
 		}
-		SendNoContent(request.Context(), writer)
+		return SendNoContent(request.Context(), writer)
 	}
 }
 

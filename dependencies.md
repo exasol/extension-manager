@@ -99,7 +99,7 @@
 | [mockito-junit-jupiter][75]        | [The MIT License][76]             |
 | [udf-debugging-java][77]           | [MIT License][78]                 |
 | [Maven Project Version Getter][79] | [MIT License][80]                 |
-| [SLF4J JDK14 Binding][81]          | [MIT License][22]                 |
+| [SLF4J JDK14 Provider][81]         | [MIT License][22]                 |
 
 ### Plugin Dependencies
 

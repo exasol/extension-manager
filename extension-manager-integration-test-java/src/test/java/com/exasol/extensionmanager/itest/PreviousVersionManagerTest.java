@@ -30,7 +30,7 @@ import com.exasol.exasoltestsetup.ExasolTestSetup;
 
 @ExtendWith(MockitoExtension.class)
 class PreviousVersionManagerTest {
-
+    private static final String BASE_URL = "https://extensions-internal.exasol.com";
     @Mock
     private ExtensionManagerSetup setupMock;
     @Mock
@@ -56,8 +56,8 @@ class PreviousVersionManagerTest {
 
     @Test
     void fetchExtension() throws IOException {
-        final String extensionId = testee.fetchExtension(URI.create(
-                "https://extensions-internal.exasol.com/com.exasol/s3-document-files-virtual-schema/2.6.2/s3-vs-extension.js"));
+        final String extensionId = testee.fetchExtension(
+                URI.create(BASE_URL + "/com.exasol/s3-document-files-virtual-schema/2.6.2/s3-vs-extension.js"));
         final Path file = tempDir.resolve(extensionId);
         assertAll(() -> assertTrue(Files.exists(file), "file downloaded"),
                 () -> assertThat(Files.size(file), equalTo(20875L)));
@@ -66,7 +66,7 @@ class PreviousVersionManagerTest {
 
     @Test
     void fetchExtensionFailsForMissingFile() throws IOException {
-        final URI uri = URI.create("https://extensions-internal.exasol.com/no-such-file");
+        final URI uri = URI.create(BASE_URL + "/no-such-file");
         final IllegalStateException exception = assertThrows(IllegalStateException.class,
                 () -> testee.fetchExtension(uri));
         assertThat(exception.getMessage(),
@@ -85,8 +85,8 @@ class PreviousVersionManagerTest {
 
     @Test
     void prepareBucketFsFile() throws FileNotFoundException, BucketAccessException, TimeoutException {
-        testee.prepareBucketFsFile(URI.create(
-                "https://extensions-internal.exasol.com/com.exasol/s3-document-files-virtual-schema/2.6.2/s3-vs-extension.js"),
+        testee.prepareBucketFsFile(
+                URI.create(BASE_URL + "/com.exasol/s3-document-files-virtual-schema/2.6.2/s3-vs-extension.js"),
                 "filename");
         verify(bucketMock).uploadFile(any(), eq("filename"));
     }

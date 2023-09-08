@@ -26,24 +26,23 @@ func ListInstances(apiContext *ApiContext) *openapi.Get {
 			AddParameter("extensionId", openapi.STRING, "The ID of the installed extension for which to get the instances").
 			AddParameter("extensionVersion", openapi.STRING, "The version of the installed extension for which to get the instances").
 			Add("instances"),
-		HandlerFunc: adaptDbHandler(handleListInstances(apiContext)),
+		HandlerFunc: adaptDbHandler(apiContext, handleListInstances(apiContext)),
 	}
 }
 
 func handleListInstances(apiContext *ApiContext) dbHandler {
-	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) {
+	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) error {
 		id := chi.URLParam(request, "extensionId")
 		version := chi.URLParam(request, "extensionVersion")
 		rawInstances, err := apiContext.Controller.FindInstances(request.Context(), db, id, version)
 		if err != nil {
-			HandleError(request.Context(), writer, err)
-			return
+			return err
 		}
 		instances := make([]Instance, 0, len(rawInstances))
 		for _, i := range rawInstances {
 			instances = append(instances, Instance{Id: i.Id, Name: i.Name})
 		}
-		SendJSON(request.Context(), writer, ListInstancesResponse{Instances: instances})
+		return SendJSON(request.Context(), writer, ListInstancesResponse{Instances: instances})
 	}
 }
 

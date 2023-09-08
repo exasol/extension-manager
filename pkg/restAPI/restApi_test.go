@@ -34,6 +34,8 @@ const (
 	VALID_DB_ARGS             = "?dbHost=host&dbPort=8563"
 )
 
+var mockError = fmt.Errorf("mock error")
+
 func TestRestApiSuite(t *testing.T) {
 	suite.Run(t, new(RestAPISuite))
 }
@@ -44,7 +46,7 @@ func (suite *RestAPISuite) SetupSuite() {
 
 func (suite *RestAPISuite) SetupTest() {
 	suite.controller = &mockExtensionController{}
-	suite.restApi = startRestApi(&suite.Suite, suite.controller)
+	suite.restApi = startRestApi(&suite.Suite, true, suite.controller)
 }
 
 func (suite *RestAPISuite) TearDownTest() {
@@ -53,7 +55,7 @@ func (suite *RestAPISuite) TearDownTest() {
 
 func (suite *RestAPISuite) TestStopWithoutStartFails() {
 	controller := &mockExtensionController{}
-	restAPI := Create(controller, "localhost:8082")
+	restAPI := Create(controller, "localhost:8082", false)
 	suite.Panics(restAPI.Stop)
 }
 
@@ -74,9 +76,9 @@ func (suite *RestAPISuite) TestGetInstallationsSuccessfully() {
 }
 
 func (suite *RestAPISuite) TestGetInstallationsFailed() {
-	suite.controller.On("GetInstalledExtensions", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("mock error"))
+	suite.controller.On("GetInstalledExtensions", mock.Anything, mock.Anything).Return(nil, mockError)
 	responseString := suite.makeRequest("GET", LIST_INSTALLED_EXTENSIONS+VALID_DB_ARGS, "", 500)
-	suite.Regexp(`{"code":500,"message":"Internal server error",`, responseString)
+	suite.isInternalServerError(responseString, mockError)
 }
 
 // GetAllExtensions
@@ -95,9 +97,9 @@ func (suite *RestAPISuite) TestGetAllExtensionsSuccessfully() {
 }
 
 func (suite *RestAPISuite) TestGetAllExtensionsFails() {
-	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("mock error"))
+	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return(nil, mockError)
 	responseString := suite.makeRequest("GET", LIST_AVAILABLE_EXTENSIONS+VALID_DB_ARGS, "", 500)
-	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
+	suite.isInternalServerError(responseString, mockError)
 }
 
 // GetExtensionDetails
@@ -116,9 +118,9 @@ func (suite *RestAPISuite) TestGetExtensionDetailsSuccessfully() {
 }
 
 func (suite *RestAPISuite) TestGetExtensionDetailsFails() {
-	suite.controller.On("GetParameterDefinitions", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(nil, fmt.Errorf("mock error"))
+	suite.controller.On("GetParameterDefinitions", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(nil, mockError)
 	responseString := suite.makeRequest("GET", GET_EXTENSION_DETAILS+VALID_DB_ARGS, "", 500)
-	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
+	suite.isInternalServerError(responseString, mockError)
 }
 
 // Install extension
@@ -134,9 +136,9 @@ func (suite *RestAPISuite) TestInstallExtensionsSuccessfully() {
 }
 
 func (suite *RestAPISuite) TestInstallExtensionsFailed() {
-	suite.controller.On("InstallExtension", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(fmt.Errorf("mock error"))
+	suite.controller.On("InstallExtension", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(mockError)
 	responseString := suite.makeRequest("PUT", INSTALL_EXT_URL+VALID_DB_ARGS, `{}`, 500)
-	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
+	suite.isInternalServerError(responseString, mockError)
 }
 
 // Uninstall extension
@@ -152,9 +154,9 @@ func (suite *RestAPISuite) TestUninstallExtensionsSuccessfully() {
 }
 
 func (suite *RestAPISuite) TestUninstallExtensionsFailed() {
-	suite.controller.On("UninstallExtension", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(fmt.Errorf("mock error"))
+	suite.controller.On("UninstallExtension", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(mockError)
 	responseString := suite.makeRequest("DELETE", UNINSTALL_EXT_URL+"?extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563", "", 500)
-	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
+	suite.isInternalServerError(responseString, mockError)
 }
 
 // Upgrade extension
@@ -171,9 +173,9 @@ func (suite *RestAPISuite) TestUpgradeExtensionsSuccessfully() {
 }
 
 func (suite *RestAPISuite) TestUpgradeExtensionsFailsWithGenericError() {
-	suite.controller.On("UpgradeExtension", mock.Anything, mock.Anything, "ext-id").Return(nil, fmt.Errorf("mock error"))
+	suite.controller.On("UpgradeExtension", mock.Anything, mock.Anything, "ext-id").Return(nil, mockError)
 	responseString := suite.makeRequest("POST", UPGRADE_EXT_URL+"?extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563", "", 500)
-	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
+	suite.isInternalServerError(responseString, mockError)
 }
 
 func (suite *RestAPISuite) TestUpgradeExtensionsFailsWithAPIError() {
@@ -204,10 +206,10 @@ func (suite *RestAPISuite) TestCreateInstanceFailedInvalidPayload() {
 }
 
 func (suite *RestAPISuite) TestCreateInstanceFailed() {
-	suite.controller.On("CreateInstance", mock.Anything, mock.Anything, "ext-id", "ext-version", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return(nil, fmt.Errorf("mock error"))
+	suite.controller.On("CreateInstance", mock.Anything, mock.Anything, "ext-id", "ext-version", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return(nil, mockError)
 	responseString := suite.makeRequest("POST", CREATE_INSTANCE_URL+VALID_DB_ARGS,
 		`{"parameterValues": [{"name":"p1", "value":"v1"}]}`, 500)
-	suite.Regexp(`{"code":500,"message":"Internal server error",.*`, responseString)
+	suite.isInternalServerError(responseString, mockError)
 }
 
 // List instances
@@ -223,9 +225,9 @@ func (suite *RestAPISuite) TestListInstancesSuccessfully() {
 }
 
 func (suite *RestAPISuite) TestListInstancesFailedGenericError() {
-	suite.controller.On("FindInstances", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(nil, fmt.Errorf("mock"))
+	suite.controller.On("FindInstances", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(nil, mockError)
 	responseString := suite.restApi.makeRequestWithAuthHeader("GET", LIST_INSTANCES_URL+VALID_DB_ARGS, "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "", 500)
-	suite.Contains(responseString, "{\"code\":500,\"message\":\"Internal server error\"")
+	suite.isInternalServerError(responseString, mockError)
 }
 
 func (suite *RestAPISuite) TestListInstancesFailedApiError() {
@@ -247,9 +249,9 @@ func (suite *RestAPISuite) TestDeleteInstanceSuccessfully() {
 }
 
 func (suite *RestAPISuite) TestDeleteInstanceFailedGenericError() {
-	suite.controller.On("DeleteInstance", mock.Anything, mock.Anything, "ext-id", "ext-version", "inst-id").Return(fmt.Errorf("mock"))
+	suite.controller.On("DeleteInstance", mock.Anything, mock.Anything, "ext-id", "ext-version", "inst-id").Return(mockError)
 	responseString := suite.restApi.makeRequestWithAuthHeader("DELETE", DELETE_INSTANCE_URL+VALID_DB_ARGS, "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "", 500)
-	suite.Contains(responseString, "{\"code\":500,\"message\":\"Internal server error\"")
+	suite.isInternalServerError(responseString, mockError)
 }
 
 func (suite *RestAPISuite) TestDeleteInstanceFailedApiError() {
@@ -311,4 +313,8 @@ func (suite *RestAPISuite) makeRequest(method, path, body string, expectedStatus
 	suite.T().Helper()
 	authHeader := createBasicAuthHeader("user", "password")
 	return suite.restApi.makeRequestWithAuthHeader(method, path, authHeader, body, expectedStatus)
+}
+
+func (suite *RestAPISuite) isInternalServerError(response string, expectedCause error) {
+	suite.Contains(response, fmt.Sprintf(`{"code":500,"message":"Internal server error: %s",`, expectedCause.Error()))
 }

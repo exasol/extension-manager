@@ -19,6 +19,7 @@ func main() {
 	var extensionRegistryURL = flag.String("extensionRegistryURL", "", "URL of the extension registry index used to find available extensions or the path of a local directory")
 	var serverAddress = flag.String("serverAddress", ":8080", `Server address, e.g. ":8080" (all network interfaces) or "localhost:8080" (only local interface)`)
 	var openAPIOutputPath = flag.String("openAPIOutputPath", "", "Generate the OpenAPI spec at the given path instead of starting the server")
+	var addCauseToInternalServerError = flag.Bool("addCauseToInternalServerError", false, "Add cause of internal server errors (status 500) to the error message. Don't use this in production!")
 	flag.Parse()
 	log.SetLevel(log.DebugLevel)
 	log.SetFormatter(&simpleFormatter{})
@@ -28,17 +29,17 @@ func main() {
 			panic(fmt.Sprintf("failed to generate OpenAPI to %q: %v", *openAPIOutputPath, err))
 		}
 	} else {
-		startServer(*extensionRegistryURL, *serverAddress)
+		startServer(*extensionRegistryURL, *serverAddress, *addCauseToInternalServerError)
 	}
 }
 
-func startServer(pathToExtensionFolder string, serverAddress string) {
+func startServer(pathToExtensionFolder string, serverAddress string, addCauseToInternalServerError bool) {
 	log.Printf("Starting extension manager with extension folder %q", pathToExtensionFolder)
 	controller := extensionController.CreateWithConfig(extensionController.ExtensionManagerConfig{
 		ExtensionRegistryURL: pathToExtensionFolder,
 		ExtensionSchema:      restAPI.EXTENSION_SCHEMA_NAME,
 		BucketFSBasePath:     "/buckets/bfsdefault/default/"})
-	restApi := restAPI.Create(controller, serverAddress)
+	restApi := restAPI.Create(controller, serverAddress, addCauseToInternalServerError)
 	restApi.Serve()
 }
 

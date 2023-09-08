@@ -1,4 +1,4 @@
-# Extension Manager 0.5.1, released 2023-??-??
+# Extension Manager 0.5.1, released 2023-09-08
 
 Code name: Support `select` parameter type
 
@@ -7,15 +7,17 @@ Code name: Support `select` parameter type
 This release contains the following changes:
 * It adds support for the `select` parameter type.
 * In Integration test class `PreviousExtensionVersion` the builder property `adapterFileName` is now optional. This is useful for extensions that don't need an adapter file like Lua based virtual schemas.
+* Command line flag `-addCauseToInternalServerError` of the standalone server now allows adding the root cause error message to internal server errors (status 500).
+
+    This is helpful during debugging because the error message contains the actual root cause and you don't need to check the log for errors. The Java integration test framework `extension-manager-integration-test-java` enables this flag automatically.
+
+    ⚠️Warning⚠️: Do not enable this flag in production environments as this might leak internal information.
 
 ## Features
 
 * #132: Added support for the `select` parameter type
 * #134: Made adapter file optional for `PreviousExtensionVersion`
-
-## Documentation
-
-* #129: Improved description of deployment process
+* #131: Added command line flag `-addCauseToInternalServerError`
 
 ## Dependency Updates
 
@@ -41,6 +43,7 @@ This release contains the following changes:
 #### Test Dependency Updates
 
 * Updated `org.mockito:mockito-junit-jupiter:5.4.0` to `5.5.0`
+* Updated `org.slf4j:slf4j-jdk14:2.0.7` to `2.0.9`
 
 #### Plugin Dependency Updates
 
