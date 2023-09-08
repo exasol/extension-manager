@@ -1,4 +1,4 @@
-# Extension Manager 0.5.1, released 2023-??-??
+# Extension Manager 0.5.1, released 2023-09-08
 
 Code name: Support `select` parameter type
 
@@ -18,10 +18,6 @@ This release contains the following changes:
 * #132: Added support for the `select` parameter type
 * #134: Made adapter file optional for `PreviousExtensionVersion`
 * #131: Added command line flag `-addCauseToInternalServerError`
-
-## Documentation
-
-* #129: Improved description of deployment process
 
 ## Dependency Updates
 
