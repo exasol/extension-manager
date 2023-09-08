@@ -19,7 +19,7 @@ import (
 )
 
 /* [impl -> dsn~rest-interface~1]. */
-func setupStandaloneAPI(controller extensionController.TransactionController) (http.Handler, *openapi.API, error) {
+func setupStandaloneAPI(controller extensionController.TransactionController, addCauseToInternalServerError bool) (http.Handler, *openapi.API, error) {
 	api, err := CreateOpenApi()
 	if err != nil {
 		return nil, nil, err
@@ -29,7 +29,7 @@ func setupStandaloneAPI(controller extensionController.TransactionController) (h
 	r.Use(loggerMiddleware())
 	r.Use(middleware.Recoverer)
 
-	err = addPublicEndpointsWithController(api, controller)
+	err = addPublicEndpointsWithController(api, addCauseToInternalServerError, controller)
 	if err != nil {
 		return nil, nil, err
 	}

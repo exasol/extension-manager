@@ -23,16 +23,21 @@ type RestAPI interface {
 }
 
 // Create creates a new RestAPI.
-func Create(controller extensionController.TransactionController, serverAddress string) RestAPI {
-	return &restAPIImpl{controller: controller, serverAddress: serverAddress}
+func Create(controller extensionController.TransactionController, serverAddress string, addCauseToInternalServerError bool) RestAPI {
+	return &restAPIImpl{
+		controller:                    controller,
+		serverAddress:                 serverAddress,
+		addCauseToInternalServerError: addCauseToInternalServerError,
+	}
 }
 
 type restAPIImpl struct {
-	controller    extensionController.TransactionController
-	serverAddress string
-	server        *http.Server
-	stopped       *bool
-	stoppedMutex  *sync.Mutex
+	controller                    extensionController.TransactionController
+	addCauseToInternalServerError bool
+	serverAddress                 string
+	server                        *http.Server
+	stopped                       *bool
+	stoppedMutex                  *sync.Mutex
 }
 
 func (api *restAPIImpl) StartInBackground() {
@@ -46,7 +51,7 @@ func (api *restAPIImpl) Serve() {
 	}
 	api.setStopped(false)
 
-	handler, _, err := setupStandaloneAPI(api.controller)
+	handler, _, err := setupStandaloneAPI(api.controller, api.addCauseToInternalServerError)
 	if err != nil {
 		log.Fatalf("failed to setup api: %v", err)
 	}

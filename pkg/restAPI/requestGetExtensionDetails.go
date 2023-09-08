@@ -32,21 +32,20 @@ func GetExtensionDetails(apiContext *ApiContext) *openapi.Get {
 			Add("extensions").
 			AddParameter("extensionId", openapi.STRING, "ID of the extension").
 			AddParameter("extensionVersion", openapi.STRING, "Version of the extension"),
-		HandlerFunc: adaptDbHandler(handleGetParameterDefinitions(apiContext)),
+		HandlerFunc: adaptDbHandler(apiContext, handleGetParameterDefinitions(apiContext)),
 	}
 }
 
 func handleGetParameterDefinitions(apiContext *ApiContext) dbHandler {
-	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) {
+	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) error {
 		extensionId := chi.URLParam(request, "extensionId")
 		extensionVersion := chi.URLParam(request, "extensionVersion")
 		definitions, err := apiContext.Controller.GetParameterDefinitions(request.Context(), db, extensionId, extensionVersion)
 		if err != nil {
-			HandleError(request.Context(), writer, err)
-			return
+			return err
 		}
 		response := ExtensionDetailsResponse{Id: extensionId, Version: extensionVersion, ParamDefinitions: convertParamDefinitions(definitions)}
-		SendJSON(request.Context(), writer, response)
+		return SendJSON(request.Context(), writer, response)
 	}
 }
 

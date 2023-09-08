@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -32,8 +33,9 @@ class ExtensionManagerProcess implements AutoCloseable {
         final int port = findOpenPort();
         LOGGER.info(() -> "Starting extension manager " + extensionManagerBinary + " on port " + port
                 + " with extension folder " + extensionFolder + "...");
-        final List<String> command = List.of(extensionManagerBinary.toString(), "-extensionRegistryURL",
-                extensionFolder.toString(), "-serverAddress", "localhost:" + port);
+        final List<String> command = new ArrayList<>(List.of(extensionManagerBinary.toString(), "-extensionRegistryURL",
+                extensionFolder.toString(), "-serverAddress", "localhost:" + port));
+        addFlagIfSupported(extensionManagerBinary, "-addCauseToInternalServerError", command);
 
         final ServerStartupConsumer serverPortConsumer = new ServerStartupConsumer();
         final SimpleProcess process = SimpleProcess.start(command,
@@ -47,6 +49,22 @@ class ExtensionManagerProcess implements AutoCloseable {
                     .mitigation("Check log output for error messages.").toString());
         }
         return new ExtensionManagerProcess(process, port);
+    }
+
+    private static void addFlagIfSupported(final Path extensionManagerBinary, final String flag,
+            final List<String> command) {
+        if (supportsFlag(extensionManagerBinary, flag)) {
+            command.add(flag);
+        }
+    }
+
+    static boolean supportsFlag(final Path extensionManagerBinary, final String flag) {
+        final String helpContent = getHelpContent(extensionManagerBinary);
+        return helpContent.contains(flag);
+    }
+
+    static String getHelpContent(final Path extensionManagerBinary) {
+        return SimpleProcess.start(List.of(extensionManagerBinary.toString(), "-help"), Duration.ofSeconds(3));
     }
 
     private static int findOpenPort() {

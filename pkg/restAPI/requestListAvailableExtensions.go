@@ -31,20 +31,19 @@ func ListAvailableExtensions(apiContext *ApiContext) *openapi.Get {
 			}},
 		},
 		Path:        newPathWithDbQueryParams().Add("extensions"),
-		HandlerFunc: adaptDbHandler(handleListAvailableExtensions(apiContext)),
+		HandlerFunc: adaptDbHandler(apiContext, handleListAvailableExtensions(apiContext)),
 	}
 }
 
 func handleListAvailableExtensions(apiContext *ApiContext) dbHandler {
-	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) {
+	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) error {
 		extensions, err := apiContext.Controller.GetAllExtensions(request.Context(), db)
 		if err != nil {
-			HandleError(request.Context(), writer, err)
-			return
+			return err
 		}
 		response := convertResponse(extensions)
 		log.Debugf("Got %d available extensions", len(response.Extensions))
-		SendJSON(request.Context(), writer, response)
+		return SendJSON(request.Context(), writer, response)
 	}
 }
 
