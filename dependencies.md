@@ -139,13 +139,24 @@
 | [constructs][86]         | [Apache-2.0][87] |
 | [source-map-support][88] | [MIT][89]        |
 
+## Registry-upload
+
+### Compile Dependencies
+
+| Dependency                           | License          |
+| ------------------------------------ | ---------------- |
+| [@aws-sdk/client-cloudformation][90] | [Apache-2.0][91] |
+| [@aws-sdk/client-cloudfront][92]     | [Apache-2.0][91] |
+| [@aws-sdk/client-s3][93]             | [Apache-2.0][91] |
+| [follow-redirects][94]               | [MIT][95]        |
+
 ## Parametervalidator
 
 ### Compile Dependencies
 
 | Dependency                                  | License |
 | ------------------------------------------- | ------- |
-| [@exasol/extension-parameter-validator][90] | MIT     |
+| [@exasol/extension-parameter-validator][96] | MIT     |
 
 [0]: https://github.com/Nightapes/go-rest/blob/v0.3.3/LICENSE
 [1]: https://github.com/dop251/goja/blob/636fdf960de1/LICENSE
@@ -237,4 +248,10 @@
 [87]: https://github.com/aws/constructs
 [88]: https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz
 [89]: https://github.com/evanw/node-source-map-support
-[90]: https://registry.npmjs.org/@exasol/extension-parameter-validator/-/extension-parameter-validator-0.3.0.tgz
+[90]: https://registry.npmjs.org/@aws-sdk/client-cloudformation/-/client-cloudformation-3.409.0.tgz
+[91]: https://github.com/aws/aws-sdk-js-v3
+[92]: https://registry.npmjs.org/@aws-sdk/client-cloudfront/-/client-cloudfront-3.409.0.tgz
+[93]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.409.0.tgz
+[94]: https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.2.tgz
+[95]: https://github.com/follow-redirects/follow-redirects
+[96]: https://registry.npmjs.org/@exasol/extension-parameter-validator/-/extension-parameter-validator-0.3.0.tgz

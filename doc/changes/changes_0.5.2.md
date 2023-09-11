@@ -32,3 +32,23 @@ This release updates the upload process for the extension registry to verify tha
 * Updated `typescript:~5.1.6` to `~5.2.2`
 * Updated `jest:^29.6.1` to `^29.6.4`
 * Updated `aws-cdk:2.87.0` to `2.94.0`
+
+### Registry-upload
+
+#### Compile Dependency Updates
+
+* Added `@aws-sdk/client-cloudfront:^3.409.0`
+* Added `follow-redirects:^1.15.2`
+* Added `@aws-sdk/client-s3:^3.409.0`
+* Added `@aws-sdk/client-cloudformation:^3.409.0`
+
+#### Development Dependency Updates
+
+* Added `@types/follow-redirects:^1.14.1`
+* Added `@types/node:^20.6.0`
+* Added `ts-jest:^29.1.1`
+* Added `@types/jest:^29.5.4`
+* Added `typescript:~5.2.2`
+* Added `@types/prettier:2.7.3`
+* Added `jest:^29.6.4`
+* Added `ts-node:^10.9.1`
