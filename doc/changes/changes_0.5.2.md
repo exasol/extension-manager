@@ -44,11 +44,11 @@ This release updates the upload process for the extension registry to verify tha
 
 #### Development Dependency Updates
 
+* Added `eslint:^8.49.0`
 * Added `@types/follow-redirects:^1.14.1`
+* Added `@typescript-eslint/parser:^6.6.0`
 * Added `@types/node:^20.6.0`
-* Added `ts-jest:^29.1.1`
-* Added `@types/jest:^29.5.4`
 * Added `typescript:~5.2.2`
 * Added `@types/prettier:2.7.3`
-* Added `jest:^29.6.4`
+* Added `@typescript-eslint/eslint-plugin:^6.6.0`
 * Added `ts-node:^10.9.1`
