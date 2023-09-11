@@ -323,7 +323,7 @@ Covers:
 
 Each parameter definition is attached to a specific version of the extension.
 
-Rationale: Parameters can change over time, see [Updates](#updates).
+Rationale: Parameters can change over time, see [Upgrades](#upgrades).
 
 Covers:
 * [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
@@ -475,7 +475,7 @@ Notes:
 * See details about [BucketsFS Buckets in Exasol SaaS](#bucketsfs-buckets-in-exasol-saas) in the next section.
 
 Covers:
-* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
 * [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
 * [`req~uninstall-extension~1`](system_requirements.md#uninstalling-extensions)
 
@@ -567,7 +567,7 @@ Installation "1" o-- "*" Instance
 ```
 
 Covers:
-* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
 
 
 #### Installation Metadata
@@ -578,7 +578,7 @@ Extensions don't store their own metadata. Instead they read information about e
 However, for example for reading back the credentials stored in a connection, EM uses a temporary UDF that reads back the secret value.
 
 Covers:
-* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
 
 Needs: impl, utest, itest
 
@@ -627,7 +627,7 @@ database Database {
 ```
 
 Covers:
-* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
 
 Needs: impl, utest, itest
 
@@ -638,7 +638,7 @@ EM can upgrade an installed extensions and its instances to the latest version.
 
 Covers:
 * [`req~upgrade-extension~1`](system_requirements.md#uninstalling-extensions)
-* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
 
 Needs: impl, utest, itest
 
@@ -658,7 +658,7 @@ Rationale:
 * While EM also provides [access to metadata](#extension-context-metadata) via the context, this information may not be sufficient. Executing arbitrary queries ensures maximum flexibility for extensions.
 
 Covers:
-* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
 
 Needs: impl, utest, itest
 
@@ -668,7 +668,7 @@ Needs: impl, utest, itest
 The BucketFS client in the extension context allows the extension definition to interact with BucketFS.
 
 Covers:
-* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
 
 Needs: impl, utest, itest
 
@@ -697,7 +697,7 @@ Rationale:
   * **Note:** EM will only need to work with Exasol v8, so support for v7 is actually not necessary. However the Docker container for v8 currently does not support running Python and Java UDFs. Until this is fixed we still need v7 for integration testing.
 
 Covers:
-* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
 
 Needs: impl, utest, itest
 
