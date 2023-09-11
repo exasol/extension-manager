@@ -407,7 +407,7 @@ The EITFJ provides a method for installing and starting an [Extension Manager RE
 Covers:
 * [`req~extension-testing-framework~1`](system_requirements.md#integration-test-framework-for-extensions)
 
-Needs: impl, itest
+Needs: impl, itest, doc
 
 #### Accessing the Extension Manager REST Interface
 `dsn~eitfj-access-extension-manager-rest-interface~1`
@@ -417,7 +417,7 @@ The EITFJ provides a Java API for accessing the EM REST interface. This simplifi
 Covers:
 * [`req~extension-testing-framework~1`](system_requirements.md#integration-test-framework-for-extensions)
 
-Needs: impl, utest, itest
+Needs: impl, utest, itest, doc
 
 #### Preparing Previous Extension Versions
 `dsn~eitfj-prepare-previous-extension-version~1`

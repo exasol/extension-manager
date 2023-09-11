@@ -20,6 +20,8 @@ import com.exasol.extensionmanager.itest.builder.ExtensionBuilder;
  * <a href="https://github.com/exasol/extension-manager/blob/main/doc/extension_developer_guide.md">Extension Developer
  * Guide</a> for details.
  */
+// [doc -> dsn~eitfj-start-extension-manager~1]
+// [doc -> dsn~eitfj-access-extension-manager-rest-interface~1]
 class ExampleIT {
     private static final Path EXTENSION_SOURCE_DIR = Paths.get("testing-extension").toAbsolutePath();
     private static final String EXTENSION_ID = "testing-extension.js";
