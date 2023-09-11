@@ -4,9 +4,11 @@ Code name:
 
 ## Summary
 
+This release updates the upload process for the extension registry to verify that the extension URLs are valid.
+
 ## Features
 
-* ISSUE_NUMBER: description
+* #129: Added verification for extension URLs before uploading to registry
 
 ## Dependency Updates
 

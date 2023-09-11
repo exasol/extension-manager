@@ -1,4 +1,5 @@
 import { Stage } from "./common"
+import { upload } from "./upload"
 
 function printUsage() {
     const stages = Object.keys(Stage)
@@ -26,4 +27,4 @@ if (stage === undefined) {
     printUsage()
     process.exit(1)
 }
-console.log("hello", stage)
+upload(stage)
