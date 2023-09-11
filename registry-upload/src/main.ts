@@ -1,13 +1,9 @@
-import { Stage } from "./common"
-import { CommandLineArgs, parseArguments } from "./parseArgs"
+import { CommandLineArgs, getAvailableStages } from "./common"
+import { parseArguments } from "./parseArgs"
 import { upload } from "./upload"
 
 function printUsage() {
-    const stages = Object.keys(Stage)
-        .filter(v => typeof (v) === "string")
-        .filter(v => v.length > 1)
-        .map(v => v.toUpperCase())
-        .join("|")
+    const stages = getAvailableStages().join("|")
     console.error(`Usage: AWS_PROFILE=$profile npm run upload -- --stage=${stages} [--no-dry-run]`)
 }
 

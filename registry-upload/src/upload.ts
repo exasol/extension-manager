@@ -2,8 +2,7 @@ import { existsSync } from "fs";
 import { readFile } from "fs/promises";
 import { resolve } from "path";
 import { invalidateCloudFrontCache, readStackConfiguration, uploadFileContent } from "./awsService";
-import { Stage } from "./common";
-import { CommandLineArgs } from "./parseArgs";
+import { CommandLineArgs, Stage } from "./common";
 import { verifyLink } from "./verifyLink";
 
 const EXTENSION_MANAGER_STACK_NAME = "ExtensionManagerRegistry";

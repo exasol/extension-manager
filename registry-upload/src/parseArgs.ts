@@ -1,11 +1,5 @@
 import { ParseArgsConfig, parseArgs } from "node:util"
-import { Stage } from "./common"
-
-
-export interface CommandLineArgs {
-    stage: Stage
-    dryRun: boolean
-}
+import { CommandLineArgs, Stage, getAvailableStages } from "./common"
 
 export function parseArguments(args: string[]): CommandLineArgs {
     const options: any = {
@@ -26,7 +20,6 @@ export function parseArguments(args: string[]): CommandLineArgs {
     }
 }
 
-
 function parseStage(value: any): Stage {
     if (typeof value !== "string") {
         throw new Error(`Type of stage ${value} is ${typeof value}, expected string`)
@@ -36,7 +29,7 @@ function parseStage(value: any): Stage {
         case "test": return Stage.Test
         case "prod": return Stage.Prod
         default:
-            throw new Error(`Got unexpected value ${value} for stage, allowed values: test, prod`)
+            throw new Error(`Got unexpected value ${value} for stage, allowed values: ${getAvailableStages().join(", ")}`)
     }
 }
 
