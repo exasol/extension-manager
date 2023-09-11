@@ -15,7 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const defaultExtensionApiVersion = "0.2.0"
+const defaultExtensionApiVersion = "0.3.0"
 
 func CreateTestExtensionBuilder(t *testing.T) *TestExtensionBuilder {
 	builder := TestExtensionBuilder{testing: t}
@@ -247,12 +247,12 @@ func (builder TestExtensionBuilder) runNpmInstall(workDir string) {
 		// running "npm install" once for each version is enough
 		return
 	}
-	builder.testing.Logf("Running npm install in %s", workDir)
+	builder.testing.Logf("Running 'npm install in %s", workDir)
 	installCommand := exec.Command("npm", "install")
 	installCommand.Dir = workDir
 	output, err := installCommand.CombinedOutput()
 	if err != nil {
-		log.Fatalf("Failed to run 'npm install' in dir %v. Cause: %v, Output:\n%s", workDir, err, output)
+		log.Fatalf("Failed to run 'npm install' in dir %v.\nEnsure to use flag '-p 1' when starting tests.\nCause: %v, Output:\n%s", workDir, err, output)
 	} else {
 		isNpmInstallCalledForVersion[builder.extensionApiVersion] = true
 	}
