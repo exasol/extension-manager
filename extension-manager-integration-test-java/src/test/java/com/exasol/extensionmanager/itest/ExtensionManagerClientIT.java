@@ -1,5 +1,6 @@
 package com.exasol.extensionmanager.itest;
 
+import static com.exasol.extensionmanager.itest.IntegrationTestCommon.EXTENSION_ID;
 import static com.exasol.extensionmanager.itest.IntegrationTestCommon.TESTING_EXTENSION_SOURCE_DIR;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -25,7 +26,6 @@ import com.exasol.extensionmanager.itest.builder.ExtensionBuilder;
 // [itest -> dsn~eitfj-start-extension-manager~1]
 class ExtensionManagerClientIT {
 
-    private static final String EXTENSION_ID = "testing-extension.js";
     private static final String EXTENSION_VERSION = "0.0.0";
     private static ExasolTestSetup exasolTestSetup;
     private static Connection connection;

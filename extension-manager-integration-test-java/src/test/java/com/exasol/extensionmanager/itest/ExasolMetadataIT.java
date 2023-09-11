@@ -17,8 +17,9 @@ class ExasolMetadataIT {
     @BeforeAll
     static void setupExasol() {
         exasolTestSetup = IntegrationTestCommon.createExasolTestSetup();
-        extensionManager = ExtensionManagerSetup.create(exasolTestSetup, ExtensionBuilder.createDefaultNpmBuilder(
-                TESTING_EXTENSION_SOURCE_DIR, TESTING_EXTENSION_SOURCE_DIR.resolve("dist/testing-extension.js")));
+        extensionManager = ExtensionManagerSetup.create(exasolTestSetup,
+                ExtensionBuilder.createDefaultNpmBuilder(TESTING_EXTENSION_SOURCE_DIR,
+                        TESTING_EXTENSION_SOURCE_DIR.resolve("dist").resolve(IntegrationTestCommon.EXTENSION_ID)));
         metadata = extensionManager.exasolMetadata();
     }
 
