@@ -1,7 +1,6 @@
 package com.exasol.extensionmanager.itest;
 
-import static com.exasol.extensionmanager.itest.IntegrationTestCommon.EXTENSION_ID;
-import static com.exasol.extensionmanager.itest.IntegrationTestCommon.TESTING_EXTENSION_SOURCE_DIR;
+import static com.exasol.extensionmanager.itest.IntegrationTestCommon.*;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -37,8 +36,8 @@ class ExtensionManagerClientIT {
         exasolTestSetup = IntegrationTestCommon.createExasolTestSetup();
         connection = exasolTestSetup.createConnection();
         createTestConfigFile();
-        extensionManager = ExtensionManagerSetup.create(exasolTestSetup, ExtensionBuilder.createDefaultNpmBuilder(
-                TESTING_EXTENSION_SOURCE_DIR, TESTING_EXTENSION_SOURCE_DIR.resolve("dist").resolve(EXTENSION_ID)));
+        extensionManager = ExtensionManagerSetup.create(exasolTestSetup,
+                ExtensionBuilder.createDefaultNpmBuilder(TESTING_EXTENSION_SOURCE_DIR, BUILT_EXTENSION_JS));
         client = extensionManager.client();
     }
 
