@@ -242,7 +242,7 @@
 [81]: http://www.slf4j.org
 [82]: https://maven.apache.org/surefire/maven-failsafe-plugin/
 [83]: https://maven.apache.org/plugins/maven-jar-plugin/
-[84]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.94.0.tgz
+[84]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.95.1.tgz
 [85]: https://github.com/aws/aws-cdk
 [86]: https://registry.npmjs.org/constructs/-/constructs-10.2.70.tgz
 [87]: https://github.com/aws/constructs
