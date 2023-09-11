@@ -1,12 +1,12 @@
 {
-    "extensions": [
-        {
-            "id": "s3-vs",
-            "url": "https://github.com/exasol/s3-document-files-virtual-schema/releases/download/2.4.0/s3-vs-extension.js"
-        },
-        {
-            "id": "cloud-storage-extension",
-            "url": "https://github.com/exasol/cloud-storage-extension/releases/download/2.6.0/cloud-storage-extension.js"
-        }
-    ]
+  "extensions": [
+    {
+      "id": "s3-vs",
+      "url": "https://github.com/exasol/s3-document-files-virtual-schema/releases/download/2.4.0/s3-vs-extension.js"
+    },
+    {
+      "id": "cloud-storage-extension",
+      "url": "https://github.com/exasol/cloud-storage-extension/releases/download/2.6.0/cloud-storage-extension.js"
+    }
+  ]
 }
