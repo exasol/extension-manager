@@ -21,6 +21,8 @@ import com.exasol.extensionmanager.client.invoker.ApiException;
 import com.exasol.extensionmanager.client.model.*;
 import com.exasol.extensionmanager.itest.builder.ExtensionBuilder;
 
+// [itest -> dsn~eitfj-access-extension-manager-rest-interface~1]
+// [itest -> dsn~eitfj-start-extension-manager~1]
 class ExtensionManagerClientIT {
 
     private static final String EXTENSION_ID = "testing-extension.js";

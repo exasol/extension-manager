@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.extensionmanager.client.model.UpgradeExtensionResponse;
 
+// [utest -> dsn~eitfj-prepare-previous-extension-version~1]
 @ExtendWith(MockitoExtension.class)
 class PreviousExtensionVersionTest {
 

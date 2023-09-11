@@ -283,6 +283,8 @@ The Extension API provides a defined interface that extensions need to implement
 Covers:
 * [`feat~developing-extensions~1`](#developing-extensions)
 
+Needs: dsn
+
 #### Integration Test Framework for Extensions
 `req~extension-testing-framework~1`
 
@@ -290,6 +292,8 @@ The Extension Testing Framework contains common setup code and convenient helper
 
 Covers:
 * [`feat~developing-extensions~1`](#developing-extensions)
+
+Needs: dsn
 
 ## Non-functional Requirements
 

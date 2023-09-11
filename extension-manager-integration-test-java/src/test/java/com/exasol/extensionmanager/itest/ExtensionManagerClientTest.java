@@ -20,6 +20,7 @@ import com.exasol.extensionmanager.itest.ExtensionManagerClient.Extension;
 
 import jakarta.json.JsonObject;
 
+// [utest -> dsn~eitfj-access-extension-manager-rest-interface~1]
 @ExtendWith(MockitoExtension.class)
 class ExtensionManagerClientTest {
 
@@ -42,7 +43,6 @@ class ExtensionManagerClientTest {
         dbConnectionInfoMock = new SqlConnectionInfo(DB_HOST, DB_PORT, DB_USER, DB_PASSWORD);
         testee = new ExtensionManagerClient(extensionClientMock, installationApiMock, instanceClientMock,
                 dbConnectionInfoMock);
-
     }
 
     @Test

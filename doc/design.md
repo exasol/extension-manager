@@ -175,7 +175,16 @@ Needs: impl, utest, itest
 
 Each extension might be implemented in an arbitrary programming language and typically are based on a so-called [user defined function](system_requirements.md#terms-and-abbreviations). In order to allow EM to manage multiple heterogenous extensions in a unique way, each extension is represented by small wrapper implementing a uniform interface. This wrapper is called an "extension definition".
 
-The interface is defined in [`extension-manager-interface`](https://github.com/exasol/extension-manager-interface/):
+Covers:
+
+* [`req~extension~1`](system_requirements.md#install-required-artifacts)
+
+Needs: impl, utest, itest
+
+#### Extension API Interface
+`dsn~extension-api~1`
+
+Each [extension definition](#extension-definitions) implements the TypeScript interface defined in [`extension-manager-interface`](https://github.com/exasol/extension-manager-interface/). This allows EM to uniformly manage all extensions that implement this interface.
 
 ```plantuml
 @startuml
@@ -190,9 +199,9 @@ ExasolExtension <-- "mysql-virtual-schema (repo).MySqlExtensionDefinition"
 
 Covers:
 
-* [`req~extension~1`](system_requirements.md#install-required-artifacts)
+* [`req~extension-api~1`](system_requirements.md#extension-api)
 
-Needs: impl, utest, itest
+Needs: impl, utest
 
 #### Storage for Extension Definitions
 `dsn~extension-definitions-storage~1`
@@ -383,6 +392,43 @@ See design decision [against a callback for the client side validation](#callbac
 
 Covers:
 * [`req~validate-parameter-values~1`](system_requirements.md#ui-languages)
+
+### Extension Integration Testing Framework
+
+The Extension Integration Testing Framework for Java (EITFJ) allows [extension developers](system_requirements.md#extension-developers) to create integration tests for an [extension definition](#extension-definitions).
+
+The EITFJ is written in Java as most extensions like virtual schemas are also written in Java. This way it's easy to add integration tests for extension definitions into the existing Maven build.
+
+#### Starting Extension Manager during Integration Tests
+`dsn~eitfj-start-extension-manager~1`
+
+The EITFJ provides a method for installing and starting an [Extension Manager REST interface](#em-provides-a-rest-interface).
+
+Covers:
+* [`req~extension-testing-framework~1`](system_requirements.md#integration-test-framework-for-extensions)
+
+Needs: impl, itest
+
+#### Accessing the Extension Manager REST Interface
+`dsn~eitfj-access-extension-manager-rest-interface~1`
+
+The EITFJ provides a Java API for accessing the EM REST interface. This simplifies integration tests and avoids code duplication.
+
+Covers:
+* [`req~extension-testing-framework~1`](system_requirements.md#integration-test-framework-for-extensions)
+
+Needs: impl, utest, itest
+
+#### Preparing Previous Extension Versions
+`dsn~eitfj-prepare-previous-extension-version~1`
+
+The EITFJ provides a Java API for preparing previous versions of an extension. This allows writing integration tests for upgrading from a previous version to the current version of an extension.
+
+Covers:
+* [`req~extension-testing-framework~1`](system_requirements.md#integration-test-framework-for-extensions)
+* [`req~upgrade-extension~1`](system_requirements.md#upgrade-extension)
+
+Needs: impl, utest
 
 ## Runtime
 
