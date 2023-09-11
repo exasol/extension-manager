@@ -14,7 +14,6 @@ export function parseArguments(args: string[]): CommandLineArgs {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const config: ParseArgsConfig = { args, options, allowPositionals: false, strict: true }
     const { values } = parseArgs(config)
-    console.log(`Args:`, args)
     return {
         stage: parseStage(values.stage),
         dryRun: values["no-dry-run"] === false

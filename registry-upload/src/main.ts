@@ -20,5 +20,4 @@ function getArgs(): CommandLineArgs {
 }
 
 const args = getArgs()
-console.log("Got args", args)
 upload(args).catch((reason) => console.log("Failure:", reason))
