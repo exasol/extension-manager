@@ -68,3 +68,6 @@ vendor/
 /registry/cdk.out/
 /registry/coverage/
 /registry/lib/config.ts
+
+/registry-upload/node_modules/
+/registry-upload/dist/

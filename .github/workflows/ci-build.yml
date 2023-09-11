@@ -46,9 +46,9 @@ jobs:
 
       - name: Get npm cache directory
         id: npm-cache-dir
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-      - uses: actions/cache@v3
+        run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
+      - name: Cache npm modules
+        uses: actions/cache@v3
         with:
           path: ${{ steps.npm-cache-dir.outputs.dir }}
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -103,6 +103,13 @@ jobs:
           echo "export const CONFIG = { owner: 'dummy-owner@example.com' }" > lib/config.ts
           npm ci
           npm run test
+
+      - name: Build and test registry upload
+        run: |
+          cd registry-upload
+          npm ci
+          npm run build
+          npm run lint
 
       - name: Prepare SonarCloud scan
         # Without this step, Sonar will fail with this error:
