@@ -171,9 +171,9 @@ To deploy the content of the Extension Registry to `test` or `prod` stage, run t
 
 ```sh
 cd registry-upload
-AWS_PROFILE=$profile npm run upload test
+AWS_PROFILE=$profile npm run upload -- --stage=test --no-dry-run
 # or
-AWS_PROFILE=$profile npm run upload prod
+AWS_PROFILE=$profile npm run upload -- --stage=prod --no-dry-run
 ```
 
 This will upload the JSON file from the `registry-upload/content` folder for the given stage to the S3 bucket and invalidate the CloudFront cache. It will also upload the `testing-extension.js` extension to the `test` stage.

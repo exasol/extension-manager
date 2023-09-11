@@ -1,2 +1,3 @@
 
-export enum Stage { Test="test", Prod="prod" }
+export enum Stage { Test = "test", Prod = "prod" }
+

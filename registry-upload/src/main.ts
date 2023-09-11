@@ -1,4 +1,5 @@
 import { Stage } from "./common"
+import { CommandLineArgs, parseArguments } from "./parseArgs"
 import { upload } from "./upload"
 
 function printUsage() {
@@ -7,24 +8,21 @@ function printUsage() {
         .filter(v => v.length > 1)
         .map(v => v.toUpperCase())
         .join("|")
-    console.error(`Usage: ts-node upload-registry-content.ts ${stages}`)
+    console.error(`Usage: AWS_PROFILE=$profile npm run upload -- --stage=${stages} [--no-dry-run]`)
 }
 
-function getStage(): Stage | undefined {
-    if (process.argv.length !== 3) {
-        return undefined
-    }
-    const stageParam = process.argv[2].toLowerCase()
-    switch (stageParam) {
-        case "test": return Stage.Test
-        case "prod": return Stage.Prod
-        default: return undefined
+function getArgs(): CommandLineArgs {
+    const allArgs = process.argv
+    const relevantArgs = allArgs.splice(2, allArgs.length - 1)
+    try {
+        return parseArguments(relevantArgs)
+    } catch (error) {
+        console.error(`Failed to parse arguments [${relevantArgs.join(' ')}]: ${error}`)
+        printUsage()
+        process.exit(1)
     }
 }
 
-const stage = getStage()
-if (stage === undefined) {
-    printUsage()
-    process.exit(1)
-}
-upload(stage)
+const args = getArgs()
+console.log("Got args", args)
+upload(args)

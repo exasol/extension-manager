@@ -3,15 +3,20 @@ import { readFile } from "fs/promises";
 import { resolve } from "path";
 import { invalidateCloudFrontCache, readStackConfiguration, uploadFileContent } from "./awsService";
 import { Stage } from "./common";
+import { CommandLineArgs } from "./parseArgs";
 import { verifyLink } from "./verifyLink";
 
 const EXTENSION_MANAGER_STACK_NAME = "ExtensionManagerRegistry";
 
-export async function upload(stage: Stage) {
-    await verifyExtensionUrls(stage)
+export async function upload(args: CommandLineArgs) {
+    await verifyExtensionUrls(args.stage)
     const config = await readStackConfiguration(EXTENSION_MANAGER_STACK_NAME)
     console.log(`Read configuration: bucket ${config.bucketName}, domain: ${config.domainName}`)
-    await uploadFiles(stage, config.bucketName)
+    if (args.dryRun) {
+        console.log("Dry run, skipping upload")
+        return
+    }
+    await uploadFiles(args.stage, config.bucketName)
     await invalidateCloudFrontCache(config.cloudFrontDistributionId)
     await verifyLink(new URL(`https://${config.domainName}/registry.json`))
 }

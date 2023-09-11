@@ -14,18 +14,16 @@ export async function verifyLink(url: URL) {
 function httpRequest(url: string | URL, options: RequestOptions): Promise<string> {
     return new Promise(function (resolve, reject) {
         const req = request(url, options, function (res) {
-            // reject on bad status
-            if (res?.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
+            if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
                 return reject(new Error(`Request ${options.method} ${url} failed with status ${res.statusCode}`));
             }
-            // cumulate data
             const chunks: Uint8Array[] = [];
             res.on('data', function (chunk) {
                 chunks.push(chunk);
             });
             res.on('end', function () {
                 try {
-                    resolve(Buffer.concat(chunks).toString());
+                    resolve(Buffer.concat(chunks).toString("utf-8"));
                 } catch (e) {
                     reject(e);
                 }
