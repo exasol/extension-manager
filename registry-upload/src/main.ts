@@ -13,7 +13,7 @@ function getArgs(): CommandLineArgs {
     try {
         return parseArguments(relevantArgs)
     } catch (error) {
-        console.error(`Failed to parse arguments [${relevantArgs.join(' ')}]: ${error}`)
+        console.error(`Failed to parse arguments [${relevantArgs.join(' ')}]:`, error)
         printUsage()
         process.exit(1)
     }
@@ -21,4 +21,4 @@ function getArgs(): CommandLineArgs {
 
 const args = getArgs()
 console.log("Got args", args)
-upload(args)
+upload(args).catch((reason) => console.log("Failure:", reason))

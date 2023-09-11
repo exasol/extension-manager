@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { existsSync } from "fs";
 import { readFile } from "fs/promises";
 import { resolve } from "path";
@@ -59,9 +62,9 @@ async function verifyExtensionEntry(extension: any): Promise<void> {
     const id: string = extension.id
     const url: string = extension.url
     try {
-        const content = await verifyLink(new URL(url))
+        await verifyLink(new URL(url))
     } catch (error) {
-        throw new Error(`URL for extension ${id} is invalid: ${error}`, { cause: error })
+        throw new Error(`URL for extension ${id} is invalid`, { cause: error })
     }
 }
 

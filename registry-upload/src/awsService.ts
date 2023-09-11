@@ -57,7 +57,7 @@ export async function readStackConfiguration(cloudFormationStackName: string): P
 
 export async function uploadFileContent(bucket: string, key: string, localFilePath: string): Promise<void> {
     const stream = createReadStream(localFilePath)
-    const result = await s3Client.putObject({ Bucket: bucket, Key: key, Body: stream })
+    await s3Client.putObject({ Bucket: bucket, Key: key, Body: stream })
 }
 
 export async function invalidateCloudFrontCache(distributionId: string): Promise<void> {

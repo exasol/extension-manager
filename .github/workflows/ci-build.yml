@@ -104,6 +104,13 @@ jobs:
           npm ci
           npm run test
 
+      - name: Build and test registry upload
+        run: |
+          cd registry-upload
+          npm ci
+          npm run build
+          npm run lint
+
       - name: Prepare SonarCloud scan
         # Without this step, Sonar will fail with this error:
         # "Maven project detected. You should run the goal 'org.sonarsource.scanner.maven:sonar' during build rather than using this GitHub Action."
