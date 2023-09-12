@@ -364,13 +364,13 @@ func (suite *ControllerUTestSuite) TestUninstallFails() {
 func (suite *ControllerUTestSuite) TestUninstallFailsWhenInstanceExists() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUninstallFunc("context.sqlClient.execute(`uninstall extension version ${version}`)").
-		WithFindInstancesFunc(`return [{"id":"ext1","name":"ext-name1"}]`).
+		WithFindInstancesFunc(`return [{"id":"ext1","name":"ext-name1"}, {"id":"ext2","name":"ext-name2"}]`).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
 	err := suite.controller.UninstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
-	suite.EqualError(err, "cannot uninstall extension because 1 instance(s) still exist")
+	suite.EqualError(err, "cannot uninstall extension because 2 instance(s) still exist: ext-name1, ext-name2")
 	if apiErr, ok := err.(*apiErrors.APIError); ok {
 		suite.Equal(400, apiErr.Status)
 	} else {

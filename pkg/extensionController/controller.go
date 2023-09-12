@@ -215,7 +215,14 @@ func (c *controllerImpl) UninstallExtension(txCtx *transaction.TransactionContex
 		return fmt.Errorf("failed to check existing instances: %w", err)
 	}
 	if len(instances) > 0 {
-		return apiErrors.NewBadRequestErrorF("cannot uninstall extension because %d instance(s) still exist", len(instances))
+		instanceNames := ""
+		for _, inst := range instances {
+			if instanceNames != "" {
+				instanceNames += ", "
+			}
+			instanceNames += inst.Name
+		}
+		return apiErrors.NewBadRequestErrorF("cannot uninstall extension because %d instance(s) still exist: %s", len(instances), instanceNames)
 	}
 	return extension.Uninstall(extensionCtx, extensionVersion)
 }
