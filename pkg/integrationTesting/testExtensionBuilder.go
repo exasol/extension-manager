@@ -107,20 +107,13 @@ func (builder *TestExtensionBuilder) WithBucketFsUpload(upload BucketFsUploadPar
 	return builder
 }
 
-//go:embed extensionForTesting/tsconfig.json
-var tscConfig []byte
-
 func (builder TestExtensionBuilder) Build() *BuiltExtension {
 	workDir := builder.createWorkDir()
 	err := os.WriteFile(path.Join(workDir, "package.json"), []byte(builder.createPackageJsonContent()), 0600)
 	if err != nil {
 		panic(err)
 	}
-	err = os.WriteFile(path.Join(workDir, "extensionForTesting.ts"), []byte(builder.createExtensionTsContent()), 0600)
-	if err != nil {
-		panic(err)
-	}
-	err = os.WriteFile(path.Join(workDir, "tsconfig.json"), tscConfig, 0600)
+	err = os.WriteFile(path.Join(workDir, "extensionForTesting.js"), []byte(builder.createExtensionTsContent()), 0600)
 	if err != nil {
 		panic(err)
 	}
@@ -146,7 +139,7 @@ func (builder TestExtensionBuilder) createPackageJsonContent() string {
 	return strings.Replace(packageJsonTemplate, "$EXTENSION_API_VERSION$", builder.extensionApiVersion, 1)
 }
 
-//go:embed extensionForTesting/extensionForTestingTemplate.ts
+//go:embed extensionForTesting/extensionForTestingTemplate.js
 var extensionTemplate string
 
 func (builder TestExtensionBuilder) createExtensionTsContent() string {

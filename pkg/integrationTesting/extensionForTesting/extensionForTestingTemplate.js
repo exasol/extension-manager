@@ -1,43 +1,41 @@
 import {
-    BadRequestError, Context, ExaMetadata, ExasolExtension,
-    Installation,
-    Instance, InternalServerError, Parameter, ParameterValues,
-    UpgradeResult,
+    BadRequestError,
+    InternalServerError,
     registerExtension
 } from "@exasol/extension-manager-interface";
 
-function createExtension(): ExasolExtension {
+function createExtension() {
     return {
         name: "MyDemoExtension",
         description: "An extension for testing.",
         category: "Demo category",
         installableVersions: [{ name: "0.1.0", latest: true, deprecated: false }],
         bucketFsUploads: $UPLOADS$,
-        install(context: Context, version: string) {
+        install(context, version) {
             $INSTALL_EXTENSION$
         },
-        addInstance(context: Context, version: string, params: ParameterValues): Instance {
+        addInstance(context, version, params) {
             $ADD_INSTANCE$
         },
-        findInstallations(context: Context, metadata: ExaMetadata): Installation[] {
+        findInstallations(context, metadata) {
             $FIND_INSTALLATIONS$
         },
-        findInstances(context: Context, version: string): Instance[] {
+        findInstances(context, version) {
             $FIND_INSTANCES$
         },
-        uninstall(context: Context, version: string): void {
+        uninstall(context, version) {
             $UNINSTALL_EXTENSION$
         },
-        upgrade(context: Context): UpgradeResult {
+        upgrade(context) {
             $UPGRADE_EXTENSION$
         },
-        deleteInstance(context: Context, extensionVersion: string, instanceId: string): void {
+        deleteInstance(context, extensionVersion, instanceId) {
             $DELETE_INSTANCE$
         },
-        getInstanceParameters(context: Context, version: string): Parameter[] {
+        getInstanceParameters(context, version) {
             $GET_INSTANCE_PARAMETER_DEFINITIONS$
         },
-        readInstanceParameterValues(context: Context, extensionVersion: string, instanceId: string): ParameterValues {
+        readInstanceParameterValues(context, extensionVersion, instanceId) {
             return undefined;
         }
     }
