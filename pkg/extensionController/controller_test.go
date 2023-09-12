@@ -119,7 +119,7 @@ var errorTests = []errorTest{
 	{testName: "generic", throwCommand: "throw Error(`mock error from js`);", expectedStatus: -1},
 	{testName: "internal server error", throwCommand: "throw new InternalServerError(`mock error from js`);", expectedStatus: -1},
 	{testName: "bad request", throwCommand: "throw new BadRequestError(`mock error from js`);", expectedStatus: 400},
-	{testName: "null pointer", throwCommand: `(<any>{}).a.b; throw Error("mock");`, expectedStatus: -1, expectedMessage: "TypeError: Cannot read property 'b' of undefined"},
+	{testName: "null pointer", throwCommand: `({}).a.b; throw Error("mock");`, expectedStatus: -1, expectedMessage: "TypeError: Cannot read property 'b' of undefined"},
 }
 
 // GetInstalledExtensions
