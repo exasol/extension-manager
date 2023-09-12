@@ -33,6 +33,7 @@ import jakarta.json.bind.JsonbBuilder;
  * The class also provides a convenient method {@link #assertRequestFails(Executable, Matcher, Matcher)} for verifying
  * that an API fails with expected error message and HTTP status code.
  */
+// [impl -> dsn~eitfj-access-extension-manager-rest-interface~1]
 public class ExtensionManagerClient {
     private static final Logger LOGGER = Logger.getLogger(ExtensionManagerClient.class.getName());
     private final ExtensionApi extensionClient;

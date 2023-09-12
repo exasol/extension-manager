@@ -1,5 +1,6 @@
 package com.exasol.extensionmanager.itest;
 
+import static com.exasol.extensionmanager.itest.IntegrationTestCommon.BUILT_EXTENSION_JS;
 import static com.exasol.extensionmanager.itest.IntegrationTestCommon.TESTING_EXTENSION_SOURCE_DIR;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,8 +35,8 @@ class ExtensionManagerSetupIT {
 
     @BeforeEach
     void setup() throws SQLException {
-        extensionManager = ExtensionManagerSetup.create(exasolTestSetup, ExtensionBuilder.createDefaultNpmBuilder(
-                TESTING_EXTENSION_SOURCE_DIR, TESTING_EXTENSION_SOURCE_DIR.resolve("dist/testing-extension.js")));
+        extensionManager = ExtensionManagerSetup.create(exasolTestSetup,
+                ExtensionBuilder.createDefaultNpmBuilder(TESTING_EXTENSION_SOURCE_DIR, BUILT_EXTENSION_JS));
     }
 
     @AfterEach

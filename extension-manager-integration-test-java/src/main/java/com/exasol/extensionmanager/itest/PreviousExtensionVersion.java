@@ -12,6 +12,7 @@ import com.exasol.extensionmanager.client.model.UpgradeExtensionResponse;
 /**
  * This represents a previous version of an extension.
  */
+// [impl -> dsn~eitfj-prepare-previous-extension-version~1]
 public class PreviousExtensionVersion {
     private static final Logger LOGGER = Logger.getLogger(PreviousExtensionVersion.class.getName());
     private final ExtensionManagerSetup setup;

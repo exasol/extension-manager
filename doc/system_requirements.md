@@ -22,7 +22,7 @@ Database Administrators (DBA) use EM through it's REST API or a user interface f
 
 ### Extension Developers
 
-Extension developers create and maintain extensions for EM.
+Extension developers create and maintain extensions for EM. They write integration tests for extensions and release and deploy extensions.
 
 ## Terms and Abbreviations
 
@@ -133,7 +133,7 @@ An extension might consist of JDBC driver, artifacts, configuration and database
 
 Covers:
 * [`feat~install-extension~1`](#configure-an-extension)
-* [`feat~configure-extension~1`](#updating-an-extension)
+* [`feat~configure-extension~1`](#configure-an-extension)
 * [`feat~uninstall-extension~1`](#extensions)
 
 Needs: dsn
@@ -193,7 +193,7 @@ Needs: dsn
 EM allows extensions to define a set of parameters. Each extension might have different parameters.
 
 Covers:
-* [`feat~configure-extension~1`](#updating-an-extension)
+* [`feat~configure-extension~1`](#configure-an-extension)
 
 Needs: dsn
 
@@ -210,7 +210,7 @@ EM supports the following types for configuration parameters
 Rationale: EM's UI can then present all relevant parameters to the user and allow the user to assign a value to each parameter, e.g.  enter credentials, select values from option lists.
 
 Covers
-* [`feat~configure-extension~1`](#updating-an-extension)
+* [`feat~configure-extension~1`](#configure-an-extension)
 
 Needs: dsn
 
@@ -225,7 +225,7 @@ Rationale:
 * ensure security
 
 Covers:
-* [`feat~configure-extension~1`](#updating-an-extension)
+* [`feat~configure-extension~1`](#configure-an-extension)
 
 Needs: dsn
 
@@ -283,6 +283,8 @@ The Extension API provides a defined interface that extensions need to implement
 Covers:
 * [`feat~developing-extensions~1`](#developing-extensions)
 
+Needs: dsn
+
 #### Integration Test Framework for Extensions
 `req~extension-testing-framework~1`
 
@@ -290,6 +292,8 @@ The Extension Testing Framework contains common setup code and convenient helper
 
 Covers:
 * [`feat~developing-extensions~1`](#developing-extensions)
+
+Needs: dsn
 
 ## Non-functional Requirements
 
@@ -299,7 +303,7 @@ Covers:
 The current SaaS implementation only supports English as language in the user interface. To avoid complexity EM currently only supports English language in the user interface, too. This avoids additional efforts for UI translation until this is required.
 
 Covers:
-* [`feat~configure-extension~1`](#updating-an-extension)
+* [`feat~configure-extension~1`](#configure-an-extension)
 * [`feat~install-extension~1`](#configure-an-extension)
 * [`feat~uninstall-extension~1`](#extensions)
 

@@ -1,6 +1,6 @@
 package com.exasol.extensionmanager.itest;
 
-import static com.exasol.extensionmanager.itest.IntegrationTestCommon.TESTING_EXTENSION_SOURCE_DIR;
+import static com.exasol.extensionmanager.itest.IntegrationTestCommon.*;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -21,9 +21,10 @@ import com.exasol.extensionmanager.client.invoker.ApiException;
 import com.exasol.extensionmanager.client.model.*;
 import com.exasol.extensionmanager.itest.builder.ExtensionBuilder;
 
+// [itest -> dsn~eitfj-access-extension-manager-rest-interface~1]
+// [itest -> dsn~eitfj-start-extension-manager~1]
 class ExtensionManagerClientIT {
 
-    private static final String EXTENSION_ID = "testing-extension.js";
     private static final String EXTENSION_VERSION = "0.0.0";
     private static ExasolTestSetup exasolTestSetup;
     private static Connection connection;
@@ -35,8 +36,8 @@ class ExtensionManagerClientIT {
         exasolTestSetup = IntegrationTestCommon.createExasolTestSetup();
         connection = exasolTestSetup.createConnection();
         createTestConfigFile();
-        extensionManager = ExtensionManagerSetup.create(exasolTestSetup, ExtensionBuilder.createDefaultNpmBuilder(
-                TESTING_EXTENSION_SOURCE_DIR, TESTING_EXTENSION_SOURCE_DIR.resolve("dist").resolve(EXTENSION_ID)));
+        extensionManager = ExtensionManagerSetup.create(exasolTestSetup,
+                ExtensionBuilder.createDefaultNpmBuilder(TESTING_EXTENSION_SOURCE_DIR, BUILT_EXTENSION_JS));
         client = extensionManager.client();
     }
 

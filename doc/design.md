@@ -173,9 +173,18 @@ Needs: impl, utest, itest
 ### Extension Definitions
 `dsn~extension-definition~1`
 
-Each extension might be implemented in an arbitrary programming language and typically are based on a so-called [user defined function](system_requirements.md#terms-and-abbreviations). In order to allow EM to manage multiple heterogenous extensions in a unique way, each extension is represented by small wrapper implementing a uniform interface. This wrapper is called an "extension definition".
+Each extension might be implemented in an arbitrary programming language and typically is based on a so-called [user defined function](system_requirements.md#terms-and-abbreviations). In order to allow EM to manage multiple heterogenous extensions in a unique way, each extension is represented by small wrapper implementing a uniform interface. This wrapper is called an "extension definition".
 
-The interface is defined in [`extension-manager-interface`](https://github.com/exasol/extension-manager-interface/):
+Covers:
+
+* [`req~extension~1`](system_requirements.md#install-required-artifacts)
+
+Needs: impl, utest, itest
+
+#### Extension API Interface
+`dsn~extension-api~1`
+
+Each [extension definition](#extension-definitions) implements the TypeScript interface defined in [`extension-manager-interface`](https://github.com/exasol/extension-manager-interface/). This allows EM to uniformly manage all extensions that implement this interface.
 
 ```plantuml
 @startuml
@@ -190,9 +199,9 @@ ExasolExtension <-- "mysql-virtual-schema (repo).MySqlExtensionDefinition"
 
 Covers:
 
-* [`req~extension~1`](system_requirements.md#install-required-artifacts)
+* [`req~extension-api~1`](system_requirements.md#extension-api)
 
-Needs: impl, utest, itest
+Needs: impl, utest
 
 #### Storage for Extension Definitions
 `dsn~extension-definitions-storage~1`
@@ -323,7 +332,7 @@ Covers:
 
 Each parameter definition is attached to a specific version of the extension.
 
-Rationale: Parameters can change over time, see [Updates](#updates).
+Rationale: Parameters can change over time, see [Upgrades](#upgrades).
 
 Covers:
 * [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
@@ -383,6 +392,46 @@ See design decision [against a callback for the client side validation](#callbac
 
 Covers:
 * [`req~validate-parameter-values~1`](system_requirements.md#ui-languages)
+
+### Extension Integration Testing Framework
+
+The Extension Integration Testing Framework for Java (EITFJ) allows [extension developers](system_requirements.md#extension-developers) to create integration tests for an extension involving its definition](#extension-definitions) and implementation.
+
+The EITFJ is written in Java as most extensions like virtual schemas are also written in Java. This way it's easy to add integration tests for an extension into the existing Maven build.
+
+#### Starting Extension Manager during Integration Tests
+`dsn~eitfj-start-extension-manager~1`
+
+The EITFJ provides a method for installing and starting an [Extension Manager REST interface](#em-provides-a-rest-interface).
+
+Covers:
+* [`req~extension-testing-framework~1`](system_requirements.md#integration-test-framework-for-extensions)
+
+Needs: impl, itest, doc
+
+#### Accessing the Extension Manager REST Interface
+`dsn~eitfj-access-extension-manager-rest-interface~1`
+
+The EITFJ provides a Java API for accessing the EM REST interface.
+
+Rationale:
+This simplifies integration tests and avoids code duplication.
+
+Covers:
+* [`req~extension-testing-framework~1`](system_requirements.md#integration-test-framework-for-extensions)
+
+Needs: impl, utest, itest, doc
+
+#### Preparing Previous Extension Versions
+`dsn~eitfj-prepare-previous-extension-version~1`
+
+The EITFJ provides a Java API for preparing previous versions of an extension. This allows writing integration tests for upgrading from a previous version to the current version of an extension.
+
+Covers:
+* [`req~extension-testing-framework~1`](system_requirements.md#integration-test-framework-for-extensions)
+* [`req~upgrade-extension~1`](system_requirements.md#upgrade-extension)
+
+Needs: impl, utest
 
 ## Runtime
 
@@ -475,7 +524,7 @@ Notes:
 * See details about [BucketsFS Buckets in Exasol SaaS](#bucketsfs-buckets-in-exasol-saas) in the next section.
 
 Covers:
-* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
 * [`req~define-configuration-parameters~1`](system_requirements.md#parameter-types)
 * [`req~uninstall-extension~1`](system_requirements.md#uninstalling-extensions)
 
@@ -567,7 +616,7 @@ Installation "1" o-- "*" Instance
 ```
 
 Covers:
-* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
 
 
 #### Installation Metadata
@@ -578,7 +627,7 @@ Extensions don't store their own metadata. Instead they read information about e
 However, for example for reading back the credentials stored in a connection, EM uses a temporary UDF that reads back the secret value.
 
 Covers:
-* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
 
 Needs: impl, utest, itest
 
@@ -627,7 +676,7 @@ database Database {
 ```
 
 Covers:
-* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
 
 Needs: impl, utest, itest
 
@@ -638,7 +687,7 @@ EM can upgrade an installed extensions and its instances to the latest version.
 
 Covers:
 * [`req~upgrade-extension~1`](system_requirements.md#uninstalling-extensions)
-* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
 
 Needs: impl, utest, itest
 
@@ -658,7 +707,7 @@ Rationale:
 * While EM also provides [access to metadata](#extension-context-metadata) via the context, this information may not be sufficient. Executing arbitrary queries ensures maximum flexibility for extensions.
 
 Covers:
-* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
 
 Needs: impl, utest, itest
 
@@ -668,7 +717,7 @@ Needs: impl, utest, itest
 The BucketFS client in the extension context allows the extension definition to interact with BucketFS.
 
 Covers:
-* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
 
 Needs: impl, utest, itest
 
@@ -697,7 +746,7 @@ Rationale:
   * **Note:** EM will only need to work with Exasol v8, so support for v7 is actually not necessary. However the Docker container for v8 currently does not support running Python and Java UDFs. Until this is fixed we still need v7 for integration testing.
 
 Covers:
-* [`req~install-extension-database-objects~1`](system_requirements.md#update-extension)
+* [`req~install-extension-database-objects~1`](system_requirements.md#install-database-objects)
 
 Needs: impl, utest, itest
 

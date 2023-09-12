@@ -1,4 +1,6 @@
-# Developers Guide
+# Developer Guide
+
+This guide describes how to develop, test and build the Extension Manager.
 
 ## Building
 
@@ -36,42 +38,17 @@ If tracing fails with a `org.xml.sax.SAXParseException` you might need to run `m
 
 ## Testing
 
-The different components of the project are responsible for testing different things.
-
-### extension-manager
-
 The extension-manager project contains unit and integration tests that verify
 * Loading and executing of JavaScript extensions
 * Database interactions
 * REST API interface
 * Server-side parameter validation using `extension-parameter-validator`
-* ...
 
 Tests use dummy extensions, no real extensions.
 
-### Extensions
-
-Extensions are located in the repositories of the virtual schema implementations, e.g. `s3-document-files-virtual-schema`.
-
-Tests for extensions are:
-* Verify correct implementation of a specific version of the `extension-manager-interface` using the TypeScript compiler
-* Unit tests written in TypeScript verify all execution paths of the extension
-* Integration tests written in Java use a specific version of the `extension-manager` to verify that the extension
-  * can be loaded
-  * can install a virtual schema and check that it works
-  * can update parameters of an existing virtual schema
-  * can upgrade a virtual schema created with an older version
-  * ...
-
-### Restrictions as Document Virtual Schemas Only Support a Single Version
-
-Document virtual schemas like `s3-document-files-virtual-schema` require a `SET SCRIPT` that must have a specific name. As this script references a specific virtual schema JAR archive, it is not possible to install multiple version of the same virtual schema in the same database `SCHEMA`.
-
-This means that in order to test a new version of a virtual schema, you need to create a new `SCHEMA` with the required database objects.
-
 ### Non-Parallel Tests
 
-The tests of this project use the exasol-test-setup-abstraction-server. There the tests connect to an Exasol database running in a docker container. For performance reasons the test-setup-abstraction reuses that container.  This feature is not compatible with running tests in parallel.
+The tests of this project use [`exasol-test-setup-abstraction-server`](https://github.com/exasol/exasol-test-setup-abstraction-server/). There the tests connect to an Exasol database running in a docker container. For performance reasons the test-setup-abstraction reuses that container. This feature is not compatible with running tests in parallel.
 
 Problems would be:
 
@@ -92,6 +69,8 @@ To run only tests without the database use:
 ```sh
 go test -p 1 -short ./...
 ```
+
+Please note that also `-short` tests need `-p 1` because extension integration tests share a directory for building a test extension. Tests will fail randomly without `-p 1`.
 
 ## Static Code Analysis
 

@@ -18,6 +18,7 @@ import com.exasol.extensionmanager.itest.process.*;
 /**
  * This class allows starting and stopping an extension manager process.
  */
+// [impl -> dsn~eitfj-start-extension-manager~1]
 class ExtensionManagerProcess implements AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(ExtensionManagerProcess.class.getName());
     private static final Duration SERVER_STARTUP_TIMEOUT = Duration.ofSeconds(5);

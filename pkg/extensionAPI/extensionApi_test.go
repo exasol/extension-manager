@@ -42,6 +42,7 @@ func (suite *ExtensionApiSuite) TearDownTest() {
 }
 
 /* [utest -> dsn~extension-definition~1] */
+/* [utest -> dsn~extension-api~1]. */
 func (suite *ExtensionApiSuite) TestLoadExtension() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).Build().AsString()
 	extension := suite.loadExtension(extensionContent)
