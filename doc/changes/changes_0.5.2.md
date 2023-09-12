@@ -4,11 +4,15 @@ Code name:
 
 ## Summary
 
-This release updates the upload process for the extension registry to verify that the extension URLs are valid.
+This release updates the upload process for the extension registry to verify that the extension URLs are valid. It also adds design, requirements and user guide for the integration testing framework.
 
 ## Features
 
 * #129: Added verification for extension URLs before uploading to registry
+
+## Documentation
+
+* #9: Add design, requirements and user guide for integration testing framework
 
 ## Refactoring
 

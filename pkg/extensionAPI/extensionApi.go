@@ -69,6 +69,8 @@ func loadExtension(vm *goja.Runtime, id, content string) (*installedExtension, e
 	return &extension, nil
 }
 
+// installedExtension allows deserializing extension definitions that implement the extension-manager-interface (https://github.com/exasol/extension-manager-interface/).
+/* [impl -> dsn~extension-api~1]. */
 type installedExtension struct {
 	Extension  rawJsExtension `json:"extension"`
 	APIVersion string         `json:"apiVersion"`
