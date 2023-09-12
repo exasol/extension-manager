@@ -23,6 +23,7 @@ jobs:
           mkdir gh-pages
           cd gh-pages
           pandoc ../doc/design.md -o design.html --filter pandoc-plantuml
+          pandoc ../doc/system_requirements.md -o system_requirements.html --filter pandoc-plantuml
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.3.0
         with:
