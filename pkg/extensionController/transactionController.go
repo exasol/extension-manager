@@ -105,8 +105,7 @@ func CreateWithConfig(config ExtensionManagerConfig) TransactionController {
 
 // CreateWithValidatedConfig validates the configuration and creates a new instance of [TransactionController].
 func CreateWithValidatedConfig(config ExtensionManagerConfig) (TransactionController, error) {
-	err := validateConfig(config)
-	if err != nil {
+	if err := validateConfig(config); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
 	controller := createImpl(config)
