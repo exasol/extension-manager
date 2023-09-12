@@ -40,7 +40,7 @@ func newJavaScriptVm(logPrefix string) *goja.Runtime {
 }
 
 func configureLogging(registry *require.Registry, vm *goja.Runtime, logPrefix string) {
-	var printer console.Printer = console.PrinterFunc(func(s string) { log.Print(logPrefix + s) })
+	printer := createJavaScriptLogger(logPrefix)
 	registry.RegisterNativeModule(console.ModuleName, console.RequireWithPrinter(printer))
 	console.Enable(vm)
 }
