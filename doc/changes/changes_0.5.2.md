@@ -14,6 +14,10 @@ This release updates the upload process for the extension registry to verify tha
 
 * #9: Add design, requirements and user guide for integration testing framework
 
+## Refactoring
+
+* #139: Converted `extensionForTesting` to JavaScript to speedup tests
+
 ## Dependency Updates
 
 ### Extension Integration Tests Library
