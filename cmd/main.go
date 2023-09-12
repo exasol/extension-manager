@@ -29,18 +29,25 @@ func main() {
 			panic(fmt.Sprintf("failed to generate OpenAPI to %q: %v", *openAPIOutputPath, err))
 		}
 	} else {
-		startServer(*extensionRegistryURL, *serverAddress, *addCauseToInternalServerError)
+		err := startServer(*extensionRegistryURL, *serverAddress, *addCauseToInternalServerError)
+		if err != nil {
+			panic(fmt.Sprintf("failed to start server: %v", err))
+		}
 	}
 }
 
-func startServer(pathToExtensionFolder string, serverAddress string, addCauseToInternalServerError bool) {
+func startServer(pathToExtensionFolder string, serverAddress string, addCauseToInternalServerError bool) error {
 	log.Printf("Starting extension manager with extension folder %q", pathToExtensionFolder)
-	controller := extensionController.CreateWithConfig(extensionController.ExtensionManagerConfig{
+	controller, err := extensionController.CreateWithValidatedConfig(extensionController.ExtensionManagerConfig{
 		ExtensionRegistryURL: pathToExtensionFolder,
 		ExtensionSchema:      restAPI.EXTENSION_SCHEMA_NAME,
 		BucketFSBasePath:     "/buckets/bfsdefault/default/"})
+	if err != nil {
+		return err
+	}
 	restApi := restAPI.Create(controller, serverAddress, addCauseToInternalServerError)
 	restApi.Serve()
+	return nil
 }
 
 func generateOpenAPISpec(filename string) error {
