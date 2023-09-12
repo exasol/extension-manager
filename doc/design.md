@@ -395,9 +395,9 @@ Covers:
 
 ### Extension Integration Testing Framework
 
-The Extension Integration Testing Framework for Java (EITFJ) allows [extension developers](system_requirements.md#extension-developers) to create integration tests for an [extension definition](#extension-definitions).
+The Extension Integration Testing Framework for Java (EITFJ) allows [extension developers](system_requirements.md#extension-developers) to create integration tests for an extension involving its definition](#extension-definitions) and implementation.
 
-The EITFJ is written in Java as most extensions like virtual schemas are also written in Java. This way it's easy to add integration tests for extension definitions into the existing Maven build.
+The EITFJ is written in Java as most extensions like virtual schemas are also written in Java. This way it's easy to add integration tests for an extension into the existing Maven build.
 
 #### Starting Extension Manager during Integration Tests
 `dsn~eitfj-start-extension-manager~1`
