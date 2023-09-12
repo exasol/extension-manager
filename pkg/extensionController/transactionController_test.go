@@ -45,6 +45,37 @@ func (suite *extCtrlUnitTestSuite) AfterTest(suiteName, testName string) {
 	}
 }
 
+// CreateWithValidatedConfig
+
+func (suite *extCtrlUnitTestSuite) TestCreateWithValidatedConfigSuccess() {
+	ctrl, err := CreateWithValidatedConfig(ExtensionManagerConfig{ExtensionRegistryURL: "url", BucketFSBasePath: "bfspath", ExtensionSchema: "schema"})
+	suite.NoError(err)
+	suite.NotNil(ctrl)
+}
+
+func (suite *extCtrlUnitTestSuite) TestCreateWithValidatedConfigFailure() {
+	var tests = []struct {
+		name          string
+		config        ExtensionManagerConfig
+		expectedError string
+	}{
+		{name: "missing registry url", config: ExtensionManagerConfig{BucketFSBasePath: "bfspath", ExtensionSchema: "schema"}, expectedError: "invalid configuration: missing ExtensionRegistryURL"},
+		{name: "empty registry url", config: ExtensionManagerConfig{ExtensionRegistryURL: "", BucketFSBasePath: "bfspath", ExtensionSchema: "schema"}, expectedError: "invalid configuration: missing ExtensionRegistryURL"},
+		{name: "missing bucketfs base path", config: ExtensionManagerConfig{ExtensionRegistryURL: "url", ExtensionSchema: "schema"}, expectedError: "invalid configuration: missing BucketFSBasePath"},
+		{name: "empty bucketfs base path", config: ExtensionManagerConfig{ExtensionRegistryURL: "url", BucketFSBasePath: "", ExtensionSchema: "schema"}, expectedError: "invalid configuration: missing BucketFSBasePath"},
+		{name: "missing schema", config: ExtensionManagerConfig{ExtensionRegistryURL: "url", BucketFSBasePath: "bfspath"}, expectedError: "invalid configuration: missing ExtensionSchema"},
+		{name: "empty schema", config: ExtensionManagerConfig{ExtensionRegistryURL: "url", BucketFSBasePath: "bfspath", ExtensionSchema: ""}, expectedError: "invalid configuration: missing ExtensionSchema"},
+		{name: "all missing", config: ExtensionManagerConfig{}, expectedError: "invalid configuration: missing BucketFSBasePath"},
+	}
+	for _, test := range tests {
+		suite.Run(test.name, func() {
+			ctrl, err := CreateWithValidatedConfig(test.config)
+			suite.EqualError(err, test.expectedError)
+			suite.Nil(ctrl)
+		})
+	}
+}
+
 // GetAllExtensions
 
 func (suite *extCtrlUnitTestSuite) TestGetAllExtensionsSuccess() {

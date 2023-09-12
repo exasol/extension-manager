@@ -205,12 +205,16 @@ err := restAPI.AddPublicEndpoints(api, config)
 If you want to directly use the controller:
 
 ```go
-controller := extensionController.CreateWithConfig(extensionController.ExtensionManagerConfig{
+controller, err := extensionController.CreateWithValidatedConfig(extensionController.ExtensionManagerConfig{
     ExtensionRegistryURL: "https://example.com/registry.json", 
     BucketFSBasePath: "/buckets/bfsdefault/default/",
     ExtensionSchema: "EXA_EXTENSIONS",
 })
-var db *sql.DB // create database connection
+if err != nil {
+    // Handle configuration validation error
+    return err
+}
+var db *sql.DB // Create database connection
 extensions, err := controller.GetAllExtensions(context.Background(), db)
 // ...
 ```
