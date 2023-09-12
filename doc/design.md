@@ -173,7 +173,7 @@ Needs: impl, utest, itest
 ### Extension Definitions
 `dsn~extension-definition~1`
 
-Each extension might be implemented in an arbitrary programming language and typically are based on a so-called [user defined function](system_requirements.md#terms-and-abbreviations). In order to allow EM to manage multiple heterogenous extensions in a unique way, each extension is represented by small wrapper implementing a uniform interface. This wrapper is called an "extension definition".
+Each extension might be implemented in an arbitrary programming language and typically is based on a so-called [user defined function](system_requirements.md#terms-and-abbreviations). In order to allow EM to manage multiple heterogenous extensions in a unique way, each extension is represented by small wrapper implementing a uniform interface. This wrapper is called an "extension definition".
 
 Covers:
 
@@ -412,7 +412,10 @@ Needs: impl, itest, doc
 #### Accessing the Extension Manager REST Interface
 `dsn~eitfj-access-extension-manager-rest-interface~1`
 
-The EITFJ provides a Java API for accessing the EM REST interface. This simplifies integration tests and avoids code duplication.
+The EITFJ provides a Java API for accessing the EM REST interface.
+
+Rationale:
+This simplifies integration tests and avoids code duplication.
 
 Covers:
 * [`req~extension-testing-framework~1`](system_requirements.md#integration-test-framework-for-extensions)
