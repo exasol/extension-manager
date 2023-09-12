@@ -9,6 +9,7 @@ This release updates the upload process for the extension registry to verify tha
 ## Features
 
 * #129: Added verification for extension URLs before uploading to registry
+* #130: Added verification that no instance exists before uninstalling an extension
 
 ## Documentation
 

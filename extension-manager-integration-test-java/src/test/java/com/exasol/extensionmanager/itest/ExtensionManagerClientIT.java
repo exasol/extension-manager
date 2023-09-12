@@ -91,13 +91,9 @@ class ExtensionManagerClientIT {
     }
 
     @Test
-    void uninstall() {
-        assertDoesNotThrow(() -> client.uninstall());
-    }
-
-    @Test
-    void uninstallWithExtensionVersion() {
-        assertDoesNotThrow(() -> client.uninstall(EXTENSION_VERSION));
+    void uninstallFailsBecauseInstanceExists() {
+        client.assertRequestFails(() -> client.uninstall(),
+                "cannot uninstall extension because 1 instance(s) still exist: Instance 1", 400);
     }
 
     @Test
