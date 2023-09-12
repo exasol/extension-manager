@@ -26,17 +26,22 @@ func main() {
 	if openAPIOutputPath != nil && *openAPIOutputPath != "" {
 		err := generateOpenAPISpec(*openAPIOutputPath)
 		if err != nil {
-			panic(fmt.Sprintf("failed to generate OpenAPI to %q: %v", *openAPIOutputPath, err))
+			fmt.Printf("failed to generate OpenAPI to %q: %v\n", *openAPIOutputPath, err)
+			os.Exit(1)
 		}
 	} else {
 		err := startServer(*extensionRegistryURL, *serverAddress, *addCauseToInternalServerError)
 		if err != nil {
-			panic(fmt.Sprintf("failed to start server: %v", err))
+			fmt.Printf("failed to start server: %v\n", err)
+			os.Exit(1)
 		}
 	}
 }
 
 func startServer(pathToExtensionFolder string, serverAddress string, addCauseToInternalServerError bool) error {
+	if pathToExtensionFolder == "" {
+		return fmt.Errorf("please specify extension registry with parameter '-extensionRegistryURL'")
+	}
 	log.Printf("Starting extension manager with extension folder %q", pathToExtensionFolder)
 	controller, err := extensionController.CreateWithValidatedConfig(extensionController.ExtensionManagerConfig{
 		ExtensionRegistryURL: pathToExtensionFolder,
