@@ -68,7 +68,7 @@ func writeFile(filename string, content []byte) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Wrote OpenAPI spec to %s", filename)
+	fmt.Printf("Wrote OpenAPI spec to %s\n", filename)
 	return nil
 }
 
@@ -77,7 +77,8 @@ func generateOpenAPIJson() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = restAPI.AddPublicEndpoints(api, extensionController.ExtensionManagerConfig{})
+	dummyConfiguration := extensionController.ExtensionManagerConfig{ExtensionRegistryURL: "dummy", BucketFSBasePath: "dummy", ExtensionSchema: "dummy"}
+	err = restAPI.AddPublicEndpoints(api, dummyConfiguration)
 	if err != nil {
 		return nil, err
 	}
