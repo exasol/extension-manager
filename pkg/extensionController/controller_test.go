@@ -122,6 +122,31 @@ var errorTests = []errorTest{
 	{testName: "null pointer", throwCommand: `({}).a.b; throw Error("mock");`, expectedStatus: -1, expectedMessage: "TypeError: Cannot read property 'b' of undefined"},
 }
 
+// GetInstalledExtensions
+
+func (suite *ControllerUTestSuite) TestGetAllInstallations() {
+	suite.writeDefaultExtension()
+	suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{{Schema: "schema", Name: "script"}})
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectRollback()
+	installations, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
+	suite.NoError(err)
+	suite.Equal([]*extensionAPI.JsExtInstallation{{Name: "schema.script", Version: "0.1.0"}}, installations)
+}
+
+func (suite *ControllerUTestSuite) TestGetAllInstallationsReturnsEmptyList() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithFindInstallationsFunc("return []").
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{{Schema: "schema", Name: "script"}})
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectRollback()
+	installations, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
+	suite.NoError(err)
+	suite.Empty(installations)
+}
+
 func (suite *ControllerUTestSuite) TestGetAllInstallationsFails() {
 	for _, t := range errorTests {
 		suite.Run(t.testName, func() {
@@ -139,6 +164,34 @@ func (suite *ControllerUTestSuite) TestGetAllInstallationsFails() {
 			suite.metaDataMock.AssertExpectations(suite.T())
 		})
 	}
+}
+
+// FindInstances
+
+func (suite *ControllerUTestSuite) TestFindInstancesReturnsEmptyList() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithFindInstancesFunc(`return []`).
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	suite.initDbMock()
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectRollback()
+	extensions, err := suite.controller.FindInstances(mockContext(), suite.db, EXTENSION_ID, "ver")
+	suite.NoError(err)
+	suite.Empty(extensions)
+}
+
+func (suite *ControllerUTestSuite) TestFindInstancesReturnsEntries() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithFindInstancesFunc(`return [{"id":"ext1","name":"ext-name1"},{"id":"ext2","name":"ext-name2"}]`).
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	suite.initDbMock()
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectRollback()
+	extensions, err := suite.controller.FindInstances(mockContext(), suite.db, EXTENSION_ID, "ver")
+	suite.NoError(err)
+	suite.Equal([]*extensionAPI.JsExtInstance{{Id: "ext1", Name: "ext-name1"}, {Id: "ext2", Name: "ext-name2"}}, extensions)
 }
 
 func (suite *ControllerUTestSuite) TestFindInstancesFails() {
@@ -203,16 +256,6 @@ func (suite *ControllerUTestSuite) assertError(t errorTest, actualError error) {
 	} else {
 		suite.assertNonApiError(actualError, expectedErrorMessage)
 	}
-}
-
-func (suite *ControllerUTestSuite) TestGetAllInstallations() {
-	suite.writeDefaultExtension()
-	suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{{Schema: "schema", Name: "script"}})
-	suite.dbMock.ExpectBegin()
-	suite.dbMock.ExpectRollback()
-	installations, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
-	suite.NoError(err)
-	suite.Equal([]*extensionAPI.JsExtInstallation{{Name: "schema.script", Version: "0.1.0"}}, installations)
 }
 
 // InstallExtension
@@ -316,6 +359,35 @@ func (suite *ControllerUTestSuite) TestUninstallFails() {
 			suite.assertError(t, err)
 		})
 	}
+}
+
+func (suite *ControllerUTestSuite) TestUninstallFailsWhenInstanceExists() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithUninstallFunc("context.sqlClient.execute(`uninstall extension version ${version}`)").
+		WithFindInstancesFunc(`return [{"id":"ext1","name":"ext-name1"}, {"id":"ext2","name":"ext-name2"}]`).
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectRollback()
+	err := suite.controller.UninstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
+	suite.EqualError(err, "cannot uninstall extension because 2 instance(s) still exist: ext-name1, ext-name2")
+	if apiErr, ok := err.(*apiErrors.APIError); ok {
+		suite.Equal(400, apiErr.Status)
+	} else {
+		suite.Fail(fmt.Sprintf("expected an APIError but got %T: %v", err, err))
+	}
+}
+
+func (suite *ControllerUTestSuite) TestUninstallFailsListingInstances() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithUninstallFunc("context.sqlClient.execute(`uninstall extension version ${version}`)").
+		WithFindInstancesFunc(`throw new Error('mock js error')`).
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectRollback()
+	err := suite.controller.UninstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
+	suite.ErrorContains(err, `failed to check existing instances: failed to list instances for extension "testing-extension.js" in version "ver": Error: mock js error`)
 }
 
 // Upgrade

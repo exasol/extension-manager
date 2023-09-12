@@ -209,7 +209,22 @@ func (c *controllerImpl) UninstallExtension(txCtx *transaction.TransactionContex
 	if err != nil {
 		return extensionLoadingFailed(extensionId, err)
 	}
-	return extension.Uninstall(c.createExtensionContext(txCtx), extensionVersion)
+	extensionCtx := c.createExtensionContext(txCtx)
+	instances, err := extension.ListInstances(extensionCtx, extensionVersion)
+	if err != nil {
+		return fmt.Errorf("failed to check existing instances: %w", err)
+	}
+	if len(instances) > 0 {
+		instanceNames := ""
+		for _, inst := range instances {
+			if instanceNames != "" {
+				instanceNames += ", "
+			}
+			instanceNames += inst.Name
+		}
+		return apiErrors.NewBadRequestErrorF("cannot uninstall extension because %d instance(s) still exist: %s", len(instances), instanceNames)
+	}
+	return extension.Uninstall(extensionCtx, extensionVersion)
 }
 
 /* [impl -> dsn~upgrade-extension~1]. */

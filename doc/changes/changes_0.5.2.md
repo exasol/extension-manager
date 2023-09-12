@@ -4,7 +4,7 @@ Code name:
 
 ## Summary
 
-This release updates the upload process for the extension registry to verify that the extension URLs are valid.
+This release updates the upload process for the extension registry to verify that the extension URLs are valid. It also adds design, requirements and user guide for the integration testing framework.
 
 The release deprecates function `extensionController.CreateWithConfig()` in favor of `extensionController.CreateWithValidatedConfig()`. This new function validates the given configuration and returns an error in case it finds an issue.
 
@@ -12,6 +12,11 @@ The release deprecates function `extensionController.CreateWithConfig()` in favo
 
 * #129: Added verification for extension URLs before uploading to registry
 * #142: Added validation of configuration when creating a new controller
+* #130: Added verification that no instance exists before uninstalling an extension
+
+## Documentation
+
+* #9: Add design, requirements and user guide for integration testing framework
 
 ## Refactoring
 
