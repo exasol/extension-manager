@@ -193,28 +193,41 @@ You can embed the Extension Manager's REST API in other programs that use the [N
 ```go
 // Create an instance of `openapi.API`
 api := openapi.NewOpenAPI()
-// Create a new configuration object
-config := ExtensionManagerConfig{ExtensionRegistryURL: "https://<extension-registry>"}
-// Add endpoints
-err := restAPI.AddPublicEndpoints(api, config)
-// Start the server
-```
-
-### Embedding the Controller
-
-If you want to directly use the controller:
-
-```go
-controller, err := extensionController.CreateWithValidatedConfig(extensionController.ExtensionManagerConfig{
+// Create a new configuration
+config := extensionController.ExtensionManagerConfig{
     ExtensionRegistryURL: "https://example.com/registry.json", 
     BucketFSBasePath: "/buckets/bfsdefault/default/",
     ExtensionSchema: "EXA_EXTENSIONS",
-})
+}
+// Add endpoints
+err := restAPI.AddPublicEndpoints(api, config)
 if err != nil {
-    // Handle configuration validation error
     return err
 }
-var db *sql.DB // Create database connection
-extensions, err := controller.GetAllExtensions(context.Background(), db)
+// Start the server
+```
+
+### Embedding the Extension Controller
+
+If you want to directly use the extension controller in your application you can use the following code as an example:
+
+```go
+// Create a new configuration
+config := extensionController.ExtensionManagerConfig{
+    ExtensionRegistryURL: "https://example.com/registry.json", 
+    BucketFSBasePath: "/buckets/bfsdefault/default/",
+    ExtensionSchema: "EXA_EXTENSIONS",
+}
+// Create controller and handle configuration validation error
+ctrl, err := extensionController.CreateWithValidatedConfig(config)
+if err != nil {
+    return err
+}
+
+// Create database connection (required as an argument for all controller methods)
+var db *sql.DB = createDBConnection()
+
+// Call controller method and process result. Use a custom context if available.
+extensions, err := ctrl.GetAllExtensions(context.Background(), db)
 // ...
 ```
