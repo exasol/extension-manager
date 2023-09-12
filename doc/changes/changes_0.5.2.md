@@ -10,6 +10,10 @@ This release updates the upload process for the extension registry to verify tha
 
 * #129: Added verification for extension URLs before uploading to registry
 
+## Refactoring
+
+* #139: Converted `extensionForTesting` to JavaScript to speedup tests
+
 ## Dependency Updates
 
 ### Extension Integration Tests Library
