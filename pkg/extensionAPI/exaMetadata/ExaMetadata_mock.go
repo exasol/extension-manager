@@ -39,10 +39,10 @@ func (m *ExaMetaDataReaderMock) SimulateGetScriptByNameScriptText(scriptName str
 		Schema:     "?",
 		Name:       scriptName,
 		Text:       scriptText,
-		Type:       "?",
-		InputType:  "?",
-		ResultType: "?",
-		Comment:    "?",
+		Type:       "",
+		InputType:  "",
+		ResultType: "",
+		Comment:    "",
 	}
 	m.SimulateGetScriptByName(scriptName, script)
 }
