@@ -1,3 +1,4 @@
+//nolint:unused // Mocked methods are actually used
 package extensionController
 
 import (
