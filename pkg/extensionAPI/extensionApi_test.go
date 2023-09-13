@@ -103,31 +103,22 @@ func (suite *ExtensionApiSuite) TestInstallResolveBucketFsPathFails() {
 	suite.EqualError(err, `failed to install extension "ext-id": failed to find absolute path for file "my-adapter-extVersion.jar": mock error`)
 }
 
-func (suite *ExtensionApiSuite) TestJavaScriptConsoleLog() {
-	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithInstallFunc("console.log('test log message')").
-		Build().AsString()
-	extension := suite.loadExtension(extensionContent)
-	err := extension.Install(suite.mockContext(), "extensionVersion")
-	suite.NoError(err)
-}
-
-func (suite *ExtensionApiSuite) TestJavaScriptConsoleWarn() {
-	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithInstallFunc("console.warn('test warning message')").
-		Build().AsString()
-	extension := suite.loadExtension(extensionContent)
-	err := extension.Install(suite.mockContext(), "extensionVersion")
-	suite.NoError(err)
-}
-
-func (suite *ExtensionApiSuite) TestJavaScriptConsoleError() {
-	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithInstallFunc("console.error('test error message')").
-		Build().AsString()
-	extension := suite.loadExtension(extensionContent)
-	err := extension.Install(suite.mockContext(), "extensionVersion")
-	suite.NoError(err)
+func (suite *ExtensionApiSuite) TestJavaScriptConsoleLogging() {
+	var tests = []struct{ jsLoggingCode string }{
+		{jsLoggingCode: "console.log('test log message')"},
+		{jsLoggingCode: "console.warn('test warning message')"},
+		{jsLoggingCode: "console.error('test error message')"},
+	}
+	for _, test := range tests {
+		suite.Run(test.jsLoggingCode, func() {
+			extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+				WithInstallFunc(test.jsLoggingCode).
+				Build().AsString()
+			extension := suite.loadExtension(extensionContent)
+			err := extension.Install(suite.mockContext(), "extensionVersion")
+			suite.NoError(err)
+		})
+	}
 }
 
 func (suite *ExtensionApiSuite) TestUninstall() {
