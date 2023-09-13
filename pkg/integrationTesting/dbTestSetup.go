@@ -32,8 +32,11 @@ func StartDbSetup(suite *suite.Suite) *DbTestSetup {
 	if err != nil {
 		suite.FailNowf("error getting connection info: %v", err.Error())
 	}
-	setup := DbTestSetup{suite: suite, Exasol: exasol, ConnectionInfo: connectionInfo}
-	return &setup
+	return &DbTestSetup{
+		suite:          suite,
+		Exasol:         exasol,
+		ConnectionInfo: connectionInfo,
+		connection:     nil}
 }
 
 func getDbVersion() string {

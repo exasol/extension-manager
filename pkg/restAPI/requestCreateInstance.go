@@ -13,6 +13,7 @@ import (
 )
 
 func CreateInstance(apiContext *ApiContext) *openapi.Post {
+	//nolint:exhaustruct // Default values for request are OK
 	return &openapi.Post{
 		Summary:        "Create an instance of an extension.",
 		Description:    "This creates a new instance of an extension, e.g. a virtual schema.",
@@ -39,6 +40,7 @@ func CreateInstance(apiContext *ApiContext) *openapi.Post {
 
 func handleCreateInstance(apiContext *ApiContext) dbHandler {
 	return func(db *sql.DB, writer http.ResponseWriter, request *http.Request) error {
+		//nolint:exhaustruct // Omitting values by intention for deserialization
 		requestBody := CreateInstanceRequest{}
 		err := DecodeJSONBody(writer, request, &requestBody)
 		if err != nil {

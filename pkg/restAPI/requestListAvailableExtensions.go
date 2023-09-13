@@ -13,6 +13,7 @@ import (
 )
 
 func ListAvailableExtensions(apiContext *ApiContext) *openapi.Get {
+	//nolint:exhaustruct // Default values for request are OK
 	return &openapi.Get{
 		Summary:        "List available extensions",
 		Description:    "Get a list of all available extensions, i.e. extensions that can be installed.",

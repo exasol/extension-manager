@@ -19,7 +19,12 @@ type MockRegistryServer struct {
 const REGISTRY_PATH = "/registry.json"
 
 func NewMockRegistryServer(suite *suite.Suite) *MockRegistryServer {
-	return &MockRegistryServer{suite: suite, registryContent: ""}
+	return &MockRegistryServer{
+		suite:           suite,
+		registryContent: "",
+		server:          nil,
+		files:           make(map[string]string),
+	}
 }
 
 func (s *MockRegistryServer) Start() {

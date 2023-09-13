@@ -18,7 +18,7 @@ type Extension struct {
 // Decode parses the content of the given reader and returns a RegistryIndex.
 func Decode(reader io.Reader) (RegistryIndex, error) {
 	decoder := json.NewDecoder(reader)
-	content := RegistryIndex{}
+	content := RegistryIndex{Extensions: []Extension{}}
 	err := decoder.Decode(&content)
 	if err != nil {
 		return content, fmt.Errorf("failed to decode registry content: %w", err)
@@ -42,5 +42,5 @@ func (i RegistryIndex) GetExtension(id string) (extension Extension, ok bool) {
 			return ext, true
 		}
 	}
-	return Extension{}, false
+	return Extension{ID: "", URL: ""}, false
 }

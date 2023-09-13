@@ -10,6 +10,7 @@ import (
 )
 
 func InstallExtension(apiContext *ApiContext) *openapi.Put {
+	//nolint:exhaustruct // Default values for request are OK
 	return &openapi.Put{
 		Summary:        "Install an extension.",
 		Description:    "This installs an extension in a given version, e.g. by creating Adapter Scripts.",

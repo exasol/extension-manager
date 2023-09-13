@@ -10,6 +10,7 @@ import (
 )
 
 func ListInstances(apiContext *ApiContext) *openapi.Get {
+	//nolint:exhaustruct // Default values for request are OK
 	return &openapi.Get{
 		Summary:        "List all instances of an extension.",
 		Description:    "This lists all instances of an extension, e.g. virtual schema.",

@@ -9,6 +9,7 @@ import (
 )
 
 func ListInstalledExtensions(apiContext *ApiContext) *openapi.Get {
+	//nolint:exhaustruct // Default values for request are OK
 	return &openapi.Get{
 		Summary:        "List installed extensions",
 		Description:    "Get a list of all installed extensions.",

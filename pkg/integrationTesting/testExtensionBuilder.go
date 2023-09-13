@@ -18,16 +18,19 @@ import (
 const defaultExtensionApiVersion = "0.3.0"
 
 func CreateTestExtensionBuilder(t *testing.T) *TestExtensionBuilder {
-	builder := TestExtensionBuilder{testing: t}
-	builder.extensionApiVersion = defaultExtensionApiVersion
-	builder.findInstallationsFunc = "return []"
-	builder.installFunc = "context.sqlClient.execute('select 1')"
-	builder.uninstallFunc = ""
-	builder.upgradeFunc = "return { previousVersion: '0.1.0', newVersion: '0.2.0' }"
-	builder.addInstanceFunc = "return undefined"
-	builder.findInstancesFunc = "return []"
-	builder.deleteInstanceFunc = "context.sqlClient.execute(`drop instance ${instanceId}`)"
-	builder.getInstanceParameterDefinitionsFunc = "return []"
+	builder := TestExtensionBuilder{
+		testing:                             t,
+		extensionApiVersion:                 defaultExtensionApiVersion,
+		findInstallationsFunc:               "return []",
+		installFunc:                         "context.sqlClient.execute('select 1')",
+		uninstallFunc:                       "",
+		upgradeFunc:                         "return { previousVersion: '0.1.0', newVersion: '0.2.0' }",
+		addInstanceFunc:                     "return undefined",
+		findInstancesFunc:                   "return []",
+		deleteInstanceFunc:                  "context.sqlClient.execute(`drop instance ${instanceId}`)",
+		getInstanceParameterDefinitionsFunc: "return []",
+		bucketFsUploads:                     []BucketFsUploadParams{},
+	}
 	return &builder
 }
 

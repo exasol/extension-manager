@@ -10,6 +10,7 @@ import (
 )
 
 func DeleteInstance(apiContext *ApiContext) *openapi.Delete {
+	//nolint:exhaustruct // Default values for request are OK
 	return &openapi.Delete{
 		Summary:        "Delete an instances of an extension.",
 		Description:    "This deletes a single instances of an extension, e.g. a virtual schema.",

@@ -9,6 +9,7 @@ import (
 )
 
 func UninstallExtension(apiContext *ApiContext) *openapi.Delete {
+	//nolint:exhaustruct // Default values for request are OK
 	return &openapi.Delete{
 		Summary:        "Uninstall an extension.",
 		Description:    "This uninstalls an extension in a given version, e.g. by removing Adapter Scripts.",

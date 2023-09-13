@@ -72,8 +72,6 @@ func CreateOpenApi() (*openapi.API, error) {
 			Status:        500,
 			Message:       "Something went wrong.",
 			RequestID:     "Rn3x8gcEInnHt205B4c7QZ",
-			Timestamp:     "2021-01-02T15:04:05Z07:00",
-			APIID:         "",
 			OriginalError: nil,
 		},
 	})
