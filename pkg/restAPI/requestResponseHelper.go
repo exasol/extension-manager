@@ -87,6 +87,16 @@ func GetLogger(context context.Context) *log.Entry {
 	return log.WithFields(fields)
 }
 
+func getContextValue(ctx context.Context, id interface{}) string {
+	if ctx == nil {
+		return ""
+	}
+	if reqID, ok := ctx.Value(id).(string); ok {
+		return reqID
+	}
+	return ""
+}
+
 func DecodeJSONBody(writer http.ResponseWriter, request *http.Request, dst interface{}) error {
 	if value := request.Header.Get(HeaderContentType); value != ContentTypeJson {
 		return apiErrors.NewAPIError(http.StatusBadRequest, "Content-Type header is not application/json")
