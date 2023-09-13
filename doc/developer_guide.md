@@ -109,9 +109,9 @@ To use a local, non-published version of the extension interface for testing EM 
 
 1. Build `extension-manager-interface` by running `npm run build`. This is required after each change.
 2. Edit [pkg/integrationTesting/extensionForTesting/package.json](./../pkg/integrationTesting/extensionForTesting/package.json) and replace the version of `"@exasol/extension-manager-interface"` with the path to your local clone of [extension-manager-interface](https://github.com/exasol/extension-manager-interface).
-3. Edit [pkg/integrationTesting/extensionForTesting/extensionForTestingTemplate.ts](./../pkg/integrationTesting/extensionForTesting/extensionForTestingTemplate.ts) and adapt it to the new API if necessary.
+3. Edit [pkg/integrationTesting/extensionForTesting/extensionForTestingTemplate.js](./../pkg/integrationTesting/extensionForTesting/extensionForTestingTemplate.js) and adapt it to the new API if necessary.
 
-   **Note:** The file contains placeholders that will be replaced during tests. It is not valid TypeScript, so it's normal that the editor complains about the invalid syntax.
+   **Note:** The file contains placeholders that will be replaced during tests. It is not valid JavaScript, so it's normal that the editor complains about the invalid syntax.
 
 Make sure to not commit the modified `package.json`.
 
@@ -172,24 +172,41 @@ You can embed the Extension Manager's REST API in other programs that use the [N
 ```go
 // Create an instance of `openapi.API`
 api := openapi.NewOpenAPI()
-// Create a new configuration object
-config := ExtensionManagerConfig{ExtensionRegistryURL: "https://<extension-registry>"}
-// Add endpoints
-err := restAPI.AddPublicEndpoints(api, config)
-// Start the server
-```
-
-### Embedding the Controller
-
-If you want to directly use the controller:
-
-```go
-controller:=extensionController.CreateWithConfig(extensionController.ExtensionManagerConfig{
+// Create a new configuration
+config := extensionController.ExtensionManagerConfig{
     ExtensionRegistryURL: "https://example.com/registry.json", 
     BucketFSBasePath: "/buckets/bfsdefault/default/",
     ExtensionSchema: "EXA_EXTENSIONS",
-})
-var db *sql.DB // create database connection
-extensions, err := controller.GetAllExtensions(context.Background(), db)
+}
+// Add endpoints
+err := restAPI.AddPublicEndpoints(api, config)
+if err != nil {
+    return err
+}
+// Start the server
+```
+
+### Embedding the Extension Controller
+
+If you want to directly use the extension controller in your application you can use the following code as an example:
+
+```go
+// Create a new configuration
+config := extensionController.ExtensionManagerConfig{
+    ExtensionRegistryURL: "https://example.com/registry.json", 
+    BucketFSBasePath: "/buckets/bfsdefault/default/",
+    ExtensionSchema: "EXA_EXTENSIONS",
+}
+// Create controller and handle configuration validation error
+ctrl, err := extensionController.CreateWithValidatedConfig(config)
+if err != nil {
+    return err
+}
+
+// Create database connection (required as an argument for all controller methods)
+var db *sql.DB = createDBConnection()
+
+// Call controller method and process result. Use a custom context if available.
+extensions, err := ctrl.GetAllExtensions(context.Background(), db)
 // ...
 ```

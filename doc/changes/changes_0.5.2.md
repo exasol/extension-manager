@@ -12,9 +12,12 @@ This release contains the following notable changes:
 * It adds a custom JavaScript console logger that forwards the log levels of `console.log()`, `console.warn()` and `console.error()` to the Go `logrus` functions `Print()`, `Warn()` and `Error()`. Before, all log messages were output using `Print()`.
 * It speeds up tests that use a mock extension by avoiding compiling TypeScript to JavaScript.
 
+The release deprecates function `extensionController.CreateWithConfig()` in favor of `extensionController.CreateWithValidatedConfig()`. This new function validates the given configuration and returns an error in case it finds an issue.
+
 ## Features
 
 * #129: Added verification for extension URLs before uploading to registry
+* #142: Added validation of configuration when creating a new controller
 * #130: Added verification that no instance exists before uninstalling an extension
 * #115: Added custom JavaScript console logger that forwards log levels to the Go logger
 

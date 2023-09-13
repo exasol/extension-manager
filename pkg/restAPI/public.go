@@ -21,7 +21,10 @@ const (
 // The config struct contains configuration options for the extension manager.
 /* [impl -> dsn~go-library~1]. */
 func AddPublicEndpoints(api *openapi.API, config extensionController.ExtensionManagerConfig) error {
-	controller := extensionController.CreateWithConfig(config)
+	controller, err := extensionController.CreateWithValidatedConfig(config)
+	if err != nil {
+		return err
+	}
 	return addPublicEndpointsWithController(api, false, controller)
 }
 

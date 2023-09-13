@@ -96,11 +96,36 @@ func Create(extensionRegistryURL string, schema string) TransactionController {
 }
 
 // CreateWithConfig creates a new instance of [TransactionController] with more configuration options.
+//
+// Deprecated: Use function [CreateWithValidatedConfig] which additionally validates the given configuration.
 func CreateWithConfig(config ExtensionManagerConfig) TransactionController {
+	controller, _ := CreateWithValidatedConfig(config)
+	return controller
+}
+
+// CreateWithValidatedConfig validates the configuration and creates a new instance of [TransactionController].
+func CreateWithValidatedConfig(config ExtensionManagerConfig) (TransactionController, error) {
+	if err := validateConfig(config); err != nil {
+		return nil, fmt.Errorf("invalid configuration: %w", err)
+	}
 	controller := createImpl(config)
-	return &transactionControllerImpl{
+	transactionController := &transactionControllerImpl{
 		controller: controller,
 		bucketFs:   bfs.CreateBucketFsAPI(config.BucketFSBasePath)}
+	return transactionController, nil
+}
+
+func validateConfig(config ExtensionManagerConfig) error {
+	if config.BucketFSBasePath == "" {
+		return fmt.Errorf("missing BucketFSBasePath")
+	}
+	if config.ExtensionRegistryURL == "" {
+		return fmt.Errorf("missing ExtensionRegistryURL")
+	}
+	if config.ExtensionSchema == "" {
+		return fmt.Errorf("missing ExtensionSchema")
+	}
+	return nil
 }
 
 type transactionControllerImpl struct {
