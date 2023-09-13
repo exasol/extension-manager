@@ -26,21 +26,33 @@ func main() {
 	if openAPIOutputPath != nil && *openAPIOutputPath != "" {
 		err := generateOpenAPISpec(*openAPIOutputPath)
 		if err != nil {
-			panic(fmt.Sprintf("failed to generate OpenAPI to %q: %v", *openAPIOutputPath, err))
+			fmt.Printf("failed to generate OpenAPI to %q: %v\n", *openAPIOutputPath, err)
+			os.Exit(1)
 		}
 	} else {
-		startServer(*extensionRegistryURL, *serverAddress, *addCauseToInternalServerError)
+		err := startServer(*extensionRegistryURL, *serverAddress, *addCauseToInternalServerError)
+		if err != nil {
+			fmt.Printf("failed to start server: %v\n", err)
+			os.Exit(1)
+		}
 	}
 }
 
-func startServer(pathToExtensionFolder string, serverAddress string, addCauseToInternalServerError bool) {
+func startServer(pathToExtensionFolder string, serverAddress string, addCauseToInternalServerError bool) error {
+	if pathToExtensionFolder == "" {
+		return fmt.Errorf("please specify extension registry with parameter '-extensionRegistryURL'")
+	}
 	log.Printf("Starting extension manager with extension folder %q", pathToExtensionFolder)
-	controller := extensionController.CreateWithConfig(extensionController.ExtensionManagerConfig{
+	controller, err := extensionController.CreateWithValidatedConfig(extensionController.ExtensionManagerConfig{
 		ExtensionRegistryURL: pathToExtensionFolder,
 		ExtensionSchema:      restAPI.EXTENSION_SCHEMA_NAME,
 		BucketFSBasePath:     "/buckets/bfsdefault/default/"})
+	if err != nil {
+		return err
+	}
 	restApi := restAPI.Create(controller, serverAddress, addCauseToInternalServerError)
 	restApi.Serve()
+	return nil
 }
 
 func generateOpenAPISpec(filename string) error {
@@ -61,7 +73,7 @@ func writeFile(filename string, content []byte) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Wrote OpenAPI spec to %s", filename)
+	fmt.Printf("Wrote OpenAPI spec to %s\n", filename)
 	return nil
 }
 
@@ -70,7 +82,8 @@ func generateOpenAPIJson() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = restAPI.AddPublicEndpoints(api, extensionController.ExtensionManagerConfig{})
+	dummyConfiguration := extensionController.ExtensionManagerConfig{ExtensionRegistryURL: "dummy", BucketFSBasePath: "dummy", ExtensionSchema: "dummy"}
+	err = restAPI.AddPublicEndpoints(api, dummyConfiguration)
 	if err != nil {
 		return nil, err
 	}
