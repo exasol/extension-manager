@@ -107,7 +107,7 @@ func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsFailsInvalidBearer
 // Get extension details
 
 func (suite *RestAPIIntegrationTestSuite) TestGetExtensionDetailsFailsForUnknownExtension() {
-	response := suite.makeRequest("GET", suite.getExtensionDetails("unknown-ext-id", "version"), "", 404)
+	response := suite.makeRequest("GET", suite.getExtensionDetails("unknown-ext-id", "version"), 404)
 	suite.Contains(response, `{"code":404,"message":"extension \"unknown-ext-id\" not found",`)
 }
 
@@ -115,7 +115,7 @@ func (suite *RestAPIIntegrationTestSuite) TestGetExtensionDetailsSucceeds() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param:"+version, type: "string"}]`).
 		Build().Publish(suite.registryServer, EXTENSION_ID)
-	response := suite.makeRequest("GET", suite.getExtensionDetails(EXTENSION_ID, "ext-version"), "", 200)
+	response := suite.makeRequest("GET", suite.getExtensionDetails(EXTENSION_ID, "ext-version"), 200)
 	suite.assertJSON.Assertf(response, `{"id": "ext-id", "version":"ext-version", "parameterDefinitions": [
 		{"id":"param1","name":"My param:ext-version","definition":{"id": "param1", "name": "My param:ext-version", "type": "string"}}
 	]}`)
@@ -135,12 +135,12 @@ func (suite *RestAPIIntegrationTestSuite) TestListInstancesQueryFails() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstancesFunc("context.sqlClient.execute('invalid query'); return [{id: 'instId', name: 'instName_ver'+version}]").
 		Build().Publish(suite.registryServer, EXTENSION_ID)
-	response := suite.makeRequest("GET", suite.listInstances(EXTENSION_ID, "ext-version"), "", 500)
+	response := suite.makeRequest("GET", suite.listInstances(EXTENSION_ID, "ext-version"), 500)
 	suite.Contains(response, `{"code":500,"message":"Internal server error"`)
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestListInstancesQueryFailsForUnknownExtension() {
-	response := suite.makeRequest("GET", suite.listInstances("unknown-ext-id", "ext-version"), "", 404)
+	response := suite.makeRequest("GET", suite.listInstances("unknown-ext-id", "ext-version"), 404)
 	suite.Contains(response, `{"code":404,"message":"extension \"unknown-ext-id\" not found"`)
 }
 
@@ -150,7 +150,7 @@ func (suite *RestAPIIntegrationTestSuite) TestDeleteInstanceSuccessfully() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithDeleteInstanceFunc("context.sqlClient.execute('select 1')").
 		Build().Publish(suite.registryServer, EXTENSION_ID)
-	response := suite.makeRequest("DELETE", suite.deleteInstance(EXTENSION_ID, "ext-version", "inst-id"), "", 204)
+	response := suite.makeRequest("DELETE", suite.deleteInstance(EXTENSION_ID, "ext-version", "inst-id"), 204)
 	suite.Equal("", response)
 }
 
@@ -158,12 +158,12 @@ func (suite *RestAPIIntegrationTestSuite) TestDeleteInstanceFails() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithDeleteInstanceFunc("context.sqlClient.execute('invalid query')").
 		Build().Publish(suite.registryServer, EXTENSION_ID)
-	response := suite.makeRequest("DELETE", suite.deleteInstance(EXTENSION_ID, "ext-version", "inst-id"), "", 500)
+	response := suite.makeRequest("DELETE", suite.deleteInstance(EXTENSION_ID, "ext-version", "inst-id"), 500)
 	suite.Contains(response, `{"code":500,"message":"Internal server error"`)
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestDeleteInstanceFailsForUnknownExtension() {
-	response := suite.makeRequest("DELETE", suite.deleteInstance("unknown-ext-id", "ext-version", "inst-id"), "", 404)
+	response := suite.makeRequest("DELETE", suite.deleteInstance("unknown-ext-id", "ext-version", "inst-id"), 404)
 	suite.Contains(response, `{"code":404,"message":"extension \"unknown-ext-id\" not found"`)
 }
 
@@ -173,7 +173,7 @@ func (suite *RestAPIIntegrationTestSuite) TestUninstallExtensionSuccessfully() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUninstallFunc("context.sqlClient.execute('select 1')").
 		Build().Publish(suite.registryServer, EXTENSION_ID)
-	response := suite.makeRequest("DELETE", suite.uninstallExtension(EXTENSION_ID, "ext-version"), "", 204)
+	response := suite.makeRequest("DELETE", suite.uninstallExtension(EXTENSION_ID, "ext-version"), 204)
 	suite.Equal("", response)
 }
 
@@ -181,12 +181,12 @@ func (suite *RestAPIIntegrationTestSuite) TestUninstallExtensionFails() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUninstallFunc("context.sqlClient.execute('invalid query')").
 		Build().Publish(suite.registryServer, EXTENSION_ID)
-	response := suite.makeRequest("DELETE", suite.uninstallExtension(EXTENSION_ID, "ext-version"), "", 500)
+	response := suite.makeRequest("DELETE", suite.uninstallExtension(EXTENSION_ID, "ext-version"), 500)
 	suite.Contains(response, `{"code":500,"message":"Internal server error"`)
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestUninstallExtensionFailsForUnknownExtension() {
-	response := suite.makeRequest("DELETE", suite.uninstallExtension("unknown-ext-id", "ext-version"), "", 404)
+	response := suite.makeRequest("DELETE", suite.uninstallExtension("unknown-ext-id", "ext-version"), 404)
 	suite.Contains(response, `{"code":404,"message":"extension \"unknown-ext-id\" not found"`)
 }
 
@@ -197,7 +197,7 @@ func (suite *RestAPIIntegrationTestSuite) TestUpgradeExtensionSuccessfully() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUpgradeFunc("context.sqlClient.execute('select 1'); return { previousVersion: 'old', newVersion: 'new' };").
 		Build().Publish(suite.registryServer, EXTENSION_ID)
-	response := suite.makeRequest("POST", suite.upgradeExtension(EXTENSION_ID), "", 200)
+	response := suite.makeRequest("POST", suite.upgradeExtension(EXTENSION_ID), 200)
 	suite.assertJSON.Assertf(response, `{"previousVersion":"old","newVersion":"new"}`)
 }
 
@@ -205,12 +205,12 @@ func (suite *RestAPIIntegrationTestSuite) TestUpgradeFails() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUpgradeFunc("context.sqlClient.execute('invalid query'); return { previousVersion: 'old', newVersion: 'new' };").
 		Build().Publish(suite.registryServer, EXTENSION_ID)
-	response := suite.makeRequest("POST", suite.upgradeExtension(EXTENSION_ID), "", 500)
+	response := suite.makeRequest("POST", suite.upgradeExtension(EXTENSION_ID), 500)
 	suite.Contains(response, `{"code":500,"message":"Internal server error"`)
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestUpgradeFailsForUnknownExtension() {
-	response := suite.makeRequest("POST", suite.upgradeExtension("unknown-ext-id"), "", 404)
+	response := suite.makeRequest("POST", suite.upgradeExtension("unknown-ext-id"), 404)
 	suite.Contains(response, `{"code":404,"message":"extension \"unknown-ext-id\" not found"`)
 }
 
@@ -236,11 +236,12 @@ func (suite *RestAPIIntegrationTestSuite) getDbArgsWithUserPassword() string {
 }
 
 func (suite *RestAPIIntegrationTestSuite) makeGetRequest(path string) string {
-	return suite.makeRequest("GET", path, "", 200)
+	return suite.makeRequest("GET", path, 200)
 }
 
-func (suite *RestAPIIntegrationTestSuite) makeRequest(method string, path string, body string, expectedStatusCode int) string {
+func (suite *RestAPIIntegrationTestSuite) makeRequest(method string, path string, expectedStatusCode int) string {
 	suite.T().Helper()
 	info := suite.exasol.ConnectionInfo
+	body := ""
 	return suite.restApi.makeRequestWithAuthHeader(method, path, createBasicAuthHeader(info.User, info.Password), body, expectedStatusCode)
 }

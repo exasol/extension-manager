@@ -54,8 +54,7 @@ func (suite *RestAPISuite) TearDownTest() {
 }
 
 func (suite *RestAPISuite) TestStopWithoutStartFails() {
-	controller := &mockExtensionController{}
-	restAPI := Create(controller, "localhost:8082", false)
+	restAPI := Create(suite.controller, "localhost:8082", false)
 	suite.Panics(restAPI.Stop)
 }
 

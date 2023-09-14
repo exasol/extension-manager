@@ -25,15 +25,28 @@ func TestJsExtensionSuite(t *testing.T) {
 }
 
 func (suite *ErrorHandlingExtensionSuite) SetupSuite() {
-	suite.rawExtension = &rawJsExtension{Name: "name", Description: "desc",
-		InstallableVersions: []rawJsExtensionVersion{{Name: "v1", Deprecated: true, Latest: false}, {Name: "v2", Deprecated: false, Latest: true}},
-		BucketFsUploads:     []BucketFsUpload{{Name: "uploadName"}}}
+	suite.rawExtension = &rawJsExtension{
+		Name:                    "name",
+		Category:                "category",
+		Description:             "desc",
+		InstallableVersions:     []rawJsExtensionVersion{{Name: "v1", Deprecated: true, Latest: false}, {Name: "v2", Deprecated: false, Latest: true}},
+		BucketFsUploads:         []BucketFsUpload{{Name: "uploadName"}},
+		GetParameterDefinitions: nil,
+		Install:                 nil,
+		Uninstall:               nil,
+		Upgrade:                 nil,
+		FindInstallations:       nil,
+		AddInstance:             nil,
+		FindInstances:           nil,
+		DeleteInstance:          nil,
+	}
 	suite.extension = wrapExtension(suite.rawExtension, "id", newJavaScriptVm("logPrefix>"))
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestProperties() {
 	suite.Equal(&JsExtension{
 		Id:                  "id",
+		Category:            "category",
 		Name:                "name",
 		Description:         "desc",
 		InstallableVersions: []JsExtensionVersion{{Name: "v1", Deprecated: true, Latest: false}, {Name: "v2", Deprecated: false, Latest: true}},
@@ -192,25 +205,25 @@ func (suite *ErrorHandlingExtensionSuite) TestUpgradeUnsupported() {
 
 func (suite *ErrorHandlingExtensionSuite) TestAddInstanceSuccessful() {
 	suite.rawExtension.AddInstance = func(context *context.ExtensionContext, version string, params *ParameterValues) *JsExtInstance {
-		return &JsExtInstance{Name: "newInstance"}
+		return &JsExtInstance{Id: "inst", Name: "newInstance"}
 	}
-	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{})
+	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{Values: []ParameterValue{}})
 	suite.NoError(err)
-	suite.Equal(&JsExtInstance{Name: "newInstance"}, instance)
+	suite.Equal(&JsExtInstance{Id: "inst", Name: "newInstance"}, instance)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestAddInstanceFails() {
 	suite.rawExtension.AddInstance = func(context *context.ExtensionContext, version string, params *ParameterValues) *JsExtInstance {
 		panic("mock error")
 	}
-	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{})
+	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{Values: []ParameterValue{}})
 	suite.EqualError(err, "failed to add instance for extension \"id\": mock error")
 	suite.Nil(instance)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestAddInstanceUnsupported() {
 	suite.rawExtension.AddInstance = nil
-	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{})
+	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{Values: []ParameterValue{}})
 	suite.EqualError(err, `extension "id" does not support operation "addInstance"`)
 	suite.Nil(instance)
 }

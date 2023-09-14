@@ -173,8 +173,9 @@ func (suite *ExtensionApiSuite) TestDeleteInstance() {
 }
 
 func createMockMetadata() *exaMetadata.ExaMetadata {
-	exaAllScripts := exaMetadata.ExaScriptTable{Rows: []exaMetadata.ExaScriptRow{{Name: "test"}}}
-	return &exaMetadata.ExaMetadata{AllScripts: exaAllScripts}
+	return &exaMetadata.ExaMetadata{
+		AllScripts:        exaMetadata.ExaScriptTable{Rows: []exaMetadata.ExaScriptRow{{Name: "test"}}},
+		AllVirtualSchemas: exaMetadata.ExaVirtualSchemasTable{Rows: []exaMetadata.ExaVirtualSchemaRow{}}}
 }
 
 func (suite *ExtensionApiSuite) TestFindInstallationsCanReadAllScriptsTable() {
