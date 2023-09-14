@@ -46,8 +46,9 @@ func (suite *ControllerITestSuite) SetupTest() {
 
 /* [itest -> dsn~extension-definition~1]. */
 func (suite *ControllerITestSuite) TestGetAllExtensions() {
-	suite.writeDefaultExtension()
-	suite.uploadBucketFsFile("123", "my-extension.1.2.3.jar") // create file with 3B size
+	jarFile := "my-extension.1.2.3.jar"
+	suite.writeDefaultExtensionWithJar(jarFile)
+	suite.uploadBucketFsFile("123", jarFile) // create file with 3B size
 	extensions, err := suite.createController().GetAllExtensions(mockContext(), suite.exasol.GetConnection())
 	suite.NoError(err)
 	suite.Equal(1, len(extensions))
@@ -56,8 +57,12 @@ func (suite *ControllerITestSuite) TestGetAllExtensions() {
 }
 
 func (suite *ControllerITestSuite) writeDefaultExtension() {
+	suite.writeDefaultExtensionWithJar("file.txt")
+}
+
+func (suite *ControllerITestSuite) writeDefaultExtensionWithJar(jarFile string) {
 	suite.createExtensionBuilder().
-		WithBucketFsUpload(createBfsUpload("extension.jar")).
+		WithBucketFsUpload(createBfsUpload(jarFile)).
 		WithFindInstallationsFunc(`
 		return metadata.allScripts.rows.map(row => {
 			return {name: row.schema + "." + row.name, version: "0.1.0"}
@@ -98,7 +103,6 @@ func (suite *ControllerITestSuite) GetInstalledExtensionsFailsWithApiError() {
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.uploadBucketFsFile("123", jarName)
 	extensions, err := suite.createController().GetInstalledExtensions(mockContext(), suite.exasol.GetConnection())
-
 	if apiError, ok := apiErrors.AsAPIError(err); ok {
 		suite.Equal("mock error from js", apiError.Message)
 		suite.Equal(400, apiError.Status)
