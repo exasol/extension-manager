@@ -135,7 +135,7 @@ func (pv ParameterValues) Find(id string) (value ParameterValue, found bool) {
 			return v, true
 		}
 	}
-	return ParameterValue{}, false
+	return ParameterValue{Name: "", Value: ""}, false
 }
 
 type ParameterValue struct {

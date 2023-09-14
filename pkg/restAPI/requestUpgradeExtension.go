@@ -12,6 +12,7 @@ import (
 
 /* [impl -> dsn~upgrade-extension~1]. */
 func UpgradeExtension(apiContext *ApiContext) *openapi.Post {
+	//nolint:exhaustruct // Default values for request are OK
 	return &openapi.Post{
 		Summary:        "Upgrade an extension.",
 		Description:    "This upgrades all instances of an extension to the latest version, e.g. by updating the JAR used in adapter scripts to the latest version.",

@@ -11,15 +11,16 @@ linters:
     - comment
     - performance
     - test
-    #- error
+    - error
     #- style
     #- metalinter
-    #- unused # Deactivated because of false positives for mocks
+    #- unused # Causes false positives for mocks and test code
   disable:
     - gofumpt # "gofmt" is OK for us, no need for stricter rules (https://github.com/mvdan/gofumpt)
     - gci # No need to explicitly format imports using GCI (https://github.com/daixiang0/gci)
     - depguard # No need to restrict imported packages (https://github.com/OpenPeeDeeP/depguard)
-    - exhaustruct # Listing every field of a struct is not worth the effort (https://github.com/GaijinEntertainment/go-exhaustruct)
+    - goerr113 # Using static errors is not necessary (https://github.com/Djarvur/go-err113)
+    - wrapcheck # Wrapping errors is not necessary (https://github.com/tomarrell/wrapcheck#tldr)
 run:
   tests: false
   skip-dirs:

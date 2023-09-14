@@ -12,11 +12,14 @@ type ExaMetaDataReaderMock struct {
 }
 
 func CreateExaMetaDataReaderMock(extensionSchema string) *ExaMetaDataReaderMock {
+	//nolint:exhaustruct // Default value for Mock is fine
 	return &ExaMetaDataReaderMock{extensionSchema: extensionSchema}
 }
 
 func (m *ExaMetaDataReaderMock) SimulateExaAllScripts(scripts []ExaScriptRow) {
-	m.SimulateExaMetaData(ExaMetadata{AllScripts: ExaScriptTable{Rows: scripts}})
+	m.SimulateExaMetaData(ExaMetadata{
+		AllScripts:        ExaScriptTable{Rows: scripts},
+		AllVirtualSchemas: ExaVirtualSchemasTable{Rows: []ExaVirtualSchemaRow{}}})
 }
 
 func (m *ExaMetaDataReaderMock) SimulateExaMetaData(metaData ExaMetadata) {
@@ -32,7 +35,16 @@ func (mock *ExaMetaDataReaderMock) ReadMetadataTables(tx *sql.Tx, schemaName str
 }
 
 func (m *ExaMetaDataReaderMock) SimulateGetScriptByNameScriptText(scriptName string, scriptText string) {
-	m.SimulateGetScriptByName(scriptName, &ExaScriptRow{Schema: "?", Name: scriptName, Text: scriptText})
+	script := &ExaScriptRow{
+		Schema:     "?",
+		Name:       scriptName,
+		Text:       scriptText,
+		Type:       "",
+		InputType:  "",
+		ResultType: "",
+		Comment:    "",
+	}
+	m.SimulateGetScriptByName(scriptName, script)
 }
 
 func (m *ExaMetaDataReaderMock) SimulateGetScriptByName(scriptName string, script *ExaScriptRow) {

@@ -92,6 +92,7 @@ func New() (*Validator, error) {
 	}
 	function := globalJsObj.Get("validateParameter")
 
+	//nolint:exhaustruct // Omitting values by intention for deserialization
 	validator := Validator{}
 	err = vm.ExportTo(function, &validator.validate)
 	if err != nil {

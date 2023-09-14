@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/exasol/extension-manager/pkg/apiErrors"
 	"github.com/go-chi/chi/v5/middleware"
@@ -69,10 +68,6 @@ func sendError(a *apiErrors.APIError, context context.Context, apiContext *ApiCo
 	writer.WriteHeader(a.Status)
 	if context != nil && a.Status != http.StatusUnauthorized {
 		a.RequestID = middleware.GetReqID(context)
-		if a.Timestamp == "" {
-			a.Timestamp = time.Now().Format(time.RFC3339)
-		}
-		a.APIID = getContextValue(context, APIIDKey)
 	}
 	if apiContext.addCauseToInternalServerError && a.Status == http.StatusInternalServerError && a.OriginalError != nil {
 		a.Message = a.Message + ": " + a.OriginalError.Error()
@@ -84,29 +79,12 @@ func sendError(a *apiErrors.APIError, context context.Context, apiContext *ApiCo
 	}
 }
 
-type ContextKeyAPIID int
-
-const APIIDKey ContextKeyAPIID = 1
-
 func GetLogger(context context.Context) *log.Entry {
 	fields := log.Fields{}
-	if id := getContextValue(context, APIIDKey); id != "" {
-		fields["api"] = id
-	}
 	if id := middleware.GetReqID(context); id != "" {
 		fields["request"] = id
 	}
 	return log.WithFields(fields)
-}
-
-func getContextValue(ctx context.Context, id interface{}) string {
-	if ctx == nil {
-		return ""
-	}
-	if reqID, ok := ctx.Value(id).(string); ok {
-		return reqID
-	}
-	return ""
 }
 
 func DecodeJSONBody(writer http.ResponseWriter, request *http.Request, dst interface{}) error {

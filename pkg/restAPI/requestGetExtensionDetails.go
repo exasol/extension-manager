@@ -12,6 +12,7 @@ import (
 
 /* [impl -> dsn~parameter-versioning~1]. */
 func GetExtensionDetails(apiContext *ApiContext) *openapi.Get {
+	//nolint:exhaustruct // Default values for request are OK
 	return &openapi.Get{
 		Summary:        "Get details about an extension version.",
 		Description:    "This returns details about an extension version, e.g. the parameter definitions required for creating an instance.",

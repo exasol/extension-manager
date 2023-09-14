@@ -12,7 +12,7 @@ import (
 )
 
 func newHttpRegistry(url string) Registry {
-	return &httpRegistry{url: url}
+	return &httpRegistry{url: url, index: nil}
 }
 
 type httpRegistry struct {

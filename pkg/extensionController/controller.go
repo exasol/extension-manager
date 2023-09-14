@@ -245,17 +245,8 @@ func (c *controllerImpl) CreateInstance(txCtx *transaction.TransactionContext, e
 	if err != nil {
 		return nil, err
 	}
-	params := extensionAPI.ParameterValues{}
-	for _, p := range parameterValues {
-		params.Values = append(params.Values, extensionAPI.ParameterValue{Name: p.Name, Value: p.Value})
-	}
 
-	paramDefinitions, err := c.GetParameterDefinitions(txCtx, extensionId, extensionVersion)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get parameter definitions: %w", err)
-	}
-
-	err = validateParameters(paramDefinitions, params)
+	params, err := c.convertAndValidate(txCtx, extensionId, extensionVersion, parameterValues)
 	if err != nil {
 		return nil, err
 	}
@@ -269,6 +260,27 @@ func (c *controllerImpl) CreateInstance(txCtx *transaction.TransactionContext, e
 		return nil, fmt.Errorf("extension %q did not return an instance", extensionId)
 	}
 	return instance, nil
+}
+
+func (c *controllerImpl) convertAndValidate(txCtx *transaction.TransactionContext, extensionId string, extensionVersion string, parameterValues []ParameterValue) (extensionAPI.ParameterValues, error) {
+	paramDefinitions, err := c.GetParameterDefinitions(txCtx, extensionId, extensionVersion)
+	if err != nil {
+		return extensionAPI.ParameterValues{}, fmt.Errorf("failed to get parameter definitions: %w", err)
+	}
+	params := convertParameters(parameterValues)
+	err = validateParameters(paramDefinitions, params)
+	if err != nil {
+		return extensionAPI.ParameterValues{}, err
+	}
+	return params, nil
+}
+
+func convertParameters(parameterValues []ParameterValue) extensionAPI.ParameterValues {
+	values := []extensionAPI.ParameterValue{}
+	for _, p := range parameterValues {
+		values = append(values, extensionAPI.ParameterValue{Name: p.Name, Value: p.Value})
+	}
+	return extensionAPI.ParameterValues{Values: values}
 }
 
 func (c *controllerImpl) DeleteInstance(txCtx *transaction.TransactionContext, extensionId, extensionVersion, instanceId string) error {

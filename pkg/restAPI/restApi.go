@@ -28,6 +28,9 @@ func Create(controller extensionController.TransactionController, serverAddress 
 		controller:                    controller,
 		serverAddress:                 serverAddress,
 		addCauseToInternalServerError: addCauseToInternalServerError,
+		server:                        nil,
+		stopped:                       nil,
+		stoppedMutex:                  nil,
 	}
 }
 
@@ -55,6 +58,7 @@ func (api *restAPIImpl) Serve() {
 	if err != nil {
 		log.Fatalf("failed to setup api: %v", err)
 	}
+	//nolint:exhaustruct // Default values are ok for other fields
 	api.server = &http.Server{
 		Addr:              api.serverAddress,
 		Handler:           handler,
