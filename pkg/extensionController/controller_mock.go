@@ -13,6 +13,11 @@ type mockControllerImpl struct {
 	mock.Mock
 }
 
+func createMockControllerImpl() mockControllerImpl {
+	//nolint:exhaustruct // Empty struct is OK for Mock
+	return mockControllerImpl{}
+}
+
 func (mock *mockControllerImpl) GetAllExtensions(bfsFiles []bfs.BfsFile) ([]*Extension, error) {
 	args := mock.Called(bfsFiles)
 	if ext, ok := args.Get(0).([]*Extension); ok {

@@ -46,6 +46,7 @@ func (suite *ParameterValidatorSuite) TestValidateParameter() {
 /* [utest -> dsn~reuse-parameter-validation-rules~1] */
 /* [utest -> dsn~parameter-validation-rules-simple~1] */
 /* [utest -> dsn~parameter-definitions~1] */
+//nolint:funlen // Function is long because it contains many test cases
 func (suite *ParameterValidatorSuite) TestValidateParameters() {
 	var tests = []struct {
 		name        string
@@ -115,7 +116,7 @@ func (suite *ParameterValidatorSuite) TestValidateParameters() {
 
 func (suite *ParameterValidatorSuite) TestInvalidDefinitionIgnored() {
 	rawDefinition := []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}}
-	result, err := suite.validator.ValidateParameters(suite.convert(rawDefinition), extensionAPI.ParameterValues{})
+	result, err := suite.validator.ValidateParameters(suite.convert(rawDefinition), extensionAPI.ParameterValues{Values: []extensionAPI.ParameterValue{}})
 	suite.NoError(err)
 	suite.Empty(result)
 }

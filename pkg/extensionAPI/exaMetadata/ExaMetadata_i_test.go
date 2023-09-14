@@ -32,7 +32,7 @@ func (suite *ExaMetadataITestSuite) BeforeTest(suiteName, testName string) {
 	})
 }
 
-/* [utest -> dsn~extension-components~1] */
+/* [utest -> dsn~extension-components~1]. */
 func (suite *ExaMetadataITestSuite) TestReadMetadataWithAllColumnsDefined() {
 	fixture := integrationTesting.CreateLuaScriptFixture(suite.exasol.GetConnection())
 	fixture.Cleanup(suite.T())
@@ -88,7 +88,7 @@ func (suite *ExaMetadataITestSuite) TestReadMetadataVirtualSchemasEmpty() {
 	suite.Equal(exaMetadata.ExaVirtualSchemasTable{Rows: []exaMetadata.ExaVirtualSchemaRow{}}, result.AllVirtualSchemas)
 }
 
-/* [itest -> dsn~extension-context-metadata~1] */
+/* [itest -> dsn~extension-context-metadata~1]. */
 func (suite *ExaMetadataITestSuite) TestGetScriptByName() {
 	fixture := integrationTesting.CreateJavaAdapterScriptFixture(suite.exasol.GetConnection())
 	fixture.Cleanup(suite.T())

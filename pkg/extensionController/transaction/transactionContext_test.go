@@ -82,7 +82,7 @@ func (suite *TransactionContextSuite) TestCommit() {
 	suite.dbMock.ExpectBegin()
 	txCtx, _ := suite.beginTransaction()
 	suite.dbMock.ExpectCommit()
-	txCtx.Commit()
+	suite.NoError(txCtx.Commit())
 }
 
 func (suite *TransactionContextSuite) beginTransaction() (*TransactionContext, error) {

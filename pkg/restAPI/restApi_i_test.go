@@ -24,7 +24,7 @@ type RestAPIIntegrationTestSuite struct {
 	assertJSON     *jsonassert.Asserter
 }
 
-/* [itest -> dsn~rest-interface~1] */
+/* [itest -> dsn~rest-interface~1]. */
 func TestRestAPIIntegrationTestSuite(t *testing.T) {
 	suite.Run(t, new(RestAPIIntegrationTestSuite))
 }
@@ -43,7 +43,11 @@ func (suite *RestAPIIntegrationTestSuite) TearDownSuite() {
 
 func (suite *RestAPIIntegrationTestSuite) SetupTest() {
 	// [itest -> dsn~extension-registry~1]
-	ctrl := extensionController.Create(suite.registryServer.IndexUrl(), EXTENSION_SCHEMA)
+	ctrl, err := extensionController.CreateWithValidatedConfig(extensionController.ExtensionManagerConfig{
+		ExtensionRegistryURL: suite.registryServer.IndexUrl(),
+		ExtensionSchema:      EXTENSION_SCHEMA,
+		BucketFSBasePath:     "/bfspath"})
+	suite.NoError(err)
 	suite.restApi = startRestApi(&suite.Suite, false, ctrl)
 	suite.registryServer.Reset()
 	suite.registryServer.SetRegistryContent(`{"extensions":[]}`)
@@ -88,7 +92,7 @@ func (suite *RestAPIIntegrationTestSuite) TestGetAllExtensionsSuccessfully() {
 
 // List installed extensions
 
-/* [itest -> dsn~list-extensions~1] */
+/* [itest -> dsn~list-extensions~1]. */
 func (suite *RestAPIIntegrationTestSuite) TestGetInstallationsSuccessfully() {
 	response := suite.makeGetRequest(suite.listInstalledExtensions())
 	suite.assertJSON.Assertf(response, `{"installations":[]}`)
@@ -192,7 +196,7 @@ func (suite *RestAPIIntegrationTestSuite) TestUninstallExtensionFailsForUnknownE
 
 // Upgrade
 
-/* [itest -> dsn~upgrade-extension~1] */
+/* [itest -> dsn~upgrade-extension~1]. */
 func (suite *RestAPIIntegrationTestSuite) TestUpgradeExtensionSuccessfully() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUpgradeFunc("context.sqlClient.execute('select 1'); return { previousVersion: 'old', newVersion: 'new' };").
@@ -214,13 +218,13 @@ func (suite *RestAPIIntegrationTestSuite) TestUpgradeFailsForUnknownExtension() 
 	suite.Contains(response, `{"code":404,"message":"extension \"unknown-ext-id\" not found"`)
 }
 
-/* [itest -> dsn~openapi-spec~1] */
+/* [itest -> dsn~openapi-spec~1]. */
 func (suite *RestAPIIntegrationTestSuite) TestGetOpenApiHtml() {
 	response := suite.makeGetRequest("/openapi/index.html")
 	suite.Contains(response, "\n<!DOCTYPE html>")
 }
 
-/* [itest -> dsn~openapi-spec~1] */
+/* [itest -> dsn~openapi-spec~1]. */
 func (suite *RestAPIIntegrationTestSuite) TestGetOpenApiJson() {
 	response := suite.makeGetRequest("/openapi.json")
 	suite.Contains(response, `"openapi": "3.0.0",`)

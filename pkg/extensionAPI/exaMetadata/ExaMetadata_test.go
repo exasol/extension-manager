@@ -254,7 +254,7 @@ func (suite *ExaMetadataUTestSuite) TestReadExaAllVirtualSchemasTableV7InvalidSc
 
 // GetScriptByName
 
-/* [utest -> dsn~extension-context-metadata~1] */
+/* [utest -> dsn~extension-context-metadata~1]. */
 func (suite *ExaMetadataUTestSuite) TestGetScriptByName() {
 	tx := suite.beginTransaction()
 	suite.dbMock.ExpectQuery("(?m)SELECT .*FROM SYS.EXA_ALL_SCRIPTS .*WHERE SCRIPT_SCHEMA=\\? AND SCRIPT_NAME=\\?").WithArgs(SCHEMA_NAME, "script").

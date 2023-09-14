@@ -11,6 +11,11 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+func createMockExtensionController() *mockExtensionController {
+	//nolint:exhaustruct
+	return &mockExtensionController{}
+}
+
 type mockExtensionController struct {
 	mock.Mock
 }
