@@ -28,6 +28,7 @@ The release deprecates function `extensionController.CreateWithConfig()` in favo
 ## Refactoring
 
 * #139: Converted `extensionForTesting` to JavaScript to speedup tests
+* #114: Fixed many linter warnings
 
 ## Dependency Updates
 
