@@ -12,9 +12,9 @@ linters:
     - performance
     - test
     - error
+    - unused
     #- style
     #- metalinter
-    #- unused # Causes false positives for mocks and test code
   disable:
     - gofumpt # "gofmt" is OK for us, no need for stricter rules (https://github.com/mvdan/gofumpt)
     - gci # No need to explicitly format imports using GCI (https://github.com/daixiang0/gci)

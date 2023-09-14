@@ -1,3 +1,4 @@
+//nolint:unused // Util functions are actually used in tests
 package restAPI
 
 import (
