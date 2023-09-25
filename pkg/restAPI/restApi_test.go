@@ -45,7 +45,7 @@ func (suite *RestAPISuite) SetupSuite() {
 }
 
 func (suite *RestAPISuite) SetupTest() {
-	suite.controller = &mockExtensionController{}
+	suite.controller = createMockExtensionController()
 	suite.restApi = startRestApi(&suite.Suite, true, suite.controller)
 }
 
@@ -54,8 +54,7 @@ func (suite *RestAPISuite) TearDownTest() {
 }
 
 func (suite *RestAPISuite) TestStopWithoutStartFails() {
-	controller := &mockExtensionController{}
-	restAPI := Create(controller, "localhost:8082", false)
+	restAPI := Create(suite.controller, "localhost:8082", false)
 	suite.Panics(restAPI.Stop)
 }
 
@@ -83,7 +82,7 @@ func (suite *RestAPISuite) TestGetInstallationsFailed() {
 
 // GetAllExtensions
 
-/* [itest -> dsn~list-extensions~1] */
+/* [itest -> dsn~list-extensions~1]. */
 func (suite *RestAPISuite) TestGetAllExtensionsSuccessfully() {
 	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return([]*extensionController.Extension{{
 		Id: "ext-id", Name: "my-extension", Category: "my-category", Description: "a cool extension",
@@ -161,7 +160,7 @@ func (suite *RestAPISuite) TestUninstallExtensionsFailed() {
 
 // Upgrade extension
 
-/* [itest -> dsn~upgrade-extension~1] */
+/* [itest -> dsn~upgrade-extension~1]. */
 func (suite *RestAPISuite) TestUpgradeExtensionsSuccessfully() {
 	suite.controller.On("UpgradeExtension", mock.Anything, mock.Anything, "ext-id").Return(&extensionAPI.JsUpgradeResult{PreviousVersion: "old", NewVersion: "new"}, nil)
 	for _, test := range authSuccessTests {

@@ -77,3 +77,12 @@ type APIError struct {
 func (a *APIError) Error() string {
 	return a.Message
 }
+
+func AsAPIError(err error) (*APIError, bool) {
+	//nolint:errorlint // Type assertion via cast is OK here as the error is not wrapped
+	if apiError, ok := err.(*APIError); ok {
+		return apiError, true
+	} else {
+		return nil, false
+	}
+}

@@ -44,10 +44,11 @@ func (suite *ControllerITestSuite) SetupTest() {
 	suite.tempExtensionRepo = tempExtensionRepo
 }
 
-/* [itest -> dsn~extension-definition~1] */
+/* [itest -> dsn~extension-definition~1]. */
 func (suite *ControllerITestSuite) TestGetAllExtensions() {
-	suite.writeDefaultExtension()
-	suite.uploadBucketFsFile("123", "my-extension.1.2.3.jar") // create file with 3B size
+	jarFile := "my-extension.1.2.3.jar"
+	suite.writeDefaultExtensionWithJar(jarFile)
+	suite.uploadBucketFsFile("123", jarFile) // create file with 3B size
 	extensions, err := suite.createController().GetAllExtensions(mockContext(), suite.exasol.GetConnection())
 	suite.NoError(err)
 	suite.Equal(1, len(extensions))
@@ -56,8 +57,12 @@ func (suite *ControllerITestSuite) TestGetAllExtensions() {
 }
 
 func (suite *ControllerITestSuite) writeDefaultExtension() {
+	suite.writeDefaultExtensionWithJar("file.txt")
+}
+
+func (suite *ControllerITestSuite) writeDefaultExtensionWithJar(jarFile string) {
 	suite.createExtensionBuilder().
-		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "my-extension.1.2.3.jar", FileSize: 3}).
+		WithBucketFsUpload(createBfsUpload(jarFile)).
 		WithFindInstallationsFunc(`
 		return metadata.allScripts.rows.map(row => {
 			return {name: row.schema + "." + row.name, version: "0.1.0"}
@@ -68,7 +73,7 @@ func (suite *ControllerITestSuite) writeDefaultExtension() {
 
 func (suite *ControllerITestSuite) TestGetAllExtensionsWithMissingJar() {
 	suite.createExtensionBuilder().
-		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "missing-jar.jar", FileSize: 3}).
+		WithBucketFsUpload(createBfsUpload("missing-jar.jar")).
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	extensions, err := suite.createController().GetAllExtensions(mockContext(), suite.exasol.GetConnection())
@@ -79,7 +84,7 @@ func (suite *ControllerITestSuite) TestGetAllExtensionsWithMissingJar() {
 func (suite *ControllerITestSuite) GetInstalledExtensionsFailsWithGenericError() {
 	const jarName = "my-failing-extension-1.2.3.jar"
 	suite.createExtensionBuilder().
-		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: jarName, FileSize: 3}).
+		WithBucketFsUpload(createBfsUpload(jarName)).
 		WithFindInstallationsFunc("throw Error(`mock error from js`)").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
@@ -92,13 +97,13 @@ func (suite *ControllerITestSuite) GetInstalledExtensionsFailsWithGenericError()
 func (suite *ControllerITestSuite) GetInstalledExtensionsFailsWithApiError() {
 	const jarName = "my-failing-extension-1.2.3.jar"
 	suite.createExtensionBuilder().
-		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: jarName, FileSize: 3}).
+		WithBucketFsUpload(createBfsUpload(jarName)).
 		WithFindInstallationsFunc("throw new ApiError(400, `mock error from js`)").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.uploadBucketFsFile("123", jarName)
 	extensions, err := suite.createController().GetInstalledExtensions(mockContext(), suite.exasol.GetConnection())
-	if apiError, ok := err.(*apiErrors.APIError); ok {
+	if apiError, ok := apiErrors.AsAPIError(err); ok {
 		suite.Equal("mock error from js", apiError.Message)
 		suite.Equal(400, apiError.Status)
 	} else {
@@ -152,7 +157,7 @@ func (suite *ControllerITestSuite) TestUpgradeFailsForUnknownExtensionId() {
 	suite.Nil(result)
 }
 
-/* [itest -> dsn~upgrade-extension~1] */
+/* [itest -> dsn~upgrade-extension~1]. */
 func (suite *ControllerITestSuite) TestUpgradeSucceeds() {
 	suite.writeDefaultExtension()
 	result, err := suite.createController().UpgradeExtension(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID)
@@ -172,7 +177,7 @@ return {previousVersion:'0.1.0', newVersion: result}`).
 	suite.Equal("result is null", result.NewVersion)
 }
 
-/* [itest -> const~use-reserved-schema~1] */
+/* [itest -> const~use-reserved-schema~1]. */
 func (suite *ControllerITestSuite) TestEnsureSchemaExistsCreatesSchemaIfItDoesNotExist() {
 	suite.writeDefaultExtension()
 	const schemaName = "my_testing_schema"
@@ -196,7 +201,7 @@ func (suite *ControllerITestSuite) TestEnsureSchemaDoesNotFailIfSchemaAlreadyExi
 
 /* [itest -> dsn~validate-parameters~1] */
 /* [itest -> dsn~parameter-definitions~1] */
-/* [itest -> dsn~extension-context-sql-client~1] */
+/* [itest -> dsn~extension-context-sql-client~1]. */
 func (suite *ControllerITestSuite) TestAddInstanceInvalidParameters() {
 	suite.createExtensionBuilder().
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
@@ -229,7 +234,7 @@ func (suite *ControllerITestSuite) TestFindInstances() {
 	suite.Equal([]*extensionAPI.JsExtInstance{{Id: "instId", Name: "instName_ver0.1.0"}}, instances)
 }
 
-/* [itest -> dsn~extension-context-sql-client~1] */
+/* [itest -> dsn~extension-context-sql-client~1]. */
 func (suite *ControllerITestSuite) TestFindInstancesUseSqlQueryResult() {
 	suite.createExtensionBuilder().
 		WithFindInstancesFunc(`const result=context.sqlClient.query("select 1 as c1, 'a' as c2 from dual where 1=?", 1);
@@ -279,6 +284,7 @@ func (suite *ControllerITestSuite) getAllSchemaNames() []string {
 	defer rows.Close()
 	var schemaNames []string
 	for rows.Next() {
+		suite.NoError(rows.Err())
 		var schemaName string
 		suite.NoError(rows.Scan(&schemaName))
 		schemaNames = append(schemaNames, schemaName)
@@ -306,4 +312,8 @@ func (suite *ControllerITestSuite) createController() TransactionController {
 
 func (suite *ControllerITestSuite) createExtensionBuilder() *integrationTesting.TestExtensionBuilder {
 	return integrationTesting.CreateTestExtensionBuilder(suite.T())
+}
+
+func createBfsUpload(jarName string) integrationTesting.BucketFsUploadParams {
+	return integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: jarName, FileSize: 3, DownloadUrl: "", LicenseUrl: "", LicenseAgreementRequired: false}
 }

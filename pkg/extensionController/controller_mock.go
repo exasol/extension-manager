@@ -1,3 +1,4 @@
+//nolint:unused // Mock functions are actually used in tests
 package extensionController
 
 import (
@@ -10,6 +11,11 @@ import (
 
 type mockControllerImpl struct {
 	mock.Mock
+}
+
+func createMockControllerImpl() mockControllerImpl {
+	//nolint:exhaustruct // Empty struct is OK for Mock
+	return mockControllerImpl{}
 }
 
 func (mock *mockControllerImpl) GetAllExtensions(bfsFiles []bfs.BfsFile) ([]*Extension, error) {

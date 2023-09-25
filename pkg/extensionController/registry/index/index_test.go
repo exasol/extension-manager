@@ -37,11 +37,11 @@ func TestGetExtension(t *testing.T) {
 		id       string
 		expected Extension
 	}{
-		{"empty json", `{}`, "id", Extension{}},
-		{"empty extension field", `{"extensions":[]}`, "id", Extension{}},
-		{"single entry wrong id", `{"extensions":[{"id": "ext1"}]}`, "wrong-id", Extension{}},
+		{"empty json", `{}`, "id", Extension{ID: "", URL: ""}},
+		{"empty extension field", `{"extensions":[]}`, "id", Extension{ID: "", URL: ""}},
+		{"single entry wrong id", `{"extensions":[{"id": "ext1"}]}`, "wrong-id", Extension{ID: "", URL: ""}},
 		{"single entry correct id", `{"extensions":[{"id": "ext1", "url": "http://url"}]}`, "ext1", Extension{ID: "ext1", URL: "http://url"}},
-		{"multiple entries wrong id", `{"extensions":[{"id": "ext1"},{"id": "ext2"},{"id": "ext3"}]}`, "wrong-id", Extension{}},
+		{"multiple entries wrong id", `{"extensions":[{"id": "ext1"},{"id": "ext2"},{"id": "ext3"}]}`, "wrong-id", Extension{ID: "", URL: ""}},
 		{"multiple entries correct id", `{"extensions":[{"id": "ext1"},{"id": "ext2", "url": "ext2-url"},{"id": "ext3"}]}`, "ext2", Extension{ID: "ext2", URL: "ext2-url"}},
 	}
 	for _, test := range tests {

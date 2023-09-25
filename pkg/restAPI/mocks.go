@@ -1,3 +1,4 @@
+//nolint:unused // Mock functions are actually used in tests
 package restAPI
 
 import (
@@ -9,6 +10,11 @@ import (
 	"github.com/exasol/extension-manager/pkg/parameterValidator"
 	"github.com/stretchr/testify/mock"
 )
+
+func createMockExtensionController() *mockExtensionController {
+	//nolint:exhaustruct
+	return &mockExtensionController{}
+}
 
 type mockExtensionController struct {
 	mock.Mock

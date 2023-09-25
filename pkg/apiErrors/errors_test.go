@@ -34,38 +34,38 @@ func TestNewAPIError(t *testing.T) {
 	assertApiError(t, err, "err", 123, nil)
 }
 
-func TestNewAPIErrorWithCause_ApiErrorCause(t *testing.T) {
+func TestNewAPIErrorWithCauseApiErrorCause(t *testing.T) {
 	cause := apiErrors.NewAPIError(123, "cause")
 	err := apiErrors.NewAPIErrorWithCause("msg", cause)
 	assertApiError(t, err, "msg: cause", 123, cause)
 }
 
-func TestNewAPIErrorWithCause_nonApiErrorCause(t *testing.T) {
+func TestNewAPIErrorWithCauseNonApiErrorCause(t *testing.T) {
 	cause := fmt.Errorf("cause")
 	err := apiErrors.NewAPIErrorWithCause("msg", cause)
 	assert.EqualError(t, err, "msg: cause")
 }
 
-func TestUnwrapAPIError_normalError(t *testing.T) {
+func TestUnwrapAPIErrorNormalError(t *testing.T) {
 	orgErr := fmt.Errorf("mock")
 	err := apiErrors.UnwrapAPIError(orgErr)
 	assertApiError(t, err, "Internal server error", 500, orgErr)
 }
 
-func TestUnwrapAPIError_APIError(t *testing.T) {
+func TestUnwrapAPIErrorAPIError(t *testing.T) {
 	orgErr := apiErrors.NewNotFoundErrorF("extension not found")
 	err := apiErrors.UnwrapAPIError(orgErr)
 	assertApiError(t, err, "extension not found", 404, nil)
 }
 
-func TestUnwrapAPIError_wrappedAPIError(t *testing.T) {
+func TestUnwrapAPIErrorWrappedAPIError(t *testing.T) {
 	orgErr := apiErrors.NewNotFoundErrorF("extension not found")
 	orgErr = fmt.Errorf("wrapper %w", orgErr)
 	err := apiErrors.UnwrapAPIError(orgErr)
 	assertApiError(t, err, "extension not found", 404, nil)
 }
 
-func TestUnwrapAPIError_multipleWrapperAPIError(t *testing.T) {
+func TestUnwrapAPIErrorMultipleWrapperAPIError(t *testing.T) {
 	orgErr := apiErrors.NewNotFoundErrorF("extension not found")
 	orgErr = fmt.Errorf("wrapper1 %w", orgErr)
 	orgErr = fmt.Errorf("wrapper2 %w", orgErr)
@@ -76,7 +76,7 @@ func TestUnwrapAPIError_multipleWrapperAPIError(t *testing.T) {
 
 func assertApiError(t *testing.T, err error, expectedMsg string, expectedStatus int, expectedOrgError error) {
 	t.Helper()
-	if apiErr, ok := err.(*apiErrors.APIError); ok {
+	if apiErr, ok := apiErrors.AsAPIError(err); ok {
 		assert.Equal(t, expectedMsg, apiErr.Message)
 		assert.Equal(t, expectedStatus, apiErr.Status)
 		if expectedOrgError == nil {

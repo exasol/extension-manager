@@ -38,14 +38,14 @@ func (suite *BucketFsAPIITestSuite) BeforeTest(suiteName, testName string) {
 	})
 }
 
-/* [utest -> dsn~extension-components~1] */
+/* [utest -> dsn~extension-components~1]. */
 func (suite *BucketFsAPIITestSuite) TestListEmptyDir() {
 	result, err := suite.listFiles()
 	suite.NoError(err)
 	suite.Empty(result)
 }
 
-/* [itest -> dsn~configure-bucketfs-path~1] */
+/* [itest -> dsn~configure-bucketfs-path~1]. */
 func (suite *BucketFsAPIITestSuite) TestListSingleFile() {
 	fileName := fmt.Sprintf("myFile-%d.txt", time.Now().Unix())
 	suite.uploadStringContent(fileName, "12345")
@@ -79,7 +79,7 @@ func (suite *BucketFsAPIITestSuite) TestFindAbsolutePathNoFileFound() {
 }
 
 /* [itest -> dsn~configure-bucketfs-path~1] */
-/* [itest -> dsn~resolving-files-in-bucketfs~1] */
+/* [itest -> dsn~resolving-files-in-bucketfs~1]. */
 func (suite *BucketFsAPIITestSuite) TestFindAbsolutePathFileInRoot() {
 	fileName := "file01.txt"
 	suite.uploadStringContent(fileName, "123")

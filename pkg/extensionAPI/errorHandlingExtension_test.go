@@ -25,15 +25,28 @@ func TestJsExtensionSuite(t *testing.T) {
 }
 
 func (suite *ErrorHandlingExtensionSuite) SetupSuite() {
-	suite.rawExtension = &rawJsExtension{Name: "name", Description: "desc",
-		InstallableVersions: []rawJsExtensionVersion{{Name: "v1", Deprecated: true, Latest: false}, {Name: "v2", Deprecated: false, Latest: true}},
-		BucketFsUploads:     []BucketFsUpload{{Name: "uploadName"}}}
+	suite.rawExtension = &rawJsExtension{
+		Name:                    "name",
+		Category:                "category",
+		Description:             "desc",
+		InstallableVersions:     []rawJsExtensionVersion{{Name: "v1", Deprecated: true, Latest: false}, {Name: "v2", Deprecated: false, Latest: true}},
+		BucketFsUploads:         []BucketFsUpload{{Name: "uploadName"}},
+		GetParameterDefinitions: nil,
+		Install:                 nil,
+		Uninstall:               nil,
+		Upgrade:                 nil,
+		FindInstallations:       nil,
+		AddInstance:             nil,
+		FindInstances:           nil,
+		DeleteInstance:          nil,
+	}
 	suite.extension = wrapExtension(suite.rawExtension, "id", newJavaScriptVm("logPrefix>"))
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestProperties() {
 	suite.Equal(&JsExtension{
 		Id:                  "id",
+		Category:            "category",
 		Name:                "name",
 		Description:         "desc",
 		InstallableVersions: []JsExtensionVersion{{Name: "v1", Deprecated: true, Latest: false}, {Name: "v2", Deprecated: false, Latest: true}},
@@ -51,8 +64,8 @@ func createMockContextWithClients(sqlClient backend.SimpleSQLClient, bucketFsCli
 }
 
 func createMockContext() *context.ExtensionContext {
-	var sqlClientMock backend.SimpleSQLClient = &backend.SimpleSqlClientMock{}
-	var bucketFsClientMock bfs.BucketFsAPI = &bfs.BucketFsMock{}
+	var sqlClientMock backend.SimpleSQLClient = backend.CreateSimpleSqlClientMock()
+	var bucketFsClientMock bfs.BucketFsAPI = bfs.CreateBucketFsMock()
 	var metadataReader exaMetadata.ExaMetadataReader = exaMetadata.CreateExaMetaDataReaderMock(EXTENSION_SCHEMA)
 	return createMockContextWithClients(sqlClientMock, bucketFsClientMock, metadataReader)
 }
@@ -64,7 +77,7 @@ func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsSuccessful() {
 	suite.rawExtension.FindInstallations = func(context *context.ExtensionContext, metadata *exaMetadata.ExaMetadata) []*JsExtInstallation {
 		return expectedInstallations
 	}
-	installations, err := suite.extension.FindInstallations(createMockContext(), &exaMetadata.ExaMetadata{})
+	installations, err := suite.extension.FindInstallations(createMockContext(), createMetaData())
 	suite.NoError(err)
 	suite.Equal(expectedInstallations, installations)
 }
@@ -73,14 +86,14 @@ func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsFailure() {
 	suite.rawExtension.FindInstallations = func(context *context.ExtensionContext, metadata *exaMetadata.ExaMetadata) []*JsExtInstallation {
 		panic("mock error")
 	}
-	installations, err := suite.extension.FindInstallations(createMockContext(), &exaMetadata.ExaMetadata{})
+	installations, err := suite.extension.FindInstallations(createMockContext(), createMetaData())
 	suite.EqualError(err, "failed to find installations for extension \"id\": mock error")
 	suite.Nil(installations)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsUnsupported() {
 	suite.rawExtension.FindInstallations = nil
-	installations, err := suite.extension.FindInstallations(createMockContext(), &exaMetadata.ExaMetadata{})
+	installations, err := suite.extension.FindInstallations(createMockContext(), createMetaData())
 	suite.EqualError(err, `extension "id" does not support operation "findInstallations"`)
 	suite.Nil(installations)
 }
@@ -192,25 +205,25 @@ func (suite *ErrorHandlingExtensionSuite) TestUpgradeUnsupported() {
 
 func (suite *ErrorHandlingExtensionSuite) TestAddInstanceSuccessful() {
 	suite.rawExtension.AddInstance = func(context *context.ExtensionContext, version string, params *ParameterValues) *JsExtInstance {
-		return &JsExtInstance{Name: "newInstance"}
+		return &JsExtInstance{Id: "inst", Name: "newInstance"}
 	}
-	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{})
+	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{Values: []ParameterValue{}})
 	suite.NoError(err)
-	suite.Equal(&JsExtInstance{Name: "newInstance"}, instance)
+	suite.Equal(&JsExtInstance{Id: "inst", Name: "newInstance"}, instance)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestAddInstanceFails() {
 	suite.rawExtension.AddInstance = func(context *context.ExtensionContext, version string, params *ParameterValues) *JsExtInstance {
 		panic("mock error")
 	}
-	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{})
+	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{Values: []ParameterValue{}})
 	suite.EqualError(err, "failed to add instance for extension \"id\": mock error")
 	suite.Nil(instance)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestAddInstanceUnsupported() {
 	suite.rawExtension.AddInstance = nil
-	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{})
+	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{Values: []ParameterValue{}})
 	suite.EqualError(err, `extension "id" does not support operation "addInstance"`)
 	suite.Nil(instance)
 }
@@ -286,7 +299,8 @@ func (suite *ErrorHandlingExtensionSuite) TestConvertError_JavaScriptErrorWithSt
 	err := suite.extension.convertError("msg", exception)
 	suite.Equal("*apiErrors.APIError", fmt.Sprintf("%T", err))
 	suite.EqualError(err, "jsError")
-	apiErr := err.(*apiErrors.APIError)
+	apiErr, ok := apiErrors.AsAPIError(err)
+	suite.True(ok)
 	suite.Equal(apiErrors.NewAPIError(400, "jsError"), apiErr)
 }
 
@@ -294,7 +308,13 @@ func (suite *ErrorHandlingExtensionSuite) getGojaException(javaScript string) *g
 	_, err := suite.extension.vm.RunString(javaScript)
 	suite.Error(err)
 	suite.Equal("*goja.Exception", fmt.Sprintf("%T", err))
+	//nolint:errorlint // Type assertion is OK here because the error is not wrapped
 	exception := err.(*goja.Exception)
 	suite.NotNil(exception)
 	return exception
+}
+
+func createMetaData() *exaMetadata.ExaMetadata {
+	//nolint:exhaustruct // Not necessary for test data
+	return &exaMetadata.ExaMetadata{}
 }

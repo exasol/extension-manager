@@ -3,25 +3,30 @@ linters:
   enable-all: false
   presets:
     - bugs
+    - comment
     - complexity
+    - error
     - format
     - import
+    - metalinter
     - module
-    - sql
-    - comment
     - performance
-    - test
-    - error
+    - sql
     #- style
-    #- metalinter
-    #- unused # Causes false positives for mocks and test code
+    - test
+    - unused
   disable:
     - gofumpt # "gofmt" is OK for us, no need for stricter rules (https://github.com/mvdan/gofumpt)
     - gci # No need to explicitly format imports using GCI (https://github.com/daixiang0/gci)
     - depguard # No need to restrict imported packages (https://github.com/OpenPeeDeeP/depguard)
     - goerr113 # Using static errors is not necessary (https://github.com/Djarvur/go-err113)
     - wrapcheck # Wrapping errors is not necessary (https://github.com/tomarrell/wrapcheck#tldr)
+    - paralleltest # Running tests in parallel is not possible
+
+    # Fix later
+    - revive # Many naming issues, may cause breaking changes
+    - testpackage # Naming of test package causes compile errors in test
 run:
-  tests: false
+  tests: true
   skip-dirs:
     - node_modules

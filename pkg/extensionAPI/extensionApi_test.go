@@ -30,8 +30,8 @@ func (suite *ExtensionApiSuite) SetupSuite() {
 }
 
 func (suite *ExtensionApiSuite) SetupTest() {
-	suite.mockSQLClient = backend.SimpleSqlClientMock{}
-	suite.mockBucketFsClient = bfs.BucketFsMock{}
+	suite.mockSQLClient = *backend.CreateSimpleSqlClientMock()
+	suite.mockBucketFsClient = *bfs.CreateBucketFsMock()
 	suite.mockMetadataReader = exaMetadata.CreateExaMetaDataReaderMock(EXTENSION_SCHEMA)
 }
 
@@ -59,7 +59,7 @@ func (suite *ExtensionApiSuite) TestGetParameterDefinitionsEmptyResult() {
 	suite.Equal([]interface{}{}, definitions)
 }
 
-/* [utest -> dsn~configuration-parameters~1] */
+/* [utest -> dsn~configuration-parameters~1]. */
 func (suite *ExtensionApiSuite) TestGetParameterDefinitions() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithGetInstanceParameterDefinitionFunc(`return [{id: "param1", name: "My param", type: "string"}]`).
@@ -78,7 +78,7 @@ func (suite *ExtensionApiSuite) TestInstall() {
 }
 
 /* [itest -> dsn~resolving-files-in-bucketfs~1] */
-/* [itest -> dsn~extension-context-bucketfs~1] */
+/* [itest -> dsn~extension-context-bucketfs~1]. */
 func (suite *ExtensionApiSuite) TestInstallResolveBucketFsPath() {
 	version := "extVersion"
 	absolutePath := "/absolute/file/path"
@@ -173,8 +173,9 @@ func (suite *ExtensionApiSuite) TestDeleteInstance() {
 }
 
 func createMockMetadata() *exaMetadata.ExaMetadata {
-	exaAllScripts := exaMetadata.ExaScriptTable{Rows: []exaMetadata.ExaScriptRow{{Name: "test"}}}
-	return &exaMetadata.ExaMetadata{AllScripts: exaAllScripts}
+	return &exaMetadata.ExaMetadata{
+		AllScripts:        exaMetadata.ExaScriptTable{Rows: []exaMetadata.ExaScriptRow{{Name: "test"}}},
+		AllVirtualSchemas: exaMetadata.ExaVirtualSchemasTable{Rows: []exaMetadata.ExaVirtualSchemaRow{}}}
 }
 
 func (suite *ExtensionApiSuite) TestFindInstallationsCanReadAllScriptsTable() {
@@ -199,7 +200,7 @@ func (suite *ExtensionApiSuite) TestFindInstallationsReturningParameters() {
 	suite.NoError(err)
 }
 
-/* [itest -> dsn~extension-context-metadata~1] */
+/* [itest -> dsn~extension-context-metadata~1]. */
 func (suite *ExtensionApiSuite) TestUpgradeReadsMetadata() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUpgradeFunc("const text = context.metadata.getScriptByName('script').text; return {previousVersion:'0.1.0',newVersion:text};").Build().AsString()
@@ -221,7 +222,7 @@ func (suite *ExtensionApiSuite) TestUpgradeReadMetadataFails() {
 	suite.Nil(result)
 }
 
-/* [itest -> dsn~extension-compatibility~1] */
+/* [itest -> dsn~extension-compatibility~1]. */
 func (suite *ExtensionApiSuite) TestLoadExtensionWithCompatibleApiVersion() {
 	extensionContent := minimalExtension("0.1.15")
 	extension, err := LoadExtension("ext-id", extensionContent)
@@ -229,7 +230,7 @@ func (suite *ExtensionApiSuite) TestLoadExtensionWithCompatibleApiVersion() {
 	suite.NotNil(extension)
 }
 
-/* [itest -> dsn~extension-compatibility~1] */
+/* [itest -> dsn~extension-compatibility~1]. */
 func (suite *ExtensionApiSuite) TestLoadExtensionWithIncompatibleApiVersion() {
 	extensionContent := minimalExtension("99.0.0")
 	extension, err := LoadExtension("ext-id", extensionContent)

@@ -10,6 +10,11 @@ type SimpleSqlClientMock struct {
 	mock.Mock
 }
 
+func CreateSimpleSqlClientMock() *SimpleSqlClientMock {
+	//nolint:exhaustruct // Empty struct is OK for Mock
+	return &SimpleSqlClientMock{}
+}
+
 func (mock *SimpleSqlClientMock) SimulateExecuteSuccess(query string, args ...any) {
 	var mockResult sql.Result = &mockSqlResult{}
 	if len(args) > 0 {

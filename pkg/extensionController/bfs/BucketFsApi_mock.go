@@ -11,6 +11,11 @@ type BucketFsMock struct {
 	mock.Mock
 }
 
+func CreateBucketFsMock() *BucketFsMock {
+	//nolint:exhaustruct // Empty struct is OK for Mock
+	return &BucketFsMock{}
+}
+
 func (m *BucketFsMock) SimulateFiles(files []BfsFile) {
 	m.On("ListFiles", mock.Anything, mock.Anything).Return(files, nil)
 }

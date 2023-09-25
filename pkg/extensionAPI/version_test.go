@@ -15,14 +15,14 @@ func TestInvalidVersion(t *testing.T) {
 
 const currentMajorVersion = "0"
 
-/* [utest -> dsn~extension-compatibility~1] */
+/* [utest -> dsn~extension-compatibility~1]. */
 func TestCompatibleNewerVersion(t *testing.T) {
 	a := assert.New(t)
 	err := validateExtensionIsCompatibleWithApiVersion("id", currentMajorVersion+".99.99")
 	a.NoError(err)
 }
 
-/* [utest -> dsn~extension-compatibility~1] */
+/* [utest -> dsn~extension-compatibility~1]. */
 func TestCompatibleOlderVersion(t *testing.T) {
 	a := assert.New(t)
 	err := validateExtensionIsCompatibleWithApiVersion("id", currentMajorVersion+".0.0")

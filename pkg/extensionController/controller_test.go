@@ -42,7 +42,7 @@ func (suite *ControllerUTestSuite) BeforeTest(suiteName, testName string) {
 }
 
 func (suite *ControllerUTestSuite) createController() {
-	suite.bucketFsMock = bfs.BucketFsMock{}
+	suite.bucketFsMock = *bfs.CreateBucketFsMock()
 	suite.metaDataMock = exaMetadata.CreateExaMetaDataReaderMock(EXTENSION_SCHEMA)
 	ctrl := &controllerImpl{
 		registry: registry.NewRegistry(suite.tempExtensionRepo),
@@ -73,7 +73,7 @@ func (suite *ControllerUTestSuite) AfterTest(suiteName, testName string) {
 
 // GetAllExtensions
 
-/* [utest -> dsn~list-extensions~1] */
+/* [utest -> dsn~list-extensions~1]. */
 func (suite *ControllerUTestSuite) TestGetAllExtensions() {
 	suite.writeDefaultExtension()
 	suite.bucketFsMock.SimulateFiles([]bfs.BfsFile{{Name: "my-extension.1.2.3.jar", Size: 3}})
@@ -83,7 +83,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensions() {
 		InstallableVersions: []extensionAPI.JsExtensionVersion{{Name: "0.1.0", Latest: true, Deprecated: false}}}}, extensions)
 }
 
-/* [utest -> dsn~list-extensions~1] */
+/* [utest -> dsn~list-extensions~1]. */
 func (suite *ControllerUTestSuite) TestGetAllExtensionsWithMissingJar() {
 	suite.writeDefaultExtension()
 	suite.bucketFsMock.SimulateFiles([]bfs.BfsFile{})
@@ -154,6 +154,7 @@ func (suite *ControllerUTestSuite) TestGetAllInstallationsFails() {
 				WithFindInstallationsFunc(t.throwCommand).
 				Build().
 				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+			//nolint:exhaustruct // Empty metadata is OK for this test
 			suite.metaDataMock.SimulateExaMetaData(exaMetadata.ExaMetadata{})
 			suite.initDbMock()
 			suite.dbMock.ExpectBegin()
@@ -230,7 +231,7 @@ func (suite *ControllerUTestSuite) TestGetParameterDefinitionsFails() {
 	}
 }
 
-/* [utest -> dsn~parameter-versioning~1] */
+/* [utest -> dsn~parameter-versioning~1]. */
 func (suite *ControllerUTestSuite) TestGetParameterDefinitionsSucceeds() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithGetInstanceParameterDefinitionFunc(`context.sqlClient.query('get param definitions'); return [{id: "param1", name: "My param:"+version, type: "string"}]`).
@@ -371,7 +372,7 @@ func (suite *ControllerUTestSuite) TestUninstallFailsWhenInstanceExists() {
 	suite.dbMock.ExpectRollback()
 	err := suite.controller.UninstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
 	suite.EqualError(err, "cannot uninstall extension because 2 instance(s) still exist: ext-name1, ext-name2")
-	if apiErr, ok := err.(*apiErrors.APIError); ok {
+	if apiErr, ok := apiErrors.AsAPIError(err); ok {
 		suite.Equal(400, apiErr.Status)
 	} else {
 		suite.Fail(fmt.Sprintf("expected an APIError but got %T: %v", err, err))
@@ -401,7 +402,7 @@ func (suite *ControllerUTestSuite) TestUpgradeFailsForUnknownExtensionId() {
 	suite.Nil(result)
 }
 
-/* [utest -> dsn~upgrade-extension~1] */
+/* [utest -> dsn~upgrade-extension~1]. */
 func (suite *ControllerUTestSuite) TestUpgradeSucceeds() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUpgradeFunc("context.sqlClient.execute(`upgrade extension`); return { previousVersion: 'old', newVersion: 'new' };").
@@ -447,7 +448,7 @@ func (suite *ControllerUTestSuite) TestUpgradeFails() {
 
 // CreateInstance
 
-/* [utest -> dsn~parameter-types~1] */
+/* [utest -> dsn~parameter-types~1]. */
 func (suite *ControllerUTestSuite) TestCreateInstanceInvalidParameters() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithFindInstallationsFunc(integrationTesting.MockFindInstallationsFunction("test", "0.1.0")).
@@ -527,7 +528,7 @@ func (suite *ControllerUTestSuite) TestDeleteInstanceSucceeds() {
 
 func (suite *ControllerUTestSuite) writeDefaultExtension() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
-		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "my-extension.1.2.3.jar", FileSize: 3}).
+		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "my-extension.1.2.3.jar", FileSize: 3, DownloadUrl: "", LicenseUrl: "", LicenseAgreementRequired: false}).
 		WithFindInstallationsFunc(`
 		return metadata.allScripts.rows.map(row => {
 			return {name: row.schema + "." + row.name, version: "0.1.0"}
@@ -543,7 +544,7 @@ func mockContext() context.Context {
 
 func (suite *ControllerUTestSuite) assertApiError(err error, expectedStatus int, expectedMessage string) {
 	suite.T().Helper()
-	if apiError, ok := err.(*apiErrors.APIError); ok {
+	if apiError, ok := apiErrors.AsAPIError(err); ok {
 		suite.ErrorContains(apiError, expectedMessage)
 		suite.Contains(apiError.Message, expectedMessage)
 		suite.Equal(expectedStatus, apiError.Status)
@@ -554,7 +555,7 @@ func (suite *ControllerUTestSuite) assertApiError(err error, expectedStatus int,
 
 func (suite *ControllerUTestSuite) assertNonApiError(err error, expectedMessage string) {
 	suite.T().Helper()
-	if _, ok := err.(*apiErrors.APIError); ok {
+	if _, ok := apiErrors.AsAPIError(err); ok {
 		suite.Fail("wrong error type", "Expected non-APIError but got %T: %v", err, err)
 	} else {
 		suite.ErrorContains(err, expectedMessage)

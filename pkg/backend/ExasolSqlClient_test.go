@@ -40,7 +40,7 @@ func (suite *ExasolSqlClientUTestSuite) createMockTransaction() *sql.Tx {
 	return tx
 }
 
-/* [utest -> dsn~extension-context-sql-client~1] */
+/* [utest -> dsn~extension-context-sql-client~1]. */
 func (suite *ExasolSqlClientUTestSuite) TestExecuteSucceeds() {
 	client := suite.createClient()
 	suite.dbMock.ExpectExec("select 1").WillReturnResult(sqlmock.NewResult(1, 1))
@@ -101,7 +101,7 @@ func (suite *ExasolSqlClientUTestSuite) TestQueryFails() {
 	suite.Nil(result)
 }
 
-/* [utest -> dsn~extension-context-sql-client~1] */
+/* [utest -> dsn~extension-context-sql-client~1]. */
 func (suite *ExasolSqlClientUTestSuite) TestQuerySucceeds() {
 	client := suite.createClient()
 	suite.dbMock.ExpectQuery("query").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).AddRow(1, "a").AddRow(2, "b")).RowsWillBeClosed()

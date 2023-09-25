@@ -34,7 +34,7 @@ func (suite *ContextSuite) SetupTest() {
 	suite.db = db
 	suite.dbMock = mock
 	suite.dbMock.MatchExpectationsInOrder(true)
-	suite.bucketFSMock = &bfs.BucketFsMock{}
+	suite.bucketFSMock = bfs.CreateBucketFsMock()
 	suite.metadataReaderMock = exaMetadata.CreateExaMetaDataReaderMock(EXTENSION_SCHEMA)
 }
 
@@ -52,7 +52,7 @@ func (suite *ContextSuite) TestCreate() {
 	suite.NotNil(ctx.SqlClient)
 }
 
-/* [utest -> dsn~extension-context-sql-client~1] */
+/* [utest -> dsn~extension-context-sql-client~1]. */
 func (suite *ContextSuite) TestSqlClientQuerySuccess() {
 	ctx := suite.createContext()
 	suite.dbMock.ExpectQuery("select 1").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).AddRow(1, "a").AddRow(2, "b")).RowsWillBeClosed()
@@ -70,7 +70,7 @@ func (suite *ContextSuite) TestSqlClientQueryFailure() {
 	})
 }
 
-/* [utest -> dsn~extension-context-sql-client~1] */
+/* [utest -> dsn~extension-context-sql-client~1]. */
 func (suite *ContextSuite) TestSqlClientExecuteSuccess() {
 	ctx := suite.createContext()
 	suite.dbMock.ExpectExec("create script").WillReturnResult(sqlmock.NewResult(1, 1))
@@ -87,7 +87,7 @@ func (suite *ContextSuite) TestSqlClientExecuteFailure() {
 	})
 }
 
-/* [utest -> dsn~extension-context-bucketfs~1] */
+/* [utest -> dsn~extension-context-bucketfs~1]. */
 func (suite *ContextSuite) TestBucketFsResolvePath() {
 	ctx := suite.createContextWithClients()
 	suite.bucketFSMock.SimulateAbsolutePath("file.txt", "/absolute/path/file.txt")
@@ -102,7 +102,7 @@ func (suite *ContextSuite) TestBucketFsResolvePathError() {
 	})
 }
 
-/* [utest -> dsn~extension-context-metadata~1] */
+/* [utest -> dsn~extension-context-metadata~1]. */
 func (suite *ContextSuite) TestMetadataGetScriptByName() {
 	ctx := suite.createContextWithClients()
 	suite.metadataReaderMock.SimulateGetScriptByNameScriptText("script", "scriptText")
