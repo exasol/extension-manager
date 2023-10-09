@@ -1,6 +1,6 @@
 module github.com/exasol/extension-manager
 
-go 1.19
+go 1.20
 
 require (
 	github.com/dop251/goja v0.0.0-20230707174833-636fdf960de1

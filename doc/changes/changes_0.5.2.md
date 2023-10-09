@@ -34,11 +34,27 @@ The release deprecates function `extensionController.CreateWithConfig()` in favo
 
 ## Dependency Updates
 
+### Extension-manager
+
+#### Compile Dependency Updates
+
+* Updated `golang:1.19` to `1.20`
+
+### Extension Manager Java Client
+
+#### Plugin Dependency Updates
+
+* Updated `com.exasol:project-keeper-maven-plugin:2.9.11` to `2.9.12`
+
 ### Extension Integration Tests Library
 
 #### Compile Dependency Updates
 
 * Updated `com.exasol:extension-manager-client-java:0.5.1` to `0.5.2`
+
+#### Plugin Dependency Updates
+
+* Updated `com.exasol:project-keeper-maven-plugin:2.9.11` to `2.9.12`
 
 ### Registry
 
