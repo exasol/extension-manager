@@ -13,7 +13,7 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}-build
       cancel-in-progress: true
     env:
-      EXASOL_VERSION: 7.1.22
+      EXASOL_VERSION: 7.1.23
     steps:
       - name: Check out code
         uses: actions/checkout@v4

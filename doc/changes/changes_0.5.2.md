@@ -1,6 +1,6 @@
-# Extension Manager 0.5.2, released 2023-??-??
+# Extension Manager 0.5.2, released 2023-10-10
 
-Code name:
+Code name: Small improvements
 
 ## Summary
 
@@ -11,6 +11,7 @@ This release contains the following notable changes:
 * It adds design, requirements and user guide for the integration testing framework.
 * It adds a custom JavaScript console logger that forwards the log levels of `console.log()`, `console.warn()` and `console.error()` to the Go `logrus` functions `Print()`, `Warn()` and `Error()`. Before, all log messages were output using `Print()`.
 * It speeds up tests that use a mock extension by avoiding compiling TypeScript to JavaScript.
+* Controller method `GetInstalledExtensions()` now additionally returns the extension ID.
 
 The release deprecates function `extensionController.CreateWithConfig()` in favor of `extensionController.CreateWithValidatedConfig()`. This new function validates the given configuration and returns an error in case it finds an issue.
 
@@ -20,6 +21,7 @@ The release deprecates function `extensionController.CreateWithConfig()` in favo
 * #142: Added validation of configuration when creating a new controller
 * #130: Added verification that no instance exists before uninstalling an extension
 * #115: Added custom JavaScript console logger that forwards log levels to the Go logger
+* #148: Added extension ID to result of controller method `GetInstalledExtensions()`
 
 ## Documentation
 
