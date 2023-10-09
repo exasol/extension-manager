@@ -159,9 +159,9 @@
 | [@exasol/extension-parameter-validator][96] | MIT     |
 
 [0]: https://github.com/Nightapes/go-rest/blob/v0.3.3/LICENSE
-[1]: https://github.com/dop251/goja/blob/636fdf960de1/LICENSE
-[2]: https://github.com/dop251/goja_nodejs/blob/804a84515562/LICENSE
-[3]: https://github.com/exasol/exasol-driver-go/blob/v1.0.0/LICENSE
+[1]: https://github.com/dop251/goja/blob/fc55792775de/LICENSE
+[2]: https://github.com/dop251/goja_nodejs/blob/198ba9a8b098/LICENSE
+[3]: https://github.com/exasol/exasol-driver-go/blob/v1.0.2/LICENSE
 [4]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.3.3/go-client/LICENSE
 [5]: https://github.com/go-chi/chi/blob/v5.0.10/LICENSE
 [6]: https://github.com/sirupsen/logrus/blob/v1.9.3/LICENSE
@@ -169,7 +169,7 @@
 [8]: https://github.com/swaggo/http-swagger/blob/v1.3.4/LICENSE
 [9]: https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE
 [10]: https://github.com/kinbiko/jsonassert/blob/HEAD/LICENSE
-[11]: https://cs.opensource.google/go/x/mod/+/v0.12.0:LICENSE
+[11]: https://cs.opensource.google/go/x/mod/+/v0.13.0:LICENSE
 [12]: https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-annotations
 [13]: http://www.apache.org/licenses/LICENSE-2.0.html
 [14]: https://projects.eclipse.org/projects/ee4j.jersey/jersey-client

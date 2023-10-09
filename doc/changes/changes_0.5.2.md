@@ -39,6 +39,13 @@ The release deprecates function `extensionController.CreateWithConfig()` in favo
 #### Compile Dependency Updates
 
 * Updated `golang:1.19` to `1.20`
+* Updated `github.com/dop251/goja:v0.0.0-20230707174833-636fdf960de1` to `v0.0.0-20230919151941-fc55792775de`
+* Updated `github.com/dop251/goja_nodejs:v0.0.0-20230602164024-804a84515562` to `v0.0.0-20230914102007-198ba9a8b098`
+* Updated `github.com/exasol/exasol-driver-go:v1.0.0` to `v1.0.2`
+
+#### Test Dependency Updates
+
+* Updated `golang.org/x/mod:v0.12.0` to `v0.13.0`
 
 ### Extension Manager Java Client
 
