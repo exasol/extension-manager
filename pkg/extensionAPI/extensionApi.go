@@ -109,6 +109,7 @@ type BucketFsUpload struct {
 }
 
 type JsExtInstallation struct {
+	ID      string `json:"id"`
 	Name    string `json:"name"`
 	Version string `json:"version"`
 }

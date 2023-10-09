@@ -65,11 +65,11 @@ var authSuccessTests = []struct{ authHeader string }{
 // GetInstalledExtensions
 
 func (suite *RestAPISuite) TestGetInstallationsSuccessfully() {
-	suite.controller.On("GetInstalledExtensions", mock.Anything, mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0"}}, nil)
+	suite.controller.On("GetInstalledExtensions", mock.Anything, mock.Anything).Return([]*extensionAPI.JsExtInstallation{{ID: EXTENSION_ID, Name: "test", Version: "0.1.0"}}, nil)
 	for _, test := range authSuccessTests {
 		suite.Run(test.authHeader, func() {
 			responseString := suite.restApi.makeRequestWithAuthHeader("GET", LIST_INSTALLED_EXTENSIONS+VALID_DB_ARGS, test.authHeader, "", 200)
-			suite.assertJSON.Assertf(responseString, `{"installations":[{"name":"test","version":"0.1.0"}]}`)
+			suite.assertJSON.Assertf(responseString, `{"installations":[{"id":"ext-id","name":"test","version":"0.1.0"}]}`)
 		})
 	}
 }
@@ -296,7 +296,7 @@ func (suite *RestAPISuite) TestRequestsFailForMissingParameters() {
 	}
 	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return([]*extensionController.Extension{{Name: "my-extension", Description: "a cool extension",
 		InstallableVersions: []extensionAPI.JsExtensionVersion{{Name: "0.1.0", Latest: true, Deprecated: false}}}}, nil)
-	suite.controller.On("GetInstalledExtensions", mock.Anything, mock.Anything).Return([]*extensionAPI.JsExtInstallation{{Name: "test", Version: "0.1.0"}}, nil)
+	suite.controller.On("GetInstalledExtensions", mock.Anything, mock.Anything).Return([]*extensionAPI.JsExtInstallation{{ID: EXTENSION_ID, Name: "test", Version: "0.1.0"}}, nil)
 	suite.controller.On("InstallExtension", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(nil)
 	suite.controller.On("CreateInstance", mock.Anything, mock.Anything, "ext-id", "ext-version", mock.Anything).Return(&extensionAPI.JsExtInstance{Id: "instId", Name: "instName"}, nil)
 	for _, test := range tests {

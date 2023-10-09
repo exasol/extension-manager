@@ -131,7 +131,7 @@ func (suite *ControllerUTestSuite) TestGetAllInstallations() {
 	suite.dbMock.ExpectRollback()
 	installations, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
 	suite.NoError(err)
-	suite.Equal([]*extensionAPI.JsExtInstallation{{Name: "schema.script", Version: "0.1.0"}}, installations)
+	suite.Equal([]*extensionAPI.JsExtInstallation{{ID: "testing-extension.js", Name: "schema.script", Version: "0.1.0"}}, installations)
 }
 
 func (suite *ControllerUTestSuite) TestGetAllInstallationsReturnsEmptyList() {

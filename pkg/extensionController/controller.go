@@ -155,12 +155,18 @@ func (c *controllerImpl) GetAllInstallations(txCtx *transaction.TransactionConte
 		installations, err := extension.FindInstallations(extensionContext, metadata)
 		if err != nil {
 			return nil, apiErrors.NewAPIErrorWithCause(fmt.Sprintf("failed to find installations for extension %q", extension.Name), err)
-		} else {
-			c.logInstallations(extension, installations)
-			allInstallations = append(allInstallations, installations...)
 		}
+		addExtensionId(extension.Id, installations)
+		c.logInstallations(extension, installations)
+		allInstallations = append(allInstallations, installations...)
 	}
 	return allInstallations, nil
+}
+
+func addExtensionId(extensionID string, installations []*extensionAPI.JsExtInstallation) {
+	for _, i := range installations {
+		i.ID = extensionID
+	}
 }
 
 func (*controllerImpl) logInstallations(extension *extensionAPI.JsExtension, installations []*extensionAPI.JsExtInstallation) {
