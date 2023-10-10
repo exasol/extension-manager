@@ -96,7 +96,7 @@
 | Dependency                         | License                           |
 | ---------------------------------- | --------------------------------- |
 | [JUnit Jupiter Params][32]         | [Eclipse Public License v2.0][33] |
-| [mockito-junit-jupiter][75]        | [The MIT License][76]             |
+| [mockito-junit-jupiter][75]        | [MIT][76]                         |
 | [udf-debugging-java][77]           | [MIT License][78]                 |
 | [Maven Project Version Getter][79] | [MIT License][80]                 |
 | [SLF4J JDK14 Provider][81]         | [MIT License][22]                 |

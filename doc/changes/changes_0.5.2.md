@@ -49,6 +49,14 @@ The release deprecates function `extensionController.CreateWithConfig()` in favo
 
 ### Extension Manager Java Client
 
+#### Compile Dependency Updates
+
+* Updated `io.swagger.core.v3:swagger-annotations:2.2.15` to `2.2.16`
+
+#### Test Dependency Updates
+
+* Updated `nl.jqno.equalsverifier:equalsverifier:3.15.1` to `3.15.2`
+
 #### Plugin Dependency Updates
 
 * Updated `com.exasol:project-keeper-maven-plugin:2.9.11` to `2.9.12`
@@ -57,7 +65,15 @@ The release deprecates function `extensionController.CreateWithConfig()` in favo
 
 #### Compile Dependency Updates
 
+* Updated `com.exasol:exasol-test-setup-abstraction-java:2.0.3` to `2.0.4`
 * Updated `com.exasol:extension-manager-client-java:0.5.1` to `0.5.2`
+* Updated `com.exasol:hamcrest-resultset-matcher:1.6.0` to `1.6.1`
+* Updated `com.exasol:test-db-builder-java:3.5.0` to `3.5.1`
+
+#### Test Dependency Updates
+
+* Updated `com.exasol:udf-debugging-java:0.6.10` to `0.6.11`
+* Updated `org.mockito:mockito-junit-jupiter:5.5.0` to `5.6.0`
 
 #### Plugin Dependency Updates
 
