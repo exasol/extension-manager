@@ -119,15 +119,17 @@ func (suite *ControllerITestSuite) TestGetAllInstallations() {
 	installations, err := suite.createControllerWithSchema(fixture.GetSchemaName()).
 		GetInstalledExtensions(mockContext(), suite.exasol.GetConnection())
 	suite.NoError(err)
-	suite.Equal(1, len(installations))
-	suite.Equal(fixture.GetSchemaName()+".MY_SCRIPT", installations[0].Name)
+	suite.Equal([]*extensionAPI.JsExtInstallation{{
+		ID:      "testing-extension.js",
+		Name:    fixture.GetSchemaName() + ".MY_SCRIPT",
+		Version: "0.1.0"}}, installations)
 }
 
 // Install
 
 func (suite *ControllerITestSuite) TestInstallFailsForUnknownExtensionId() {
 	err := suite.createController().InstallExtension(mockContext(), suite.exasol.GetConnection(), "unknown-extension-id", "ver")
-	suite.ErrorContains(err, "failed to load extension \"unknown-extension-id\"")
+	suite.ErrorContains(err, `failed to load extension "unknown-extension-id"`)
 }
 
 func (suite *ControllerITestSuite) TestInstallSucceeds() {

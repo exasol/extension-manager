@@ -186,7 +186,7 @@ func (suite *ExtensionApiSuite) TestFindInstallationsCanReadAllScriptsTable() {
 		});`).Build().AsString()
 	extension := suite.loadExtension(extensionContent)
 	result, err := extension.FindInstallations(suite.createMockContext(), createMockMetadata())
-	suite.Equal([]*JsExtInstallation{{Name: "test", Version: "0.1.0"}}, result)
+	suite.Equal([]*JsExtInstallation{{ID: "", Name: "test", Version: "0.1.0"}}, result)
 	suite.NoError(err)
 }
 
@@ -196,7 +196,7 @@ func (suite *ExtensionApiSuite) TestFindInstallationsReturningParameters() {
 			MockFindInstallationsFunction("test", "0.1.0")).Build().AsString()
 	extension := suite.loadExtension(extensionContent)
 	result, err := extension.FindInstallations(suite.createMockContext(), createMockMetadata())
-	suite.Equal([]*JsExtInstallation{{Name: "test", Version: "0.1.0"}}, result)
+	suite.Equal([]*JsExtInstallation{{ID: "", Name: "test", Version: "0.1.0"}}, result)
 	suite.NoError(err)
 }
 

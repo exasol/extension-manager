@@ -66,7 +66,7 @@ class ExtensionManagerClientIT {
 
     @Test
     void getInstallations() {
-        final InstallationsResponseInstallation expected = new InstallationsResponseInstallation()
+        final InstallationsResponseInstallation expected = new InstallationsResponseInstallation().id(EXTENSION_ID)
                 .name("Testing Extension").version(EXTENSION_VERSION);
         assertThat(client.getInstallations(), contains(expected));
     }

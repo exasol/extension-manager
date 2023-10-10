@@ -112,7 +112,7 @@ func (suite *extCtrlUnitTestSuite) TestGetAllInstallationsBeginTransactionFailur
 
 func (suite *extCtrlUnitTestSuite) TestGetInstalledExtensionsSuccess() {
 	suite.dbMock.ExpectBegin()
-	mockResult := []*extensionAPI.JsExtInstallation{{Name: "ext"}}
+	mockResult := []*extensionAPI.JsExtInstallation{{ID: "mock-ID", Name: "ext", Version: "mock-version"}}
 	suite.mockCtrl.On("GetAllInstallations", mock.Anything).Return(mockResult, nil)
 	suite.dbMock.ExpectRollback()
 	installations, err := suite.ctrl.GetInstalledExtensions(mockContext(), suite.db)
