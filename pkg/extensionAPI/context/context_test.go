@@ -9,7 +9,6 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/exasol/extension-manager/pkg/backend"
 	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
-	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/transaction"
 	"github.com/stretchr/testify/suite"
 )
@@ -18,7 +17,7 @@ type ContextSuite struct {
 	suite.Suite
 	db                 *sql.DB
 	dbMock             sqlmock.Sqlmock
-	bucketFSMock       *bfs.BucketFsMock
+	bucketFSMock       *BucketFsContextMock
 	metadataReaderMock *exaMetadata.ExaMetaDataReaderMock
 }
 
@@ -34,7 +33,7 @@ func (suite *ContextSuite) SetupTest() {
 	suite.db = db
 	suite.dbMock = mock
 	suite.dbMock.MatchExpectationsInOrder(true)
-	suite.bucketFSMock = bfs.CreateBucketFsMock()
+	suite.bucketFSMock = CreateBucketFsContextMock()
 	suite.metadataReaderMock = exaMetadata.CreateExaMetaDataReaderMock(EXTENSION_SCHEMA)
 }
 
@@ -90,14 +89,14 @@ func (suite *ContextSuite) TestSqlClientExecuteFailure() {
 /* [utest -> dsn~extension-context-bucketfs~1]. */
 func (suite *ContextSuite) TestBucketFsResolvePath() {
 	ctx := suite.createContextWithClients()
-	suite.bucketFSMock.SimulateAbsolutePath("file.txt", "/absolute/path/file.txt")
+	suite.bucketFSMock.SimulateResolvePath("file.txt", "/absolute/path/file.txt")
 	suite.Equal("/absolute/path/file.txt", ctx.BucketFs.ResolvePath("file.txt"))
 }
 
 func (suite *ContextSuite) TestBucketFsResolvePathError() {
 	ctx := suite.createContextWithClients()
-	suite.bucketFSMock.SimulateAbsolutePathError("file.txt", fmt.Errorf("mock error"))
-	suite.PanicsWithError("failed to find absolute path for file \"file.txt\": mock error", func() {
+	suite.bucketFSMock.SimulateResolvePathPanics("file.txt", "mock error")
+	suite.PanicsWithValue("mock error", func() {
 		ctx.BucketFs.ResolvePath("file.txt")
 	})
 }
@@ -127,7 +126,7 @@ func (suite *ContextSuite) createContext() *ExtensionContext {
 	suite.dbMock.ExpectBegin()
 	txCtx, err := transaction.BeginTransaction(context.Background(), suite.db)
 	suite.NoError(err)
-	return CreateContext(txCtx, "EXT_SCHEMA", "/bucketfs/base/path/")
+	return CreateContext(txCtx, "EXT_SCHEMA")
 }
 
 func (suite *ContextSuite) createContextWithClients() *ExtensionContext {

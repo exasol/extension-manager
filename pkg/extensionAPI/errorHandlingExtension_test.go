@@ -9,7 +9,6 @@ import (
 	"github.com/exasol/extension-manager/pkg/backend"
 	"github.com/exasol/extension-manager/pkg/extensionAPI/context"
 	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
-	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/transaction"
 	"github.com/stretchr/testify/suite"
 )
@@ -58,14 +57,18 @@ func (suite *ErrorHandlingExtensionSuite) TestProperties() {
 
 const EXTENSION_SCHEMA = "extension_schema"
 
-func createMockContextWithClients(sqlClient backend.SimpleSQLClient, bucketFsClient bfs.BucketFsAPI, metadataReader exaMetadata.ExaMetadataReader) *context.ExtensionContext {
+func createMockContextWithClients(
+	sqlClient backend.SimpleSQLClient,
+	bucketFsContext context.BucketFsContext,
+	metadataReader exaMetadata.ExaMetadataReader,
+) *context.ExtensionContext {
 	txCtx := &transaction.TransactionContext{}
-	return context.CreateContextWithClient(EXTENSION_SCHEMA, txCtx, sqlClient, bucketFsClient, metadataReader)
+	return context.CreateContextWithClient(EXTENSION_SCHEMA, txCtx, sqlClient, bucketFsContext, metadataReader)
 }
 
 func createMockContext() *context.ExtensionContext {
 	var sqlClientMock backend.SimpleSQLClient = backend.CreateSimpleSqlClientMock()
-	var bucketFsClientMock bfs.BucketFsAPI = bfs.CreateBucketFsMock()
+	var bucketFsClientMock context.BucketFsContext = context.CreateBucketFsContextMock()
 	var metadataReader exaMetadata.ExaMetadataReader = exaMetadata.CreateExaMetaDataReaderMock(EXTENSION_SCHEMA)
 	return createMockContextWithClients(sqlClientMock, bucketFsClientMock, metadataReader)
 }

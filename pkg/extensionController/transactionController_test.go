@@ -8,6 +8,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
+	"github.com/exasol/extension-manager/pkg/extensionController/transaction"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -15,11 +16,12 @@ import (
 
 type extCtrlUnitTestSuite struct {
 	suite.Suite
-	ctrl     TransactionController
-	db       *sql.DB
-	dbMock   sqlmock.Sqlmock
-	mockCtrl mockControllerImpl
-	mockBfs  bfs.BucketFsMock
+	ctrl                   TransactionController
+	db                     *sql.DB
+	dbMock                 sqlmock.Sqlmock
+	mockCtrl               mockControllerImpl
+	bucketFsMock           *bfs.BucketFsMock
+	transactionStarterMock *transaction.TransactionStarterMock
 }
 
 func TestExtensionControllerUnitTestSuite(t *testing.T) {
@@ -27,16 +29,21 @@ func TestExtensionControllerUnitTestSuite(t *testing.T) {
 }
 
 func (suite *extCtrlUnitTestSuite) SetupTest() {
+	suite.setupDbMock()
 	suite.mockCtrl = createMockControllerImpl()
-	suite.mockBfs = *bfs.CreateBucketFsMock()
-	suite.ctrl = &transactionControllerImpl{controller: &suite.mockCtrl, bucketFs: &suite.mockBfs}
+	suite.bucketFsMock = bfs.CreateBucketFsMock()
+	suite.transactionStarterMock = transaction.CreateTransactionStarterMock(suite.db, suite.bucketFsMock)
+	suite.ctrl = &transactionControllerImpl{controller: &suite.mockCtrl, beginTransaction: suite.transactionStarterMock.GetTransactionStarter()}
+}
+
+func (suite *extCtrlUnitTestSuite) setupDbMock() {
 	db, dbMock, err := sqlmock.New()
 	if err != nil {
 		suite.Failf("error '%v' was not expected when opening a stub database connection", err.Error())
 	}
-	dbMock.MatchExpectationsInOrder(true)
 	suite.db = db
 	suite.dbMock = dbMock
+	suite.dbMock.MatchExpectationsInOrder(true)
 }
 
 func (suite *extCtrlUnitTestSuite) AfterTest(suiteName, testName string) {
@@ -79,7 +86,7 @@ func (suite *extCtrlUnitTestSuite) TestCreateWithValidatedConfigFailure() {
 // GetAllExtensions
 
 func (suite *extCtrlUnitTestSuite) TestGetAllExtensionsSuccess() {
-	suite.mockBfs.SimulateFiles([]bfs.BfsFile{})
+	suite.bucketFsMock.SimulateFiles([]bfs.BfsFile{})
 	suite.mockCtrl.On("GetAllExtensions", mock.Anything).Return([]*Extension{}, nil)
 	extensions, err := suite.ctrl.GetAllExtensions(mockContext(), suite.db)
 	suite.NoError(err)
@@ -87,14 +94,14 @@ func (suite *extCtrlUnitTestSuite) TestGetAllExtensionsSuccess() {
 }
 
 func (suite *extCtrlUnitTestSuite) TestGetAllExtensionsBucketFsListFails() {
-	suite.mockBfs.SimulateFilesError(fmt.Errorf("mock"))
+	suite.bucketFsMock.SimulateFilesError(fmt.Errorf("mock"))
 	extensions, err := suite.ctrl.GetAllExtensions(mockContext(), suite.db)
 	suite.EqualError(err, "failed to search for required files in BucketFS. Cause: mock")
 	suite.Nil(extensions)
 }
 
 func (suite *extCtrlUnitTestSuite) TestGetAllExtensionsGetFails() {
-	suite.mockBfs.SimulateFiles([]bfs.BfsFile{})
+	suite.bucketFsMock.SimulateFiles([]bfs.BfsFile{})
 	suite.mockCtrl.On("GetAllExtensions", mock.Anything).Return(nil, fmt.Errorf("mock"))
 	extensions, err := suite.ctrl.GetAllExtensions(mockContext(), suite.db)
 	suite.EqualError(err, "mock")

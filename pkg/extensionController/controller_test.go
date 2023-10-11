@@ -14,6 +14,7 @@ import (
 	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/registry"
+	"github.com/exasol/extension-manager/pkg/extensionController/transaction"
 	"github.com/exasol/extension-manager/pkg/integrationTesting"
 	"github.com/exasol/extension-manager/pkg/parameterValidator"
 
@@ -22,12 +23,13 @@ import (
 
 type ControllerUTestSuite struct {
 	suite.Suite
-	tempExtensionRepo string
-	controller        TransactionController
-	db                *sql.DB
-	dbMock            sqlmock.Sqlmock
-	bucketFsMock      bfs.BucketFsMock
-	metaDataMock      *exaMetadata.ExaMetaDataReaderMock
+	tempExtensionRepo      string
+	controller             TransactionController
+	db                     *sql.DB
+	dbMock                 sqlmock.Sqlmock
+	bucketFsMock           *bfs.BucketFsMock
+	metaDataMock           *exaMetadata.ExaMetaDataReaderMock
+	transactionStarterMock *transaction.TransactionStarterMock
 }
 
 func TestControllerUTestSuite(t *testing.T) {
@@ -37,13 +39,15 @@ func TestControllerUTestSuite(t *testing.T) {
 func (suite *ControllerUTestSuite) BeforeTest(suiteName, testName string) {
 	tempExtensionRepo := suite.T().TempDir()
 	suite.tempExtensionRepo = tempExtensionRepo
-	suite.createController()
 	suite.initDbMock()
+	suite.createController()
 }
 
 func (suite *ControllerUTestSuite) createController() {
-	suite.bucketFsMock = *bfs.CreateBucketFsMock()
+	suite.bucketFsMock = bfs.CreateBucketFsMock()
+	suite.bucketFsMock.SimulateCloseSuccess()
 	suite.metaDataMock = exaMetadata.CreateExaMetaDataReaderMock(EXTENSION_SCHEMA)
+
 	ctrl := &controllerImpl{
 		registry: registry.NewRegistry(suite.tempExtensionRepo),
 		config: ExtensionManagerConfig{
@@ -52,7 +56,11 @@ func (suite *ControllerUTestSuite) createController() {
 			BucketFSBasePath:     "bfsBasePath"},
 		metaDataReader: suite.metaDataMock,
 	}
-	suite.controller = &transactionControllerImpl{controller: ctrl, bucketFs: &suite.bucketFsMock}
+
+	suite.controller = &transactionControllerImpl{
+		controller:       ctrl,
+		beginTransaction: suite.transactionStarterMock.GetTransactionStarter(),
+	}
 }
 
 func (suite *ControllerUTestSuite) initDbMock() {
@@ -63,6 +71,7 @@ func (suite *ControllerUTestSuite) initDbMock() {
 	suite.db = db
 	suite.dbMock = mock
 	suite.dbMock.MatchExpectationsInOrder(true)
+	suite.transactionStarterMock = transaction.CreateTransactionStarterMock(suite.db, suite.bucketFsMock)
 }
 
 func (suite *ControllerUTestSuite) AfterTest(suiteName, testName string) {
@@ -506,8 +515,10 @@ func (suite *ControllerUTestSuite) TestDeleteInstancesFails() {
 				Build().
 				WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 			suite.initDbMock()
+			suite.createController()
 			suite.dbMock.ExpectBegin()
 			suite.dbMock.ExpectRollback()
+			//suite.bucketFsMock.Close()
 			err := suite.controller.DeleteInstance(mockContext(), suite.db, EXTENSION_ID, "extVersion", "instId")
 			suite.assertError(t, err)
 		})

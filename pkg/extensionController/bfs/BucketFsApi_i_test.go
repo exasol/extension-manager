@@ -112,13 +112,23 @@ func (suite *BucketFsAPIITestSuite) TestFindAbsolutePathMultipleFilesFirstFileDo
 }
 
 func (suite *BucketFsAPIITestSuite) listFiles() ([]bfs.BfsFile, error) {
-	bfsClient := bfs.CreateBucketFsAPI(DEFAULT_BUCKET_PATH)
-	return bfsClient.ListFiles(context.Background(), suite.exasol.GetConnection())
+	bfsClient := suite.createBucketFsClient()
+	defer bfsClient.Close()
+	return bfsClient.ListFiles()
 }
 
 func (suite *BucketFsAPIITestSuite) findAbsolutePath(fileName string) (string, error) {
-	bfsClient := bfs.CreateBucketFsAPI(DEFAULT_BUCKET_PATH)
-	return bfsClient.FindAbsolutePath(context.Background(), suite.exasol.GetConnection(), fileName)
+	bfsClient := suite.createBucketFsClient()
+	defer bfsClient.Close()
+	return bfsClient.FindAbsolutePath(fileName)
+}
+
+func (suite *BucketFsAPIITestSuite) createBucketFsClient() bfs.BucketFsAPI {
+	bfsClient, err := bfs.CreateBucketFsAPI(DEFAULT_BUCKET_PATH, context.Background(), suite.exasol.GetConnection())
+	if err != nil {
+		suite.FailNow("Creating BFS API failed: " + err.Error())
+	}
+	return bfsClient
 }
 
 func (suite *BucketFsAPIITestSuite) uploadStringContent(fileName string, fileContent string) {

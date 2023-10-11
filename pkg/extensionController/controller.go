@@ -306,7 +306,7 @@ func (c *controllerImpl) FindInstances(txCtx *transaction.TransactionContext, ex
 }
 
 func (c *controllerImpl) createExtensionContext(txCtx *transaction.TransactionContext) *context.ExtensionContext {
-	return context.CreateContext(txCtx, c.config.ExtensionSchema, c.config.BucketFSBasePath)
+	return context.CreateContext(txCtx, c.config.ExtensionSchema)
 }
 
 func (c *controllerImpl) ensureSchemaExists(txCtx *transaction.TransactionContext) error {

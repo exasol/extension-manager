@@ -8,15 +8,18 @@ import (
 	"time"
 )
 
-// BucketFsAPI allows access to BucketFS.
+// BucketFsAPI allows access to BucketFS. Call the [BucketFsAPI.Close] method to release resources after using the BucketFS API.
 type BucketFsAPI interface {
 	// ListFiles lists all files in the configured directory recursively.
-	ListFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error)
+	ListFiles() ([]BfsFile, error)
 
 	// FindAbsolutePath searches for a file with the given name in BucketFS and returns its absolute path.
 	// If multiple files with the same name exist in different folders, this picks an arbitrary file and returns its path.
 	// If no file with the given name exists, this will return an error.
-	FindAbsolutePath(ctx context.Context, db *sql.DB, fileName string) (string, error)
+	FindAbsolutePath(fileName string) (string, error)
+
+	// Close removes any resources used by the BucketFS API like Exasol UDF SCRIPTS.
+	Close() error
 }
 
 // BfsFile represents a file in BucketFS.
@@ -29,57 +32,42 @@ type BfsFile struct {
 // CreateBucketFsAPI creates an instance of BucketFsAPI.
 //
 // The current implementation uses a Python UDF for accessing BucketFS.
-// In the future that implementation might be replaced by direct access.
+// Call the [BucketFsAPI.Close] method to release resources after using the BucketFS API.
 /* [impl -> dsn~configure-bucketfs-path~1]. */
-func CreateBucketFsAPI(bucketFsBasePath string) BucketFsAPI {
-	return &bucketFsAPIImpl{bucketFsBasePath: bucketFsBasePath}
-}
-
-type bucketFsAPIImpl struct {
-	bucketFsBasePath string
-}
-
-/* [impl -> dsn~extension-components~1]. */
-func (bfs bucketFsAPIImpl) ListFiles(ctx context.Context, db *sql.DB) (files []BfsFile, retErr error) {
+func CreateBucketFsAPI(bucketFsBasePath string, ctx context.Context, db *sql.DB) (BucketFsAPI, error) {
 	transaction, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a transaction. Cause: %w", err)
 	}
-	defer func() {
-		if err = transaction.Rollback(); err != nil {
-			retErr = fmt.Errorf("failed to rollback transaction. Cause: %w", err)
-		}
-	}()
-	udfScriptName, err := bfs.createUdfScript(transaction)
+	udfScriptName, err := createUdfScript(transaction)
 	if err != nil {
+		_ = transaction.Rollback()
 		return nil, err
 	}
-	return bfs.queryBucketFsContent(transaction, udfScriptName)
+	return &bucketFsAPIImpl{bucketFsBasePath: bucketFsBasePath, udfScriptName: udfScriptName, transaction: transaction}, nil
+}
+
+type bucketFsAPIImpl struct {
+	bucketFsBasePath string
+	udfScriptName    string
+	transaction      *sql.Tx
+}
+
+/* [impl -> dsn~extension-components~1]. */
+func (bfs bucketFsAPIImpl) ListFiles() (files []BfsFile, retErr error) {
+	return bfs.queryBucketFsContent()
 }
 
 /* [impl -> dsn~resolving-files-in-bucketfs~1]. */
 /* [impl -> dsn~extension-context-bucketfs~1]. */
-func (bfs bucketFsAPIImpl) FindAbsolutePath(ctx context.Context, db *sql.DB, fileName string) (absolutePath string, retErr error) {
-	transaction, err := db.BeginTx(ctx, nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to create a transaction. Cause: %w", err)
-	}
-	defer func() {
-		if err = transaction.Rollback(); err != nil {
-			retErr = fmt.Errorf("failed to rollback transaction. Cause: %w", err)
-		}
-	}()
-	udfScriptName, err := bfs.createUdfScript(transaction)
-	if err != nil {
-		return "", err
-	}
-	return bfs.queryAbsoluteFilePath(transaction, udfScriptName, fileName)
+func (bfs bucketFsAPIImpl) FindAbsolutePath(fileName string) (absolutePath string, retErr error) {
+	return bfs.queryAbsoluteFilePath(fileName)
 }
 
 //go:embed list_files_recursively_udf.py
 var listFilesRecursivelyUdfContent string
 
-func (bfs bucketFsAPIImpl) createUdfScript(transaction *sql.Tx) (string, error) {
+func createUdfScript(transaction *sql.Tx) (string, error) {
 	schemaName := fmt.Sprintf("INTERNAL_%v", time.Now().Unix())
 	_, err := transaction.Exec("CREATE SCHEMA " + schemaName)
 	if err != nil {
@@ -97,8 +85,8 @@ func (bfs bucketFsAPIImpl) createUdfScript(transaction *sql.Tx) (string, error) 
 	return udfScriptName, nil
 }
 
-func (bfs bucketFsAPIImpl) queryBucketFsContent(transaction *sql.Tx, udfScriptName string) ([]BfsFile, error) {
-	statement, err := transaction.Prepare("SELECT " + udfScriptName + "(?) ORDER BY FULL_PATH") //nolint:gosec // SQL string concatenation is safe here
+func (bfs bucketFsAPIImpl) queryBucketFsContent() ([]BfsFile, error) {
+	statement, err := bfs.transaction.Prepare("SELECT " + bfs.udfScriptName + "(?) ORDER BY FULL_PATH") //nolint:gosec // SQL string concatenation is safe here
 	if err != nil {
 		return nil, fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
 	}
@@ -126,8 +114,8 @@ func readQueryResult(result *sql.Rows) ([]BfsFile, error) {
 	return files, nil
 }
 
-func (bfs bucketFsAPIImpl) queryAbsoluteFilePath(transaction *sql.Tx, udfScriptName string, fileName string) (string, error) {
-	statement, err := transaction.Prepare(`SELECT FULL_PATH FROM (SELECT ` + udfScriptName + `(?)) WHERE FILE_NAME = ? ORDER BY FULL_PATH LIMIT 1`) //nolint:gosec // SQL string concatenation is safe here
+func (bfs bucketFsAPIImpl) queryAbsoluteFilePath(fileName string) (string, error) {
+	statement, err := bfs.transaction.Prepare(`SELECT FULL_PATH FROM (SELECT ` + bfs.udfScriptName + `(?)) WHERE FILE_NAME = ? ORDER BY FULL_PATH LIMIT 1`) //nolint:gosec // SQL string concatenation is safe here
 	if err != nil {
 		return "", fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
 	}
@@ -149,4 +137,11 @@ func (bfs bucketFsAPIImpl) queryAbsoluteFilePath(transaction *sql.Tx, udfScriptN
 		return "", fmt.Errorf("failed reading absolute path. Cause: %w", err)
 	}
 	return absolutePath, nil
+}
+
+func (bfs bucketFsAPIImpl) Close() error {
+	if err := bfs.transaction.Rollback(); err != nil {
+		return fmt.Errorf("failed to rollback transaction to cleanup resources. Cause: %w", err)
+	}
+	return nil
 }

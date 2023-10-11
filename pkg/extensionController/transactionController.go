@@ -110,8 +110,9 @@ func CreateWithValidatedConfig(config ExtensionManagerConfig) (TransactionContro
 	}
 	controller := createImpl(config)
 	transactionController := &transactionControllerImpl{
-		controller: controller,
-		bucketFs:   bfs.CreateBucketFsAPI(config.BucketFSBasePath)}
+		controller:       controller,
+		beginTransaction: transaction.BeginTransaction,
+	}
 	return transactionController, nil
 }
 
@@ -129,8 +130,8 @@ func validateConfig(config ExtensionManagerConfig) error {
 }
 
 type transactionControllerImpl struct {
-	controller controller
-	bucketFs   bfs.BucketFsAPI
+	controller       controller
+	beginTransaction transaction.TransactionStarter
 }
 
 func (c *transactionControllerImpl) GetAllExtensions(ctx context.Context, db *sql.DB) ([]*Extension, error) {
@@ -142,7 +143,16 @@ func (c *transactionControllerImpl) GetAllExtensions(ctx context.Context, db *sq
 }
 
 func (c *transactionControllerImpl) listBfsFiles(ctx context.Context, db *sql.DB) ([]bfs.BfsFile, error) {
-	bfsFiles, err := c.bucketFs.ListFiles(ctx, db)
+	txCtx, err := c.beginTransaction(ctx, db)
+	if err != nil {
+		return nil, err
+	}
+	defer txCtx.Rollback()
+	bfsClient, err := txCtx.GetBucketFsClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to search for required files in BucketFS. Cause: %w", err)
+	}
+	bfsFiles, err := bfsClient.ListFiles()
 	if err != nil {
 		return nil, fmt.Errorf("failed to search for required files in BucketFS. Cause: %w", err)
 	}
@@ -150,7 +160,7 @@ func (c *transactionControllerImpl) listBfsFiles(ctx context.Context, db *sql.DB
 }
 
 func (c *transactionControllerImpl) InstallExtension(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) (returnErr error) {
-	txCtx, err := transaction.BeginTransaction(ctx, db)
+	txCtx, err := c.beginTransaction(ctx, db)
 	if err != nil {
 		return err
 	}
@@ -166,7 +176,7 @@ func (c *transactionControllerImpl) InstallExtension(ctx context.Context, db *sq
 }
 
 func (c *transactionControllerImpl) UninstallExtension(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) (returnErr error) {
-	tx, err := transaction.BeginTransaction(ctx, db)
+	tx, err := c.beginTransaction(ctx, db)
 	if err != nil {
 		return err
 	}
@@ -183,7 +193,7 @@ func (c *transactionControllerImpl) UninstallExtension(ctx context.Context, db *
 
 /* [impl -> dsn~upgrade-extension~1]. */
 func (c *transactionControllerImpl) UpgradeExtension(ctx context.Context, db *sql.DB, extensionId string) (result *extensionAPI.JsUpgradeResult, returnErr error) {
-	tx, err := transaction.BeginTransaction(ctx, db)
+	tx, err := c.beginTransaction(ctx, db)
 	if err != nil {
 		return nil, err
 	}
@@ -199,7 +209,7 @@ func (c *transactionControllerImpl) UpgradeExtension(ctx context.Context, db *sq
 }
 
 func (c *transactionControllerImpl) GetInstalledExtensions(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
-	tx, err := transaction.BeginTransaction(ctx, db)
+	tx, err := c.beginTransaction(ctx, db)
 	if err != nil {
 		return nil, err
 	}
@@ -208,7 +218,7 @@ func (c *transactionControllerImpl) GetInstalledExtensions(ctx context.Context, 
 }
 
 func (c *transactionControllerImpl) GetParameterDefinitions(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
-	tx, err := transaction.BeginTransaction(ctx, db)
+	tx, err := c.beginTransaction(ctx, db)
 	if err != nil {
 		return nil, err
 	}
@@ -217,7 +227,7 @@ func (c *transactionControllerImpl) GetParameterDefinitions(ctx context.Context,
 }
 
 func (c *transactionControllerImpl) CreateInstance(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string, parameterValues []ParameterValue) (*extensionAPI.JsExtInstance, error) {
-	tx, err := transaction.BeginTransaction(ctx, db)
+	tx, err := c.beginTransaction(ctx, db)
 	if err != nil {
 		return nil, err
 	}
@@ -233,7 +243,7 @@ func (c *transactionControllerImpl) CreateInstance(ctx context.Context, db *sql.
 }
 
 func (c *transactionControllerImpl) FindInstances(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) ([]*extensionAPI.JsExtInstance, error) {
-	tx, err := transaction.BeginTransaction(ctx, db)
+	tx, err := c.beginTransaction(ctx, db)
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +252,7 @@ func (c *transactionControllerImpl) FindInstances(ctx context.Context, db *sql.D
 }
 
 func (c *transactionControllerImpl) DeleteInstance(ctx context.Context, db *sql.DB, extensionId, extensionVersion, instanceId string) error {
-	tx, err := transaction.BeginTransaction(ctx, db)
+	tx, err := c.beginTransaction(ctx, db)
 	if err != nil {
 		return err
 	}
