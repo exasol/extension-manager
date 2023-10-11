@@ -12,6 +12,12 @@ This release speeds up listing extensions, especially when there are many files 
 
 ## Dependency Updates
 
+### Extension-manager
+
+#### Compile Dependency Updates
+
+* Updated `github.com/exasol/exasol-driver-go:v1.0.2` to `v1.0.3`
+
 ### Extension Integration Tests Library
 
 #### Compile Dependency Updates

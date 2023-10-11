@@ -27,8 +27,8 @@ github.com/dop251/goja_nodejs v0.0.0-20230914102007-198ba9a8b098 h1:MdrnfFPrfMfx
 github.com/dop251/goja_nodejs v0.0.0-20230914102007-198ba9a8b098/go.mod h1:phKgRwmVpHQiW0mh9HNXILv/e2MfH7kqAnDANHnpXdU=
 github.com/exasol/error-reporting-go v0.2.0 h1:nKIe4zYiTHbYrKJRlSNJcmGjTJCZredDh5akVHfIbRs=
 github.com/exasol/error-reporting-go v0.2.0/go.mod h1:lUzRJqKLiSuYpqRUN2LVyj08WeHzhMEC/8Gmgtuqh1Y=
-github.com/exasol/exasol-driver-go v1.0.2 h1:JE4qInaWj94cYEZydYEcaitoPKZclnkRuEzL7M/XA5U=
-github.com/exasol/exasol-driver-go v1.0.2/go.mod h1:t9MSp8SQJFLuKUWmzOTLtrsYuUkZfsjsuxJE7eflVQo=
+github.com/exasol/exasol-driver-go v1.0.3 h1:Q2rnp8Zlh2Ef8fqjskRNH/3cq/alIsGdSwS7orKF2Nc=
+github.com/exasol/exasol-driver-go v1.0.3/go.mod h1:5lkVe9phxZ6u/IYginlXwHXfHxQyHhd2Msa4rMA3Hno=
 github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.3 h1:Jzv/j8yAIJgTaP1s+YazLbPTWhgBH+skcCsA1FaHKhQ=
 github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.3/go.mod h1:Ct3IjYbM/04a5fF6hlK4HVKDdsf1hROiJxJNoe6CIiI=
 github.com/gabriel-vasile/mimetype v1.4.2 h1:w5qFW6JKBz9Y393Y4q372O9A7cUSequkh1Q7OhCmWKU=
@@ -129,8 +129,8 @@ golang.org/x/net v0.0.0-20220722155237-a158d28d115b/go.mod h1:XRhObCWvk6IyKnWLug
 golang.org/x/net v0.6.0/go.mod h1:2Tu9+aMcznHK/AK1HMvgo6xiTLG5rD5rZLDS+rp2Bjs=
 golang.org/x/net v0.7.0/go.mod h1:2Tu9+aMcznHK/AK1HMvgo6xiTLG5rD5rZLDS+rp2Bjs=
 golang.org/x/net v0.10.0/go.mod h1:0qNGK6F8kojg2nk9dLZ2mShWaEBan6FAoqfSigmmuDg=
-golang.org/x/net v0.16.0 h1:7eBu7KsSvFDtSXUIDbh3aqlK4DPsZ1rByC8PFfBThos=
-golang.org/x/net v0.16.0/go.mod h1:NxSsAGuq816PNPmqtQdLE42eU2Fs7NoRIZrHJAlaCOE=
+golang.org/x/net v0.17.0 h1:pVaXccu2ozPjCXewfr1S7xza/zcXTity9cCdXQYSjIM=
+golang.org/x/net v0.17.0/go.mod h1:NxSsAGuq816PNPmqtQdLE42eU2Fs7NoRIZrHJAlaCOE=
 golang.org/x/sync v0.0.0-20190423024810-112230192c58/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.1.0/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
