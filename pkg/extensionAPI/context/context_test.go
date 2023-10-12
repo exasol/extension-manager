@@ -55,10 +55,16 @@ func (suite *ContextSuite) TestCreate() {
 /* [utest -> dsn~extension-context-sql-client~1]. */
 func (suite *ContextSuite) TestSqlClientQuerySuccess() {
 	ctx := suite.createContext()
-	suite.dbMock.ExpectQuery("select 1").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).AddRow(1, "a").AddRow(2, "b")).RowsWillBeClosed()
+	suite.dbMock.ExpectQuery("select 1").WillReturnRows(sqlmock.NewRowsWithColumnDefinition(
+		sqlmock.NewColumn("col1").OfType("type1", "sample"),
+		sqlmock.NewColumn("col2").OfType("type2", "sample"),
+	).
+		AddRow(1, "a").
+		AddRow(2, "b")).
+		RowsWillBeClosed()
 	result := ctx.SqlClient.Query("select 1")
 	suite.Equal(backend.QueryResult{
-		Columns: []backend.Column{{Name: "col1", TypeName: "type"}, {Name: "col2", TypeName: "type"}},
+		Columns: []backend.Column{{Name: "col1", TypeName: "type1"}, {Name: "col2", TypeName: "type2"}},
 		Rows:    []backend.Row{{int64(1), "a"}, {int64(2), "b"}}}, result)
 }
 
