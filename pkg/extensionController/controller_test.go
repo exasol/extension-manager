@@ -58,17 +58,20 @@ func (suite *ControllerUTestSuite) createController() {
 	suite.bucketFsMock = bfs.CreateBucketFsMock()
 	suite.metaDataMock = exaMetadata.CreateExaMetaDataReaderMock(EXTENSION_SCHEMA)
 
+	config := ExtensionManagerConfig{
+		ExtensionSchema:      EXTENSION_SCHEMA,
+		ExtensionRegistryURL: "registryUrl",
+		BucketFSBasePath:     "bfsBasePath",
+	}
 	ctrl := &controllerImpl{
-		registry: registry.NewRegistry(suite.tempExtensionRepo),
-		config: ExtensionManagerConfig{
-			ExtensionSchema:      EXTENSION_SCHEMA,
-			ExtensionRegistryURL: "registryUrl",
-			BucketFSBasePath:     "bfsBasePath"},
+		registry:       registry.NewRegistry(suite.tempExtensionRepo),
+		config:         config,
 		metaDataReader: suite.metaDataMock,
 	}
 
 	suite.transactionStarterMock = transaction.CreateTransactionStarterMock(suite.db, suite.bucketFsMock)
 	suite.controller = &transactionControllerImpl{
+		config:             config,
 		controller:         ctrl,
 		transactionStarter: suite.transactionStarterMock.GetTransactionStarter(),
 	}
