@@ -13,17 +13,19 @@ import (
 const BUCKETFS_BASE_PATH = "/basePath/"
 const FILE_NAME = "file.txt"
 
-type BucketFsAPIUTestSuite struct {
+var mockError = fmt.Errorf("mock error")
+
+type BucketFsClientUTestSuite struct {
 	suite.Suite
 	db     *sql.DB
 	dbMock sqlmock.Sqlmock
 }
 
 func TestBucketFsApiUTestSuite(t *testing.T) {
-	suite.Run(t, new(BucketFsAPIUTestSuite))
+	suite.Run(t, new(BucketFsClientUTestSuite))
 }
 
-func (suite *BucketFsAPIUTestSuite) SetupTest() {
+func (suite *BucketFsClientUTestSuite) SetupTest() {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherRegexp))
 	suite.NoError(err)
 	suite.db = db
@@ -31,12 +33,13 @@ func (suite *BucketFsAPIUTestSuite) SetupTest() {
 	suite.dbMock.MatchExpectationsInOrder(true)
 }
 
-func (suite *BucketFsAPIUTestSuite) AfterTest(suiteName, testName string) {
+func (suite *BucketFsClientUTestSuite) AfterTest(suiteName, testName string) {
 	suite.NoError(suite.dbMock.ExpectationsWereMet())
 }
 
 // CreateBucketFsAPI
-func (suite *BucketFsAPIUTestSuite) TestCreateBucketFsAPI() {
+
+func (suite *BucketFsClientUTestSuite) TestCreateBucketFsAPI() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
 	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
@@ -45,26 +48,26 @@ func (suite *BucketFsAPIUTestSuite) TestCreateBucketFsAPI() {
 	suite.NotNil(client)
 }
 
-func (suite *BucketFsAPIUTestSuite) TestCreateBucketFsAPIFailsCreatingTransaction() {
-	suite.dbMock.ExpectBegin().WillReturnError(fmt.Errorf("mock error"))
+func (suite *BucketFsClientUTestSuite) TestCreateBucketFsAPIFailsCreatingTransaction() {
+	suite.dbMock.ExpectBegin().WillReturnError(mockError)
 	client, err := CreateBucketFsAPI(BUCKETFS_BASE_PATH, context.Background(), suite.db)
 	suite.EqualError(err, "failed to create a transaction. Cause: mock error")
 	suite.Nil(client)
 }
 
-func (suite *BucketFsAPIUTestSuite) TestCreateBucketFsAPIFailsCreatingSchema() {
+func (suite *BucketFsClientUTestSuite) TestCreateBucketFsAPIFailsCreatingSchema() {
 	suite.dbMock.ExpectBegin()
-	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnError(fmt.Errorf("mock error"))
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnError(mockError)
 	suite.dbMock.ExpectRollback()
 	client, err := CreateBucketFsAPI(BUCKETFS_BASE_PATH, context.Background(), suite.db)
 	suite.EqualError(err, "failed to create a schema for BucketFS list script. Cause: mock error")
 	suite.Nil(client)
 }
 
-func (suite *BucketFsAPIUTestSuite) TestCreateBucketFsAPIFailsCreatingUDFScript() {
+func (suite *BucketFsClientUTestSuite) TestCreateBucketFsAPIFailsCreatingUDFScript() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
-	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnError(fmt.Errorf("mock error"))
+	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnError(mockError)
 	suite.dbMock.ExpectRollback()
 	client, err := CreateBucketFsAPI(BUCKETFS_BASE_PATH, context.Background(), suite.db)
 	suite.EqualError(err, "failed to create UDF script for listing bucket. Cause: mock error")
@@ -74,7 +77,7 @@ func (suite *BucketFsAPIUTestSuite) TestCreateBucketFsAPIFailsCreatingUDFScript(
 // ListFiles
 
 /* [utest -> dsn~configure-bucketfs-path~1]. */
-func (suite *BucketFsAPIUTestSuite) TestListFiles() {
+func (suite *BucketFsClientUTestSuite) TestListFiles() {
 	client := suite.createBucketFsClientHandleError()
 	suite.dbMock.ExpectPrepare(`SELECT "INTERNAL_.* ORDER BY FULL_PATH`).
 		WillBeClosed().
@@ -87,29 +90,29 @@ func (suite *BucketFsAPIUTestSuite) TestListFiles() {
 	suite.Equal([]BfsFile{{Name: "file1.txt", Path: "/base/file1.txt", Size: 10}, {Name: "file2.txt", Path: "/base2/file2.txt", Size: 20}}, result)
 }
 
-func (suite *BucketFsAPIUTestSuite) TestListFilesPrepareQueryFails() {
+func (suite *BucketFsClientUTestSuite) TestListFilesPrepareQueryFails() {
 	client := suite.createBucketFsClientHandleError()
-	suite.dbMock.ExpectPrepare(`SELECT "INTERNAL_.* ORDER BY FULL_PATH`).WillReturnError(fmt.Errorf("mock error"))
+	suite.dbMock.ExpectPrepare(`SELECT "INTERNAL_.* ORDER BY FULL_PATH`).WillReturnError(mockError)
 	result, err := client.ListFiles()
 	suite.EqualError(err, "failed to create prepared statement for running list files UDF. Cause: mock error")
 	suite.Empty(result)
 }
 
-func (suite *BucketFsAPIUTestSuite) TestListFilesExecuteQueryFails() {
+func (suite *BucketFsClientUTestSuite) TestListFilesExecuteQueryFails() {
 	client := suite.createBucketFsClientHandleError()
 	suite.dbMock.ExpectPrepare(`SELECT "INTERNAL_.* ORDER BY FULL_PATH`).
 		WillBeClosed().
-		ExpectQuery().WillReturnError(fmt.Errorf("mock error"))
+		ExpectQuery().WillReturnError(mockError)
 	result, err := client.ListFiles()
 	suite.EqualError(err, "failed to list files in BucketFS using UDF. Cause: mock error")
 	suite.Empty(result)
 }
 
-func (suite *BucketFsAPIUTestSuite) TestListFilesWrongResultColumnCount() {
+func (suite *BucketFsClientUTestSuite) TestListFilesWrongResultColumnCount() {
 	client := suite.createBucketFsClientHandleError()
 	suite.dbMock.ExpectPrepare(`SELECT "INTERNAL_.* ORDER BY FULL_PATH`).
 		WillBeClosed().
-		ExpectQuery().WillReturnRows(sqlmock.NewRows([]string{"FILE_NAME", "FULL_PATH"}).
+		ExpectQuery().WithArgs(BUCKETFS_BASE_PATH).WillReturnRows(sqlmock.NewRows([]string{"FILE_NAME", "FULL_PATH"}).
 		AddRow("file1.txt", "/base/file1.txt").
 		AddRow("file2.txt", "/base2/file2.txt")).
 		RowsWillBeClosed()
@@ -122,7 +125,7 @@ func (suite *BucketFsAPIUTestSuite) TestListFilesWrongResultColumnCount() {
 
 /* [utest -> dsn~configure-bucketfs-path~1] */
 /* [utest -> dsn~resolving-files-in-bucketfs~1]. */
-func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePath() {
+func (suite *BucketFsClientUTestSuite) TestFindAbsolutePath() {
 	client := suite.createBucketFsClientHandleError()
 	suite.dbMock.ExpectPrepare(`SELECT FULL_PATH FROM.*`).
 		WillBeClosed().
@@ -133,25 +136,25 @@ func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePath() {
 	suite.Equal("/abs/path/file.txt", result)
 }
 
-func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePathPrepareQueryFails() {
+func (suite *BucketFsClientUTestSuite) TestFindAbsolutePathPrepareQueryFails() {
 	client := suite.createBucketFsClientHandleError()
-	suite.dbMock.ExpectPrepare(`SELECT FULL_PATH FROM.*`).WillReturnError(fmt.Errorf("mock error"))
+	suite.dbMock.ExpectPrepare(`SELECT FULL_PATH FROM.*`).WillReturnError(mockError)
 	result, err := client.FindAbsolutePath(FILE_NAME)
 	suite.EqualError(err, "failed to create prepared statement for running list files UDF. Cause: mock error")
 	suite.Equal("", result)
 }
 
-func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePathExecuteQueryFails() {
+func (suite *BucketFsClientUTestSuite) TestFindAbsolutePathExecuteQueryFails() {
 	client := suite.createBucketFsClientHandleError()
 	suite.dbMock.ExpectPrepare(`SELECT FULL_PATH FROM.*`).
 		WillBeClosed().
-		ExpectQuery().WithArgs(BUCKETFS_BASE_PATH, FILE_NAME).WillReturnError(fmt.Errorf("mock error"))
+		ExpectQuery().WithArgs(BUCKETFS_BASE_PATH, FILE_NAME).WillReturnError(mockError)
 	result, err := client.FindAbsolutePath(FILE_NAME)
 	suite.EqualError(err, "failed to find absolute path in BucketFS using UDF. Cause: mock error")
 	suite.Equal("", result)
 }
 
-func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePathNoResult() {
+func (suite *BucketFsClientUTestSuite) TestFindAbsolutePathNoResult() {
 	client := suite.createBucketFsClientHandleError()
 	suite.dbMock.ExpectPrepare(`SELECT FULL_PATH FROM.*`).
 		WillBeClosed().
@@ -161,18 +164,18 @@ func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePathNoResult() {
 	suite.Equal("", result)
 }
 
-func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePathRowError() {
+func (suite *BucketFsClientUTestSuite) TestFindAbsolutePathRowError() {
 	client := suite.createBucketFsClientHandleError()
 	suite.dbMock.ExpectPrepare(`SELECT FULL_PATH FROM.*`).
 		WillBeClosed().
-		ExpectQuery().WithArgs(BUCKETFS_BASE_PATH, FILE_NAME).WillReturnRows(sqlmock.NewRows([]string{"FULL_PATH"}).AddRow("/abs/path/file.txt").RowError(0, fmt.Errorf("mock error"))).
+		ExpectQuery().WithArgs(BUCKETFS_BASE_PATH, FILE_NAME).WillReturnRows(sqlmock.NewRows([]string{"FULL_PATH"}).AddRow("/abs/path/file.txt").RowError(0, mockError)).
 		RowsWillBeClosed()
 	result, err := client.FindAbsolutePath(FILE_NAME)
 	suite.EqualError(err, "failed iterating absolute path results. Cause: mock error")
 	suite.Equal("", result)
 }
 
-func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePathWrongResultColumnCount() {
+func (suite *BucketFsClientUTestSuite) TestFindAbsolutePathWrongResultColumnCount() {
 	client := suite.createBucketFsClientHandleError()
 	suite.dbMock.ExpectPrepare(`SELECT FULL_PATH FROM.*`).
 		WillBeClosed().
@@ -183,7 +186,21 @@ func (suite *BucketFsAPIUTestSuite) TestFindAbsolutePathWrongResultColumnCount()
 	suite.Equal("", result)
 }
 
-func (suite *BucketFsAPIUTestSuite) createBucketFsClientHandleError() BucketFsAPI {
+// Close()
+
+func (suite *BucketFsClientUTestSuite) TestClose() {
+	bfsClient := suite.createBucketFsClientHandleError()
+	suite.dbMock.ExpectRollback()
+	suite.NoError(bfsClient.Close())
+}
+
+func (suite *BucketFsClientUTestSuite) TestCloseFails() {
+	bfsClient := suite.createBucketFsClientHandleError()
+	suite.dbMock.ExpectRollback().WillReturnError(mockError)
+	suite.EqualError(bfsClient.Close(), "failed to rollback transaction to cleanup resources. Cause: mock error")
+}
+
+func (suite *BucketFsClientUTestSuite) createBucketFsClientHandleError() BucketFsAPI {
 	bfsClient, err := suite.createBucketFsClient()
 	if err != nil {
 		suite.FailNow("Creating BFS API failed: " + err.Error())
@@ -191,7 +208,7 @@ func (suite *BucketFsAPIUTestSuite) createBucketFsClientHandleError() BucketFsAP
 	return bfsClient
 }
 
-func (suite *BucketFsAPIUTestSuite) createBucketFsClient() (BucketFsAPI, error) {
+func (suite *BucketFsClientUTestSuite) createBucketFsClient() (BucketFsAPI, error) {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
 	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
