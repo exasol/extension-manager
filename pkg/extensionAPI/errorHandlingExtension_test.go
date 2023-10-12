@@ -29,7 +29,7 @@ func (suite *ErrorHandlingExtensionSuite) SetupSuite() {
 		Category:                "category",
 		Description:             "desc",
 		InstallableVersions:     []rawJsExtensionVersion{{Name: "v1", Deprecated: true, Latest: false}, {Name: "v2", Deprecated: false, Latest: true}},
-		BucketFsUploads:         []BucketFsUpload{{Name: "uploadName"}},
+		BucketFsUploads:         []BucketFsUpload{{Name: "uploadName", DownloadURL: "url", LicenseURL: "license", FileSize: 123, BucketFsFilename: "filename"}},
 		GetParameterDefinitions: nil,
 		Install:                 nil,
 		Uninstall:               nil,
@@ -49,7 +49,7 @@ func (suite *ErrorHandlingExtensionSuite) TestProperties() {
 		Name:                "name",
 		Description:         "desc",
 		InstallableVersions: []JsExtensionVersion{{Name: "v1", Deprecated: true, Latest: false}, {Name: "v2", Deprecated: false, Latest: true}},
-		BucketFsUploads:     []BucketFsUpload{{Name: "uploadName"}},
+		BucketFsUploads:     []BucketFsUpload{{Name: "uploadName", DownloadURL: "url", LicenseURL: "license", FileSize: 123, BucketFsFilename: "filename"}},
 		extension:           suite.rawExtension,
 		vm:                  suite.extension.vm},
 		suite.extension)

@@ -94,7 +94,7 @@ func (suite *ControllerUTestSuite) AfterTest(suiteName, testName string) {
 func (suite *ControllerUTestSuite) TestGetAllExtensions() {
 	suite.writeDefaultExtension()
 	suite.dbMock.ExpectBegin()
-	suite.bucketFsMock.SimulateFiles([]bfs.BfsFile{{Name: "my-extension.1.2.3.jar", Size: 3}})
+	suite.bucketFsMock.SimulateFiles([]bfs.BfsFile{{Name: "my-extension.1.2.3.jar", Size: 3, Path: "path"}})
 	suite.bucketFsMock.SimulateCloseSuccess()
 	suite.dbMock.ExpectRollback()
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
@@ -158,6 +158,7 @@ var errorTests = []errorTest{
 
 func (suite *ControllerUTestSuite) TestGetAllInstallations() {
 	suite.writeDefaultExtension()
+	//nolint:exhaustruct // Non-exhaustive struct is fine here
 	suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{{Schema: "schema", Name: "script"}})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
@@ -178,6 +179,8 @@ func (suite *ControllerUTestSuite) TestGetAllInstallationsReturnsEmptyList() {
 		WithFindInstallationsFunc("return []").
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+
+	//nolint:exhaustruct // Non-exhaustive struct is fine here
 	suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{{Schema: "schema", Name: "script"}})
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()

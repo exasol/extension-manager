@@ -173,7 +173,8 @@ func (suite *ExtensionApiSuite) TestDeleteInstance() {
 
 func createMockMetadata() *exaMetadata.ExaMetadata {
 	return &exaMetadata.ExaMetadata{
-		AllScripts:        exaMetadata.ExaScriptTable{Rows: []exaMetadata.ExaScriptRow{{Name: "test"}}},
+		AllScripts: exaMetadata.ExaScriptTable{Rows: []exaMetadata.ExaScriptRow{
+			{Name: "test", Schema: "schema", Type: "type", InputType: "input type", ResultType: "result type", Text: "text", Comment: "comment"}}},
 		AllVirtualSchemas: exaMetadata.ExaVirtualSchemasTable{Rows: []exaMetadata.ExaVirtualSchemaRow{}}}
 }
 
