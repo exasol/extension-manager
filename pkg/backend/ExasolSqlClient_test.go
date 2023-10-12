@@ -110,7 +110,7 @@ func (suite *ExasolSqlClientUTestSuite) TestQuerySucceeds() {
 	suite.NoError(err)
 	suite.NotNil(result)
 	suite.Equal(&QueryResult{
-		Columns: []Column{{Name: "col1", TypeName: "type"}, {Name: "col2", TypeName: "type"}},
+		Columns: []Column{{Name: "col1", TypeName: ""}, {Name: "col2", TypeName: ""}},
 		Rows:    []Row{{int64(1), "a"}, {int64(2), "b"}}}, result)
 }
 
