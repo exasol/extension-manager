@@ -11,15 +11,15 @@ import (
 )
 
 type (
-	TransactionStarter func(ctx context.Context, db *sql.DB) (*TransactionContext, error)
+	TransactionStarter func(ctx context.Context, db *sql.DB, bucketFsBasePath string) (*TransactionContext, error)
 )
 
 type (
-	BucketFsClientCreator func(bucketFsBasePath string, ctx context.Context, db *sql.DB) (bfs.BucketFsAPI, error)
+	BucketFsClientCreator func() (bfs.BucketFsAPI, error)
 )
 
 // BeginTransaction starts a new database transaction.
-func BeginTransaction(ctx context.Context, db *sql.DB) (*TransactionContext, error) {
+func BeginTransaction(ctx context.Context, db *sql.DB, bucketFsBasePath string) (*TransactionContext, error) {
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		if strings.Contains(err.Error(), "Connection exception - authentication failed") {
@@ -28,11 +28,13 @@ func BeginTransaction(ctx context.Context, db *sql.DB) (*TransactionContext, err
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	return &TransactionContext{
-		context:         ctx,
-		db:              db,
-		transaction:     tx,
-		createBfsClient: bfs.CreateBucketFsAPI,
-		bfsClient:       nil,
+		context:     ctx,
+		db:          db,
+		transaction: tx,
+		bfsClient:   nil,
+		createBfsClient: func() (bfs.BucketFsAPI, error) {
+			return bfs.CreateBucketFsAPI(bucketFsBasePath, ctx, db)
+		},
 	}, nil
 }
 
@@ -59,7 +61,7 @@ func (ctx *TransactionContext) GetContext() context.Context {
 
 func (ctx *TransactionContext) GetBucketFsClient() (bfs.BucketFsAPI, error) {
 	if ctx.bfsClient == nil {
-		client, err := ctx.createBfsClient("", ctx.context, ctx.db)
+		client, err := ctx.createBfsClient()
 		fmt.Printf("Created bucket FS Client %v\n", client)
 		if err != nil {
 			return nil, err

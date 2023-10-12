@@ -10,6 +10,8 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+const BUCKETFS_BASE_PATH = "bucketfs-base-path"
+
 type TransactionContextSuite struct {
 	suite.Suite
 	db     *sql.DB
@@ -86,5 +88,5 @@ func (suite *TransactionContextSuite) TestCommit() {
 }
 
 func (suite *TransactionContextSuite) beginTransaction() (*TransactionContext, error) {
-	return BeginTransaction(context.Background(), suite.db)
+	return BeginTransaction(context.Background(), suite.db, BUCKETFS_BASE_PATH)
 }

@@ -110,8 +110,9 @@ func CreateWithValidatedConfig(config ExtensionManagerConfig) (TransactionContro
 	}
 	controller := createImpl(config)
 	transactionController := &transactionControllerImpl{
-		controller:       controller,
-		beginTransaction: transaction.BeginTransaction,
+		controller:         controller,
+		transactionStarter: transaction.BeginTransaction,
+		config:             config,
 	}
 	return transactionController, nil
 }
@@ -130,8 +131,9 @@ func validateConfig(config ExtensionManagerConfig) error {
 }
 
 type transactionControllerImpl struct {
-	controller       controller
-	beginTransaction transaction.TransactionStarter
+	controller         controller
+	transactionStarter transaction.TransactionStarter
+	config             ExtensionManagerConfig
 }
 
 func (c *transactionControllerImpl) GetAllExtensions(ctx context.Context, db *sql.DB) ([]*Extension, error) {
@@ -265,4 +267,8 @@ func (c *transactionControllerImpl) DeleteInstance(ctx context.Context, db *sql.
 		}
 	}
 	return err
+}
+
+func (c *transactionControllerImpl) beginTransaction(ctx context.Context, db *sql.DB) (*transaction.TransactionContext, error) {
+	return c.transactionStarter(ctx, db, c.config.BucketFSBasePath)
 }

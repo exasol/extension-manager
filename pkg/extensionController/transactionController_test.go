@@ -37,7 +37,7 @@ func (suite *extCtrlUnitTestSuite) SetupTest() {
 	suite.mockCtrl = createMockControllerImpl()
 	suite.bucketFsMock = bfs.CreateBucketFsMock()
 	suite.transactionStarterMock = transaction.CreateTransactionStarterMock(suite.db, suite.bucketFsMock)
-	suite.ctrl = &transactionControllerImpl{controller: &suite.mockCtrl, beginTransaction: suite.transactionStarterMock.GetTransactionStarter()}
+	suite.ctrl = &transactionControllerImpl{controller: &suite.mockCtrl, transactionStarter: suite.transactionStarterMock.GetTransactionStarter()}
 }
 
 func (suite *extCtrlUnitTestSuite) setupDbMock() {

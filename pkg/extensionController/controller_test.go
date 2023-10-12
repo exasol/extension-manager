@@ -69,8 +69,8 @@ func (suite *ControllerUTestSuite) createController() {
 
 	suite.transactionStarterMock = transaction.CreateTransactionStarterMock(suite.db, suite.bucketFsMock)
 	suite.controller = &transactionControllerImpl{
-		controller:       ctrl,
-		beginTransaction: suite.transactionStarterMock.GetTransactionStarter(),
+		controller:         ctrl,
+		transactionStarter: suite.transactionStarterMock.GetTransactionStarter(),
 	}
 }
 

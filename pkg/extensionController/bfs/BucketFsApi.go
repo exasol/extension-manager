@@ -35,6 +35,9 @@ type BfsFile struct {
 // Call the [BucketFsAPI.Close] method to release resources after using the BucketFS API.
 /* [impl -> dsn~configure-bucketfs-path~1]. */
 func CreateBucketFsAPI(bucketFsBasePath string, ctx context.Context, db *sql.DB) (BucketFsAPI, error) {
+	if bucketFsBasePath == "" {
+		return nil, fmt.Errorf("bucketFsBasePath is empty")
+	}
 	transaction, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a transaction. Cause: %w", err)
@@ -55,13 +58,44 @@ type bucketFsAPIImpl struct {
 
 /* [impl -> dsn~extension-components~1]. */
 func (bfs bucketFsAPIImpl) ListFiles() (files []BfsFile, retErr error) {
-	return bfs.queryBucketFsContent()
+	statement, err := bfs.transaction.Prepare("SELECT " + bfs.udfScriptName + "(?) ORDER BY FULL_PATH") //nolint:gosec // SQL string concatenation is safe here
+	if err != nil {
+		return nil, fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
+	}
+	defer statement.Close()
+	result, err := statement.Query(bfs.bucketFsBasePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list files in BucketFS using UDF. Cause: %w", err)
+	}
+	defer result.Close()
+	return readQueryResult(result)
 }
 
 /* [impl -> dsn~resolving-files-in-bucketfs~1]. */
 /* [impl -> dsn~extension-context-bucketfs~1]. */
-func (bfs bucketFsAPIImpl) FindAbsolutePath(fileName string) (absolutePath string, retErr error) {
-	return bfs.queryAbsoluteFilePath(fileName)
+func (bfs bucketFsAPIImpl) FindAbsolutePath(fileName string) (string, error) {
+	statement, err := bfs.transaction.Prepare(`SELECT FULL_PATH FROM (SELECT ` + bfs.udfScriptName + `(?)) WHERE FILE_NAME = ? ORDER BY FULL_PATH LIMIT 1`) //nolint:gosec // SQL string concatenation is safe here
+	if err != nil {
+		return "", fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
+	}
+	defer statement.Close()
+	result, err := statement.Query(bfs.bucketFsBasePath, fileName)
+	if err != nil {
+		return "", fmt.Errorf("failed to find absolute path in BucketFS using UDF. Cause: %w", err)
+	}
+	defer result.Close()
+	if !result.Next() {
+		if result.Err() != nil {
+			return "", fmt.Errorf("failed iterating absolute path results. Cause: %w", result.Err())
+		}
+		return "", fmt.Errorf("file %q not found in BucketFS", fileName)
+	}
+	var absolutePath string
+	err = result.Scan(&absolutePath)
+	if err != nil {
+		return "", fmt.Errorf("failed reading absolute path. Cause: %w", err)
+	}
+	return absolutePath, nil
 }
 
 //go:embed list_files_recursively_udf.py
@@ -85,20 +119,6 @@ func createUdfScript(transaction *sql.Tx) (string, error) {
 	return udfScriptName, nil
 }
 
-func (bfs bucketFsAPIImpl) queryBucketFsContent() ([]BfsFile, error) {
-	statement, err := bfs.transaction.Prepare("SELECT " + bfs.udfScriptName + "(?) ORDER BY FULL_PATH") //nolint:gosec // SQL string concatenation is safe here
-	if err != nil {
-		return nil, fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
-	}
-	defer statement.Close()
-	result, err := statement.Query(bfs.bucketFsBasePath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list files in BucketFS using UDF. Cause: %w", err)
-	}
-	defer result.Close()
-	return readQueryResult(result)
-}
-
 func readQueryResult(result *sql.Rows) ([]BfsFile, error) {
 	var files []BfsFile
 	for result.Next() {
@@ -112,31 +132,6 @@ func readQueryResult(result *sql.Rows) ([]BfsFile, error) {
 		files = append(files, file)
 	}
 	return files, nil
-}
-
-func (bfs bucketFsAPIImpl) queryAbsoluteFilePath(fileName string) (string, error) {
-	statement, err := bfs.transaction.Prepare(`SELECT FULL_PATH FROM (SELECT ` + bfs.udfScriptName + `(?)) WHERE FILE_NAME = ? ORDER BY FULL_PATH LIMIT 1`) //nolint:gosec // SQL string concatenation is safe here
-	if err != nil {
-		return "", fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
-	}
-	defer statement.Close()
-	result, err := statement.Query(bfs.bucketFsBasePath, fileName)
-	if err != nil {
-		return "", fmt.Errorf("failed to find absolute path in BucketFS using UDF. Cause: %w", err)
-	}
-	defer result.Close()
-	if !result.Next() {
-		if result.Err() != nil {
-			return "", fmt.Errorf("failed iterating absolute path results. Cause: %w", result.Err())
-		}
-		return "", fmt.Errorf("file %q not found in BucketFS", fileName)
-	}
-	var absolutePath string
-	err = result.Scan(&absolutePath)
-	if err != nil {
-		return "", fmt.Errorf("failed reading absolute path. Cause: %w", err)
-	}
-	return absolutePath, nil
 }
 
 func (bfs bucketFsAPIImpl) Close() error {

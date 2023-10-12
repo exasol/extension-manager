@@ -26,6 +26,7 @@ func TestContextSuite(t *testing.T) {
 }
 
 const EXTENSION_SCHEMA = "EXT_SCHEMA"
+const BUCKETFS_BASE_PATH = "bucketfs-base-path"
 
 func (suite *ContextSuite) SetupTest() {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherRegexp))
@@ -124,14 +125,14 @@ func (suite *ContextSuite) TestMetadataGetScriptByNameFails() {
 
 func (suite *ContextSuite) createContext() *ExtensionContext {
 	suite.dbMock.ExpectBegin()
-	txCtx, err := transaction.BeginTransaction(context.Background(), suite.db)
+	txCtx, err := transaction.BeginTransaction(context.Background(), suite.db, BUCKETFS_BASE_PATH)
 	suite.NoError(err)
 	return CreateContext(txCtx, "EXT_SCHEMA")
 }
 
 func (suite *ContextSuite) createContextWithClients() *ExtensionContext {
 	suite.dbMock.ExpectBegin()
-	txCtx, err := transaction.BeginTransaction(context.Background(), suite.db)
+	txCtx, err := transaction.BeginTransaction(context.Background(), suite.db, BUCKETFS_BASE_PATH)
 	suite.NoError(err)
 	return CreateContextWithClient("EXT_SCHEMA", txCtx, nil, suite.bucketFSMock, suite.metadataReaderMock)
 }

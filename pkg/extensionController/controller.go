@@ -13,6 +13,7 @@ import (
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/registry"
 	"github.com/exasol/extension-manager/pkg/extensionController/transaction"
+
 	"github.com/exasol/extension-manager/pkg/parameterValidator"
 )
 
