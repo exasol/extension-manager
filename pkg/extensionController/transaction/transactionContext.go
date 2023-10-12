@@ -23,7 +23,7 @@ type (
 )
 
 type (
-	BucketFsClientCreator func(bucketFsBasePath string, ctx context.Context, db *sql.DB) (bfs.BucketFsAPI, error)
+	BucketFsClientCreator func() (bfs.BucketFsAPI, error)
 )
 
 // BeginTransaction starts a new database transaction.
