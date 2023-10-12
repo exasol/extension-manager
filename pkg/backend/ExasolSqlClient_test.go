@@ -105,12 +105,19 @@ func (suite *ExasolSqlClientUTestSuite) TestQueryFails() {
 /* [utest -> dsn~extension-context-sql-client~1]. */
 func (suite *ExasolSqlClientUTestSuite) TestQuerySucceeds() {
 	client := suite.createClient()
-	suite.dbMock.ExpectQuery("query").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).AddRow(1, "a").AddRow(2, "b")).RowsWillBeClosed()
+	suite.dbMock.ExpectQuery("query").WillReturnRows(
+		sqlmock.NewRowsWithColumnDefinition(
+			sqlmock.NewColumn("col1").OfType("type1", "sample"),
+			sqlmock.NewColumn("col2").OfType("type2", "sample"),
+		).
+			AddRow(1, "a").
+			AddRow(2, "b")).
+		RowsWillBeClosed()
 	result, err := client.Query("query")
 	suite.NoError(err)
 	suite.NotNil(result)
 	suite.Equal(&QueryResult{
-		Columns: []Column{{Name: "col1", TypeName: ""}, {Name: "col2", TypeName: ""}},
+		Columns: []Column{{Name: "col1", TypeName: "type1"}, {Name: "col2", TypeName: "type2"}},
 		Rows:    []Row{{int64(1), "a"}, {int64(2), "b"}}}, result)
 }
 
