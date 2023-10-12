@@ -38,7 +38,10 @@ func (m *TransactionStarterMock) SimulateMockTransaction() {
 			context:     context.Background(),
 			transaction: tx,
 			db:          m.dbMock,
-			bfsClient:   m.bfsMock,
+			createBfsClient: func(bucketFsBasePath string, ctx context.Context, db *sql.DB) (bfs.BucketFsAPI, error) {
+				return m.bfsMock, nil
+			},
+			bfsClient: nil,
 		}, nil
 	}
 }

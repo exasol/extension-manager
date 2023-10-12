@@ -14,6 +14,10 @@ type (
 	TransactionStarter func(ctx context.Context, db *sql.DB) (*TransactionContext, error)
 )
 
+type (
+	BucketFsClientCreator func(bucketFsBasePath string, ctx context.Context, db *sql.DB) (bfs.BucketFsAPI, error)
+)
+
 // BeginTransaction starts a new database transaction.
 func BeginTransaction(ctx context.Context, db *sql.DB) (*TransactionContext, error) {
 	tx, err := db.BeginTx(ctx, nil)
@@ -23,15 +27,22 @@ func BeginTransaction(ctx context.Context, db *sql.DB) (*TransactionContext, err
 		}
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	return &TransactionContext{context: ctx, db: db, transaction: tx}, nil
+	return &TransactionContext{
+		context:         ctx,
+		db:              db,
+		transaction:     tx,
+		createBfsClient: bfs.CreateBucketFsAPI,
+		bfsClient:       nil,
+	}, nil
 }
 
 // TransactionContext contains the state of a running database transaction.
 type TransactionContext struct {
-	context     context.Context
-	db          *sql.DB
-	transaction *sql.Tx
-	bfsClient   bfs.BucketFsAPI
+	context         context.Context
+	db              *sql.DB
+	transaction     *sql.Tx
+	createBfsClient BucketFsClientCreator
+	bfsClient       bfs.BucketFsAPI
 }
 
 func (ctx *TransactionContext) GetTransaction() *sql.Tx {
@@ -48,7 +59,8 @@ func (ctx *TransactionContext) GetContext() context.Context {
 
 func (ctx *TransactionContext) GetBucketFsClient() (bfs.BucketFsAPI, error) {
 	if ctx.bfsClient == nil {
-		client, err := bfs.CreateBucketFsAPI("", ctx.context, ctx.db)
+		client, err := ctx.createBfsClient("", ctx.context, ctx.db)
+		fmt.Printf("Created bucket FS Client %v\n", client)
 		if err != nil {
 			return nil, err
 		}
@@ -74,7 +86,7 @@ func (ctx *TransactionContext) Commit() error {
 
 func (ctx *TransactionContext) cleanup() error {
 	if ctx.bfsClient != nil {
-		fmt.Println("Closing bfs client")
+		fmt.Printf("Closing bfs client %v\n", ctx.bfsClient)
 		return ctx.bfsClient.Close()
 	}
 	fmt.Println("bfs client is nil, not closing")

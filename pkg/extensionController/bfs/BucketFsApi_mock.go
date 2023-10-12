@@ -55,7 +55,7 @@ func (mock *BucketFsMock) FindAbsolutePath(fileName string) (absolutePath string
 }
 
 func (mock *BucketFsMock) Close() error {
-	fmt.Println("BFS Mock is closed now!")
+	fmt.Printf("BFS Mock is closed now, mock: %v", mock)
 	args := mock.Called()
 	return args.Error(0)
 }
