@@ -1,8 +1,6 @@
 package bfs
 
 import (
-	"fmt"
-
 	"github.com/stretchr/testify/mock"
 )
 

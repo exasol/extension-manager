@@ -184,7 +184,7 @@ func (suite *ExtensionApiSuite) TestFindInstallationsCanReadAllScriptsTable() {
 			return {name: row.name, version: "0.1.0"}
 		});`).Build().AsString()
 	extension := suite.loadExtension(extensionContent)
-	result, err := extension.FindInstallations(suite.createMockContext(), createMockMetadata())
+	result, err := extension.FindInstallations(suite.mockContext(), createMockMetadata())
 	suite.Equal([]*JsExtInstallation{{ID: "", Name: "test", Version: "0.1.0"}}, result)
 	suite.NoError(err)
 }
@@ -194,7 +194,7 @@ func (suite *ExtensionApiSuite) TestFindInstallationsReturningParameters() {
 		WithFindInstallationsFunc(integrationTesting.
 			MockFindInstallationsFunction("test", "0.1.0")).Build().AsString()
 	extension := suite.loadExtension(extensionContent)
-	result, err := extension.FindInstallations(suite.createMockContext(), createMockMetadata())
+	result, err := extension.FindInstallations(suite.mockContext(), createMockMetadata())
 	suite.Equal([]*JsExtInstallation{{ID: "", Name: "test", Version: "0.1.0"}}, result)
 	suite.NoError(err)
 }
@@ -205,7 +205,7 @@ func (suite *ExtensionApiSuite) TestUpgradeReadsMetadata() {
 		WithUpgradeFunc("const text = context.metadata.getScriptByName('script').text; return {previousVersion:'0.1.0',newVersion:text};").Build().AsString()
 	extension := suite.loadExtension(extensionContent)
 	suite.mockMetadataReader.SimulateGetScriptByNameScriptText("script", "scriptText")
-	result, err := extension.Upgrade(suite.createMockContext())
+	result, err := extension.Upgrade(suite.mockContext())
 	suite.NoError(err)
 	suite.Equal(&JsUpgradeResult{PreviousVersion: "0.1.0", NewVersion: "scriptText"}, result)
 }
@@ -215,7 +215,7 @@ func (suite *ExtensionApiSuite) TestUpgradeReadMetadataFails() {
 		WithUpgradeFunc("const text = context.metadata.getScriptByName('script').text; return {previousVersion:'0.1.0',newVersion:text};").Build().AsString()
 	extension := suite.loadExtension(extensionContent)
 	suite.mockMetadataReader.SimulateGetScriptByNameFails("script", fmt.Errorf("mock error"))
-	result, err := extension.Upgrade(suite.createMockContext())
+	result, err := extension.Upgrade(suite.mockContext())
 	suite.EqualError(err, `failed to upgrade extension "ext-id": failed to find script "extension_schema"."script". Caused by: mock error`)
 	suite.Nil(result)
 }
@@ -288,10 +288,6 @@ func (suite *ExtensionApiSuite) TestLoadExtensionInvalidJavaScript() {
 }
 
 func (suite *ExtensionApiSuite) mockContext() *context.ExtensionContext {
-	return createMockContextWithClients(&suite.mockSQLClient, suite.mockBucketFsClient, suite.mockMetadataReader)
-}
-
-func (suite *ExtensionApiSuite) createMockContext() *context.ExtensionContext {
 	return createMockContextWithClients(&suite.mockSQLClient, suite.mockBucketFsClient, suite.mockMetadataReader)
 }
 
