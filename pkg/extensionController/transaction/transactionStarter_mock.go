@@ -28,6 +28,12 @@ func (m *TransactionStarterMock) GetTransactionStarter() TransactionStarter {
 	return m.transactionStarter
 }
 
+func (m *TransactionStarterMock) SimulateTransactionFailed(err error) {
+	m.transactionStarter = func(ctx context.Context, db *sql.DB, bucketFsBasePath string) (*TransactionContext, error) {
+		return nil, err
+	}
+}
+
 func (m *TransactionStarterMock) SimulateMockTransaction() {
 	m.transactionStarter = func(ctx context.Context, db *sql.DB, bucketFsBasePath string) (*TransactionContext, error) {
 		tx, err := m.dbMock.Begin()

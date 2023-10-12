@@ -270,5 +270,9 @@ func (c *transactionControllerImpl) DeleteInstance(ctx context.Context, db *sql.
 }
 
 func (c *transactionControllerImpl) beginTransaction(ctx context.Context, db *sql.DB) (*transaction.TransactionContext, error) {
-	return c.transactionStarter(ctx, db, c.config.BucketFSBasePath)
+	tx, err := c.transactionStarter(ctx, db, c.config.BucketFSBasePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to start transaction: %w", err)
+	}
+	return tx, nil
 }

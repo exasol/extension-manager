@@ -18,6 +18,8 @@ const mockErrorMsg = "mock error"
 
 var mockError = fmt.Errorf(mockErrorMsg)
 
+const beginMockTransactionFailedErrorMsg = "failed to start transaction: failed to start mock transaction: " + mockErrorMsg
+
 type extCtrlUnitTestSuite struct {
 	suite.Suite
 	ctrl                   TransactionController
@@ -37,7 +39,15 @@ func (suite *extCtrlUnitTestSuite) SetupTest() {
 	suite.mockCtrl = createMockControllerImpl()
 	suite.bucketFsMock = bfs.CreateBucketFsMock()
 	suite.transactionStarterMock = transaction.CreateTransactionStarterMock(suite.db, suite.bucketFsMock)
-	suite.ctrl = &transactionControllerImpl{controller: &suite.mockCtrl, transactionStarter: suite.transactionStarterMock.GetTransactionStarter()}
+	suite.ctrl = &transactionControllerImpl{
+		controller:         &suite.mockCtrl,
+		transactionStarter: suite.transactionStarterMock.GetTransactionStarter(),
+		config: ExtensionManagerConfig{
+			ExtensionRegistryURL: "registry-url",
+			BucketFSBasePath:     "bfs-base-path",
+			ExtensionSchema:      "ext-schema",
+		},
+	}
 }
 
 func (suite *extCtrlUnitTestSuite) setupDbMock() {
@@ -123,7 +133,7 @@ func (suite *extCtrlUnitTestSuite) TestGetAllExtensionsGetFails() {
 func (suite *extCtrlUnitTestSuite) TestGetAllInstallationsBeginTransactionFailure() {
 	suite.dbMock.ExpectBegin().WillReturnError(mockError)
 	installations, err := suite.ctrl.GetInstalledExtensions(mockContext(), suite.db)
-	suite.EqualError(err, "failed to start mock transaction: mock error")
+	suite.EqualError(err, beginMockTransactionFailedErrorMsg)
 	suite.Nil(installations)
 }
 
@@ -153,7 +163,7 @@ func (suite *extCtrlUnitTestSuite) TestGetInstalledExtensionsFailure() {
 func (suite *extCtrlUnitTestSuite) TestInstallExtensionBeginTransactionFailure() {
 	suite.dbMock.ExpectBegin().WillReturnError(mockError)
 	err := suite.ctrl.InstallExtension(mockContext(), suite.db, "extId", "extVer")
-	suite.EqualError(err, "failed to start mock transaction: mock error")
+	suite.EqualError(err, beginMockTransactionFailedErrorMsg)
 }
 
 func (suite *extCtrlUnitTestSuite) TestInstallExtensionSuccess() {
@@ -185,7 +195,7 @@ func (suite *extCtrlUnitTestSuite) TestInstallExtensionCommitFailure() {
 func (suite *extCtrlUnitTestSuite) TestUninstallExtensionBeginTransactionFailure() {
 	suite.dbMock.ExpectBegin().WillReturnError(mockError)
 	err := suite.ctrl.UninstallExtension(mockContext(), suite.db, "extId", "extVer")
-	suite.EqualError(err, "failed to start mock transaction: mock error")
+	suite.EqualError(err, beginMockTransactionFailedErrorMsg)
 }
 
 func (suite *extCtrlUnitTestSuite) TestUninstallExtensionSuccess() {
@@ -217,7 +227,7 @@ func (suite *extCtrlUnitTestSuite) TestUninstallExtensionCommitFailure() {
 func (suite *extCtrlUnitTestSuite) TestUpgradeBeginTransactionFailure() {
 	suite.dbMock.ExpectBegin().WillReturnError(mockError)
 	result, err := suite.ctrl.UpgradeExtension(mockContext(), suite.db, "extId")
-	suite.EqualError(err, "failed to start mock transaction: mock error")
+	suite.EqualError(err, beginMockTransactionFailedErrorMsg)
 	suite.Nil(result)
 }
 
@@ -254,7 +264,7 @@ func (suite *extCtrlUnitTestSuite) TestUpgradeCommitFailure() {
 func (suite *extCtrlUnitTestSuite) TestCreateInstanceBeginTransactionFailure() {
 	suite.dbMock.ExpectBegin().WillReturnError(mockError)
 	instance, err := suite.ctrl.CreateInstance(mockContext(), suite.db, "extId", "extVer", []ParameterValue{})
-	suite.EqualError(err, "failed to start mock transaction: mock error")
+	suite.EqualError(err, beginMockTransactionFailedErrorMsg)
 	suite.Nil(instance)
 }
 
@@ -290,7 +300,7 @@ func (suite *extCtrlUnitTestSuite) TestCreateInstanceCommitFailure() {
 func (suite *extCtrlUnitTestSuite) TestFindInstancesBeginTransactionFailure() {
 	suite.dbMock.ExpectBegin().WillReturnError(mockError)
 	instances, err := suite.ctrl.FindInstances(mockContext(), suite.db, "extId", "extVer")
-	suite.EqualError(err, "failed to start mock transaction: mock error")
+	suite.EqualError(err, beginMockTransactionFailedErrorMsg)
 	suite.Nil(instances)
 }
 
@@ -317,7 +327,7 @@ func (suite *extCtrlUnitTestSuite) TestFindInstancesFailure() {
 func (suite *extCtrlUnitTestSuite) TestDeleteInstanceBeginTransactionFailure() {
 	suite.dbMock.ExpectBegin().WillReturnError(mockError)
 	err := suite.ctrl.DeleteInstance(mockContext(), suite.db, "extId", "extVers", "instId")
-	suite.EqualError(err, "failed to start mock transaction: mock error")
+	suite.EqualError(err, beginMockTransactionFailedErrorMsg)
 }
 
 func (suite *extCtrlUnitTestSuite) TestDeleteInstanceSuccess() {

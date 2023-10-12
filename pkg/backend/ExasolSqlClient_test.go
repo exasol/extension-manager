@@ -27,6 +27,7 @@ func (suite *ExasolSqlClientUTestSuite) SetupTest() {
 	}
 	suite.db = db
 	suite.dbMock = mock
+	suite.dbMock.MatchExpectationsInOrder(true)
 }
 
 func (suite *ExasolSqlClientUTestSuite) createClient() SimpleSQLClient {
