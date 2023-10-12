@@ -62,7 +62,6 @@ func (ctx *TransactionContext) GetContext() context.Context {
 func (ctx *TransactionContext) GetBucketFsClient() (bfs.BucketFsAPI, error) {
 	if ctx.bfsClient == nil {
 		client, err := ctx.createBfsClient()
-		fmt.Printf("Created bucket FS Client %v\n", client)
 		if err != nil {
 			return nil, err
 		}
@@ -88,9 +87,7 @@ func (ctx *TransactionContext) Commit() error {
 
 func (ctx *TransactionContext) cleanup() error {
 	if ctx.bfsClient != nil {
-		fmt.Printf("Closing bfs client %v\n", ctx.bfsClient)
 		return ctx.bfsClient.Close()
 	}
-	fmt.Println("bfs client is nil, not closing")
 	return nil
 }

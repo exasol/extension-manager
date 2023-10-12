@@ -32,12 +32,10 @@ func (m *BucketFsMock) SimulateAbsolutePathError(fileName string, err error) {
 }
 
 func (m *BucketFsMock) SimulateCloseSuccess() {
-	fmt.Println("### Expecting close success")
 	m.On("Close").Return(nil)
 }
 
 func (m *BucketFsMock) SimulateCloseFails(err error) {
-	fmt.Println("### Expecting close failure")
 	m.On("Close").Return(err)
 }
 
@@ -55,7 +53,6 @@ func (mock *BucketFsMock) FindAbsolutePath(fileName string) (absolutePath string
 }
 
 func (mock *BucketFsMock) Close() error {
-	fmt.Printf("BFS Mock is closed now, mock: %v", mock)
 	args := mock.Called()
 	return args.Error(0)
 }

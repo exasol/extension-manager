@@ -204,7 +204,6 @@ func (suite *ExtensionApiSuite) TestUpgradeReadsMetadata() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUpgradeFunc("const text = context.metadata.getScriptByName('script').text; return {previousVersion:'0.1.0',newVersion:text};").Build().AsString()
 	extension := suite.loadExtension(extensionContent)
-	fmt.Printf("Using mock %v\n", suite.mockMetadataReader)
 	suite.mockMetadataReader.SimulateGetScriptByNameScriptText("script", "scriptText")
 	result, err := extension.Upgrade(suite.createMockContext())
 	suite.NoError(err)
