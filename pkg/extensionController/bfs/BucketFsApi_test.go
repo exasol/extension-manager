@@ -74,6 +74,12 @@ func (suite *BucketFsClientUTestSuite) TestCreateBucketFsAPIFailsCreatingUDFScri
 	suite.Nil(client)
 }
 
+func (suite *BucketFsClientUTestSuite) TestCreateBucketFsAPIFailsInvalidBasePath() {
+	client, err := CreateBucketFsAPI("", context.Background(), suite.db)
+	suite.EqualError(err, "bucketFsBasePath is empty")
+	suite.Nil(client)
+}
+
 // ListFiles
 
 /* [utest -> dsn~configure-bucketfs-path~1]. */
