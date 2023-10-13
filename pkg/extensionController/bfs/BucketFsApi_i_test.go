@@ -16,7 +16,8 @@ const DEFAULT_BUCKET_PATH = "/buckets/bfsdefault/default/"
 
 type BucketFsClientITestSuite struct {
 	suite.Suite
-	exasol integrationTesting.DbTestSetup
+	exasol    integrationTesting.DbTestSetup
+	bfsClient bfs.BucketFsAPI
 }
 
 func TestBucketFsApiITestSuite(t *testing.T) {
@@ -25,17 +26,17 @@ func TestBucketFsApiITestSuite(t *testing.T) {
 
 func (suite *BucketFsClientITestSuite) SetupSuite() {
 	suite.exasol = *integrationTesting.StartDbSetup(&suite.Suite)
+	suite.exasol.CreateConnection()
+	suite.bfsClient = suite.createBucketFsClient()
 }
 
 func (suite *BucketFsClientITestSuite) TeardownSuite() {
+	suite.bfsClient.Close()
+	suite.exasol.CloseConnection()
 	suite.exasol.StopDb()
 }
 
 func (suite *BucketFsClientITestSuite) BeforeTest(suiteName, testName string) {
-	suite.exasol.CreateConnection()
-	suite.T().Cleanup(func() {
-		suite.exasol.CloseConnection()
-	})
 }
 
 /* [utest -> dsn~extension-components~1]. */
@@ -112,18 +113,21 @@ func (suite *BucketFsClientITestSuite) TestFindAbsolutePathMultipleFilesFirstFil
 }
 
 func (suite *BucketFsClientITestSuite) listFiles() ([]bfs.BfsFile, error) {
-	bfsClient := suite.createBucketFsClient()
-	defer bfsClient.Close()
-	return bfsClient.ListFiles()
+	t0 := time.Now()
+	result, err := suite.bfsClient.ListFiles()
+	suite.T().Logf("Listing %d files took %.2fs", len(result), time.Since(t0).Seconds())
+	return result, err
 }
 
 func (suite *BucketFsClientITestSuite) findAbsolutePath(fileName string) (string, error) {
-	bfsClient := suite.createBucketFsClient()
-	defer bfsClient.Close()
-	return bfsClient.FindAbsolutePath(fileName)
+	t0 := time.Now()
+	result, err := suite.bfsClient.FindAbsolutePath(fileName)
+	suite.T().Logf("Finding file %q with absolute path %q took %.2fs", fileName, result, time.Since(t0).Seconds())
+	return result, err
 }
 
 func (suite *BucketFsClientITestSuite) createBucketFsClient() bfs.BucketFsAPI {
+	suite.T().Log("Creating BucketFS client")
 	bfsClient, err := bfs.CreateBucketFsAPI(DEFAULT_BUCKET_PATH, context.Background(), suite.exasol.GetConnection())
 	if err != nil {
 		suite.FailNow("Creating BFS API failed: " + err.Error())
@@ -132,10 +136,12 @@ func (suite *BucketFsClientITestSuite) createBucketFsClient() bfs.BucketFsAPI {
 }
 
 func (suite *BucketFsClientITestSuite) uploadStringContent(fileName string, fileContent string) {
+	t0 := time.Now()
 	err := suite.exasol.Exasol.UploadStringContent(fileContent, fileName)
 	if err != nil {
 		suite.FailNowf("Failed to upload file %q. Cause: %w", fileName, err)
 	}
+	suite.T().Logf("Uploaded file %s to BucketFS in %.2fs", fileName, time.Since(t0).Seconds())
 	suite.T().Cleanup(func() {
 		suite.NoError(suite.exasol.Exasol.DeleteFile(fileName))
 	})
