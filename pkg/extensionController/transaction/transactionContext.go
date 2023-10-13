@@ -98,7 +98,10 @@ func (ctx *TransactionContext) Commit() error {
 
 func (ctx *TransactionContext) cleanup() error {
 	if ctx.bfsClient != nil {
-		return ctx.bfsClient.Close()
+		err := ctx.bfsClient.Close()
+		if err != nil {
+			return fmt.Errorf("failed to close BucketFS client: %w", err)
+		}
 	}
 	return nil
 }
