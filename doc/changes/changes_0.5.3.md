@@ -6,7 +6,7 @@ Code name: Speedup listing extensions
 
 This release speeds up listing extensions, especially when there are many files in BucketFS.
 
-Starting with this release EM is tested against Exasol version 8 instead of 7.1.
+**Notes:** Starting with this release EM is tested against Exasol version 8 instead of 7.1. This means that integration tests using `extension-manager-integration-test-java` will also need to run with Exasol 8.
 
 ## Bugfix
 
