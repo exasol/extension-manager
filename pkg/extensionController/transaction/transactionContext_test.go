@@ -43,6 +43,12 @@ func (suite *TransactionContextSuite) TestBeginTransaction() {
 	suite.NotNil(txCtx)
 }
 
+func (suite *TransactionContextSuite) TestBeginTransactionFailsWithEmptyBucketFsBasePath() {
+	txCtx, err := BeginTransaction(context.Background(), suite.db, "")
+	suite.EqualError(err, "bucketFsBasePath is empty")
+	suite.Nil(txCtx)
+}
+
 func (suite *TransactionContextSuite) TestBeginTransactionFails() {
 	suite.dbMock.ExpectBegin().WillReturnError(mockError)
 	txCtx, err := suite.beginTransaction()
