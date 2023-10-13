@@ -9,6 +9,7 @@ import (
 
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/integrationTesting"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -25,6 +26,7 @@ func TestBucketFsApiITestSuite(t *testing.T) {
 }
 
 func (suite *BucketFsClientITestSuite) SetupSuite() {
+	logrus.SetLevel(logrus.DebugLevel)
 	suite.exasol = *integrationTesting.StartDbSetup(&suite.Suite)
 	suite.exasol.CreateConnection()
 	suite.bfsClient = suite.createBucketFsClient()
@@ -113,17 +115,11 @@ func (suite *BucketFsClientITestSuite) TestFindAbsolutePathMultipleFilesFirstFil
 }
 
 func (suite *BucketFsClientITestSuite) listFiles() ([]bfs.BfsFile, error) {
-	t0 := time.Now()
-	result, err := suite.bfsClient.ListFiles()
-	suite.T().Logf("Listing %d files took %.2fs", len(result), time.Since(t0).Seconds())
-	return result, err
+	return suite.bfsClient.ListFiles()
 }
 
 func (suite *BucketFsClientITestSuite) findAbsolutePath(fileName string) (string, error) {
-	t0 := time.Now()
-	result, err := suite.bfsClient.FindAbsolutePath(fileName)
-	suite.T().Logf("Finding file %q with absolute path %q took %.2fs", fileName, result, time.Since(t0).Seconds())
-	return result, err
+	return suite.bfsClient.FindAbsolutePath(fileName)
 }
 
 func (suite *BucketFsClientITestSuite) createBucketFsClient() bfs.BucketFsAPI {
@@ -136,12 +132,10 @@ func (suite *BucketFsClientITestSuite) createBucketFsClient() bfs.BucketFsAPI {
 }
 
 func (suite *BucketFsClientITestSuite) uploadStringContent(fileName string, fileContent string) {
-	t0 := time.Now()
 	err := suite.exasol.Exasol.UploadStringContent(fileContent, fileName)
 	if err != nil {
 		suite.FailNowf("Failed to upload file %q. Cause: %w", fileName, err)
 	}
-	suite.T().Logf("Uploaded file %s to BucketFS in %.2fs", fileName, time.Since(t0).Seconds())
 	suite.T().Cleanup(func() {
 		suite.NoError(suite.exasol.Exasol.DeleteFile(fileName))
 	})

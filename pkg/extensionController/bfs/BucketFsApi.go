@@ -6,6 +6,8 @@ import (
 	_ "embed"
 	"fmt"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 // BucketFsAPI allows access to BucketFS. Call the [BucketFsAPI.Close] method to release resources after using the BucketFS API.
@@ -57,7 +59,8 @@ type bucketFsAPIImpl struct {
 }
 
 /* [impl -> dsn~extension-components~1]. */
-func (bfs bucketFsAPIImpl) ListFiles() (files []BfsFile, retErr error) {
+func (bfs bucketFsAPIImpl) ListFiles() ([]BfsFile, error) {
+	t0 := time.Now()
 	statement, err := bfs.transaction.Prepare("SELECT " + bfs.udfScriptName + "(?) ORDER BY FULL_PATH") //nolint:gosec // SQL string concatenation is safe here
 	if err != nil {
 		return nil, fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
@@ -68,7 +71,9 @@ func (bfs bucketFsAPIImpl) ListFiles() (files []BfsFile, retErr error) {
 		return nil, fmt.Errorf("failed to list files in BucketFS using UDF. Cause: %w", err)
 	}
 	defer result.Close()
-	return readQueryResult(result)
+	files, err := readQueryResult(result)
+	logrus.Debugf("Listed %d files in %.2fs", len(files), time.Since(t0).Seconds())
+	return files, err
 }
 
 /* [impl -> dsn~resolving-files-in-bucketfs~1]. */
@@ -102,7 +107,8 @@ func (bfs bucketFsAPIImpl) FindAbsolutePath(fileName string) (string, error) {
 var listFilesRecursivelyUdfContent string
 
 func createUdfScript(transaction *sql.Tx) (string, error) {
-	schemaName := fmt.Sprintf("INTERNAL_%v", time.Now().Unix())
+	t0 := time.Now()
+	schemaName := fmt.Sprintf("INTERNAL_%v", t0.Unix())
 	_, err := transaction.Exec("CREATE SCHEMA " + schemaName)
 	if err != nil {
 		return "", fmt.Errorf("failed to create a schema for BucketFS list script. Cause: %w", err)
@@ -116,6 +122,7 @@ func createUdfScript(transaction *sql.Tx) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to create UDF script for listing bucket. Cause: %w", err)
 	}
+	logrus.Debugf("Created UDF script %s in %.2f", udfScriptName, time.Since(t0).Seconds())
 	return udfScriptName, nil
 }
 
