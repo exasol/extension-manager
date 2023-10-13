@@ -129,10 +129,12 @@ func (suite *BucketFsClientITestSuite) createBucketFsClient() bfs.BucketFsAPI {
 }
 
 func (suite *BucketFsClientITestSuite) uploadStringContent(fileName string, fileContent string) {
+	t0 := time.Now()
 	err := suite.exasol.Exasol.UploadStringContent(fileContent, fileName)
 	if err != nil {
 		suite.FailNowf("Failed to upload file %q. Cause: %w", fileName, err)
 	}
+	suite.T().Logf("Uploaded file %s to BucketFS in %.2fs", fileName, time.Since(t0).Seconds())
 	suite.T().Cleanup(func() {
 		suite.NoError(suite.exasol.Exasol.DeleteFile(fileName))
 	})
