@@ -38,9 +38,6 @@ func (suite *BucketFsClientITestSuite) TeardownSuite() {
 	suite.exasol.StopDb()
 }
 
-func (suite *BucketFsClientITestSuite) BeforeTest(suiteName, testName string) {
-}
-
 /* [utest -> dsn~extension-components~1]. */
 func (suite *BucketFsClientITestSuite) TestListEmptyDir() {
 	result, err := suite.listFiles()
