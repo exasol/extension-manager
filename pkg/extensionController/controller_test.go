@@ -91,8 +91,8 @@ func (suite *ControllerUTestSuite) AfterTest(suiteName, testName string) {
 // GetAllExtensions
 
 /* [utest -> dsn~list-extensions~1]. */
-func (suite *ControllerUTestSuite) TestGetAllExtensions() {
-	suite.writeDefaultExtension()
+func (suite *ControllerUTestSuite) TestGetAllExtensionsAndBucketFSContainsJar() {
+	suite.registerDefaultExtensionDefinition()
 	suite.dbMock.ExpectBegin()
 	suite.bucketFsMock.SimulateFiles([]bfs.BfsFile{{Name: "my-extension.1.2.3.jar", Size: 3, Path: "path"}})
 	suite.bucketFsMock.SimulateCloseSuccess()
@@ -110,8 +110,8 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsFailsStartingTransaction(
 }
 
 /* [utest -> dsn~list-extensions~1]. */
-func (suite *ControllerUTestSuite) TestGetAllExtensionsWithMissingJar() {
-	suite.writeDefaultExtension()
+func (suite *ControllerUTestSuite) TestGetAllExtensionsButNoJarInBucketFS() {
+	suite.registerDefaultExtensionDefinition()
 	suite.dbMock.ExpectBegin()
 	suite.bucketFsMock.SimulateFiles([]bfs.BfsFile{})
 	suite.bucketFsMock.SimulateCloseSuccess()
@@ -157,7 +157,7 @@ var errorTests = []errorTest{
 // GetInstalledExtensions
 
 func (suite *ControllerUTestSuite) TestGetAllInstallations() {
-	suite.writeDefaultExtension()
+	suite.registerDefaultExtensionDefinition()
 	//nolint:exhaustruct // Non-exhaustive struct is fine here
 	suite.metaDataMock.SimulateExaAllScripts([]exaMetadata.ExaScriptRow{{Schema: "schema", Name: "script"}})
 	suite.dbMock.ExpectBegin()
@@ -612,7 +612,7 @@ func (suite *ControllerUTestSuite) TestDeleteInstanceFailsStartingTransaction() 
 	suite.EqualError(err, beginTransactionFailedErrorMsg)
 }
 
-func (suite *ControllerUTestSuite) writeDefaultExtension() {
+func (suite *ControllerUTestSuite) registerDefaultExtensionDefinition() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "my-extension.1.2.3.jar", FileSize: 3, DownloadUrl: "", LicenseUrl: "", LicenseAgreementRequired: false}).
 		WithFindInstallationsFunc(`

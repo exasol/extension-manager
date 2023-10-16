@@ -10,7 +10,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// BucketFsAPI allows access to BucketFS. Call the [BucketFsAPI.Close] method to release resources after using the BucketFS API.
+// BucketFsAPI allows access to BucketFS.
+// Users must call the [BucketFsAPI.Close] method to release resources after using the BucketFS API.
 type BucketFsAPI interface {
 	// ListFiles lists all files in the configured directory recursively.
 	ListFiles() ([]BfsFile, error)
@@ -63,12 +64,12 @@ func (bfs bucketFsAPIImpl) ListFiles() ([]BfsFile, error) {
 	t0 := time.Now()
 	statement, err := bfs.transaction.Prepare("SELECT " + bfs.udfScriptName + "(?) ORDER BY FULL_PATH") //nolint:gosec // SQL string concatenation is safe here
 	if err != nil {
-		return nil, fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
+		return nil, fmt.Errorf("failed to create prepared statement for listing files. Cause: %w", err)
 	}
 	defer statement.Close()
 	result, err := statement.Query(bfs.bucketFsBasePath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list files in BucketFS using UDF. Cause: %w", err)
+		return nil, fmt.Errorf("failed to list files. Cause: %w", err)
 	}
 	defer result.Close()
 	files, err := readQueryResult(result)
