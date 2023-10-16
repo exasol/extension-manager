@@ -100,7 +100,7 @@ func (suite *BucketFsClientUTestSuite) TestListFilesPrepareQueryFails() {
 	client := suite.createBucketFsClientHandleError()
 	suite.dbMock.ExpectPrepare(`SELECT "INTERNAL_.* ORDER BY FULL_PATH`).WillReturnError(mockError)
 	result, err := client.ListFiles()
-	suite.EqualError(err, "failed to create prepared statement for running list files UDF. Cause: mock error")
+	suite.EqualError(err, "failed to create prepared statement for listing files. Cause: mock error")
 	suite.Empty(result)
 }
 
@@ -110,7 +110,7 @@ func (suite *BucketFsClientUTestSuite) TestListFilesExecuteQueryFails() {
 		WillBeClosed().
 		ExpectQuery().WillReturnError(mockError)
 	result, err := client.ListFiles()
-	suite.EqualError(err, "failed to list files in BucketFS using UDF. Cause: mock error")
+	suite.EqualError(err, "failed to list files. Cause: mock error")
 	suite.Empty(result)
 }
 
