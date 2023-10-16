@@ -80,6 +80,7 @@ func (bfs bucketFsAPIImpl) ListFiles() ([]BfsFile, error) {
 /* [impl -> dsn~resolving-files-in-bucketfs~1]. */
 /* [impl -> dsn~extension-context-bucketfs~1]. */
 func (bfs bucketFsAPIImpl) FindAbsolutePath(fileName string) (string, error) {
+	t0 := time.Now()
 	statement, err := bfs.transaction.Prepare(`SELECT FULL_PATH FROM (SELECT ` + bfs.udfScriptName + `(?)) WHERE FILE_NAME = ? ORDER BY FULL_PATH LIMIT 1`) //nolint:gosec // SQL string concatenation is safe here
 	if err != nil {
 		return "", fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
@@ -101,10 +102,11 @@ func (bfs bucketFsAPIImpl) FindAbsolutePath(fileName string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed reading absolute path. Cause: %w", err)
 	}
+	logrus.Debugf("Found absolute path %q for file %q in %.2fs", absolutePath, fileName, time.Since(t0).Seconds())
 	return absolutePath, nil
 }
 
-//go:embed list_files_recursively_udf.py
+//go:embed udf/list_files_udf.py
 var listFilesRecursivelyUdfContent string
 
 func createUdfScript(transaction *sql.Tx) (string, error) {

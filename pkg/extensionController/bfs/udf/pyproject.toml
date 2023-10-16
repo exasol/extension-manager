@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "list_files_udf"
+version = "0.0.0"
+description = ""
+authors = []
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.group.dev.dependencies]
+pyyaml = "^6.0"
+pytest = "^7.2.1"
+pytest-cov = "^4.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+verbose = false
+include = "\\.pyi?$"
+
+[tool.isort]
+profile = "black"
+force_grid_wrap = 2
+
+[tool.pylint.master]
+fail-under = 7.0
+
+[tool.pylint.format]
+max-line-length = 88
+max-module-lines = 800
+
+[[tool.mypy.overrides]]
+module = []
+ignore_errors = true
+
+[tool.coverage.run]
+source = [
+    ".",
+]
+
+[tool.coverage.report]
+fail_under = 20

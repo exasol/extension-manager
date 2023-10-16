@@ -39,6 +39,8 @@ vendor/
 /doc/tracing-report.md
 /doc/tracing-report.html
 
+/pkg/extensionController/bfs/udf/__pycache__
+/pkg/extensionController/bfs/udf/.venv
 /pkg/integrationTesting/extensionForTesting/node_modules/
 /pkg/integrationTesting/extensionForTesting/package-lock.json
 /pkg/integrationTesting/extensionForTesting/dist/
