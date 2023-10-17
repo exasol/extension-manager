@@ -100,7 +100,7 @@ mvn verify
 Then run Sonar with the following command in the project root:
 
 ```sh
-sonar-scanner -Dsonar.organization=exasol -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
+sonar-scanner -Dsonar.token=$SONAR_TOKEN
 ```
 
 ## Using a Local Extension Interface
