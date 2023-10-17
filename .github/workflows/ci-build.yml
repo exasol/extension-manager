@@ -68,6 +68,8 @@ jobs:
           cd pkg/extensionController/bfs/udf
           poetry install
           poetry run pytest --cov=list_files_udf --cov-report xml --cov-report term
+          echo "Fixing source references for sonar"
+          sed -i tmp 's@<source></source>@<source>pkg/extensionController/bfs/udf/</source>@' pkg/extensionController/bfs/udf/coverage.xml
 
       - name: Enable testcontainer reuse
         run: echo 'testcontainers.reuse.enable=true' > "$HOME/.testcontainers.properties"
