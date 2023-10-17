@@ -74,7 +74,6 @@ def test_skips_dir_with_exaudf_subdir(tmp_path: Path) -> None:
     rows = run_get_emitted_rows(tmp_path)
     assert rows == [("file.txt", str(file2), 17)]
 
-
 def test_python_version_equals_udf_runtime() -> None:
     py_version = platform.python_version_tuple()
     assert py_version[0] == "3" and py_version[1] == "8"
