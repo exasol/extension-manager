@@ -81,7 +81,8 @@ func (bfs bucketFsAPIImpl) ListFiles() ([]BfsFile, error) {
 /* [impl -> dsn~extension-context-bucketfs~1]. */
 func (bfs bucketFsAPIImpl) FindAbsolutePath(fileName string) (string, error) {
 	t0 := time.Now()
-	statement, err := bfs.transaction.Prepare(`SELECT FULL_PATH FROM (SELECT ` + bfs.udfScriptName + `(?)) WHERE FILE_NAME = ? ORDER BY FULL_PATH LIMIT 1`) //nolint:gosec // SQL string concatenation is safe here
+	query := fmt.Sprintf(`SELECT FULL_PATH FROM (SELECT %s(?)) WHERE FILE_NAME = ? ORDER BY FULL_PATH LIMIT 1`, bfs.udfScriptName) //nolint:gosec // SQL string concatenation is safe here
+	statement, err := bfs.transaction.Prepare(query)
 	if err != nil {
 		return "", fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
 	}
