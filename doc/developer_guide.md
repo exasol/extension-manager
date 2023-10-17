@@ -190,6 +190,13 @@ cd pkg/extensionController/bfs/udf
 poetry run mypy .
 ```
 
+### Run Linter
+
+```sh
+cd pkg/extensionController/bfs/udf
+poetry run pylint .
+```
+
 ## Embedding Extension Manager in Other Go Programs
 
 ### Embedding the REST API

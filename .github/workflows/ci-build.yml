@@ -182,3 +182,5 @@ jobs:
         run: cd pkg/extensionController/bfs/udf && poetry run pytest --cov=list_files_udf
       - name: Run type check
         run: cd pkg/extensionController/bfs/udf && poetry run mypy .
+      - name: Run linter
+        run: cd pkg/extensionController/bfs/udf && poetry run pylint .

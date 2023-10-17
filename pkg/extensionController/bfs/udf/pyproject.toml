@@ -11,6 +11,7 @@ python = "^3.8"
 pytest = "^7.4.2"
 pytest-cov = "^4.1.0"
 mypy = "^1.6.0"
+pylint = "^3.0.1"
 
 [build-system]
 requires = ["poetry-core"]
@@ -26,7 +27,7 @@ profile = "black"
 force_grid_wrap = 2
 
 [tool.pylint.master]
-fail-under = 7.0
+fail-under = 10
 
 [tool.pylint.format]
 max-line-length = 88
@@ -37,9 +38,7 @@ module = []
 ignore_errors = true
 
 [tool.coverage.run]
-source = [
-    ".",
-]
+source = ["."]
 
 [tool.coverage.report]
-fail_under = 20
+fail_under = 90
