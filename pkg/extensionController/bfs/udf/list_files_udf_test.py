@@ -1,13 +1,14 @@
 #pylint: disable=missing-function-docstring,missing-module-docstring,missing-class-docstring
 from pathlib import Path
 import os
+import pytest
 import list_files_udf
 
 class ExaContextMock:
     path: str
     emitted_rows: list
-    def __init__(self, path:Path) -> None:
-        self.path = str(path)
+    def __init__(self, path:str) -> None:
+        self.path = path
         self.emitted_rows = []
 
     def emit(self, *args) -> None:
@@ -18,7 +19,7 @@ def run(context: ExaContextMock) -> None:
     list_files_udf.run(context)
 
 def run_get_emitted_rows(bfs_path: Path) -> list:
-    context = ExaContextMock(bfs_path)
+    context = ExaContextMock(str(bfs_path))
     list_files_udf.run(context)
     return context.emitted_rows
 
@@ -28,6 +29,10 @@ def create_file(path: Path, content: str) -> None:
     with open(path, mode="w", encoding="UTF-8") as f:
         f.write(content)
 
+def test_fails_for_empty_path() -> None:
+    with pytest.raises(ValueError) as exception:
+        run(ExaContextMock(""))
+    assert "Argument 'path' not defined" in str(exception)
 
 def test_empty_dir(tmp_path: Path) -> None:
     assert len(run_get_emitted_rows(tmp_path)) == 0
