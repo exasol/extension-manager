@@ -176,6 +176,8 @@ jobs:
           python-version: "3.8"
           cache: "poetry"
           cache-dependency-path: "pkg/extensionController/bfs/udf/poetry.lock"
+      - name: Install Poetry
+        run: sudo pip install poetry
       - name: Install dependencies
         run: cd pkg/extensionController/bfs/udf && poetry install
       - name: Run tests
