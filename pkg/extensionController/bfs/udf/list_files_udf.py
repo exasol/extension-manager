@@ -30,9 +30,10 @@ def run(ctx) -> None:
         ctx.emit(f.get_name(), f.get_absolute_path(), f.get_size())
 
 def accept_file(file: ResultPath) -> bool:
-    if file.get_name() == "EXAClusterOS":
-        return False
-    return file.is_file() or file.is_dir()
+    if file.is_dir():
+        udf_dir = file.path/"exaudf"
+        return not os.path.isdir(udf_dir)
+    return file.is_file()
 
 def list_dir(path: Path) -> Generator[ResultPath, None, None]:
     try:
