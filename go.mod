@@ -3,7 +3,7 @@ module github.com/exasol/extension-manager
 go 1.20
 
 require (
-	github.com/dop251/goja v0.0.0-20230919151941-fc55792775de
+	github.com/dop251/goja v0.0.0-20231014103939-873a1496dc8e
 	github.com/dop251/goja_nodejs v0.0.0-20230914102007-198ba9a8b098
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/mod v0.13.0
@@ -20,7 +20,7 @@ require (
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/go-openapi/jsonpointer v0.20.0 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-openapi/spec v0.20.9 // indirect
