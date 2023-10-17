@@ -55,6 +55,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
+      - name: Install Poetry
+        run: pipx install poetry
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "poetry"
+          cache-dependency-path: "pkg/extensionController/bfs/udf/poetry.lock"
+
+      - name: Calculate Python test coverage
+        run: |
+          cd pkg/extensionController/bfs/udf
+          poetry install
+          poetry run pytest --cov=list_files_udf --cov-report xml --cov-report term
+
       - name: Enable testcontainer reuse
         run: echo 'testcontainers.reuse.enable=true' > "$HOME/.testcontainers.properties"
 
