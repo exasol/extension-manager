@@ -55,6 +55,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
+      - name: Install Poetry
+        run: pipx install poetry
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "poetry"
+          cache-dependency-path: "pkg/extensionController/bfs/udf/poetry.lock"
+
+      - name: Calculate Python test coverage
+        run: |
+          cd pkg/extensionController/bfs/udf
+          poetry install
+          poetry run pytest --cov=list_files_udf --cov-report xml --cov-report term
+          echo "Fixing source references for sonar"
+          sed --in-place 's@<source></source>@<source>pkg/extensionController/bfs/udf/</source>@' coverage.xml
+
       - name: Enable testcontainer reuse
         run: echo 'testcontainers.reuse.enable=true' > "$HOME/.testcontainers.properties"
 
@@ -160,5 +176,29 @@ jobs:
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.53.3
+          version: v1.54.2
           args: --timeout=15m
+
+  build-python-udf:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-build-python-udf
+      cancel-in-progress: true
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Install Poetry
+        run: pipx install poetry
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "poetry"
+          cache-dependency-path: "pkg/extensionController/bfs/udf/poetry.lock"
+      - name: Install dependencies
+        run: cd pkg/extensionController/bfs/udf && poetry install
+      - name: Run tests
+        run: cd pkg/extensionController/bfs/udf && poetry run pytest --cov=list_files_udf
+      - name: Run type check
+        run: cd pkg/extensionController/bfs/udf && poetry run mypy .
+      - name: Run linter
+        run: cd pkg/extensionController/bfs/udf && poetry run pylint *.py

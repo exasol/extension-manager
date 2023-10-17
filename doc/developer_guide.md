@@ -100,7 +100,7 @@ mvn verify
 Then run Sonar with the following command in the project root:
 
 ```sh
-sonar-scanner -Dsonar.organization=exasol -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
+sonar-scanner -Dsonar.token=$SONAR_TOKEN
 ```
 
 ## Using a Local Extension Interface
@@ -161,6 +161,40 @@ This will upload the JSON file from the `registry-upload/content` folder for the
 
 ```sh
 npx npm-check-updates -u && npm install
+```
+
+## Python UDF
+
+EM uses a Python UDF located at [pkg/extensionController/bfs/udf](../pkg/extensionController/bfs/udf) to list files in BucketFS.
+
+### Initial Setup
+
+```sh
+cd pkg/extensionController/bfs/udf
+poetry env use 3.8
+poetry install
+```
+### Run tests
+
+```sh
+cd pkg/extensionController/bfs/udf
+poetry run pytest
+# Test coverage
+poetry run pytest --cov=list_files_udf
+```
+
+### Run Type Check
+
+```sh
+cd pkg/extensionController/bfs/udf
+poetry run mypy .
+```
+
+### Run Linter
+
+```sh
+cd pkg/extensionController/bfs/udf
+poetry run pylint *.py
 ```
 
 ## Embedding Extension Manager in Other Go Programs

@@ -25,5 +25,6 @@
   },
   "[json]": {
     "editor.tabSize": 2
-  }
+  },
+  "python.terminal.activateEnvironment": false
 }

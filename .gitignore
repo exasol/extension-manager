@@ -39,6 +39,13 @@ vendor/
 /doc/tracing-report.md
 /doc/tracing-report.html
 
+!/pkg/extensionController/bfs/udf/poetry.lock
+/pkg/extensionController/bfs/udf/__pycache__
+/pkg/extensionController/bfs/udf/.pytest_cache
+/pkg/extensionController/bfs/udf/.venv
+/pkg/extensionController/bfs/udf/.coverage
+/pkg/extensionController/bfs/udf/coverage.xml
+
 /pkg/integrationTesting/extensionForTesting/node_modules/
 /pkg/integrationTesting/extensionForTesting/package-lock.json
 /pkg/integrationTesting/extensionForTesting/dist/
