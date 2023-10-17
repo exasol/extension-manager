@@ -163,6 +163,33 @@ This will upload the JSON file from the `registry-upload/content` folder for the
 npx npm-check-updates -u && npm install
 ```
 
+## Python UDF
+
+EM uses a Python UDF located at [pkg/extensionController/bfs/udf](../pkg/extensionController/bfs/udf) to list files in BucketFS.
+
+### Initial Setup
+
+```sh
+cd pkg/extensionController/bfs/udf
+poetry env use 3.8
+poetry install
+```
+### Run tests
+
+```sh
+cd pkg/extensionController/bfs/udf
+poetry run pytest
+# Test coverage
+poetry run pytest --cov=list_files_udf
+```
+
+### Run Type Check
+
+```sh
+cd pkg/extensionController/bfs/udf
+poetry run mypy .
+```
+
 ## Embedding Extension Manager in Other Go Programs
 
 ### Embedding the REST API

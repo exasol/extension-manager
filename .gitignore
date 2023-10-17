@@ -42,6 +42,8 @@ vendor/
 /pkg/extensionController/bfs/udf/__pycache__
 /pkg/extensionController/bfs/udf/.pytest_cache
 /pkg/extensionController/bfs/udf/.venv
+/pkg/extensionController/bfs/udf/.coverage
+
 /pkg/integrationTesting/extensionForTesting/node_modules/
 /pkg/integrationTesting/extensionForTesting/package-lock.json
 /pkg/integrationTesting/extensionForTesting/dist/

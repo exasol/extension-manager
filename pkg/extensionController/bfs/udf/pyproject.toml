@@ -8,9 +8,9 @@ authors = []
 python = "^3.8"
 
 [tool.poetry.group.dev.dependencies]
-pyyaml = "^6.0"
-pytest = "^7.2.1"
-pytest-cov = "^4.0.0"
+pytest = "^7.4.2"
+pytest-cov = "^4.1.0"
+mypy = "^1.6.0"
 
 [build-system]
 requires = ["poetry-core"]
