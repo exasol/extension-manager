@@ -161,7 +161,7 @@
 [0]: https://github.com/Nightapes/go-rest/blob/v0.3.3/LICENSE
 [1]: https://github.com/dop251/goja/blob/fc55792775de/LICENSE
 [2]: https://github.com/dop251/goja_nodejs/blob/198ba9a8b098/LICENSE
-[3]: https://github.com/exasol/exasol-driver-go/blob/v1.0.2/LICENSE
+[3]: https://github.com/exasol/exasol-driver-go/blob/v1.0.3/LICENSE
 [4]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.3.3/go-client/LICENSE
 [5]: https://github.com/go-chi/chi/blob/v5.0.10/LICENSE
 [6]: https://github.com/sirupsen/logrus/blob/v1.9.3/LICENSE

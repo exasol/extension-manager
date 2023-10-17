@@ -31,17 +31,16 @@ func (suite *ApiContextSuite) TestExtractUserPasswordInvalidBase64() {
 }
 
 func (suite *ApiContextSuite) TestExtractUserPassword() {
-
 	tests := []struct {
 		input            string
 		expectedUser     string
 		expectedPassword string
 		expectedError    string
 	}{
-		{input: "user:password", expectedUser: "user", expectedPassword: "password"},
-		{input: "user:pass:word", expectedUser: "user", expectedPassword: "pass:word"},
-		{input: "öäü!µ:`«@≠", expectedUser: "öäü!µ", expectedPassword: "`«@≠"},
-		{input: "nocolon", expectedError: "colon missing in basic auth header"},
+		{input: "user:password", expectedUser: "user", expectedPassword: "password", expectedError: ""},
+		{input: "user:pass:word", expectedUser: "user", expectedPassword: "pass:word", expectedError: ""},
+		{input: "öäü!µ:`«@≠", expectedUser: "öäü!µ", expectedPassword: "`«@≠", expectedError: ""},
+		{input: "nocolon", expectedError: "colon missing in basic auth header", expectedUser: "", expectedPassword: ""},
 	}
 	for _, test := range tests {
 		suite.Run(test.input, func() {

@@ -1,11 +1,9 @@
 package context
 
 import (
-	"context"
-	"database/sql"
 	"fmt"
 
-	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
+	"github.com/exasol/extension-manager/pkg/extensionController/transaction"
 )
 
 // BucketFsContext allows extensions to interact with BucketFS.
@@ -16,16 +14,22 @@ type BucketFsContext interface {
 }
 
 type bucketFsContextImpl struct {
-	bucketFsClient bfs.BucketFsAPI
-	context        context.Context
-	db             *sql.DB
+	txCtx *transaction.TransactionContext
 }
 
 /* [impl -> dsn~resolving-files-in-bucketfs~1]. */
 func (b *bucketFsContextImpl) ResolvePath(fileName string) string {
-	path, err := b.bucketFsClient.FindAbsolutePath(b.context, b.db, fileName)
+	path, err := b.resolvePath(fileName)
 	if err != nil {
 		reportError(fmt.Errorf("failed to find absolute path for file %q: %w", fileName, err))
 	}
 	return path
+}
+
+func (b *bucketFsContextImpl) resolvePath(fileName string) (string, error) {
+	bfsClient, err := b.txCtx.GetBucketFsClient()
+	if err != nil {
+		return "", err
+	}
+	return bfsClient.FindAbsolutePath(fileName)
 }

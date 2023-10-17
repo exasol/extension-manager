@@ -3,27 +3,22 @@ package context
 import (
 	"github.com/exasol/extension-manager/pkg/backend"
 	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
-	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/transaction"
 )
 
-func CreateContext(txCtx *transaction.TransactionContext, extensionSchemaName string, bucketFsBasePath string) *ExtensionContext {
+func CreateContext(txCtx *transaction.TransactionContext, extensionSchemaName string) *ExtensionContext {
 	var sqlClient backend.SimpleSQLClient = backend.NewSqlClient(txCtx.GetContext(), txCtx.GetTransaction())
-	var bucketFsClient bfs.BucketFsAPI = bfs.CreateBucketFsAPI(bucketFsBasePath)
 	var metadataReader exaMetadata.ExaMetadataReader = exaMetadata.CreateExaMetaDataReader()
-	return CreateContextWithClient(extensionSchemaName, txCtx, sqlClient, bucketFsClient, metadataReader)
+	var bfsContext BucketFsContext = &bucketFsContextImpl{txCtx: txCtx}
+	return CreateContextWithClient(extensionSchemaName, txCtx, sqlClient, bfsContext, metadataReader)
 }
 
 func CreateContextWithClient(extensionSchemaName string, txCtx *transaction.TransactionContext,
-	client backend.SimpleSQLClient, bucketFsClient bfs.BucketFsAPI, metadataReader exaMetadata.ExaMetadataReader) *ExtensionContext {
+	client backend.SimpleSQLClient, bucketFsContext BucketFsContext, metadataReader exaMetadata.ExaMetadataReader) *ExtensionContext {
 	return &ExtensionContext{
 		ExtensionSchemaName: extensionSchemaName,
 		SqlClient:           &contextSqlClient{client},
-		BucketFs: &bucketFsContextImpl{
-			bucketFsClient: bucketFsClient,
-			context:        txCtx.GetContext(),
-			db:             txCtx.GetDBConnection(),
-		},
+		BucketFs:            bucketFsContext,
 		Metadata: &metadataContextImpl{
 			transaction:    txCtx.GetTransaction(),
 			schemaName:     extensionSchemaName,

@@ -13,6 +13,7 @@ import (
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/registry"
 	"github.com/exasol/extension-manager/pkg/extensionController/transaction"
+
 	"github.com/exasol/extension-manager/pkg/parameterValidator"
 )
 
@@ -306,7 +307,7 @@ func (c *controllerImpl) FindInstances(txCtx *transaction.TransactionContext, ex
 }
 
 func (c *controllerImpl) createExtensionContext(txCtx *transaction.TransactionContext) *context.ExtensionContext {
-	return context.CreateContext(txCtx, c.config.ExtensionSchema, c.config.BucketFSBasePath)
+	return context.CreateContext(txCtx, c.config.ExtensionSchema)
 }
 
 func (c *controllerImpl) ensureSchemaExists(txCtx *transaction.TransactionContext) error {

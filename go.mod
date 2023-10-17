@@ -11,7 +11,7 @@ require (
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/exasol/exasol-driver-go v1.0.2
+	github.com/exasol/exasol-driver-go v1.0.3
 	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.3
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/kinbiko/jsonassert v1.1.1
@@ -49,7 +49,7 @@ require (
 	github.com/stretchr/objx v0.5.1 // indirect
 	github.com/swaggo/files v1.0.1 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
-	golang.org/x/net v0.16.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sync v0.4.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect

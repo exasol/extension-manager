@@ -1,9 +1,6 @@
 package bfs
 
 import (
-	"context"
-	"database/sql"
-
 	"github.com/stretchr/testify/mock"
 )
 
@@ -17,30 +14,43 @@ func CreateBucketFsMock() *BucketFsMock {
 }
 
 func (m *BucketFsMock) SimulateFiles(files []BfsFile) {
-	m.On("ListFiles", mock.Anything, mock.Anything).Return(files, nil)
+	m.On("ListFiles").Return(files, nil)
 }
 
 func (m *BucketFsMock) SimulateFilesError(err error) {
-	m.On("ListFiles", mock.Anything, mock.Anything).Return(nil, err)
+	m.On("ListFiles").Return(nil, err)
 }
 
 func (m *BucketFsMock) SimulateAbsolutePath(fileName, absolutePath string) {
-	m.On("FindAbsolutePath", mock.Anything, mock.Anything, fileName).Return(absolutePath, nil)
+	m.On("FindAbsolutePath", fileName).Return(absolutePath, nil)
 }
 
 func (m *BucketFsMock) SimulateAbsolutePathError(fileName string, err error) {
-	m.On("FindAbsolutePath", mock.Anything, mock.Anything, fileName).Return("", err)
+	m.On("FindAbsolutePath", fileName).Return("", err)
 }
 
-func (mock *BucketFsMock) ListFiles(ctx context.Context, db *sql.DB) ([]BfsFile, error) {
-	args := mock.Called(ctx, db)
+func (m *BucketFsMock) SimulateCloseSuccess() {
+	m.On("Close").Return(nil)
+}
+
+func (m *BucketFsMock) SimulateCloseFails(err error) {
+	m.On("Close").Return(err)
+}
+
+func (mock *BucketFsMock) ListFiles() ([]BfsFile, error) {
+	args := mock.Called()
 	if buckets, ok := args.Get(0).([]BfsFile); ok {
 		return buckets, args.Error(1)
 	}
 	return nil, args.Error(1)
 }
 
-func (mock *BucketFsMock) FindAbsolutePath(ctx context.Context, db *sql.DB, fileName string) (absolutePath string, retErr error) {
-	args := mock.Called(ctx, db, fileName)
+func (mock *BucketFsMock) FindAbsolutePath(fileName string) (absolutePath string, retErr error) {
+	args := mock.Called(fileName)
 	return args.String(0), args.Error(1)
+}
+
+func (mock *BucketFsMock) Close() error {
+	args := mock.Called()
+	return args.Error(0)
 }
