@@ -171,13 +171,13 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+      - name: Install Poetry
+        run: pipx install poetry
       - uses: actions/setup-python@v4
         with:
           python-version: "3.8"
           cache: "poetry"
           cache-dependency-path: "pkg/extensionController/bfs/udf/poetry.lock"
-      - name: Install Poetry
-        run: sudo pip install poetry
       - name: Install dependencies
         run: cd pkg/extensionController/bfs/udf && poetry install
       - name: Run tests
