@@ -46,7 +46,7 @@ func (suite *RestAPIIntegrationTestSuite) SetupTest() {
 	ctrl, err := extensionController.CreateWithValidatedConfig(extensionController.ExtensionManagerConfig{
 		ExtensionRegistryURL: suite.registryServer.IndexUrl(),
 		ExtensionSchema:      EXTENSION_SCHEMA,
-		BucketFSBasePath:     "/bfspath"})
+		BucketFSBasePath:     "/buckets/bfsdefault/default/"})
 	suite.NoError(err)
 	suite.restApi = startRestApi(&suite.Suite, false, ctrl)
 	suite.registryServer.Reset()
