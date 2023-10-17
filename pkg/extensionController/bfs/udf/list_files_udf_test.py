@@ -4,6 +4,7 @@ import os
 import pytest
 import list_files_udf
 
+#pylint: disable=too-few-public-methods # Mock does not need more methods
 class ExaContextMock:
     path: str
     emitted_rows: list

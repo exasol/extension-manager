@@ -194,7 +194,7 @@ poetry run mypy .
 
 ```sh
 cd pkg/extensionController/bfs/udf
-poetry run pylint .
+poetry run pylint *.py
 ```
 
 ## Embedding Extension Manager in Other Go Programs

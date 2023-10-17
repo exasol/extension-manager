@@ -185,4 +185,4 @@ jobs:
       - name: Run type check
         run: cd pkg/extensionController/bfs/udf && poetry run mypy .
       - name: Run linter
-        run: cd pkg/extensionController/bfs/udf && poetry run pylint .
+        run: cd pkg/extensionController/bfs/udf && poetry run pylint *.py
