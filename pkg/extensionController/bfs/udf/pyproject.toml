@@ -25,6 +25,7 @@ max-line-length = 88
 max-module-lines = 800
 
 [tool.coverage.run]
+relative_files = true
 source = ["."]
 
 [tool.coverage.report]
