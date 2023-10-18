@@ -51,8 +51,8 @@ public class ExtensionManagerSetup implements AutoCloseable {
      * {@link org.junit.jupiter.api.BeforeAll} method. Make sure to close this by calling {@link #close()} in an
      * {@link org.junit.jupiter.api.AfterAll} method.
      * <p>
-     * This method verifies, that the given {@link ExasolTestSetup} is connected to an Exasol database in version 8.
-     * Else it will throw an exception.
+     * This method verifies, that the given {@link ExasolTestSetup} is connected to an Exasol database in version 8,
+     * else it will throw an exception.
      * 
      * @param exasolTestSetup  Exasol test setup connected to an Exasol v8 database to use for the tests
      * @param extensionBuilder builder for building the extension under test
