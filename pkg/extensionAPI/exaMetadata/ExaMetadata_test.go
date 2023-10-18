@@ -68,8 +68,7 @@ func (suite *ExaMetadataUTestSuite) TestExtractSchemaAndName() {
 
 const SCHEMA_NAME = "EXA_SCHEMA_NAME"
 
-func (suite *ExaMetadataUTestSuite) TestReadMetadataTablesExasol7() {
-	reader := CreateExaMetaDataReader()
+func (suite *ExaMetadataUTestSuite) TestReadMetadataTables() {
 	tx := suite.beginTransaction()
 	suite.dbMock.ExpectQuery("(?m)SELECT .*FROM SYS.EXA_ALL_SCRIPTS .*").WithArgs(SCHEMA_NAME).
 		WillReturnRows(sqlmock.
@@ -77,33 +76,6 @@ func (suite *ExaMetadataUTestSuite) TestReadMetadataTablesExasol7() {
 			AddRow("schema1", "script1", "type1", "input_type1", "result_type1", "text1", "comment1").
 			AddRow("schema2", "script2", "type2", "input_type2", "result_type2", "text2", "comment2")).
 		RowsWillBeClosed()
-	suite.simulateExasolMajorVersion("7")
-	suite.dbMock.ExpectQuery("SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT, ADAPTER_NOTES\\s+FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS").WillReturnRows(sqlmock.
-		NewRows([]string{"SCHEMA_NAME", "SCHEMA_OWNER", "ADAPTER_SCRIPT", "ADAPTER_NOTES"}).
-		AddRow("schema1", "owner1", "scriptSchema1.script1", "notes1").
-		AddRow("schema2", "owner2", "scriptSchema2.script2", "notes2")).
-		RowsWillBeClosed()
-
-	metadata, err := reader.ReadMetadataTables(tx, SCHEMA_NAME)
-	suite.NoError(err)
-	suite.Equal(&ExaMetadata{AllScripts: ExaScriptTable{Rows: []ExaScriptRow{
-		{Schema: "schema1", Name: "script1", Type: "type1", InputType: "input_type1", ResultType: "result_type1", Text: "text1", Comment: "comment1"},
-		{Schema: "schema2", Name: "script2", Type: "type2", InputType: "input_type2", ResultType: "result_type2", Text: "text2", Comment: "comment2"},
-	}}, AllVirtualSchemas: ExaVirtualSchemasTable{Rows: []ExaVirtualSchemaRow{
-		{Name: "schema1", Owner: "owner1", AdapterScriptSchema: "scriptSchema1", AdapterScriptName: "script1", AdapterNotes: "notes1"},
-		{Name: "schema2", Owner: "owner2", AdapterScriptSchema: "scriptSchema2", AdapterScriptName: "script2", AdapterNotes: "notes2"},
-	}}}, metadata)
-}
-
-func (suite *ExaMetadataUTestSuite) TestReadMetadataTablesExasol8() {
-	tx := suite.beginTransaction()
-	suite.dbMock.ExpectQuery("(?m)SELECT .*FROM SYS.EXA_ALL_SCRIPTS .*").WithArgs(SCHEMA_NAME).
-		WillReturnRows(sqlmock.
-			NewRows([]string{"SCRIPT_SCHEMA", "SCRIPT_NAME", "SCRIPT_TYPE", "SCRIPT_INPUT_TYPE", "SCRIPT_RESULT_TYPE", "SCRIPT_TEXT", "SCRIPT_COMMENT"}).
-			AddRow("schema1", "script1", "type1", "input_type1", "result_type1", "text1", "comment1").
-			AddRow("schema2", "script2", "type2", "input_type2", "result_type2", "text2", "comment2")).
-		RowsWillBeClosed()
-	suite.simulateExasolMajorVersion("8")
 	suite.dbMock.ExpectQuery("SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT_SCHEMA, ADAPTER_SCRIPT_NAME, ADAPTER_NOTES\\s+FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS").WillReturnRows(sqlmock.
 		NewRows([]string{"SCHEMA_NAME", "SCHEMA_OWNER", "ADAPTER_SCRIPT_SCHEMA", "ADAPTER_SCRIPT_NAME", "ADAPTER_NOTES"}).
 		AddRow("schema1", "owner1", "scriptSchema1", "script1", "notes1").
@@ -138,7 +110,6 @@ func (suite *ExaMetadataUTestSuite) TestReadMetadataTablesAllVirtualSchemasFails
 			AddRow("schema1", "script1", "type1", "input_type1", "result_type1", "text1", "comment1").
 			AddRow("schema2", "script2", "type2", "input_type2", "result_type2", "text2", "comment2")).
 		RowsWillBeClosed()
-	suite.simulateExasolMajorVersion("8")
 	suite.dbMock.ExpectQuery("SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT_SCHEMA, ADAPTER_SCRIPT_NAME, ADAPTER_NOTES\\s+FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS").WillReturnError(fmt.Errorf("mock error"))
 
 	metadata, err := CreateExaMetaDataReader().ReadMetadataTables(tx, SCHEMA_NAME)
@@ -164,91 +135,19 @@ func (suite *ExaMetadataUTestSuite) TestReadExaAllScriptTableScanFails() {
 	suite.Nil(result)
 }
 
-func (suite *ExaMetadataUTestSuite) TestGetExasolMajorVersionFails() {
-	tx := suite.beginTransaction()
-	suite.dbMock.ExpectQuery("SELECT PARAM_VALUE FROM SYS.EXA_METADATA WHERE PARAM_NAME='databaseMajorVersion'").
-		WillReturnError(fmt.Errorf("mock error"))
-	result, err := getExasolMajorVersion(tx)
-	suite.EqualError(err, "querying exasol version failed: mock error")
-	suite.Equal("", result)
-}
-
-func (suite *ExaMetadataUTestSuite) TestGetExasolMajorVersionIterateFails() {
-	tx := suite.beginTransaction()
-	suite.dbMock.ExpectQuery("SELECT PARAM_VALUE FROM SYS.EXA_METADATA WHERE PARAM_NAME='databaseMajorVersion'").
-		WillReturnRows(sqlmock.NewRows([]string{"PARAM_VALUE"}).AddRow("value").RowError(0, fmt.Errorf("mock error"))).RowsWillBeClosed()
-	result, err := getExasolMajorVersion(tx)
-	suite.EqualError(err, "failed to iterate exasol version: mock error")
-	suite.Equal("", result)
-}
-
-func (suite *ExaMetadataUTestSuite) TestGetExasolMajorVersionScanFails() {
-	tx := suite.beginTransaction()
-	suite.dbMock.ExpectQuery("SELECT PARAM_VALUE FROM SYS.EXA_METADATA WHERE PARAM_NAME='databaseMajorVersion'").
-		WillReturnRows(sqlmock.NewRows([]string{"PARAM_VALUE", "Wrong"}).AddRow("value1", "value2")).RowsWillBeClosed()
-	result, err := getExasolMajorVersion(tx)
-	suite.EqualError(err, "failed to read exasol version result: sql: expected 2 destination arguments in Scan, not 1")
-	suite.Equal("", result)
-}
-
-func (suite *ExaMetadataUTestSuite) TestGetExasolMajorVersionNoResult() {
-	tx := suite.beginTransaction()
-	suite.dbMock.ExpectQuery("SELECT PARAM_VALUE FROM SYS.EXA_METADATA WHERE PARAM_NAME='databaseMajorVersion'").
-		WillReturnRows(sqlmock.NewRows([]string{"PARAM_VALUE"})).
-		RowsWillBeClosed()
-	result, err := getExasolMajorVersion(tx)
-	suite.EqualError(err, "no result found for exasol version query")
-	suite.Equal("", result)
-}
-
 func (suite *ExaMetadataUTestSuite) TestReadExaAllVirtualSchemasTableFails() {
 	tx := suite.beginTransaction()
-	suite.dbMock.ExpectQuery("SELECT PARAM_VALUE FROM SYS.EXA_METADATA WHERE PARAM_NAME='databaseMajorVersion'").WillReturnError(fmt.Errorf("mock error"))
+	suite.dbMock.ExpectQuery("(?m)SELECT .* FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS").WillReturnError(fmt.Errorf("mock error"))
 	result, err := readExaAllVirtualSchemasTable(tx)
-	suite.EqualError(err, "failed to find db version: querying exasol version failed: mock error")
-	suite.Nil(result)
-}
-
-func (suite *ExaMetadataUTestSuite) TestReadExaAllVirtualSchemasTableV8Fails() {
-	tx := suite.beginTransaction()
-	suite.dbMock.ExpectQuery("(?m)SELECT .* FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS").WillReturnError(fmt.Errorf("mock error"))
-	result, err := readExaAllVirtualSchemasTableV8(tx)
 	suite.EqualError(err, "failed to read SYS.EXA_ALL_VIRTUAL_SCHEMAS: mock error")
 	suite.Nil(result)
 }
 
-func (suite *ExaMetadataUTestSuite) TestReadExaAllVirtualSchemasTableV8ScanFails() {
+func (suite *ExaMetadataUTestSuite) TestReadExaAllVirtualSchemasTableScanFails() {
 	tx := suite.beginTransaction()
 	suite.dbMock.ExpectQuery("(?m)SELECT .* FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS").WillReturnRows(sqlmock.NewRows([]string{"wrong"}).AddRow("wrong"))
-	result, err := readExaAllVirtualSchemasTableV8(tx)
+	result, err := readExaAllVirtualSchemasTable(tx)
 	suite.EqualError(err, "failed to read row of SYS.EXA_ALL_VIRTUAL_SCHEMAS: sql: expected 1 destination arguments in Scan, not 5")
-	suite.Nil(result)
-}
-
-func (suite *ExaMetadataUTestSuite) TestReadExaAllVirtualSchemasTableV7Fails() {
-	tx := suite.beginTransaction()
-	suite.dbMock.ExpectQuery("(?m)SELECT .* FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS").WillReturnError(fmt.Errorf("mock error"))
-	result, err := readExaAllVirtualSchemasTableV7(tx)
-	suite.EqualError(err, "failed to read SYS.EXA_ALL_VIRTUAL_SCHEMAS: mock error")
-	suite.Nil(result)
-}
-
-func (suite *ExaMetadataUTestSuite) TestReadExaAllVirtualSchemasTableV7ScanFails() {
-	tx := suite.beginTransaction()
-	suite.dbMock.ExpectQuery("(?m)SELECT .* FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS").WillReturnRows(sqlmock.NewRows([]string{"wrong"}).AddRow("wrong"))
-	result, err := readExaAllVirtualSchemasTableV7(tx)
-	suite.EqualError(err, "failed to read row of SYS.EXA_ALL_VIRTUAL_SCHEMAS: sql: expected 1 destination arguments in Scan, not 4")
-	suite.Nil(result)
-}
-
-func (suite *ExaMetadataUTestSuite) TestReadExaAllVirtualSchemasTableV7InvalidScriptName() {
-	tx := suite.beginTransaction()
-	suite.dbMock.ExpectQuery("SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT, ADAPTER_NOTES\\s+FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS").WillReturnRows(sqlmock.
-		NewRows([]string{"SCHEMA_NAME", "SCHEMA_OWNER", "ADAPTER_SCRIPT", "ADAPTER_NOTES"}).
-		AddRow("schema1", "owner1", "invalid_script_name", "notes1")).
-		RowsWillBeClosed()
-	result, err := readExaAllVirtualSchemasTableV7(tx)
-	suite.EqualError(err, `invalid format for adapter script: "invalid_script_name"`)
 	suite.Nil(result)
 }
 
@@ -308,12 +207,6 @@ func (suite *ExaMetadataUTestSuite) TestGetScriptByNameReadingFails() {
 	result, err := CreateExaMetaDataReader().GetScriptByName(tx, SCHEMA_NAME, "script")
 	suite.EqualError(err, `failed to read row of SYS.EXA_ALL_SCRIPTS: sql: expected 1 destination arguments in Scan, not 7`)
 	suite.Nil(result)
-}
-
-func (suite *ExaMetadataUTestSuite) simulateExasolMajorVersion(exasolMajorVersion string) {
-	suite.dbMock.ExpectQuery("SELECT PARAM_VALUE FROM SYS.EXA_METADATA WHERE PARAM_NAME='databaseMajorVersion'").
-		WillReturnRows(sqlmock.NewRows([]string{"PARAM_VALUE"}).AddRow(exasolMajorVersion)).
-		RowsWillBeClosed()
 }
 
 func (suite *ExaMetadataUTestSuite) beginTransaction() *sql.Tx {
