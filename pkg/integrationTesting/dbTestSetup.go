@@ -26,7 +26,7 @@ func StartDbSetup(suite *suite.Suite) *DbTestSetup {
 	suite.T().Logf("Starting Exasol %s...", exasolDbVersion)
 	exasol, err := testSetupAbstraction.New().DockerDbVersion(exasolDbVersion).Start()
 	if err != nil {
-		suite.FailNowf("failed to create test setup abstraction: %v", err.Error())
+		suite.FailNow("failed to create test setup abstraction: " + err.Error())
 	}
 	connectionInfo, err := exasol.GetConnectionInfo()
 	if err != nil {
