@@ -76,7 +76,7 @@ public class ExasolMetadata {
      */
     public void assertVirtualSchema(final Matcher<ResultSet> matcher) {
         assertResult(
-                "SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT, ADAPTER_NOTES FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS ORDER BY SCHEMA_NAME ASC",
+                "SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT_SCHEMA, ADAPTER_SCRIPT_NAME, ADAPTER_NOTES FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS ORDER BY SCHEMA_NAME ASC",
                 matcher);
     }
 
@@ -84,8 +84,8 @@ public class ExasolMetadata {
      * Verify that the {@code SYS.EXA_ALL_VIRTUAL_SCHEMAS} table is empty.
      */
     public void assertNoVirtualSchema() {
-        assertVirtualSchema(
-                ResultSetStructureMatcher.table(VARCHAR_TYPE, VARCHAR_TYPE, VARCHAR_TYPE, VARCHAR_TYPE).matches());
+        assertVirtualSchema(ResultSetStructureMatcher
+                .table(VARCHAR_TYPE, VARCHAR_TYPE, VARCHAR_TYPE, VARCHAR_TYPE, VARCHAR_TYPE).matches());
     }
 
     private void assertResult(final String sql, final Matcher<ResultSet> matcher) {

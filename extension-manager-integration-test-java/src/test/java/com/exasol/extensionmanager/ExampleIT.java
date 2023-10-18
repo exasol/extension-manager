@@ -30,6 +30,7 @@ class ExampleIT {
 
     @BeforeAll
     static void setup() {
+        System.setProperty("com.exasol.dockerdb.image", "8.23.0");
         exasolTestSetup = new ExasolTestSetupFactory(Path.of("cloud-setup")).getTestSetup();
         setup = ExtensionManagerSetup.create(exasolTestSetup, ExtensionBuilder.createDefaultNpmBuilder(
                 EXTENSION_SOURCE_DIR, EXTENSION_SOURCE_DIR.resolve("dist").resolve(EXTENSION_ID)));
