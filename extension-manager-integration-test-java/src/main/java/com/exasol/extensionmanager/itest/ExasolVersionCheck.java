@@ -18,6 +18,8 @@ public class ExasolVersionCheck {
 
     /**
      * Ensures that the given test setup is connected to a Exasol DB in version 8.
+     * <p>
+     * This executes a SQL query using the given test setup to determine the major version of the database.
      * 
      * @param testSetup test setup to check
      * @throws AssertionError if the major version number is not {@code 8}
@@ -28,7 +30,9 @@ public class ExasolVersionCheck {
     }
 
     /**
-     * Assumes that the given test setup is connected to a Exasol DB in version 8.
+     * Assumes that the given test setup is connected to a Exasol DB in version 8. *
+     * <p>
+     * This executes a SQL query using the given test setup to determine the major version of the database.
      * 
      * @param testSetup test setup to check
      * @throws org.opentest4j.TestAbortedException if the major version number is not {@code 8}

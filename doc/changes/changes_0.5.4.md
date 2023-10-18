@@ -9,6 +9,8 @@ Starting with this release, Extension Manager requires Exasol 8. Also integratio
 To skip tests on non v8 versions, you can use the following new method:
 
 ```java
+import com.exasol.extensionmanager.itest;
+// ...
 ExasolVersionCheck.assumeExasolVersion8(exasolTestSetup)
 ```
 

@@ -61,7 +61,21 @@ See [`ExampleIT.java`](../extension-manager-integration-test-java/src/test/java/
 
 Depending on the requirements of your extension you might also need to upload the adapter JAR or a JDBC driver to BucketFS in `@BeforeAll`.
 
-#### Features of class `ExtensionManagerSetup`
+#### Preconditions for Using EITFJ
+
+EM only works with Exasol DB version 8 or later and does not support 7.1. `ExtensionManagerSetup.create()` verifies the correct DB version by executing a query against the given Exasol test setup.
+
+When you test your project also with Exasol version 7.1, you can use the following code to skip the extension integration tests for version 7.1:
+
+```java
+import com.exasol.extensionmanager.itest;
+// ...
+exasolTestSetup = ...
+ExasolVersionCheck.assumeExasolVersion8(exasolTestSetup);
+setup = ExtensionManagerSetup.create(exasolTestSetup, /* ... */);
+```
+
+#### Features of Class `ExtensionManagerSetup`
 
 Class `ExtensionManagerSetup` offers the following useful features:
 
@@ -82,4 +96,3 @@ EITFJ works without additional configuration. During development you can however
 * `buildExtension`: Set this to `false` in order to skip building the extension definition before the tests. Use this to speedup tests when the extension definition is not modified.
 * `buildExtensionManager`: Set this to `false` to skip building/installing the extension manager binary. Use this to speedup tests when extension manager is not modified.
 * `extensionManagerVersion`: Version of EM to use during tests. By default EITFJ uses the same version as the version defined in `pom.xml` for `extension-manager-integration-test-java`. Changing this is not recommended.
-

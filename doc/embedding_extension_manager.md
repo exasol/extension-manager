@@ -1,10 +1,10 @@
-# Embedding Extension Manager in Other Go Programs
+# Embedding Extension Manager in Another Application
 
-This page describes how to integrate Extension Manager functionality into another Go program.
+This page describes how to integrate Extension Manager functionality into another Go application.
 
 ## Embedding the REST API
 
-You can embed the Extension Manager's REST API in other programs that use the [Nightapes/go-rest](https://github.com/Nightapes/go-rest) library:
+You can embed the Extension Manager's REST API in another Go application that uses the [Nightapes/go-rest](https://github.com/Nightapes/go-rest) library:
 
 ```go
 // Create an instance of `openapi.API`
@@ -25,7 +25,7 @@ if err != nil {
 
 ## Embedding the Extension Controller
 
-If you want to directly use the extension controller in your application you can use the following code as an example:
+If you want to directly use the extension controller in your Go application you can use the following code as an example:
 
 ```go
 // Create a new configuration
