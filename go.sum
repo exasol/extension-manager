@@ -4,7 +4,7 @@ github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
 github.com/Nightapes/go-rest v0.3.3 h1:KLG03xaZTTWcespjkKVr3y68COUFRXGkk8mAdQmuYUg=
 github.com/Nightapes/go-rest v0.3.3/go.mod h1:WnZV/kT1D86U1uMALXlWsmHMwx8OcJdIdoY/D+CyC9E=
-github.com/antchfx/xmlquery v1.3.17 h1:d0qWjPp/D+vtRw7ivCwT5ApH/3CkQU8JOeo3245PpTk=
+github.com/antchfx/xmlquery v1.3.18 h1:FSQ3wMuphnPPGJOFhvc+cRQ2CT/rUj4cyQXkJcjOwz0=
 github.com/antchfx/xpath v1.2.4 h1:dW1HB/JxKvGtJ9WyVGJ0sIoEcqftV3SqIstujI+B9XY=
 github.com/chzyer/logex v1.2.0/go.mod h1:9+9sk7u7pGNWYMkh0hdiL++6OeibzJccyQU4p4MedaY=
 github.com/chzyer/readline v1.5.0/go.mod h1:x22KAscuvRqlLoK9CsoYsmxoXZMMFVyOl86cAH8qUic=
@@ -29,8 +29,8 @@ github.com/exasol/error-reporting-go v0.2.0 h1:nKIe4zYiTHbYrKJRlSNJcmGjTJCZredDh
 github.com/exasol/error-reporting-go v0.2.0/go.mod h1:lUzRJqKLiSuYpqRUN2LVyj08WeHzhMEC/8Gmgtuqh1Y=
 github.com/exasol/exasol-driver-go v1.0.3 h1:Q2rnp8Zlh2Ef8fqjskRNH/3cq/alIsGdSwS7orKF2Nc=
 github.com/exasol/exasol-driver-go v1.0.3/go.mod h1:5lkVe9phxZ6u/IYginlXwHXfHxQyHhd2Msa4rMA3Hno=
-github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.3 h1:Jzv/j8yAIJgTaP1s+YazLbPTWhgBH+skcCsA1FaHKhQ=
-github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.3/go.mod h1:Ct3IjYbM/04a5fF6hlK4HVKDdsf1hROiJxJNoe6CIiI=
+github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.4 h1:HlA5nlIu8fZveE9NwsoKH2/5aMMao9GoCnb8X+oCPC4=
+github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.4/go.mod h1:cP/zgvSSXK6h15k+GoL6PfaFWGvQN/FU5wRvZnQGbwQ=
 github.com/gabriel-vasile/mimetype v1.4.3 h1:in2uUcidCuFcDKtdcBxlR0rJ1+fsokWf+uqxgUFjbI0=
 github.com/gabriel-vasile/mimetype v1.4.3/go.mod h1:d8uq/6HKRL6CGdk+aubisF/M5GcPfT7nKyLpA0lbSSk=
 github.com/go-chi/chi/v5 v5.0.10 h1:rLz5avzKpjqxrYwXNfmjkrYYXOyLJd37pz53UFHC6vk=

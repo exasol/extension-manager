@@ -20,6 +20,12 @@ ExasolVersionCheck.assumeExasolVersion8(exasolTestSetup)
 
 ## Dependency Updates
 
+### Extension-manager
+
+#### Compile Dependency Updates
+
+* Updated `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.3.3` to `v0.3.4`
+
 ### Extension Integration Tests Library
 
 #### Compile Dependency Updates
