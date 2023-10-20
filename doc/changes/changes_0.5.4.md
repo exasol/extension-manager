@@ -1,4 +1,4 @@
-# Extension Manager 0.5.4, released 2023-10-19
+# Extension Manager 0.5.4, released 2023-10-20
 
 Code name: Migrate to Exasol 8
 
