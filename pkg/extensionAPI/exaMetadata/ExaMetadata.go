@@ -102,39 +102,6 @@ func readScriptRow(result *sql.Rows) (*ExaScriptRow, error) {
 }
 
 func readExaAllVirtualSchemasTable(tx *sql.Tx) (*ExaVirtualSchemasTable, error) {
-	majorVersion, err := getExasolMajorVersion(tx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to find db version: %w", err)
-	}
-	if majorVersion == "8" {
-		return readExaAllVirtualSchemasTableV8(tx)
-	} else {
-		return readExaAllVirtualSchemasTableV7(tx)
-	}
-}
-
-func getExasolMajorVersion(tx *sql.Tx) (string, error) {
-	result, err := tx.Query("SELECT PARAM_VALUE FROM SYS.EXA_METADATA WHERE PARAM_NAME='databaseMajorVersion'")
-	if err != nil {
-		return "", fmt.Errorf("querying exasol version failed: %w", err)
-	}
-	defer result.Close()
-	if !result.Next() {
-		if result.Err() != nil {
-			return "", fmt.Errorf("failed to iterate exasol version: %w", result.Err())
-		}
-		return "", fmt.Errorf("no result found for exasol version query")
-	}
-	var majorVersion string
-	err = result.Scan(&majorVersion)
-	if err != nil {
-		return "", fmt.Errorf("failed to read exasol version result: %w", err)
-	}
-	return majorVersion, nil
-}
-
-// This reads virtual schemas from the metadata tables of Exasol version 8.
-func readExaAllVirtualSchemasTableV8(tx *sql.Tx) (*ExaVirtualSchemasTable, error) {
 	result, err := tx.Query(`
 SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT_SCHEMA, ADAPTER_SCRIPT_NAME, ADAPTER_NOTES
 FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS`)
@@ -151,35 +118,6 @@ FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS`)
 		err := result.Scan(&row.Name, &row.Owner, &row.AdapterScriptSchema, &row.AdapterScriptName, &row.AdapterNotes)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read row of SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
-		}
-		rows = append(rows, row)
-	}
-	return &ExaVirtualSchemasTable{Rows: rows}, nil
-}
-
-// This reads virtual schemas from the metadata tables of Exasol version 7.1.
-func readExaAllVirtualSchemasTableV7(tx *sql.Tx) (*ExaVirtualSchemasTable, error) {
-	result, err := tx.Query(`
-SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT, ADAPTER_NOTES
-FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS`)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
-	}
-	defer result.Close()
-	rows := make([]ExaVirtualSchemaRow, 0)
-	for result.Next() {
-		if result.Err() != nil {
-			return nil, fmt.Errorf("failed to iterate SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", result.Err())
-		}
-		var row ExaVirtualSchemaRow
-		var adapterScriptSchemaAndName string
-		err := result.Scan(&row.Name, &row.Owner, &adapterScriptSchemaAndName, &row.AdapterNotes)
-		if err != nil {
-			return nil, fmt.Errorf("failed to read row of SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
-		}
-		row.AdapterScriptSchema, row.AdapterScriptName, err = extractSchemaAndName(adapterScriptSchemaAndName)
-		if err != nil {
-			return nil, err
 		}
 		rows = append(rows, row)
 	}

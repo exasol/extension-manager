@@ -25,8 +25,13 @@ This API is documented via Swagger. In order to view it, checkout this repo, run
 * [Changelog](doc/changes/changelog.md)
 * [Software Design (online, main branch)](https://exasol.github.io/extension-manager/design.html)
 * [Software Design (local)](doc/design.md)
-* [Developer Guide](doc/developer_guide.md)
 * [Dependencies](dependencies.md)
+
+### Developer Guides
+
+* [Guide for embedding Extension Manager in another application](doc/embedding_extension_manager.md)
+* [Guide for developing an extension for Extension Manager](doc/extension_developer_guide.md)
+* [Guide for developing Extension Manager](doc/developer_guide.md)
 
 ## Related Projects
 
