@@ -108,24 +108,24 @@ func New() (*Validator, error) {
 func (v *Validator) ValidateParameters(definitions []ParameterDefinition, params extensionAPI.ParameterValues) (failedValidations []ValidationResult, err error) {
 	result := make([]ValidationResult, 0)
 	for _, def := range definitions {
-		name, r, err := v.validateParameter(def, params)
+		name, id, validationResult, err := v.validateParameter(def, params)
 		if err != nil {
 			return nil, err
 		}
-		if !r.Success {
-			result = append(result, ValidationResult{Success: false, Message: fmt.Sprintf("Failed to validate parameter '%s': %s", name, r.Message)})
+		if !validationResult.Success {
+			result = append(result, ValidationResult{Success: false, Message: fmt.Sprintf("Failed to validate parameter '%s' (%s): %s", name, id, validationResult.Message)})
 		}
 	}
 	return result, nil
 }
 
-func (v *Validator) validateParameter(def ParameterDefinition, params extensionAPI.ParameterValues) (string, *ValidationResult, error) {
+func (v *Validator) validateParameter(def ParameterDefinition, params extensionAPI.ParameterValues) (paramName, paramId string, validationResult *ValidationResult, validationError error) {
 	paramValue := findParamValue(params, def.Id)
 	result, err := v.ValidateParameter(def, paramValue)
 	if err != nil {
-		return "", nil, fmt.Errorf("failed to validate parameter value %q with id %q using definition %v", paramValue, def.Id, def.RawDefinition)
+		return "", "", nil, fmt.Errorf("failed to validate parameter value %q with id %q using definition %v", paramValue, def.Id, def.RawDefinition)
 	}
-	return def.Name, result, nil
+	return def.Name, def.Id, result, nil
 }
 
 func findParamValue(params extensionAPI.ParameterValues, id string) string {

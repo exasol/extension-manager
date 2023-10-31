@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 // SimpleSQLClient allows extensions to execute statements and queries against the database.
@@ -33,10 +35,10 @@ func (c *exasolSqlClient) Execute(query string, args ...any) (sql.Result, error)
 	if err != nil {
 		return nil, err
 	}
-
+	logrus.Tracef("Executing SQL statement %q...", query)
 	result, err := c.transaction.ExecContext(c.ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("error executing statement %q: %w", query, err)
+		return nil, fmt.Errorf("error executing statement '%s': %w", query, err)
 	}
 	return result, nil
 }
@@ -48,9 +50,10 @@ func (c *exasolSqlClient) Query(query string, args ...any) (result *QueryResult,
 	if err != nil {
 		return nil, err
 	}
+	logrus.Tracef("Executing SQL query %q...", query)
 	rows, err := c.transaction.QueryContext(c.ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("error executing statement %q: %w", query, err)
+		return nil, fmt.Errorf("error executing query '%s': %w", query, err)
 	}
 	defer func() {
 		if err := closeRows(rows); err != nil {

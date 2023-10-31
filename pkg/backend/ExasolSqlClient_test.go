@@ -54,7 +54,7 @@ func (suite *ExasolSqlClientUTestSuite) TestExecuteFails() {
 	client := suite.createClient()
 	suite.dbMock.ExpectExec("invalid").WillReturnError(fmt.Errorf("expected"))
 	result, err := client.Execute("invalid")
-	suite.EqualError(err, "error executing statement \"invalid\": expected")
+	suite.EqualError(err, "error executing statement 'invalid': expected")
 	suite.Nil(result)
 }
 
@@ -98,7 +98,7 @@ func (suite *ExasolSqlClientUTestSuite) TestQueryFails() {
 	client := suite.createClient()
 	suite.dbMock.ExpectQuery("invalid").WillReturnError(fmt.Errorf("expected")).RowsWillBeClosed()
 	result, err := client.Query("invalid")
-	suite.EqualError(err, "error executing statement \"invalid\": expected")
+	suite.EqualError(err, "error executing query 'invalid': expected")
 	suite.Nil(result)
 }
 

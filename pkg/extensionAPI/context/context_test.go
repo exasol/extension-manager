@@ -71,7 +71,7 @@ func (suite *ContextSuite) TestSqlClientQuerySuccess() {
 func (suite *ContextSuite) TestSqlClientQueryFailure() {
 	ctx := suite.createContext()
 	suite.dbMock.ExpectQuery("invalid").WillReturnError(fmt.Errorf("mock error"))
-	suite.PanicsWithError("error executing statement \"invalid\": mock error", func() {
+	suite.PanicsWithError("error executing query 'invalid': mock error", func() {
 		ctx.SqlClient.Query("invalid")
 	})
 }
@@ -88,7 +88,7 @@ func (suite *ContextSuite) TestSqlClientExecuteSuccess() {
 func (suite *ContextSuite) TestSqlClientExecuteFailure() {
 	ctx := suite.createContext()
 	suite.dbMock.ExpectExec("invalid").WillReturnError(fmt.Errorf("mock error"))
-	suite.PanicsWithError("error executing statement \"invalid\": mock error", func() {
+	suite.PanicsWithError("error executing statement 'invalid': mock error", func() {
 		ctx.SqlClient.Execute("invalid")
 	})
 }

@@ -352,7 +352,7 @@ func (suite *ControllerUTestSuite) TestInstallQueryFails() {
 	suite.dbMock.ExpectExec("install extension").WillReturnError(fmt.Errorf("mock"))
 	suite.dbMock.ExpectRollback()
 	err := suite.controller.InstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
-	suite.EqualError(err, "failed to install extension \"testing-extension.js\": error executing statement \"install extension\": mock")
+	suite.EqualError(err, "failed to install extension \"testing-extension.js\": error executing statement 'install extension': mock")
 }
 
 func (suite *ControllerUTestSuite) TestInstallFails() {
@@ -409,7 +409,7 @@ func (suite *ControllerUTestSuite) TestUninstallQueryFails() {
 	suite.dbMock.ExpectExec("uninstall extension version ver").WillReturnError(fmt.Errorf("mock"))
 	suite.dbMock.ExpectRollback()
 	err := suite.controller.UninstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
-	suite.EqualError(err, "failed to uninstall extension \"testing-extension.js\": error executing statement \"uninstall extension version ver\": mock")
+	suite.EqualError(err, "failed to uninstall extension \"testing-extension.js\": error executing statement 'uninstall extension version ver': mock")
 }
 
 func (suite *ControllerUTestSuite) TestUninstallFails() {
@@ -498,7 +498,7 @@ func (suite *ControllerUTestSuite) TestUpgradeQueryFails() {
 	suite.dbMock.ExpectExec("upgrade extension").WillReturnError(fmt.Errorf("mock"))
 	suite.dbMock.ExpectRollback()
 	result, err := suite.controller.UpgradeExtension(mockContext(), suite.db, EXTENSION_ID)
-	suite.EqualError(err, "failed to upgrade extension \"testing-extension.js\": error executing statement \"upgrade extension\": mock")
+	suite.EqualError(err, "failed to upgrade extension \"testing-extension.js\": error executing statement 'upgrade extension': mock")
 	suite.Nil(result)
 }
 
@@ -533,7 +533,7 @@ func (suite *ControllerUTestSuite) TestCreateInstanceInvalidParameters() {
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectRollback()
 	instance, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{})
-	suite.EqualError(err, `invalid parameters: Failed to validate parameter 'My param': This is a required parameter.`)
+	suite.EqualError(err, `invalid parameters: Failed to validate parameter 'My param' (param1): This is a required parameter.`)
 	suite.Nil(instance)
 }
 
