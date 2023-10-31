@@ -59,7 +59,9 @@ public class PreviousVersionManager {
             downloadToFile(url, tempFile);
             uploadToBucketFs(fileName, tempFile);
         } finally {
-            deleteFile(tempFile);
+            if (Files.exists(tempFile)) {
+                deleteFile(tempFile);
+            }
         }
     }
 
