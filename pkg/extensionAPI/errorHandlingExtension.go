@@ -122,6 +122,21 @@ func (e *JsExtension) AddInstance(context *context.ExtensionContext, version str
 	return e.extension.AddInstance(context, version, params), nil
 }
 
+func (e *JsExtension) SupportsListInstances(context *context.ExtensionContext, version string) bool {
+	if e.extension.FindInstances == nil {
+		return false
+	}
+	_, err := e.ListInstances(context, version)
+	if err == nil {
+		return true
+	}
+	apiErr := apiErrors.UnwrapAPIError(err)
+	if apiErr == nil {
+		return true
+	}
+	return apiErr.Status != 404
+}
+
 func (e *JsExtension) ListInstances(context *context.ExtensionContext, version string) (instances []*JsExtInstance, errorResult error) {
 	if e.extension.FindInstances == nil {
 		return nil, e.unsupportedFunction("findInstances")

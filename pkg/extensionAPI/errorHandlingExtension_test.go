@@ -206,6 +206,27 @@ func (suite *ErrorHandlingExtensionSuite) TestUpgradeUnsupported() {
 	suite.Nil(instance)
 }
 
+// SupportsListInstances
+
+func (suite *ErrorHandlingExtensionSuite) TestSupportsListInstancesUnsupportedMissingMethod() {
+	suite.rawExtension.FindInstances = nil
+	suite.False(suite.extension.SupportsListInstances(createMockContext(), "version"))
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestSupportsListInstancesSupportedReturnsResult() {
+	suite.rawExtension.FindInstances = func(context *context.ExtensionContext, version string) []*JsExtInstance {
+		return []*JsExtInstance{}
+	}
+	suite.True(suite.extension.SupportsListInstances(createMockContext(), "version"))
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestSupportsListInstancesSupportedReturnsGeneralError() {
+	suite.rawExtension.FindInstances = func(context *context.ExtensionContext, version string) []*JsExtInstance {
+		panic(mockErrorMessage)
+	}
+	suite.True(suite.extension.SupportsListInstances(createMockContext(), "version"))
+}
+
 // ListInstances
 
 func (suite *ErrorHandlingExtensionSuite) TestListInstancesSuccessful() {
