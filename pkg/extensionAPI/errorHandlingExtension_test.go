@@ -206,6 +206,30 @@ func (suite *ErrorHandlingExtensionSuite) TestUpgradeUnsupported() {
 	suite.Nil(instance)
 }
 
+// ListInstances
+
+func (suite *ErrorHandlingExtensionSuite) TestListInstancesSuccessful() {
+	suite.rawExtension.FindInstances = func(context *context.ExtensionContext, version string) []*JsExtInstance {
+		return []*JsExtInstance{{Id: "inst1", Name: "Inst 1"}, {Id: "inst2", Name: "Inst 2"}}
+	}
+	instances, err := suite.extension.ListInstances(createMockContext(), "version")
+	suite.NoError(err)
+	suite.Equal([]*JsExtInstance{{Id: "inst1", Name: "Inst 1"}, {Id: "inst2", Name: "Inst 2"}}, instances)
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestListInstancesFails() {
+	suite.rawExtension.FindInstances = func(context *context.ExtensionContext, version string) []*JsExtInstance {
+		panic(mockErrorMessage)
+	}
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestListInstancesUnsupported() {
+	suite.rawExtension.FindInstances = nil
+	instances, err := suite.extension.ListInstances(createMockContext(), "version")
+	suite.EqualError(err, `extension "id" does not support operation "findInstances"`)
+	suite.Nil(instances)
+}
+
 // AddInstance
 
 func (suite *ErrorHandlingExtensionSuite) TestAddInstanceSuccessful() {
