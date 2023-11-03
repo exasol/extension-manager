@@ -212,7 +212,7 @@ func (suite *ControllerITestSuite) TestAddInstanceInvalidParameters() {
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	instance, err := suite.createController().CreateInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "0.1.0", []ParameterValue{})
-	suite.EqualError(err, `invalid parameters: Failed to validate parameter 'My param': This is a required parameter.`)
+	suite.EqualError(err, `invalid parameters: Failed to validate parameter 'My param' (param1): This is a required parameter.`)
 	suite.Nil(instance)
 }
 
@@ -255,7 +255,7 @@ func (suite *ControllerITestSuite) TestDeleteInstancesFailsWithInvalidQuery() {
 		WithDeleteInstanceFunc("context.sqlClient.execute('drop instance')").
 		Build().WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	err := suite.createController().DeleteInstance(mockContext(), suite.exasol.GetConnection(), EXTENSION_ID, "extVersion", "instId")
-	suite.ErrorContains(err, `failed to delete instance "instId" for extension "testing-extension.js": error executing statement "drop instance"`)
+	suite.ErrorContains(err, `failed to delete instance "instId" for extension "testing-extension.js": error executing statement 'drop instance'`)
 }
 
 func (suite *ControllerITestSuite) TestDeleteInstancesSucceeds() {

@@ -13,6 +13,8 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+const mockErrorMessage = "mock error"
+
 type ErrorHandlingExtensionSuite struct {
 	suite.Suite
 	rawExtension *rawJsExtension
@@ -87,10 +89,10 @@ func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsSuccessful() {
 
 func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsFailure() {
 	suite.rawExtension.FindInstallations = func(context *context.ExtensionContext, metadata *exaMetadata.ExaMetadata) []*JsExtInstallation {
-		panic("mock error")
+		panic(mockErrorMessage)
 	}
 	installations, err := suite.extension.FindInstallations(createMockContext(), createMetaData())
-	suite.EqualError(err, "failed to find installations for extension \"id\": mock error")
+	suite.EqualError(err, `failed to find installations for extension "id": `+mockErrorMessage)
 	suite.Nil(installations)
 }
 
@@ -115,10 +117,10 @@ func (suite *ErrorHandlingExtensionSuite) GetParameterDefinitionsSuccessful() {
 
 func (suite *ErrorHandlingExtensionSuite) GetParameterDefinitionsFailure() {
 	suite.rawExtension.GetParameterDefinitions = func(context *context.ExtensionContext, version string) []interface{} {
-		panic("mock error")
+		panic(mockErrorMessage)
 	}
 	installations, err := suite.extension.GetParameterDefinitions(createMockContext(), "ext-version")
-	suite.EqualError(err, "failed to get parameter definitions for extension \"id\": mock error")
+	suite.EqualError(err, "failed to get parameter definitions for extension \"id\": "+mockErrorMessage)
 	suite.Nil(installations)
 }
 
@@ -141,10 +143,10 @@ func (suite *ErrorHandlingExtensionSuite) TestInstallSuccessful() {
 
 func (suite *ErrorHandlingExtensionSuite) TestInstallFailure() {
 	suite.rawExtension.Install = func(context *context.ExtensionContext, version string) {
-		panic("mock error")
+		panic(mockErrorMessage)
 	}
 	err := suite.extension.Install(createMockContext(), "version")
-	suite.EqualError(err, "failed to install extension \"id\": mock error")
+	suite.EqualError(err, `failed to install extension "id": `+mockErrorMessage)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestInstallUnsupported() {
@@ -165,10 +167,10 @@ func (suite *ErrorHandlingExtensionSuite) TestUninstallSuccessful() {
 
 func (suite *ErrorHandlingExtensionSuite) TestUninstallFailure() {
 	suite.rawExtension.Uninstall = func(context *context.ExtensionContext, version string) {
-		panic("mock error")
+		panic(mockErrorMessage)
 	}
 	err := suite.extension.Uninstall(createMockContext(), "version")
-	suite.EqualError(err, "failed to uninstall extension \"id\": mock error")
+	suite.EqualError(err, `failed to uninstall extension "id": `+mockErrorMessage)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestUninstallUnsupported() {
@@ -190,10 +192,10 @@ func (suite *ErrorHandlingExtensionSuite) TestUpgradeSuccessful() {
 
 func (suite *ErrorHandlingExtensionSuite) TestUpgradeFails() {
 	suite.rawExtension.Upgrade = func(context *context.ExtensionContext) *JsUpgradeResult {
-		panic("mock error")
+		panic(mockErrorMessage)
 	}
 	result, err := suite.extension.Upgrade(createMockContext())
-	suite.EqualError(err, "failed to upgrade extension \"id\": mock error")
+	suite.EqualError(err, `failed to upgrade extension "id": `+mockErrorMessage)
 	suite.Nil(result)
 }
 
@@ -217,10 +219,10 @@ func (suite *ErrorHandlingExtensionSuite) TestAddInstanceSuccessful() {
 
 func (suite *ErrorHandlingExtensionSuite) TestAddInstanceFails() {
 	suite.rawExtension.AddInstance = func(context *context.ExtensionContext, version string, params *ParameterValues) *JsExtInstance {
-		panic("mock error")
+		panic(mockErrorMessage)
 	}
 	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{Values: []ParameterValue{}})
-	suite.EqualError(err, "failed to add instance for extension \"id\": mock error")
+	suite.EqualError(err, `failed to add instance for extension "id": `+mockErrorMessage)
 	suite.Nil(instance)
 }
 
@@ -243,10 +245,10 @@ func (suite *ErrorHandlingExtensionSuite) TestDeleteInstanceSuccessful() {
 
 func (suite *ErrorHandlingExtensionSuite) TestDeleteInstanceFails() {
 	suite.rawExtension.DeleteInstance = func(context *context.ExtensionContext, version, instanceId string) {
-		panic("mock error")
+		panic(mockErrorMessage)
 	}
 	err := suite.extension.DeleteInstance(createMockContext(), "version", "instance-id")
-	suite.EqualError(err, "failed to delete instance \"instance-id\" for extension \"id\": mock error")
+	suite.EqualError(err, `failed to delete instance "instance-id" for extension "id": `+mockErrorMessage)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestDeleteInstanceUnsupported() {
@@ -257,47 +259,41 @@ func (suite *ErrorHandlingExtensionSuite) TestDeleteInstanceUnsupported() {
 
 // convertError
 
-func (suite *ErrorHandlingExtensionSuite) TestConvertError_nonErrorObject() {
-	err := suite.extension.convertError("msg", "dummyError")
-	suite.EqualError(err, "msg: dummyError")
-	suite.Equal("*errors.errorString", fmt.Sprintf("%T", err))
+func (suite *ErrorHandlingExtensionSuite) TestConvertErrorNonErrorObject() {
+	err := suite.extension.convertError("msg", mockErrorMessage)
+	suite.assertErrorStringError(err, "msg: "+mockErrorMessage)
 }
 
-func (suite *ErrorHandlingExtensionSuite) TestConvertError_errorObject() {
-	err := suite.extension.convertError("msg", fmt.Errorf("dummyError"))
-	suite.EqualError(err, "msg: dummyError")
-	suite.Equal("*errors.errorString", fmt.Sprintf("%T", err))
+func (suite *ErrorHandlingExtensionSuite) TestConvertErrorErrorObject() {
+	err := suite.extension.convertError("msg", fmt.Errorf(mockErrorMessage))
+	suite.assertErrorStringError(err, "msg: "+mockErrorMessage)
 }
 
-func (suite *ErrorHandlingExtensionSuite) TestConvertError_nilGojaException() {
+func (suite *ErrorHandlingExtensionSuite) TestConvertErrorNilGojaException() {
 	var exception goja.Exception
 	err := suite.extension.convertError("msg", &exception)
-	suite.Equal("*errors.errorString", fmt.Sprintf("%T", err))
-	suite.EqualError(err, "msg: <nil>")
+	suite.assertErrorStringError(err, "msg: <nil>")
 }
 
-func (suite *ErrorHandlingExtensionSuite) TestConvertError_genericJavaScriptError() {
+func (suite *ErrorHandlingExtensionSuite) TestConvertErrorGenericJavaScriptError() {
 	exception := suite.getGojaException("throw Error('jsError')")
 	err := suite.extension.convertError("msg", exception)
-	suite.Equal("*errors.errorString", fmt.Sprintf("%T", err))
-	suite.EqualError(err, "msg: Error: jsError at <eval>:1:1(3)")
+	suite.assertErrorStringError(err, "msg: Error: jsError at Error (native)")
 }
 
-func (suite *ErrorHandlingExtensionSuite) TestConvertError_genericNewJavaScriptError() {
+func (suite *ErrorHandlingExtensionSuite) TestConvertErrorGenericNewJavaScriptError() {
 	exception := suite.getGojaException("throw new Error('jsError')")
 	err := suite.extension.convertError("msg", exception)
-	suite.Equal("*errors.errorString", fmt.Sprintf("%T", err))
-	suite.EqualError(err, "msg: Error: jsError at <eval>:1:7(2)")
+	suite.assertErrorStringError(err, "msg: Error: jsError at <eval>:1:7(2)")
 }
 
-func (suite *ErrorHandlingExtensionSuite) TestConvertError_JavaScriptString() {
+func (suite *ErrorHandlingExtensionSuite) TestConvertErrorJavaScriptString() {
 	exception := suite.getGojaException("throw 'jsError'")
 	err := suite.extension.convertError("msg", exception)
-	suite.Equal("*errors.errorString", fmt.Sprintf("%T", err))
-	suite.EqualError(err, "msg: jsError at <eval>:1:1(1)")
+	suite.assertErrorStringError(err, "msg: jsError at <eval>:1:1(1)")
 }
 
-func (suite *ErrorHandlingExtensionSuite) TestConvertError_JavaScriptErrorWithStatus() {
+func (suite *ErrorHandlingExtensionSuite) TestConvertErrorJavaScriptErrorWithStatus() {
 	exception := suite.getGojaException("const err = new Error('jsError'); err.status = 400; throw err")
 	err := suite.extension.convertError("msg", exception)
 	suite.Equal("*apiErrors.APIError", fmt.Sprintf("%T", err))
@@ -320,4 +316,9 @@ func (suite *ErrorHandlingExtensionSuite) getGojaException(javaScript string) *g
 func createMetaData() *exaMetadata.ExaMetadata {
 	//nolint:exhaustruct // Not necessary for test data
 	return &exaMetadata.ExaMetadata{}
+}
+
+func (suite *ErrorHandlingExtensionSuite) assertErrorStringError(err error, expectedMessage string) {
+	suite.Equal("*errors.errorString", fmt.Sprintf("%T", err))
+	suite.EqualError(err, expectedMessage)
 }

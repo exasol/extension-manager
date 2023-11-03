@@ -251,8 +251,8 @@ public class ExtensionManagerClient {
         final ApiException exception = assertThrows(ApiException.class, executable);
         final String errorMessage = exception.getMessage();
         final JsonObject error = parseErrorMessageJson(errorMessage);
-        assertAll(() -> assertThat(error.getJsonString("message").getString(), messageMatcher),
-                () -> assertThat(error.getJsonNumber("code").intValue(), statusMatcher));
+        assertAll(() -> assertThat("error message", error.getJsonString("message").getString(), messageMatcher),
+                () -> assertThat("status code", error.getJsonNumber("code").intValue(), statusMatcher));
     }
 
     JsonObject parseErrorMessageJson(final String errorMessage) throws MultipleFailuresError {

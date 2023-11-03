@@ -90,4 +90,14 @@ class PreviousVersionManagerTest {
                 "filename");
         verify(bucketMock).uploadFile(any(), eq("filename"));
     }
+
+    @Test
+    void prepareBucketFsFileFailsForMissingFile()
+            throws FileNotFoundException, BucketAccessException, TimeoutException {
+        final URI url = URI.create(BASE_URL + "/missing-file");
+        final IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> testee.prepareBucketFsFile(url, "filename"));
+        assertThat(exception.getMessage(), equalTo(
+                "E-EMIT-39: Download of 'https://extensions-internal.exasol.com/missing-file' failed with non-OK status 404"));
+    }
 }

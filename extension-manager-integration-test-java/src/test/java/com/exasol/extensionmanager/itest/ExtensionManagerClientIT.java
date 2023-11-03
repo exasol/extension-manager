@@ -106,7 +106,7 @@ class ExtensionManagerClientIT {
         final List<ParameterValue> params = emptyList();
         final ApiException exception = assertThrows(ApiException.class, () -> client.createInstance(params));
         assertThat(exception.getMessage(), containsString(
-                "invalid parameters: Failed to validate parameter 'Param 1': This is a required parameter."));
+                "invalid parameters: Failed to validate parameter 'Param 1' (param1): This is a required parameter."));
     }
 
     @Test
@@ -118,7 +118,8 @@ class ExtensionManagerClientIT {
     @Test
     void assertRequestFails() {
         client.assertRequestFails(() -> client.createInstance(emptyList()),
-                "invalid parameters: Failed to validate parameter 'Param 1': This is a required parameter.", 400);
+                "invalid parameters: Failed to validate parameter 'Param 1' (param1): This is a required parameter.",
+                400);
     }
 
     @Test

@@ -57,13 +57,13 @@ func (suite *ExasolSqlClientITestSuite) TestExecuteWithArgumentSucceeds() {
 
 func (suite *ExasolSqlClientITestSuite) TestExecuteFails() {
 	result, err := suite.client.Execute("invalid")
-	suite.ErrorContains(err, "error executing statement \"invalid\": E-EGOD-11: execution failed")
+	suite.ErrorContains(err, "error executing statement 'invalid': E-EGOD-11: execution failed")
 	suite.Nil(result)
 }
 
 func (suite *ExasolSqlClientITestSuite) TestQueryFails() {
 	result, err := suite.client.Query("invalid")
-	suite.ErrorContains(err, "error executing statement \"invalid\": E-EGOD-11: execution failed")
+	suite.ErrorContains(err, "error executing query 'invalid': E-EGOD-11: execution failed")
 	suite.Nil(result)
 }
 

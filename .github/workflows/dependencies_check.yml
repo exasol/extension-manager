@@ -1,12 +1,15 @@
-name: Dependencies Check
+name: Report Security Issues for Repository
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 2 * * *"
 
 jobs:
-  build:
+  report_security_issues:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
 
     steps:
       - uses: actions/checkout@v4
@@ -20,5 +23,17 @@ jobs:
         # This avoids this error:
         # [ERROR] Failed to execute goal on project extension-manager-integration-test-java: Could not resolve dependencies for project com.exasol:extension-manager-integration-test-java:jar:0.2.3: Could not find artifact com.exasol:extension-manager-client-java:jar:0.2.3 in central
         run: mvn --batch-mode install -DskipTests
-      - name: Checking dependencies for vulnerabilities
-        run: mvn --batch-mode org.sonatype.ossindex.maven:ossindex-maven-plugin:audit -f pom.xml
+
+      - name: Generate ossindex report
+        run: |
+          mvn org.sonatype.ossindex.maven:ossindex-maven-plugin:audit \
+              org.sonatype.ossindex.maven:ossindex-maven-plugin:audit-aggregate \
+              -Dossindex.reportFile=$(pwd)/ossindex-report.json \
+              -Dossindex.fail=false
+
+      - name: Report Security Issues
+        uses: exasol/python-toolbox/.github/actions/security-issues@main
+        with:
+          format: "maven"
+          command: "cat ossindex-report.json"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
