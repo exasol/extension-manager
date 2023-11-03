@@ -49,6 +49,9 @@ func convertVersions(versions []rawJsExtensionVersion) []JsExtensionVersion {
 }
 
 func (e *JsExtension) GetParameterDefinitions(context *context.ExtensionContext, version string) (definitions []interface{}, errorResult error) {
+	if e.extension.GetParameterDefinitions == nil {
+		return nil, e.unsupportedFunction("getParameterDefinitions")
+	}
 	defer func() {
 		if err := recover(); err != nil {
 			errorResult = e.convertError(fmt.Sprintf("failed to get parameter definitions for extension %q", e.Id), err)

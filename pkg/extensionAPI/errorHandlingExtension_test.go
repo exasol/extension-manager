@@ -230,6 +230,33 @@ func (suite *ErrorHandlingExtensionSuite) TestListInstancesUnsupported() {
 	suite.Nil(instances)
 }
 
+// GetParameterDefinitions
+
+func (suite *ErrorHandlingExtensionSuite) TetsGetParameterDefinitionsSuccessful() {
+	suite.rawExtension.GetParameterDefinitions = func(context *context.ExtensionContext, version string) []interface{} {
+		return []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}}
+	}
+	instance, err := suite.extension.GetParameterDefinitions(createMockContext(), "version")
+	suite.NoError(err)
+	suite.Equal([]interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}}, instance)
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestGetParameterDefinitionsFails() {
+	suite.rawExtension.GetParameterDefinitions = func(context *context.ExtensionContext, version string) []interface{} {
+		panic(mockErrorMessage)
+	}
+	instance, err := suite.extension.GetParameterDefinitions(createMockContext(), "version")
+	suite.EqualError(err, `failed to get parameter definitions for extension "id": `+mockErrorMessage)
+	suite.Nil(instance)
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestGetParameterDefinitionsUnsupported() {
+	suite.rawExtension.GetParameterDefinitions = nil
+	instance, err := suite.extension.GetParameterDefinitions(createMockContext(), "version")
+	suite.EqualError(err, `extension "id" does not support operation "getParameterDefinitions"`)
+	suite.Nil(instance)
+}
+
 // AddInstance
 
 func (suite *ErrorHandlingExtensionSuite) TestAddInstanceSuccessful() {
