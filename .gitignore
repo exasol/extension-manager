@@ -78,3 +78,5 @@ vendor/
 
 /registry-upload/node_modules/
 /registry-upload/dist/
+
+**/__debug_bin*
