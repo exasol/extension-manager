@@ -92,3 +92,9 @@ This release fixes a misleading error in the integration test framework. When `P
 * Updated `@typescript-eslint/parser:^6.8.0` to `^6.9.1`
 * Updated `@types/node:^20.8.6` to `^20.8.10`
 * Updated `@typescript-eslint/eslint-plugin:^6.8.0` to `^6.9.1`
+
+### ParameterValidator
+
+#### Development Dependency Updates
+
+* Updated `esbuild:0.19.2` to `0.19.5`
