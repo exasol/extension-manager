@@ -1,4 +1,4 @@
-# Extension Manager 0.5.5, released 2023-11-03
+# Extension Manager 0.5.5, released 2023-11-06
 
 Code name: Fix misleading error
 
