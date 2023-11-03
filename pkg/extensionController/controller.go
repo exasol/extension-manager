@@ -234,7 +234,7 @@ func (*controllerImpl) verifyNoInstances(extension *extensionAPI.JsExtension, ex
 	}
 	if len(instances) > 0 {
 		instanceNames := concatInstanceNames(instances)
-		return apiErrors.NewBadRequestErrorF("%d instance(s) exist: %s", len(instances), instanceNames)
+		return apiErrors.NewBadRequestErrorF("cannot uninstall extension because %d instance(s) still exist: %s", len(instances), instanceNames)
 	}
 	return nil
 }

@@ -437,7 +437,7 @@ func (suite *ControllerUTestSuite) TestUninstallFailsWhenInstanceExists() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
 	err := suite.controller.UninstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
-	suite.EqualError(err, "cannot uninstall extension: 2 instance(s) exist: ext-name1, ext-name2")
+	suite.ErrorContains(err, "cannot uninstall extension because 2 instance(s) still exist: ext-name1, ext-name2")
 	apiErr := apiErrors.UnwrapAPIError(err)
 	if apiErr != nil {
 		suite.Equal(400, apiErr.Status)
