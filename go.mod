@@ -3,15 +3,15 @@ module github.com/exasol/extension-manager
 go 1.20
 
 require (
-	github.com/dop251/goja v0.0.0-20231014103939-873a1496dc8e
-	github.com/dop251/goja_nodejs v0.0.0-20230914102007-198ba9a8b098
+	github.com/dop251/goja v0.0.0-20231027120936-b396bb4c349d
+	github.com/dop251/goja_nodejs v0.0.0-20231022114343-5c1f9037c9ab
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/mod v0.13.0
 )
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/exasol/exasol-driver-go v1.0.3
+	github.com/exasol/exasol-driver-go v1.0.4
 	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.4
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/kinbiko/jsonassert v1.1.1
@@ -24,7 +24,7 @@ require (
 	github.com/go-openapi/jsonpointer v0.20.0 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-openapi/spec v0.20.9 // indirect
-	github.com/google/pprof v0.0.0-20230926050212-f7f687d19a98 // indirect
+	github.com/google/pprof v0.0.0-20231101202521-4ca4178f5c7a // indirect
 	github.com/iancoleman/orderedmap v0.3.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect

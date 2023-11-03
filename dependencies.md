@@ -150,9 +150,9 @@
 | [@exasol/extension-parameter-validator][91] | MIT     |
 
 [0]: https://github.com/Nightapes/go-rest/blob/v0.3.3/LICENSE
-[1]: https://github.com/dop251/goja/blob/873a1496dc8e/LICENSE
-[2]: https://github.com/dop251/goja_nodejs/blob/198ba9a8b098/LICENSE
-[3]: https://github.com/exasol/exasol-driver-go/blob/v1.0.3/LICENSE
+[1]: https://github.com/dop251/goja/blob/b396bb4c349d/LICENSE
+[2]: https://github.com/dop251/goja_nodejs/blob/5c1f9037c9ab/LICENSE
+[3]: https://github.com/exasol/exasol-driver-go/blob/v1.0.4/LICENSE
 [4]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.3.4/go-client/LICENSE
 [5]: https://github.com/go-chi/chi/blob/v5.0.10/LICENSE
 [6]: https://github.com/sirupsen/logrus/blob/v1.9.3/LICENSE
@@ -220,7 +220,7 @@
 [68]: https://github.com/exasol/hamcrest-resultset-matcher/
 [69]: https://github.com/exasol/hamcrest-resultset-matcher/blob/main/LICENSE
 [70]: https://github.com/mockito/mockito
-[71]: https://github.com/mockito/mockito/blob/main/LICENSE
+[71]: https://opensource.org/licenses/MIT
 [72]: https://github.com/exasol/udf-debugging-java/
 [73]: https://github.com/exasol/udf-debugging-java/blob/main/LICENSE
 [74]: https://github.com/exasol/maven-project-version-getter/
@@ -228,16 +228,16 @@
 [76]: http://www.slf4j.org
 [77]: https://maven.apache.org/surefire/maven-failsafe-plugin/
 [78]: https://maven.apache.org/plugins/maven-jar-plugin/
-[79]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.101.1.tgz
+[79]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.104.0.tgz
 [80]: https://github.com/aws/aws-cdk
 [81]: https://registry.npmjs.org/constructs/-/constructs-10.3.0.tgz
 [82]: https://github.com/aws/constructs
 [83]: https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz
 [84]: https://github.com/evanw/node-source-map-support
-[85]: https://registry.npmjs.org/@aws-sdk/client-cloudformation/-/client-cloudformation-3.429.0.tgz
+[85]: https://registry.npmjs.org/@aws-sdk/client-cloudformation/-/client-cloudformation-3.441.0.tgz
 [86]: https://github.com/aws/aws-sdk-js-v3
-[87]: https://registry.npmjs.org/@aws-sdk/client-cloudfront/-/client-cloudfront-3.429.0.tgz
-[88]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.429.0.tgz
+[87]: https://registry.npmjs.org/@aws-sdk/client-cloudfront/-/client-cloudfront-3.441.0.tgz
+[88]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.441.0.tgz
 [89]: https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.3.tgz
 [90]: https://github.com/follow-redirects/follow-redirects
 [91]: https://registry.npmjs.org/@exasol/extension-parameter-validator/-/extension-parameter-validator-0.3.0.tgz
