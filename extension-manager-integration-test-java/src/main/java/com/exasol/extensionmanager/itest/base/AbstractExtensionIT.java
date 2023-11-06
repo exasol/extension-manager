@@ -20,9 +20,14 @@ import com.exasol.extensionmanager.itest.*;
  * installing/listing/uninstalling extensions and creating/listing/deleting instances.
  */
 public abstract class AbstractExtensionIT {
+    private static final String VIRTUAL_SCHEMA_NAME_PARAM_NAME = "base-vs.virtual-schema-name";
+    private static final String EXTENSION_SCHEMA = "EXA_EXTENSIONS";
     private static final Logger LOG = Logger.getLogger(AbstractExtensionIT.class.getName());
     private final ExtensionITConfig config;
 
+    /**
+     * Create a new base integration test.
+     */
     protected AbstractExtensionIT() {
         this.config = createConfig();
     }
@@ -34,13 +39,30 @@ public abstract class AbstractExtensionIT {
      */
     protected abstract ExtensionITConfig createConfig();
 
+    /**
+     * Get the {@link ExtensionManagerSetup extension manager setup}.
+     * 
+     * @return extension manager setup
+     */
     protected abstract ExtensionManagerSetup getSetup();
 
+    /**
+     * Assert that the expected {@code SCRIPT}s exist after installing the extension.
+     */
     protected abstract void assertScriptsExist();
 
+    /**
+     * Prepare test data for creating a new virtual schema using this extension. This contains e.g. creating a table in
+     * the source schema or uploading test files to a cloud storage.
+     */
     protected abstract void prepareInstance();
 
-    protected abstract void verifyVirtualTableContainsData(final String virtualSchemaName);
+    /**
+     * Assert that a newly created virtual schema contains the expected data.
+     * 
+     * @param virtualSchemaName name of the virtual schema to check
+     */
+    protected abstract void assertVirtualSchemaContent(final String virtualSchemaName);
 
     /**
      * Create the same {@code SCRIPT}s as the extension would do. This is used to check that the extension also detects
@@ -114,9 +136,9 @@ public abstract class AbstractExtensionIT {
         final ExtensionDetailsResponse extensionDetails = getSetup().client()
                 .getExtensionDetails(config.getCurrentVersion());
         final List<ParamDefinition> parameters = extensionDetails.getParameterDefinitions();
-        final ParamDefinition param1 = new ParamDefinition().id("base-vs.virtual-schema-name")
+        final ParamDefinition param1 = new ParamDefinition().id(VIRTUAL_SCHEMA_NAME_PARAM_NAME)
                 .name("Virtual Schema name").definition(Map.of( //
-                        "id", "base-vs.virtual-schema-name", //
+                        "id", VIRTUAL_SCHEMA_NAME_PARAM_NAME, //
                         "name", "Virtual Schema name", //
                         "description", "Name for the new virtual schema", //
                         "placeholder", "MY_VIRTUAL_SCHEMA", //
@@ -159,7 +181,7 @@ public abstract class AbstractExtensionIT {
     @Test
     public void uninstallRemovesAdapters() {
         getSetup().client().install();
-        assertAll(() -> assertScriptsExist(), //
+        assertAll(this::assertScriptsExist, //
                 () -> assertThat(getSetup().client().getInstallations(), hasSize(1)));
         getSetup().client().uninstall(config.getCurrentVersion());
         assertAll(() -> assertThat(getSetup().client().getInstallations(), is(empty())),
@@ -187,13 +209,13 @@ public abstract class AbstractExtensionIT {
         previousVersion.prepare();
         previousVersion.install();
         prepareInstance();
-        final String virtualSchemaName = "my_VS";
+        final String virtualSchemaName = "my_upgrading_VS";
         createInstance(previousVersion.getExtensionId(), config.getPreviousVersion(), virtualSchemaName);
-        verifyVirtualTableContainsData("my_VS");
+        assertVirtualSchemaContent(virtualSchemaName);
         assertInstalledVersion(config.getPreviousVersion(), previousVersion);
         previousVersion.upgrade();
         assertInstalledVersion(config.getCurrentVersion(), previousVersion);
-        verifyVirtualTableContainsData("my_VS");
+        assertVirtualSchemaContent(virtualSchemaName);
     }
 
     private PreviousExtensionVersion createPreviousVersion() {
@@ -220,7 +242,7 @@ public abstract class AbstractExtensionIT {
         getSetup().client().install();
         prepareInstance();
         createInstance("my_VS");
-        verifyVirtualTableContainsData("my_VS");
+        assertVirtualSchemaContent("my_VS");
     }
 
     @Test
@@ -231,7 +253,7 @@ public abstract class AbstractExtensionIT {
     @Test
     public void listInstances() {
         getSetup().client().install();
-        final String name = "my_virtual_SCHEMA";
+        final String name = "my_virtual_SCHEMA1";
         createInstance(name);
         assertThat(getSetup().client().listInstances(config.getCurrentVersion()),
                 allOf(hasSize(1), equalTo(List.of(new Instance().id(name).name(name)))));
@@ -244,15 +266,17 @@ public abstract class AbstractExtensionIT {
         createInstance(name);
 
         getSetup().exasolMetadata()
-                .assertConnection(table()
-                        .row("MY_VIRTUAL_SCHEMA_CONNECTION", "Created by Extension Manager for "
-                                + config.getExtensionName() + " v" + config.getCurrentVersion() + " my_virtual_SCHEMA")
-                        .matches());
+                .assertConnection(table().row("MY_VIRTUAL_SCHEMA_CONNECTION", getInstanceComment(name)).matches());
         getSetup().exasolMetadata().assertVirtualSchema(table()
-                .row("my_virtual_SCHEMA", "SYS", "EXA_EXTENSIONS", not(emptyOrNullString()), not(emptyOrNullString()))
+                .row("my_virtual_SCHEMA", "SYS", EXTENSION_SCHEMA, not(emptyOrNullString()), not(emptyOrNullString()))
                 .matches());
         assertThat(getSetup().client().listInstances(),
                 allOf(hasSize(1), equalTo(List.of(new Instance().id(name).name(name)))));
+    }
+
+    private String getInstanceComment(final String instanceName) {
+        return "Created by Extension Manager for " + config.getExtensionName() + " v" + config.getCurrentVersion() + " "
+                + instanceName;
     }
 
     @Test
@@ -263,18 +287,12 @@ public abstract class AbstractExtensionIT {
 
         assertAll(
                 () -> getSetup().exasolMetadata()
-                        .assertConnection(table()
-                                .row("VS1_CONNECTION",
-                                        "Created by Extension Manager for " + config.getExtensionName() + " v"
-                                                + config.getCurrentVersion() + " vs1")
-                                .row("VS2_CONNECTION",
-                                        "Created by Extension Manager for " + config.getExtensionName() + " v"
-                                                + config.getCurrentVersion() + " vs2")
-                                .matches()),
+                        .assertConnection(table().row("VS1_CONNECTION", getInstanceComment("vs1"))
+                                .row("VS2_CONNECTION", getInstanceComment("vs2")).matches()),
                 () -> getSetup().exasolMetadata()
                         .assertVirtualSchema(table()
-                                .row("vs1", "SYS", "EXA_EXTENSIONS", not(emptyOrNullString()), not(emptyOrNullString()))
-                                .row("vs2", "SYS", "EXA_EXTENSIONS", not(emptyOrNullString()), not(emptyOrNullString()))
+                                .row("vs1", "SYS", EXTENSION_SCHEMA, not(emptyOrNullString()), not(emptyOrNullString()))
+                                .row("vs2", "SYS", EXTENSION_SCHEMA, not(emptyOrNullString()), not(emptyOrNullString()))
                                 .matches()),
 
                 () -> assertThat(getSetup().client().listInstances(), allOf(hasSize(2),
@@ -286,13 +304,10 @@ public abstract class AbstractExtensionIT {
         getSetup().client().install();
         createInstance("Quoted'schema");
         assertAll(
-                () -> getSetup().exasolMetadata()
-                        .assertConnection(table().row("QUOTED'SCHEMA_CONNECTION",
-                                "Created by Extension Manager for S3 Virtual Schema v" + config.getCurrentVersion()
-                                        + " Quoted'schema")
-                                .matches()),
+                () -> getSetup().exasolMetadata().assertConnection(
+                        table().row("QUOTED'SCHEMA_CONNECTION", getInstanceComment("Quoted'schema")).matches()),
                 () -> getSetup().exasolMetadata().assertVirtualSchema(table()
-                        .row("Quoted'schema", "SYS", "EXA_EXTENSIONS", "S3_FILES_ADAPTER", not(emptyOrNullString()))
+                        .row("Quoted'schema", "SYS", EXTENSION_SCHEMA, "S3_FILES_ADAPTER", not(emptyOrNullString()))
                         .matches()));
     }
 
@@ -337,7 +352,7 @@ public abstract class AbstractExtensionIT {
 
     private List<ParameterValue> createValidParameters(final String virtualSchemaName) {
         final List<ParameterValue> parameters = new ArrayList<>();
-        parameters.add(param("base-vs.virtual-schema-name", virtualSchemaName));
+        parameters.add(param(VIRTUAL_SCHEMA_NAME_PARAM_NAME, virtualSchemaName));
         parameters.addAll(createValidParameterValues());
         return parameters;
     }

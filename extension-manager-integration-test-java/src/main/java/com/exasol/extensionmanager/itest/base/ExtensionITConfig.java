@@ -26,34 +26,81 @@ public class ExtensionITConfig {
         this.previousVersionJarFile = builder.previousVersionJarFile;
     }
 
+    /**
+     * Get the project name, e.g. {@code s3-document-files-virtual-schema}.
+     * 
+     * @return project name
+     */
     public String getProjectName() {
         return projectName;
     }
 
+    /**
+     * Get the ID of this extension, e.g. {@code s3-vs-extension.js}.
+     * 
+     * @return ID of this extension
+     */
     public String getExtensionId() {
         return extensionId;
     }
 
+    /**
+     * Get the user visible name of this extension, e.g. {@code S3 Virtual Schema}.
+     * 
+     * @return name of this extension
+     */
     public String getExtensionName() {
         return extensionName;
     }
 
+    /**
+     * Get the user visible description of this extension, e.g. {@code Virtual Schema for document files on AWS S3}.
+     * 
+     * @return description of this extension
+     */
     public String getExtensionDescription() {
         return extensionDescription;
     }
 
+    /**
+     * Get the current version of this extension, e.g. {@code 1.2.3}.
+     * 
+     * @return current version
+     */
     public String getCurrentVersion() {
         return currentVersion;
     }
 
+    /**
+     * Get the total number of parameters for this extension, incl. virtual schema name.
+     * 
+     * @return total number of parameters
+     */
     public int getExpectedParameterCount() {
         return expectedParameterCount;
     }
 
+    /**
+     * Get the previous version of this extension, e.g. {@code 1.2.2}.
+     * <p>
+     * This may be {@code null} if you are just creating the first version of the extension. Once you release a second
+     * version, update this to return the previous version.
+     * 
+     * @return previous version of this extension
+     */
     public String getPreviousVersion() {
         return previousVersion;
     }
 
+    /**
+     * Get the previous version's JAR file name of this extension, e.g.
+     * {@code document-files-virtual-schema-dist-7.3.6-s3-1.2.3.jar}.
+     * <p>
+     * This may be {@code null} if you are just creating the first version of the extension. Once you release a second
+     * version, update this to return the JAR file name.
+     * 
+     * @return previous version's JAR file
+     */
     public String getPreviousVersionJarFile() {
         return previousVersionJarFile;
     }
@@ -81,13 +128,14 @@ public class ExtensionITConfig {
         private String previousVersionJarFile;
 
         private Builder() {
+            // empty by intention
         }
 
         /**
          * Set the project name, e.g. {@code s3-document-files-virtual-schema}.
          *
          * @param projectName field to set
-         * @return {@link this} for fluent programming
+         * @return {@code this} for fluent programming
          */
         public Builder projectName(final String projectName) {
             this.projectName = projectName;
@@ -97,7 +145,8 @@ public class ExtensionITConfig {
         /**
          * Set the ID of this extension, e.g. {@code s3-vs-extension.js}.
          *
-         * @param extensionId field to set {@link this} for fluent programming
+         * @param extensionId field to set
+         * @return {@code this} for fluent programming
          */
         public Builder extensionId(final String extensionId) {
             this.extensionId = extensionId;
@@ -107,7 +156,8 @@ public class ExtensionITConfig {
         /**
          * Set the user visible name of this extension, e.g. {@code S3 Virtual Schema}.
          *
-         * @param extensionName field to set {@link this} for fluent programming
+         * @param extensionName field to set
+         * @return {@code this} for fluent programming
          */
         public Builder extensionName(final String extensionName) {
             this.extensionName = extensionName;
@@ -117,7 +167,8 @@ public class ExtensionITConfig {
         /**
          * Set the user visible description of this extension, e.g. {@code Virtual Schema for document files on AWS S3}.
          *
-         * @param extensionDescription field to set {@link this} for fluent programming
+         * @param extensionDescription field to set
+         * @return {@code this} for fluent programming
          */
         public Builder extensionDescription(final String extensionDescription) {
             this.extensionDescription = extensionDescription;
@@ -127,7 +178,8 @@ public class ExtensionITConfig {
         /**
          * Set the current version of this extension, e.g. {@code 1.2.3}.
          *
-         * @param currentVersion field to set {@link this} for fluent programming
+         * @param currentVersion field to set
+         * @return {@code this} for fluent programming
          */
         public Builder currentVersion(final String currentVersion) {
             this.currentVersion = currentVersion;
@@ -137,7 +189,8 @@ public class ExtensionITConfig {
         /**
          * Set the total number of parameters for this extension, incl. virtual schema name.
          *
-         * @param expectedParameterCount field to set {@link this} for fluent programming
+         * @param expectedParameterCount field to set
+         * @return {@code this} for fluent programming
          */
         public Builder expectedParameterCount(final int expectedParameterCount) {
             this.expectedParameterCount = expectedParameterCount;
@@ -150,7 +203,8 @@ public class ExtensionITConfig {
          * This may be {@code null} if you are just creating the first version of the extension. Once you release a
          * second version, update this to return the previous version.
          *
-         * @param previousVersion field to set {@link this} for fluent programming
+         * @param previousVersion field to set
+         * @return {@code this} for fluent programming
          */
         public Builder previousVersion(final String previousVersion) {
             this.previousVersion = previousVersion;
@@ -158,13 +212,14 @@ public class ExtensionITConfig {
         }
 
         /**
-         * Get the previous version's JAR file name of this extension, e.g.
+         * Set the previous version's JAR file name of this extension, e.g.
          * {@code document-files-virtual-schema-dist-7.3.6-s3-1.2.3.jar}.
          * <p>
          * This may be {@code null} if you are just creating the first version of the extension. Once you release a
          * second version, update this to return the JAR file name.
          *
-         * @param previousVersionJarFile field to set {@link this} for fluent programming
+         * @param previousVersionJarFile field to set
+         * @return {@code this} for fluent programming
          */
         public Builder previousVersionJarFile(final String previousVersionJarFile) {
             this.previousVersionJarFile = previousVersionJarFile;
