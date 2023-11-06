@@ -3,7 +3,7 @@ package com.exasol.extensionmanager.itest.base;
 import java.util.Objects;
 
 /**
- * Configuration for {@link AbstractVirtualSchemaExtensionIT}.
+ * Configuration for {@link AbstractScriptExtensionIT} and {@link AbstractVirtualSchemaExtensionIT}.
  */
 public class ExtensionITConfig {
     private final String projectName;
