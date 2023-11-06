@@ -7,9 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.List;
+import java.util.logging.Logger;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import com.exasol.extensionmanager.client.model.ExtensionsResponseExtension;
 import com.exasol.extensionmanager.client.model.InstallationsResponseInstallation;
@@ -22,6 +22,7 @@ import com.exasol.extensionmanager.itest.PreviousExtensionVersion;
  */
 public abstract class AbstractScriptExtensionIT {
 
+    private static final Logger LOG = Logger.getLogger(AbstractScriptExtensionIT.class.getName());
     private final ExtensionITConfig config;
 
     /**
@@ -55,11 +56,19 @@ public abstract class AbstractScriptExtensionIT {
      */
     protected abstract void assertScriptsExist();
 
+    @BeforeEach
+    void logTestName(final TestInfo testInfo) {
+        LOG.info(">>> " + testInfo.getDisplayName());
+    }
+
     @AfterEach
     void cleanup() {
         getSetup().cleanup();
     }
 
+    /**
+     * Verify that extension is listed with expected properties.
+     */
     @Test
     void listExtensions() {
         final List<ExtensionsResponseExtension> extensions = getSetup().client().getExtensions();
@@ -72,11 +81,17 @@ public abstract class AbstractScriptExtensionIT {
                 () -> assertThat(extensions.get(0).getDescription(), equalTo(config.getExtensionDescription())));
     }
 
+    /**
+     * Verify that listing installations returns an empty list when there is no installation.
+     */
     @Test
     void getInstallationsReturnsEmptyList() {
         assertThat(getSetup().client().getInstallations(), hasSize(0));
     }
 
+    /**
+     * Verify that listing installations finds {@code SCRIPT}s created by the extension.
+     */
     @Test
     void getInstallationsReturnsResult() {
         getSetup().client().install();
@@ -86,6 +101,9 @@ public abstract class AbstractScriptExtensionIT {
                 .version(config.getCurrentVersion())));
     }
 
+    /**
+     * Verify that installing an unknown version fails.
+     */
     @Test
     void installingWrongVersionFails() {
         getSetup().client().assertRequestFails(() -> getSetup().client().install("wrongVersion"),
@@ -94,12 +112,18 @@ public abstract class AbstractScriptExtensionIT {
         getSetup().exasolMetadata().assertNoScripts();
     }
 
+    /**
+     * Verify that installing the extension creates expected {@code SCRIPT}s.
+     */
     @Test
     void installCreatesScripts() {
         getSetup().client().install();
         assertScriptsExist();
     }
 
+    /**
+     * Verify that installing the extension twice creates expected {@code SCRIPT}s.
+     */
     @Test
     void installingTwiceCreatesScripts() {
         getSetup().client().install();
@@ -107,24 +131,37 @@ public abstract class AbstractScriptExtensionIT {
         assertScriptsExist();
     }
 
+    /**
+     * Verify that installed {@code SCRIPT}s work as expected.
+     */
     @Test
-    void exportImportWorksAfterInstallation() {
+    void installedScriptsWork() {
         getSetup().client().install();
         assertScriptsWork();
     }
 
+    /**
+     * Verify that uninstalling an extension that is not yet install does not fail.
+     */
     @Test
     void uninstallExtensionWithoutInstallation() {
         assertDoesNotThrow(() -> getSetup().client().uninstall());
     }
 
+    /**
+     * Verify that uninstalling the extension removes all {@code SCRIPT}s.
+     */
     @Test
     void uninstallExtensionRemovesScripts() {
         getSetup().client().install();
+        assertScriptsExist();
         getSetup().client().uninstall();
         getSetup().exasolMetadata().assertNoScripts();
     }
 
+    /**
+     * Verify that uninstalling an unknown version fails.
+     */
     @Test
     void uninstallWrongVersionFails() {
         getSetup().client().assertRequestFails(() -> getSetup().client().uninstall("wrongVersion"),
@@ -132,24 +169,36 @@ public abstract class AbstractScriptExtensionIT {
                 equalTo(404));
     }
 
+    /**
+     * Verify that listing instances is not supported.
+     */
     @Test
     void listingInstancesNotSupported() {
         getSetup().client().assertRequestFails(() -> getSetup().client().listInstances(),
                 equalTo("Finding instances not supported"), equalTo(404));
     }
 
+    /**
+     * Verify that creating instances is not supported.
+     */
     @Test
     void creatingInstancesNotSupported() {
         getSetup().client().assertRequestFails(() -> getSetup().client().createInstance(emptyList()),
                 equalTo("Creating instances not supported"), equalTo(404));
     }
 
+    /**
+     * Verify that deleting instances is not supported.
+     */
     @Test
     void deletingInstancesNotSupported() {
         getSetup().client().assertRequestFails(() -> getSetup().client().deleteInstance("inst"),
                 equalTo("Deleting instances not supported"), equalTo(404));
     }
 
+    /**
+     * Verify that getting extension details is not supported.
+     */
     @Test
     void getExtensionDetailsInstancesNotSupported() {
         getSetup().client().assertRequestFails(
@@ -178,6 +227,9 @@ public abstract class AbstractScriptExtensionIT {
                 "Extension is already installed in latest version " + config.getCurrentVersion(), 412);
     }
 
+    /**
+     * Verify that upgrading from the previous version works and the scripts continue working.
+     */
     @Test
     void upgradeFromPreviousVersion() {
         final PreviousExtensionVersion previousVersion = createPreviousVersion();
