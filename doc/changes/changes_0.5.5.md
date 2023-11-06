@@ -6,6 +6,12 @@ Code name: Fix misleading error
 
 This release fixes a misleading error in the integration test framework. When `PreviousVersionManager.prepareBucketFsFile()` is called with an invalid URL it fails with `NoSuchFileException` file exception that hides the actual exception about the invalid URL. The release also improves other error messages in Extension Manager and fixes a bug that didn't let you uninstall extensions that don't support instances (e.g. because they only require scripts).
 
+The release also adds a base class that simplifies writing integration tests for extensions.
+
+## Features
+
+* #159: Extracted common code for extension integration tests
+
 ## Bugfixes
 
 * #156: Fixed misleading error in `PreviousVersionManager.prepareBucketFsFile()`
