@@ -88,6 +88,9 @@ public abstract class AbstractExtensionIT {
         getSetup().cleanup();
     }
 
+    /**
+     * Verify that extension is listed with expected properties.
+     */
     @Test
     public void listExtensions() {
         final List<ExtensionsResponseExtension> extensions = getSetup().client().getExtensions();
@@ -100,12 +103,18 @@ public abstract class AbstractExtensionIT {
                 () -> assertThat(extensions.get(0).getDescription(), equalTo(config.getExtensionDescription())));
     }
 
+    /**
+     * Verify that listing installations returns an empty list when there is no installation.
+     */
     @Test
     public void listInstallationsEmpty() {
         final List<InstallationsResponseInstallation> installations = getSetup().client().getInstallations();
         assertThat(installations, hasSize(0));
     }
 
+    /**
+     * Verify that listing installations finds manually created {@code SCRIPT}s.
+     */
     @Test
     public void listInstallationsFindsMatchingScripts() {
         createScripts();
@@ -115,6 +124,9 @@ public abstract class AbstractExtensionIT {
                 () -> assertThat(installations.get(0).getVersion(), equalTo(config.getCurrentVersion())));
     }
 
+    /**
+     * Verify that listing installations finds {@code SCRIPT}s created by the extension.
+     */
     @Test
     public void listInstallationsFindsOwnInstallation() {
         getSetup().client().install();
@@ -124,6 +136,9 @@ public abstract class AbstractExtensionIT {
                 () -> assertThat(installations.get(0).getVersion(), equalTo(config.getCurrentVersion())));
     }
 
+    /**
+     * Verify that getting extension details for an unknown version fails.
+     */
     @Test
     public void getExtensionDetailsFailsForUnknownVersion() {
         getSetup().client().assertRequestFails(() -> getSetup().client().getExtensionDetails("unknownVersion"),
@@ -131,6 +146,9 @@ public abstract class AbstractExtensionIT {
                 equalTo(404));
     }
 
+    /**
+     * Verify that getting extension details returns parameter definitions.
+     */
     @Test
     public void getExtensionDetailsSuccess() {
         final ExtensionDetailsResponse extensionDetails = getSetup().client()
@@ -151,12 +169,18 @@ public abstract class AbstractExtensionIT {
                 () -> assertThat(parameters.get(0), equalTo(param1)));
     }
 
+    /**
+     * Verify that installing the extension creates expected {@code SCRIPT}s.
+     */
     @Test
     public void installCreatesScripts() {
         getSetup().client().install();
         assertScriptsExist();
     }
 
+    /**
+     * Verify that installing the extension twice creates expected {@code SCRIPT}s.
+     */
     @Test
     public void installWorksIfCalledTwice() {
         getSetup().client().install();
@@ -164,6 +188,9 @@ public abstract class AbstractExtensionIT {
         assertScriptsExist();
     }
 
+    /**
+     * Verify that creating an instance without required parameters fails.
+     */
     @Test
     public void createInstanceFailsWithoutRequiredParameters() {
         final ExtensionManagerClient client = getSetup().client();
@@ -173,11 +200,17 @@ public abstract class AbstractExtensionIT {
                 equalTo(400));
     }
 
+    /**
+     * Verify that uninstalling an extension that is not yet install does not fail.
+     */
     @Test
     public void uninstallSucceedsForNonExistingInstallation() {
         assertDoesNotThrow(() -> getSetup().client().uninstall());
     }
 
+    /**
+     * Verify that uninstalling the extension removes all {@code SCRIPT}s.
+     */
     @Test
     public void uninstallRemovesAdapters() {
         getSetup().client().install();
@@ -188,6 +221,9 @@ public abstract class AbstractExtensionIT {
                 () -> getSetup().exasolMetadata().assertNoScripts());
     }
 
+    /**
+     * Verify that upgrading the extension fails when it is not installed.
+     */
     @Test
     public void upgradeFailsWhenNotInstalled() {
         getSetup().client().assertRequestFails(() -> getSetup().client().upgrade(), //
@@ -196,6 +232,9 @@ public abstract class AbstractExtensionIT {
                 equalTo(412));
     }
 
+    /**
+     * Verify that upgrading fails when the latest version is already installed.
+     */
     @Test
     public void upgradeFailsWhenAlreadyUpToDate() {
         getSetup().client().install();
@@ -203,6 +242,9 @@ public abstract class AbstractExtensionIT {
                 "Extension is already installed in latest version " + config.getCurrentVersion(), 412);
     }
 
+    /**
+     * Verify that upgrading from the previous version works and the instance continues working.
+     */
     @Test
     public void upgradeFromPreviousVersion() {
         final PreviousExtensionVersion previousVersion = createPreviousVersion();
@@ -237,6 +279,9 @@ public abstract class AbstractExtensionIT {
                                 .id(previousVersion.getExtensionId())));
     }
 
+    /**
+     * Verify that a created {@code VIRTUAL SCHEMA} works as expected.
+     */
     @Test
     public void virtualSchemaWorks() {
         getSetup().client().install();
@@ -245,11 +290,26 @@ public abstract class AbstractExtensionIT {
         assertVirtualSchemaContent("my_VS");
     }
 
+    /**
+     * Verify that listing instances returns an empty list when no instance exists.
+     */
     @Test
     public void listingInstancesNoVSExists() {
+        getSetup().client().install();
         assertThat(getSetup().client().listInstances(), hasSize(0));
     }
 
+    /**
+     * Verify that listing instances returns an empty list when no instance exists.
+     */
+    @Test
+    public void listingInstancesNotInstalled() {
+        assertThat(getSetup().client().listInstances(), hasSize(0));
+    }
+
+    /**
+     * Verify that listing finds the created instance.
+     */
     @Test
     public void listInstances() {
         getSetup().client().install();
@@ -259,19 +319,22 @@ public abstract class AbstractExtensionIT {
                 allOf(hasSize(1), equalTo(List.of(new Instance().id(name).name(name)))));
     }
 
+    /**
+     * Verify that creating an instance creates the expected {@code CONNECTION} and {@code VIRTUAL SCHEMA}.
+     */
     @Test
     public void createInstanceCreatesDbObjects() {
         getSetup().client().install();
         final String name = "my_virtual_SCHEMA";
         createInstance(name);
-
-        getSetup().exasolMetadata()
-                .assertConnection(table().row("MY_VIRTUAL_SCHEMA_CONNECTION", getInstanceComment(name)).matches());
-        getSetup().exasolMetadata().assertVirtualSchema(table()
-                .row("my_virtual_SCHEMA", "SYS", EXTENSION_SCHEMA, not(emptyOrNullString()), not(emptyOrNullString()))
-                .matches());
-        assertThat(getSetup().client().listInstances(),
-                allOf(hasSize(1), equalTo(List.of(new Instance().id(name).name(name)))));
+        assertAll(
+                () -> getSetup().exasolMetadata().assertConnection(
+                        table().row("MY_VIRTUAL_SCHEMA_CONNECTION", getInstanceComment(name)).matches()),
+                () -> getSetup().exasolMetadata()
+                        .assertVirtualSchema(table().row("my_virtual_SCHEMA", "SYS", EXTENSION_SCHEMA,
+                                not(emptyOrNullString()), not(emptyOrNullString())).matches()),
+                () -> assertThat(getSetup().client().listInstances(),
+                        allOf(hasSize(1), equalTo(List.of(new Instance().id(name).name(name))))));
     }
 
     private String getInstanceComment(final String instanceName) {
@@ -279,12 +342,14 @@ public abstract class AbstractExtensionIT {
                 + instanceName;
     }
 
+    /**
+     * Verify that creating two instances with different name works.
+     */
     @Test
     public void createTwoInstances() {
         getSetup().client().install();
         createInstance("vs1");
         createInstance("vs2");
-
         assertAll(
                 () -> getSetup().exasolMetadata()
                         .assertConnection(table().row("VS1_CONNECTION", getInstanceComment("vs1"))
@@ -294,28 +359,46 @@ public abstract class AbstractExtensionIT {
                                 .row("vs1", "SYS", EXTENSION_SCHEMA, not(emptyOrNullString()), not(emptyOrNullString()))
                                 .row("vs2", "SYS", EXTENSION_SCHEMA, not(emptyOrNullString()), not(emptyOrNullString()))
                                 .matches()),
-
                 () -> assertThat(getSetup().client().listInstances(), allOf(hasSize(2),
                         equalTo(List.of(new Instance().id("vs1").name("vs1"), new Instance().id("vs2").name("vs2"))))));
     }
 
+    /**
+     * Verify that creating an instance with a name containing a single quote works.
+     */
     @Test
     public void createInstanceWithSingleQuote() {
         getSetup().client().install();
-        createInstance("Quoted'schema");
+        final String virtualSchemaName = "Quoted'schema";
+        createInstance(virtualSchemaName);
         assertAll(
                 () -> getSetup().exasolMetadata().assertConnection(
-                        table().row("QUOTED'SCHEMA_CONNECTION", getInstanceComment("Quoted'schema")).matches()),
+                        table().row("QUOTED'SCHEMA_CONNECTION", getInstanceComment(virtualSchemaName)).matches()),
                 () -> getSetup().exasolMetadata().assertVirtualSchema(table()
-                        .row("Quoted'schema", "SYS", EXTENSION_SCHEMA, "S3_FILES_ADAPTER", not(emptyOrNullString()))
+                        .row(virtualSchemaName, "SYS", EXTENSION_SCHEMA, "S3_FILES_ADAPTER", not(emptyOrNullString()))
                         .matches()));
     }
 
+    /**
+     * Verify that deleting an instance succeeds when extension is not installed.
+     */
+    @Test
+    public void deleteInstanceWhenNotInstalled() {
+        assertDoesNotThrow(() -> getSetup().client().deleteInstance("instance"));
+    }
+
+    /**
+     * Verify that deleting a non-existing instance works.
+     */
     @Test
     public void deleteNonExistingInstance() {
+        getSetup().client().install();
         assertDoesNotThrow(() -> getSetup().client().deleteInstance("no-such-instance"));
     }
 
+    /**
+     * Verify that deleting an instance with an unexpected version fails.
+     */
     @Test
     public void deleteFailsForUnknownVersion() {
         getSetup().client().assertRequestFails(
@@ -324,6 +407,9 @@ public abstract class AbstractExtensionIT {
                 equalTo(404));
     }
 
+    /**
+     * Verify that deleting an instance deletes all {@code CONNECTION} and {@code VIRTUAL SCHEMA}.
+     */
     @Test
     public void deleteExistingInstance() {
         getSetup().client().install();
@@ -357,6 +443,13 @@ public abstract class AbstractExtensionIT {
         return parameters;
     }
 
+    /**
+     * Create a new parameter value.
+     * 
+     * @param name  parameter name
+     * @param value parameter value
+     * @return a new parameter value
+     */
     protected ParameterValue param(final String name, final String value) {
         return new ParameterValue().name(name).value(value);
     }
