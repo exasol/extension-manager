@@ -1,14 +1,15 @@
-# Extension Manager 0.5.5, released 2023-??-??
+# Extension Manager 0.5.5, released 2023-11-06
 
 Code name: Fix misleading error
 
 ## Summary
 
-This release fixes a misleading error in the integration test framework. When `PreviousVersionManager.prepareBucketFsFile()` is called with an invalid URL it fails with `NoSuchFileException` file exception that hides the actual exception about the invalid URL. The release also improves other error messages in Extension Manager.
+This release fixes a misleading error in the integration test framework. When `PreviousVersionManager.prepareBucketFsFile()` is called with an invalid URL it fails with `NoSuchFileException` file exception that hides the actual exception about the invalid URL. The release also improves other error messages in Extension Manager and fixes a bug that didn't let you uninstall extensions that don't support instances (e.g. because they only require scripts).
 
 ## Bugfixes
 
 * #156: Fixed misleading error in `PreviousVersionManager.prepareBucketFsFile()`
+* #155: Fixed uninstalling extensions that don't support instances
 
 ## Dependency Updates
 

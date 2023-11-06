@@ -49,6 +49,9 @@ func convertVersions(versions []rawJsExtensionVersion) []JsExtensionVersion {
 }
 
 func (e *JsExtension) GetParameterDefinitions(context *context.ExtensionContext, version string) (definitions []interface{}, errorResult error) {
+	if e.extension.GetParameterDefinitions == nil {
+		return nil, e.unsupportedFunction("getParameterDefinitions")
+	}
 	defer func() {
 		if err := recover(); err != nil {
 			errorResult = e.convertError(fmt.Sprintf("failed to get parameter definitions for extension %q", e.Id), err)
@@ -117,6 +120,25 @@ func (e *JsExtension) AddInstance(context *context.ExtensionContext, version str
 		}
 	}()
 	return e.extension.AddInstance(context, version, params), nil
+}
+
+func (e *JsExtension) SupportsListInstances(context *context.ExtensionContext, version string) bool {
+	if e.extension.FindInstances == nil {
+		return false
+	}
+	_, err := e.ListInstances(context, version)
+	if err == nil {
+		return true
+	}
+	return !isNotFoundError(err)
+}
+
+func isNotFoundError(err error) bool {
+	apiErr := apiErrors.UnwrapAPIError(err)
+	if apiErr == nil {
+		return false
+	}
+	return apiErr.Status == 404
 }
 
 func (e *JsExtension) ListInstances(context *context.ExtensionContext, version string) (instances []*JsExtInstance, errorResult error) {

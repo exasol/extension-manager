@@ -1,6 +1,7 @@
 import {
     BadRequestError,
     InternalServerError,
+    NotFoundError,
     registerExtension
 } from "@exasol/extension-manager-interface";
 
@@ -48,6 +49,10 @@ if (false) {
 if (false) {
     // dummy to keep import
     throw new InternalServerError("dummy");
+}
+if (false) {
+    // dummy to keep import
+    throw new NotFoundError("dummy");
 }
 
 registerExtension(createExtension())

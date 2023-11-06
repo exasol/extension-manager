@@ -217,21 +217,37 @@ func (c *controllerImpl) UninstallExtension(txCtx *transaction.TransactionContex
 		return extensionLoadingFailed(extensionId, err)
 	}
 	extensionCtx := c.createExtensionContext(txCtx)
+	err = c.verifyNoInstances(extension, extensionCtx, extensionVersion)
+	if err != nil {
+		return fmt.Errorf("cannot uninstall extension because instances remain: %w", err)
+	}
+	return extension.Uninstall(extensionCtx, extensionVersion)
+}
+
+func (*controllerImpl) verifyNoInstances(extension *extensionAPI.JsExtension, extensionCtx *context.ExtensionContext, extensionVersion string) error {
+	if !extension.SupportsListInstances(extensionCtx, extensionVersion) {
+		return nil
+	}
 	instances, err := extension.ListInstances(extensionCtx, extensionVersion)
 	if err != nil {
 		return fmt.Errorf("failed to check existing instances: %w", err)
 	}
 	if len(instances) > 0 {
-		instanceNames := ""
-		for _, inst := range instances {
-			if instanceNames != "" {
-				instanceNames += ", "
-			}
-			instanceNames += inst.Name
-		}
+		instanceNames := concatInstanceNames(instances)
 		return apiErrors.NewBadRequestErrorF("cannot uninstall extension because %d instance(s) still exist: %s", len(instances), instanceNames)
 	}
-	return extension.Uninstall(extensionCtx, extensionVersion)
+	return nil
+}
+
+func concatInstanceNames(instances []*extensionAPI.JsExtInstance) string {
+	instanceNames := ""
+	for _, inst := range instances {
+		if instanceNames != "" {
+			instanceNames += ", "
+		}
+		instanceNames += inst.Name
+	}
+	return instanceNames
 }
 
 /* [impl -> dsn~upgrade-extension~1]. */

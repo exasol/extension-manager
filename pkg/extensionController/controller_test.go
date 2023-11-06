@@ -437,12 +437,26 @@ func (suite *ControllerUTestSuite) TestUninstallFailsWhenInstanceExists() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
 	err := suite.controller.UninstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
-	suite.EqualError(err, "cannot uninstall extension because 2 instance(s) still exist: ext-name1, ext-name2")
-	if apiErr, ok := apiErrors.AsAPIError(err); ok {
+	suite.ErrorContains(err, "cannot uninstall extension because 2 instance(s) still exist: ext-name1, ext-name2")
+	apiErr := apiErrors.UnwrapAPIError(err)
+	if apiErr != nil {
 		suite.Equal(400, apiErr.Status)
 	} else {
 		suite.Fail(fmt.Sprintf("expected an APIError but got %T: %v", err, err))
 	}
+}
+
+func (suite *ControllerUTestSuite) TestUninstallSucceedsWhenInstancesNotSupported() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithUninstallFunc("context.sqlClient.execute(`uninstall extension version ${version}`)").
+		WithFindInstancesFunc(`throw new NotFoundError("Finding instances not supported")`).
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	suite.dbMock.ExpectBegin()
+	suite.dbMock.ExpectExec("uninstall extension version ver").WillReturnResult(sqlmock.NewResult(0, 0))
+	suite.dbMock.ExpectCommit()
+	err := suite.controller.UninstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
+	suite.NoError(err)
 }
 
 func (suite *ControllerUTestSuite) TestUninstallFailsListingInstances() {

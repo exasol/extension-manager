@@ -206,6 +206,81 @@ func (suite *ErrorHandlingExtensionSuite) TestUpgradeUnsupported() {
 	suite.Nil(instance)
 }
 
+// SupportsListInstances
+
+func (suite *ErrorHandlingExtensionSuite) TestSupportsListInstancesIsUnsupportedWhenMethodMissing() {
+	suite.rawExtension.FindInstances = nil
+	suite.False(suite.extension.SupportsListInstances(createMockContext(), "version"))
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestSupportsListInstancesSupportedReturnsResult() {
+	suite.rawExtension.FindInstances = func(context *context.ExtensionContext, version string) []*JsExtInstance {
+		return []*JsExtInstance{}
+	}
+	suite.True(suite.extension.SupportsListInstances(createMockContext(), "version"))
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestSupportsListInstancesWhenAGeneralErrorOccurs() {
+	suite.rawExtension.FindInstances = func(context *context.ExtensionContext, version string) []*JsExtInstance {
+		panic(mockErrorMessage)
+	}
+	suite.True(suite.extension.SupportsListInstances(createMockContext(), "version"))
+}
+
+// ListInstances
+
+func (suite *ErrorHandlingExtensionSuite) TestListInstancesSuccessful() {
+	suite.rawExtension.FindInstances = func(context *context.ExtensionContext, version string) []*JsExtInstance {
+		return []*JsExtInstance{{Id: "inst1", Name: "Inst 1"}, {Id: "inst2", Name: "Inst 2"}}
+	}
+	instances, err := suite.extension.ListInstances(createMockContext(), "version")
+	suite.NoError(err)
+	suite.Equal([]*JsExtInstance{{Id: "inst1", Name: "Inst 1"}, {Id: "inst2", Name: "Inst 2"}}, instances)
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestListInstancesFails() {
+	suite.rawExtension.FindInstances = func(context *context.ExtensionContext, version string) []*JsExtInstance {
+		panic(mockErrorMessage)
+	}
+	instances, err := suite.extension.ListInstances(createMockContext(), "version")
+	suite.EqualError(err, `failed to list instances for extension "id" in version "version": `+mockErrorMessage)
+	suite.Nil(instances)
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestListInstancesUnsupported() {
+	suite.rawExtension.FindInstances = nil
+	instances, err := suite.extension.ListInstances(createMockContext(), "version")
+	suite.EqualError(err, `extension "id" does not support operation "findInstances"`)
+	suite.Nil(instances)
+}
+
+// GetParameterDefinitions
+
+func (suite *ErrorHandlingExtensionSuite) TetsGetParameterDefinitionsSuccessful() {
+	suite.rawExtension.GetParameterDefinitions = func(context *context.ExtensionContext, version string) []interface{} {
+		return []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}
+	}
+	instance, err := suite.extension.GetParameterDefinitions(createMockContext(), "version")
+	suite.NoError(err)
+	suite.Equal([]interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}, instance)
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestGetParameterDefinitionsFails() {
+	suite.rawExtension.GetParameterDefinitions = func(context *context.ExtensionContext, version string) []interface{} {
+		panic(mockErrorMessage)
+	}
+	instance, err := suite.extension.GetParameterDefinitions(createMockContext(), "version")
+	suite.EqualError(err, `failed to get parameter definitions for extension "id": `+mockErrorMessage)
+	suite.Nil(instance)
+}
+
+func (suite *ErrorHandlingExtensionSuite) TestGetParameterDefinitionsUnsupported() {
+	suite.rawExtension.GetParameterDefinitions = nil
+	instance, err := suite.extension.GetParameterDefinitions(createMockContext(), "version")
+	suite.EqualError(err, `extension "id" does not support operation "getParameterDefinitions"`)
+	suite.Nil(instance)
+}
+
 // AddInstance
 
 func (suite *ErrorHandlingExtensionSuite) TestAddInstanceSuccessful() {
