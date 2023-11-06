@@ -1,4 +1,4 @@
-package com.exasol.extensionmanager.itest;
+package com.exasol.extensionmanager.itest.base;
 
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static java.util.Collections.emptyList;
@@ -7,86 +7,34 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import java.io.FileNotFoundException;
-import java.net.URISyntaxException;
 import java.util.*;
-import java.util.concurrent.TimeoutException;
+import java.util.logging.Logger;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
-import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.extensionmanager.client.model.*;
+import com.exasol.extensionmanager.itest.*;
 
 /**
  * This is a base class for Extension integration tests that already contains some basic tests for
  * installing/listing/uninstalling extensions and creating/listing/deleting instances.
  */
 public abstract class AbstractExtensionIT {
+    private static final Logger LOG = Logger.getLogger(AbstractExtensionIT.class.getName());
+    private final ExtensionITConfig config;
+
+    protected AbstractExtensionIT() {
+        this.config = createConfig();
+    }
+
+    /**
+     * Creates a new configuration for the integration tests.
+     * 
+     * @return new configuration
+     */
+    protected abstract ExtensionITConfig createConfig();
 
     protected abstract ExtensionManagerSetup getSetup();
-
-    /**
-     * Get the ID of this extension, e.g. {@code s3-vs-extension.js}.
-     * 
-     * @return extension ID
-     */
-    protected abstract String getExtensionId();
-
-    /**
-     * Get the user visible name of this extension, e.g. {@code S3 Virtual Schema}.
-     * 
-     * @return extension name
-     */
-    protected abstract String getName();
-
-    /**
-     * Get the total number of parameters for this extension, incl. virtual schema name.
-     * 
-     * @return parameter count
-     */
-    protected abstract int getExpectedParameterCount();
-
-    /**
-     * Get the user visible description of this extension, e.g. {@code Virtual Schema for document files on AWS S3}.
-     * 
-     * @return extension description
-     */
-    protected abstract String getDescription();
-
-    /**
-     * Get the current version of this extension, e.g. {@code 1.2.3}.
-     * 
-     * @return current version
-     */
-    protected abstract String getCurrentVersion();
-
-    /**
-     * Get the previous version of this extension, e.g. {@code 1.2.2}.
-     * <p>
-     * This may be {@code null} if you are just creating the first version of the extension. Once you release a second
-     * version, update this to return the previous version.
-     * 
-     * @return previous version
-     */
-    protected abstract String getPreviousVersion();
-
-    /**
-     * Get the previous version's JAR file name of this extension, e.g.
-     * {@code document-files-virtual-schema-dist-7.3.6-s3-1.2.3.jar}.
-     * <p>
-     * This may be {@code null} if you are just creating the first version of the extension. Once you release a second
-     * version, update this to return the JAR file name.
-     * 
-     * @return previous version's JAR file name
-     */
-    protected abstract String getPreviousVersionJarFile();
-
-    /**
-     * Get the project name, e.g. {@code s3-document-files-virtual-schema}.
-     * 
-     * @return project name
-     */
-    protected abstract String getProjectName();
 
     protected abstract void assertScriptsExist();
 
@@ -103,57 +51,68 @@ public abstract class AbstractExtensionIT {
     /**
      * Create valid parameters for a new instance. The instance/virtual schema name will be added automatically and is
      * not required here.
-     * 
+     *
      * @return valid parameters for a new instance
      */
     protected abstract Collection<ParameterValue> createValidParameterValues();
 
-    @Test
-    void listExtensions() {
-        final List<ExtensionsResponseExtension> extensions = getSetup().client().getExtensions();
-        assertAll(() -> assertThat(extensions, hasSize(1)), //
-                () -> assertThat(extensions.get(0).getName(), equalTo(getName())),
-                () -> assertThat(extensions.get(0).getInstallableVersions().get(0).getName(),
-                        equalTo(getCurrentVersion())),
-                () -> assertThat(extensions.get(0).getInstallableVersions().get(0).isLatest(), is(true)),
-                () -> assertThat(extensions.get(0).getInstallableVersions().get(0).isDeprecated(), is(false)),
-                () -> assertThat(extensions.get(0).getDescription(), equalTo(getDescription())));
+    @BeforeEach
+    void logTestName(final TestInfo testInfo) {
+        LOG.info(">>> " + testInfo.getDisplayName());
+    }
+
+    @AfterEach
+    void cleanup() {
+        getSetup().cleanup();
     }
 
     @Test
-    void listInstallationsEmpty() {
+    public void listExtensions() {
+        final List<ExtensionsResponseExtension> extensions = getSetup().client().getExtensions();
+        assertAll(() -> assertThat(extensions, hasSize(1)), //
+                () -> assertThat(extensions.get(0).getName(), equalTo(config.getExtensionName())),
+                () -> assertThat(extensions.get(0).getInstallableVersions().get(0).getName(),
+                        equalTo(config.getCurrentVersion())),
+                () -> assertThat(extensions.get(0).getInstallableVersions().get(0).isLatest(), is(true)),
+                () -> assertThat(extensions.get(0).getInstallableVersions().get(0).isDeprecated(), is(false)),
+                () -> assertThat(extensions.get(0).getDescription(), equalTo(config.getExtensionDescription())));
+    }
+
+    @Test
+    public void listInstallationsEmpty() {
         final List<InstallationsResponseInstallation> installations = getSetup().client().getInstallations();
         assertThat(installations, hasSize(0));
     }
 
     @Test
-    void listInstallationsFindsMatchingScripts() {
+    public void listInstallationsFindsMatchingScripts() {
         createScripts();
         final List<InstallationsResponseInstallation> installations = getSetup().client().getInstallations();
         assertAll(() -> assertThat(installations, hasSize(1)), //
-                () -> assertThat(installations.get(0).getName(), equalTo(getName())),
-                () -> assertThat(installations.get(0).getVersion(), equalTo(getCurrentVersion())));
+                () -> assertThat(installations.get(0).getName(), equalTo(config.getExtensionName())),
+                () -> assertThat(installations.get(0).getVersion(), equalTo(config.getCurrentVersion())));
     }
 
     @Test
-    void listInstallationsFindsOwnInstallation() {
+    public void listInstallationsFindsOwnInstallation() {
         getSetup().client().install();
         final List<InstallationsResponseInstallation> installations = getSetup().client().getInstallations();
         assertAll(() -> assertThat(installations, hasSize(1)), //
-                () -> assertThat(installations.get(0).getName(), equalTo(getName())),
-                () -> assertThat(installations.get(0).getVersion(), equalTo(getCurrentVersion())));
+                () -> assertThat(installations.get(0).getName(), equalTo(config.getExtensionName())),
+                () -> assertThat(installations.get(0).getVersion(), equalTo(config.getCurrentVersion())));
     }
 
     @Test
-    void getExtensionDetailsFailsForUnknownVersion() {
+    public void getExtensionDetailsFailsForUnknownVersion() {
         getSetup().client().assertRequestFails(() -> getSetup().client().getExtensionDetails("unknownVersion"),
-                equalTo("Version 'unknownVersion' not supported, can only use '" + getCurrentVersion() + "'."),
+                equalTo("Version 'unknownVersion' not supported, can only use '" + config.getCurrentVersion() + "'."),
                 equalTo(404));
     }
 
     @Test
-    void getExtensionDetailsSuccess() {
-        final ExtensionDetailsResponse extensionDetails = getSetup().client().getExtensionDetails(getCurrentVersion());
+    public void getExtensionDetailsSuccess() {
+        final ExtensionDetailsResponse extensionDetails = getSetup().client()
+                .getExtensionDetails(config.getCurrentVersion());
         final List<ParamDefinition> parameters = extensionDetails.getParameterDefinitions();
         final ParamDefinition param1 = new ParamDefinition().id("base-vs.virtual-schema-name")
                 .name("Virtual Schema name").definition(Map.of( //
@@ -164,27 +123,27 @@ public abstract class AbstractExtensionIT {
                         "regex", "[a-zA-Z_]+", //
                         "required", true, //
                         "type", "string"));
-        assertAll(() -> assertThat(extensionDetails.getId(), equalTo(getExtensionId())),
-                () -> assertThat(extensionDetails.getVersion(), equalTo(getCurrentVersion())),
-                () -> assertThat(parameters, hasSize(getExpectedParameterCount())),
+        assertAll(() -> assertThat(extensionDetails.getId(), equalTo(config.getExtensionId())),
+                () -> assertThat(extensionDetails.getVersion(), equalTo(config.getCurrentVersion())),
+                () -> assertThat(parameters, hasSize(config.getExpectedParameterCount())),
                 () -> assertThat(parameters.get(0), equalTo(param1)));
     }
 
     @Test
-    void installCreatesScripts() {
+    public void installCreatesScripts() {
         getSetup().client().install();
         assertScriptsExist();
     }
 
     @Test
-    void installWorksIfCalledTwice() {
+    public void installWorksIfCalledTwice() {
         getSetup().client().install();
         getSetup().client().install();
         assertScriptsExist();
     }
 
     @Test
-    void createInstanceFailsWithoutRequiredParameters() {
+    public void createInstanceFailsWithoutRequiredParameters() {
         final ExtensionManagerClient client = getSetup().client();
         client.install();
         client.assertRequestFails(() -> client.createInstance(emptyList()), startsWith(
@@ -193,22 +152,22 @@ public abstract class AbstractExtensionIT {
     }
 
     @Test
-    void uninstallSucceedsForNonExistingInstallation() {
+    public void uninstallSucceedsForNonExistingInstallation() {
         assertDoesNotThrow(() -> getSetup().client().uninstall());
     }
 
     @Test
-    void uninstallRemovesAdapters() {
+    public void uninstallRemovesAdapters() {
         getSetup().client().install();
         assertAll(() -> assertScriptsExist(), //
                 () -> assertThat(getSetup().client().getInstallations(), hasSize(1)));
-        getSetup().client().uninstall(getCurrentVersion());
+        getSetup().client().uninstall(config.getCurrentVersion());
         assertAll(() -> assertThat(getSetup().client().getInstallations(), is(empty())),
                 () -> getSetup().exasolMetadata().assertNoScripts());
     }
 
     @Test
-    void upgradeFailsWhenNotInstalled() {
+    public void upgradeFailsWhenNotInstalled() {
         getSetup().client().assertRequestFails(() -> getSetup().client().upgrade(), //
                 allOf(startsWith("Not all required scripts are installed: Validation failed: Script"),
                         endsWith("is missing")),
@@ -216,33 +175,33 @@ public abstract class AbstractExtensionIT {
     }
 
     @Test
-    void upgradeFailsWhenAlreadyUpToDate() {
+    public void upgradeFailsWhenAlreadyUpToDate() {
         getSetup().client().install();
         getSetup().client().assertRequestFails(() -> getSetup().client().upgrade(),
-                "Extension is already installed in latest version " + getCurrentVersion(), 412);
+                "Extension is already installed in latest version " + config.getCurrentVersion(), 412);
     }
 
     @Test
-    void upgradeFromPreviousVersion() throws InterruptedException, BucketAccessException, TimeoutException,
-            FileNotFoundException, URISyntaxException {
+    public void upgradeFromPreviousVersion() {
         final PreviousExtensionVersion previousVersion = createPreviousVersion();
         previousVersion.prepare();
         previousVersion.install();
         prepareInstance();
-        createInstance(getExtensionId(), getPreviousVersion(), "my_VS");
+        final String virtualSchemaName = "my_VS";
+        createInstance(previousVersion.getExtensionId(), config.getPreviousVersion(), virtualSchemaName);
         verifyVirtualTableContainsData("my_VS");
-        assertInstalledVersion(getPreviousVersion(), previousVersion);
+        assertInstalledVersion(config.getPreviousVersion(), previousVersion);
         previousVersion.upgrade();
-        assertInstalledVersion(getCurrentVersion(), previousVersion);
+        assertInstalledVersion(config.getCurrentVersion(), previousVersion);
         verifyVirtualTableContainsData("my_VS");
     }
 
     private PreviousExtensionVersion createPreviousVersion() {
-        return getSetup().previousVersionManager().newVersion().currentVersion(getCurrentVersion()) //
-                .previousVersion(getPreviousVersion()) //
-                .adapterFileName(getPreviousVersionJarFile()) //
-                .extensionFileName(getExtensionId()) //
-                .project(getProjectName()) //
+        return getSetup().previousVersionManager().newVersion().currentVersion(config.getCurrentVersion()) //
+                .previousVersion(config.getPreviousVersion()) //
+                .adapterFileName(config.getPreviousVersionJarFile()) //
+                .extensionFileName(config.getExtensionId()) //
+                .project(config.getProjectName()) //
                 .build();
     }
 
@@ -250,14 +209,14 @@ public abstract class AbstractExtensionIT {
         // The extension is installed twice (previous and current version), so each one returns one installation.
         assertThat(getSetup().client().getInstallations(),
                 containsInAnyOrder(
-                        new InstallationsResponseInstallation().name(getName()).version(expectedVersion)
-                                .id(getExtensionId()), //
-                        new InstallationsResponseInstallation().name(getName()).version(expectedVersion)
+                        new InstallationsResponseInstallation().name(config.getExtensionName()).version(expectedVersion)
+                                .id(config.getExtensionId()), //
+                        new InstallationsResponseInstallation().name(config.getExtensionName()).version(expectedVersion)
                                 .id(previousVersion.getExtensionId())));
     }
 
     @Test
-    void virtualSchemaWorks() {
+    public void virtualSchemaWorks() {
         getSetup().client().install();
         prepareInstance();
         createInstance("my_VS");
@@ -265,28 +224,30 @@ public abstract class AbstractExtensionIT {
     }
 
     @Test
-    void listingInstancesNoVSExists() {
+    public void listingInstancesNoVSExists() {
         assertThat(getSetup().client().listInstances(), hasSize(0));
     }
 
     @Test
-    void listInstances() {
+    public void listInstances() {
         getSetup().client().install();
         final String name = "my_virtual_SCHEMA";
         createInstance(name);
-        assertThat(getSetup().client().listInstances(getCurrentVersion()),
+        assertThat(getSetup().client().listInstances(config.getCurrentVersion()),
                 allOf(hasSize(1), equalTo(List.of(new Instance().id(name).name(name)))));
     }
 
     @Test
-    void createInstanceCreatesDbObjects() {
+    public void createInstanceCreatesDbObjects() {
         getSetup().client().install();
         final String name = "my_virtual_SCHEMA";
         createInstance(name);
 
-        getSetup().exasolMetadata().assertConnection(table().row("MY_VIRTUAL_SCHEMA_CONNECTION",
-                "Created by Extension Manager for " + getName() + " v" + getCurrentVersion() + " my_virtual_SCHEMA")
-                .matches());
+        getSetup().exasolMetadata()
+                .assertConnection(table()
+                        .row("MY_VIRTUAL_SCHEMA_CONNECTION", "Created by Extension Manager for "
+                                + config.getExtensionName() + " v" + config.getCurrentVersion() + " my_virtual_SCHEMA")
+                        .matches());
         getSetup().exasolMetadata().assertVirtualSchema(table()
                 .row("my_virtual_SCHEMA", "SYS", "EXA_EXTENSIONS", not(emptyOrNullString()), not(emptyOrNullString()))
                 .matches());
@@ -295,7 +256,7 @@ public abstract class AbstractExtensionIT {
     }
 
     @Test
-    void createTwoInstances() {
+    public void createTwoInstances() {
         getSetup().client().install();
         createInstance("vs1");
         createInstance("vs2");
@@ -304,11 +265,11 @@ public abstract class AbstractExtensionIT {
                 () -> getSetup().exasolMetadata()
                         .assertConnection(table()
                                 .row("VS1_CONNECTION",
-                                        "Created by Extension Manager for " + getName() + " v" + getCurrentVersion()
-                                                + " vs1")
+                                        "Created by Extension Manager for " + config.getExtensionName() + " v"
+                                                + config.getCurrentVersion() + " vs1")
                                 .row("VS2_CONNECTION",
-                                        "Created by Extension Manager for " + getName() + " v" + getCurrentVersion()
-                                                + " vs2")
+                                        "Created by Extension Manager for " + config.getExtensionName() + " v"
+                                                + config.getCurrentVersion() + " vs2")
                                 .matches()),
                 () -> getSetup().exasolMetadata()
                         .assertVirtualSchema(table()
@@ -321,13 +282,13 @@ public abstract class AbstractExtensionIT {
     }
 
     @Test
-    void createInstanceWithSingleQuote() {
+    public void createInstanceWithSingleQuote() {
         getSetup().client().install();
         createInstance("Quoted'schema");
         assertAll(
                 () -> getSetup().exasolMetadata()
                         .assertConnection(table().row("QUOTED'SCHEMA_CONNECTION",
-                                "Created by Extension Manager for S3 Virtual Schema v" + getCurrentVersion()
+                                "Created by Extension Manager for S3 Virtual Schema v" + config.getCurrentVersion()
                                         + " Quoted'schema")
                                 .matches()),
                 () -> getSetup().exasolMetadata().assertVirtualSchema(table()
@@ -336,20 +297,20 @@ public abstract class AbstractExtensionIT {
     }
 
     @Test
-    void deleteNonExistingInstance() {
+    public void deleteNonExistingInstance() {
         assertDoesNotThrow(() -> getSetup().client().deleteInstance("no-such-instance"));
     }
 
     @Test
-    void deleteFailsForUnknownVersion() {
+    public void deleteFailsForUnknownVersion() {
         getSetup().client().assertRequestFails(
                 () -> getSetup().client().deleteInstance("unknownVersion", "no-such-instance"),
-                equalTo("Version 'unknownVersion' not supported, can only use '" + getCurrentVersion() + "'."),
+                equalTo("Version 'unknownVersion' not supported, can only use '" + config.getCurrentVersion() + "'."),
                 equalTo(404));
     }
 
     @Test
-    void deleteExistingInstance() {
+    public void deleteExistingInstance() {
         getSetup().client().install();
         createInstance("vs1");
         final List<Instance> instances = getSetup().client().listInstances();
@@ -362,7 +323,7 @@ public abstract class AbstractExtensionIT {
     }
 
     private void createInstance(final String virtualSchemaName) {
-        createInstance(getExtensionId(), getCurrentVersion(), virtualSchemaName);
+        createInstance(config.getExtensionId(), config.getCurrentVersion(), virtualSchemaName);
     }
 
     private void createInstance(final String extensionId, final String extensionVersion,

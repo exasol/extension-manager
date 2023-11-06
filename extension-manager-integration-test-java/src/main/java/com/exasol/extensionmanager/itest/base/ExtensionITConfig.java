@@ -1,0 +1,183 @@
+package com.exasol.extensionmanager.itest.base;
+
+import java.util.Objects;
+
+/**
+ * Configuration for {@link AbstractExtensionIT}.
+ */
+public class ExtensionITConfig {
+    private final String projectName;
+    private final String extensionId;
+    private final String extensionName;
+    private final String extensionDescription;
+    private final String currentVersion;
+    private final int expectedParameterCount;
+    private final String previousVersion;
+    private final String previousVersionJarFile;
+
+    private ExtensionITConfig(final Builder builder) {
+        this.projectName = Objects.requireNonNull(builder.projectName, "projectName");
+        this.extensionId = Objects.requireNonNull(builder.extensionId, "extensionId");
+        this.extensionName = Objects.requireNonNull(builder.extensionName, "extensionName");
+        this.extensionDescription = Objects.requireNonNull(builder.extensionDescription, "extensionDescription");
+        this.currentVersion = Objects.requireNonNull(builder.currentVersion, "currentVersion");
+        this.expectedParameterCount = Objects.requireNonNull(builder.expectedParameterCount, "expectedParameterCount");
+        this.previousVersion = builder.previousVersion;
+        this.previousVersionJarFile = builder.previousVersionJarFile;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public String getExtensionId() {
+        return extensionId;
+    }
+
+    public String getExtensionName() {
+        return extensionName;
+    }
+
+    public String getExtensionDescription() {
+        return extensionDescription;
+    }
+
+    public String getCurrentVersion() {
+        return currentVersion;
+    }
+
+    public int getExpectedParameterCount() {
+        return expectedParameterCount;
+    }
+
+    public String getPreviousVersion() {
+        return previousVersion;
+    }
+
+    public String getPreviousVersionJarFile() {
+        return previousVersionJarFile;
+    }
+
+    /**
+     * Creates builder to build {@link ExtensionITConfig}.
+     *
+     * @return created builder
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Builder to build {@link ExtensionITConfig}.
+     */
+    public static final class Builder {
+        private String projectName;
+        private String extensionId;
+        private String extensionName;
+        private String extensionDescription;
+        private String currentVersion;
+        private Integer expectedParameterCount;
+        private String previousVersion;
+        private String previousVersionJarFile;
+
+        private Builder() {
+        }
+
+        /**
+         * Set the project name, e.g. {@code s3-document-files-virtual-schema}.
+         *
+         * @param projectName field to set
+         * @return {@link this} for fluent programming
+         */
+        public Builder projectName(final String projectName) {
+            this.projectName = projectName;
+            return this;
+        }
+
+        /**
+         * Set the ID of this extension, e.g. {@code s3-vs-extension.js}.
+         *
+         * @param extensionId field to set {@link this} for fluent programming
+         */
+        public Builder extensionId(final String extensionId) {
+            this.extensionId = extensionId;
+            return this;
+        }
+
+        /**
+         * Set the user visible name of this extension, e.g. {@code S3 Virtual Schema}.
+         *
+         * @param extensionName field to set {@link this} for fluent programming
+         */
+        public Builder extensionName(final String extensionName) {
+            this.extensionName = extensionName;
+            return this;
+        }
+
+        /**
+         * Set the user visible description of this extension, e.g. {@code Virtual Schema for document files on AWS S3}.
+         *
+         * @param extensionDescription field to set {@link this} for fluent programming
+         */
+        public Builder extensionDescription(final String extensionDescription) {
+            this.extensionDescription = extensionDescription;
+            return this;
+        }
+
+        /**
+         * Set the current version of this extension, e.g. {@code 1.2.3}.
+         *
+         * @param currentVersion field to set {@link this} for fluent programming
+         */
+        public Builder currentVersion(final String currentVersion) {
+            this.currentVersion = currentVersion;
+            return this;
+        }
+
+        /**
+         * Set the total number of parameters for this extension, incl. virtual schema name.
+         *
+         * @param expectedParameterCount field to set {@link this} for fluent programming
+         */
+        public Builder expectedParameterCount(final int expectedParameterCount) {
+            this.expectedParameterCount = expectedParameterCount;
+            return this;
+        }
+
+        /**
+         * Set the previous version of this extension, e.g. {@code 1.2.2}.
+         * <p>
+         * This may be {@code null} if you are just creating the first version of the extension. Once you release a
+         * second version, update this to return the previous version.
+         *
+         * @param previousVersion field to set {@link this} for fluent programming
+         */
+        public Builder previousVersion(final String previousVersion) {
+            this.previousVersion = previousVersion;
+            return this;
+        }
+
+        /**
+         * Get the previous version's JAR file name of this extension, e.g.
+         * {@code document-files-virtual-schema-dist-7.3.6-s3-1.2.3.jar}.
+         * <p>
+         * This may be {@code null} if you are just creating the first version of the extension. Once you release a
+         * second version, update this to return the JAR file name.
+         *
+         * @param previousVersionJarFile field to set {@link this} for fluent programming
+         */
+        public Builder previousVersionJarFile(final String previousVersionJarFile) {
+            this.previousVersionJarFile = previousVersionJarFile;
+            return this;
+        }
+
+        /**
+         * Builder method of the builder.
+         *
+         * @return built class
+         */
+        public ExtensionITConfig build() {
+            return new ExtensionITConfig(this);
+        }
+    }
+}
