@@ -219,7 +219,7 @@ func (c *controllerImpl) UninstallExtension(txCtx *transaction.TransactionContex
 	extensionCtx := c.createExtensionContext(txCtx)
 	err = c.verifyNoInstances(extension, extensionCtx, extensionVersion)
 	if err != nil {
-		return fmt.Errorf("cannot uninstall extension: %w", err)
+		return fmt.Errorf("cannot uninstall extension because instances remain: %w", err)
 	}
 	return extension.Uninstall(extensionCtx, extensionVersion)
 }
