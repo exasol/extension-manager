@@ -27,6 +27,10 @@ The release also adds a base class that simplifies writing integration tests for
 * Updated `github.com/dop251/goja_nodejs:v0.0.0-20230914102007-198ba9a8b098` to `v0.0.0-20231022114343-5c1f9037c9ab`
 * Updated `github.com/exasol/exasol-driver-go:v1.0.3` to `v1.0.4`
 
+#### Test Dependency Updates
+
+* Updated `golang.org/x/mod:v0.13.0` to `v0.14.0`
+
 ### Extension Manager Java Client
 
 #### Compile Dependency Updates
@@ -40,6 +44,8 @@ The release also adds a base class that simplifies writing integration tests for
 #### Test Dependency Updates
 
 * Updated `nl.jqno.equalsverifier:equalsverifier:3.15.2` to `3.15.3`
+* Updated `org.junit.jupiter:junit-jupiter-api:5.10.0` to `5.10.1`
+* Updated `org.junit.jupiter:junit-jupiter-params:5.10.0` to `5.10.1`
 
 #### Plugin Dependency Updates
 
@@ -57,9 +63,11 @@ The release also adds a base class that simplifies writing integration tests for
 
 * Updated `com.exasol:extension-manager-client-java:0.5.4` to `0.5.5`
 * Updated `com.exasol:hamcrest-resultset-matcher:1.6.1` to `1.6.2`
+* Updated `org.junit.jupiter:junit-jupiter-api:5.10.0` to `5.10.1`
 
 #### Test Dependency Updates
 
+* Updated `org.junit.jupiter:junit-jupiter-params:5.10.0` to `5.10.1`
 * Updated `org.mockito:mockito-junit-jupiter:5.6.0` to `5.7.0`
 
 #### Plugin Dependency Updates
