@@ -96,3 +96,14 @@ EITFJ works without additional configuration. During development you can however
 * `buildExtension`: Set this to `false` in order to skip building the extension definition before the tests. Use this to speedup tests when the extension definition is not modified.
 * `buildExtensionManager`: Set this to `false` to skip building/installing the extension manager binary. Use this to speedup tests when extension manager is not modified.
 * `extensionManagerVersion`: Version of EM to use during tests. By default EITFJ uses the same version as the version defined in `pom.xml` for `extension-manager-integration-test-java`. Changing this is not recommended.
+
+### Integration Test Base Classes
+
+EITFJ contains two abstract base classes for integration tests that contain basic tests useful for most extensions:
+* `com.exasol.extensionmanager.itest.base.AbstractScriptExtensionIT`: for `SCRIPT`-only extensions that don't support instances
+* `com.exasol.extensionmanager.itest.base.AbstractVirtualSchemaExtensionIT`: for `VIRTUAL SCHEMA` extensions that do support instances
+
+To use these base classes, just create a new test, extend the appropriate base class and implement all `abstract` methods. See the following tests as examples:
+
+* `SCRIPT`-only extension: [cloud-storage-extension](https://github.com/exasol/cloud-storage-extension/blob/main/src/test/java/com/exasol/cloudetl/extension/ExtensionIT.java)
+* `VIRTUAL SCHEMA` extension: [s3-document-files-virtual-schema](https://github.com/exasol/s3-document-files-virtual-schema/blob/main/src/test/java/com/exasol/adapter/document/files/extension/ExtensionIT.java)
