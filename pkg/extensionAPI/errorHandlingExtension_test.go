@@ -208,7 +208,7 @@ func (suite *ErrorHandlingExtensionSuite) TestUpgradeUnsupported() {
 
 // SupportsListInstances
 
-func (suite *ErrorHandlingExtensionSuite) TestSupportsListInstancesUnsupportedMissingMethod() {
+func (suite *ErrorHandlingExtensionSuite) TestSupportsListInstancesIsUnsupportedWhenMethodMissing() {
 	suite.rawExtension.FindInstances = nil
 	suite.False(suite.extension.SupportsListInstances(createMockContext(), "version"))
 }
