@@ -16,19 +16,19 @@ import com.exasol.extensionmanager.client.model.*;
 import com.exasol.extensionmanager.itest.*;
 
 /**
- * This is a base class for Extension integration tests that already contains some basic tests for
- * installing/listing/uninstalling extensions and creating/listing/deleting instances.
+ * This is a integration tests base class for {@code VIRTUAL SCHEMA} Extensions that already contains some basic tests
+ * for installing/listing/uninstalling extensions and creating/listing/deleting instances.
  */
-public abstract class AbstractExtensionIT {
+public abstract class AbstractVirtualSchemaExtensionIT {
     private static final String VIRTUAL_SCHEMA_NAME_PARAM_NAME = "base-vs.virtual-schema-name";
     private static final String EXTENSION_SCHEMA = "EXA_EXTENSIONS";
-    private static final Logger LOG = Logger.getLogger(AbstractExtensionIT.class.getName());
+    private static final Logger LOG = Logger.getLogger(AbstractVirtualSchemaExtensionIT.class.getName());
     private final ExtensionITConfig config;
 
     /**
      * Create a new base integration test.
      */
-    protected AbstractExtensionIT() {
+    protected AbstractVirtualSchemaExtensionIT() {
         this.config = createConfig();
     }
 

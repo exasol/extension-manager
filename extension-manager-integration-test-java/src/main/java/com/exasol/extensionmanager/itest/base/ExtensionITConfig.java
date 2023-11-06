@@ -3,7 +3,7 @@ package com.exasol.extensionmanager.itest.base;
 import java.util.Objects;
 
 /**
- * Configuration for {@link AbstractExtensionIT}.
+ * Configuration for {@link AbstractVirtualSchemaExtensionIT}.
  */
 public class ExtensionITConfig {
     private final String projectName;
@@ -21,7 +21,7 @@ public class ExtensionITConfig {
         this.extensionName = Objects.requireNonNull(builder.extensionName, "extensionName");
         this.extensionDescription = Objects.requireNonNull(builder.extensionDescription, "extensionDescription");
         this.currentVersion = Objects.requireNonNull(builder.currentVersion, "currentVersion");
-        this.expectedParameterCount = Objects.requireNonNull(builder.expectedParameterCount, "expectedParameterCount");
+        this.expectedParameterCount = builder.expectedParameterCount == null ? -1 : builder.expectedParameterCount;
         this.previousVersion = builder.previousVersion;
         this.previousVersionJarFile = builder.previousVersionJarFile;
     }
