@@ -130,11 +130,15 @@ func (e *JsExtension) SupportsListInstances(context *context.ExtensionContext, v
 	if err == nil {
 		return true
 	}
+	return !isNotFoundError(err)
+}
+
+func isNotFoundError(err error) bool {
 	apiErr := apiErrors.UnwrapAPIError(err)
 	if apiErr == nil {
-		return true
+		return false
 	}
-	return apiErr.Status != 404
+	return apiErr.Status == 404
 }
 
 func (e *JsExtension) ListInstances(context *context.ExtensionContext, version string) (instances []*JsExtInstance, errorResult error) {
