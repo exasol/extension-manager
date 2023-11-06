@@ -220,7 +220,7 @@ func (suite *ErrorHandlingExtensionSuite) TestSupportsListInstancesSupportedRetu
 	suite.True(suite.extension.SupportsListInstances(createMockContext(), "version"))
 }
 
-func (suite *ErrorHandlingExtensionSuite) TestSupportsListInstancesSupportedReturnsGeneralError() {
+func (suite *ErrorHandlingExtensionSuite) TestSupportsListInstancesWhenAGeneralErrorOccurs() {
 	suite.rawExtension.FindInstances = func(context *context.ExtensionContext, version string) []*JsExtInstance {
 		panic(mockErrorMessage)
 	}
@@ -242,6 +242,9 @@ func (suite *ErrorHandlingExtensionSuite) TestListInstancesFails() {
 	suite.rawExtension.FindInstances = func(context *context.ExtensionContext, version string) []*JsExtInstance {
 		panic(mockErrorMessage)
 	}
+	instances, err := suite.extension.ListInstances(createMockContext(), "version")
+	suite.EqualError(err, `failed to list instances for extension "id" in version "version": `+mockErrorMessage)
+	suite.Nil(instances)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestListInstancesUnsupported() {
@@ -255,11 +258,11 @@ func (suite *ErrorHandlingExtensionSuite) TestListInstancesUnsupported() {
 
 func (suite *ErrorHandlingExtensionSuite) TetsGetParameterDefinitionsSuccessful() {
 	suite.rawExtension.GetParameterDefinitions = func(context *context.ExtensionContext, version string) []interface{} {
-		return []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}}
+		return []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}
 	}
 	instance, err := suite.extension.GetParameterDefinitions(createMockContext(), "version")
 	suite.NoError(err)
-	suite.Equal([]interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}}, instance)
+	suite.Equal([]interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}, instance)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestGetParameterDefinitionsFails() {
