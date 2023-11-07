@@ -55,21 +55,21 @@ class ExtensionManagerClientTest {
     void parseErrorMessageJsonFails() {
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> testee.parseErrorMessageJson("invalid json"));
-        assertThat(exception.getMessage(), equalTo("E-EMIT-15: Failed to parse error message 'invalid json' as JSON"));
+        assertThat(exception.getMessage(), equalTo("E-EITFJ-15: Failed to parse error message 'invalid json' as JSON"));
     }
 
     @Test
     void getSingleExtensionNoExtensionFound() {
         when(extensionClientMock.listAvailableExtensions(DB_HOST, DB_PORT)).thenReturn(new ExtensionsResponse());
         final IllegalStateException exception = assertThrows(IllegalStateException.class,  testee::getSingleExtension);
-        assertThat(exception.getMessage(), equalTo("E-EMIT-28: Expected exactly one extension but found 0: []. Check the extension manager log for errors loading the extension."));
+        assertThat(exception.getMessage(), equalTo("E-EITFJ-28: Expected exactly one extension but found 0: []. Check the extension manager log for errors loading the extension."));
     }
 
     @Test
     void getSingleExtensionMultipleExtensionFound() {
         when(extensionClientMock.listAvailableExtensions(DB_HOST, DB_PORT)).thenReturn(new ExtensionsResponse().addExtensionsItem(new ExtensionsResponseExtension()).addExtensionsItem(new ExtensionsResponseExtension()));
         final IllegalStateException exception = assertThrows(IllegalStateException.class,  testee::getSingleExtension);
-        assertThat(exception.getMessage(), startsWith("E-EMIT-28: Expected exactly one extension but found 2"));
+        assertThat(exception.getMessage(), startsWith("E-EITFJ-28: Expected exactly one extension but found 2"));
     }
 
     @Test

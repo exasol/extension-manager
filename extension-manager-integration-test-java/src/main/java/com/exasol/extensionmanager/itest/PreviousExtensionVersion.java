@@ -74,7 +74,7 @@ public class PreviousExtensionVersion {
      */
     public String getExtensionId() {
         if (tempExtensionId == null) {
-            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-37")
+            throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-37")
                     .message("Previous version not prepared.").mitigation("Call method prepare first.").toString());
         }
         return tempExtensionId;
@@ -174,7 +174,7 @@ public class PreviousExtensionVersion {
         public PreviousExtensionVersion build() {
             if (builtVersion != null) {
                 throw new IllegalStateException(
-                        ExaError.messageBuilder("E-EMIT-36").message("Version was already prepared").toString());
+                        ExaError.messageBuilder("E-EITFJ-36").message("Version was already prepared").toString());
             }
             this.builtVersion = new PreviousExtensionVersion(this);
             return this.builtVersion;

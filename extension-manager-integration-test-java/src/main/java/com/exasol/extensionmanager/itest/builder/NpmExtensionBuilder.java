@@ -21,7 +21,7 @@ class NpmExtensionBuilder implements ExtensionBuilder {
 
     private static void verifySourceDirExists(final Path sourceDir) {
         if (!Files.exists(sourceDir)) {
-            throw new IllegalArgumentException(ExaError.messageBuilder("E-EMIT-2")
+            throw new IllegalArgumentException(ExaError.messageBuilder("E-EITFJ-2")
                     .message("Extension source dir {{source directory}} does not exist", sourceDir).toString());
         }
     }

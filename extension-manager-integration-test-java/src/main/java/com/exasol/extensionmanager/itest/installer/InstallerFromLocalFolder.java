@@ -25,7 +25,7 @@ class InstallerFromLocalFolder implements ExtensionManagerInstaller {
         buildExtensionManager(extensionManagerProjectDir);
         final Path executable = extensionManagerProjectDir.resolve(EXECUTABLE_NAME);
         if (!Files.exists(executable)) {
-            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-5")
+            throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-5")
                     .message("Extension manager executable not found at {{executable path}} after build.", executable)
                     .ticketMitigation().toString());
         }

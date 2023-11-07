@@ -22,7 +22,7 @@ class StreamClosedConsumer implements ProcessStreamConsumer {
             return this.latch.await(timeout.toMillis(), TimeUnit.MILLISECONDS);
         } catch (final InterruptedException exception) {
             Thread.currentThread().interrupt();
-            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-11")
+            throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-11")
                     .message("Interrupted while waiting for stream to be closed").ticketMitigation().toString(),
                     exception);
         }

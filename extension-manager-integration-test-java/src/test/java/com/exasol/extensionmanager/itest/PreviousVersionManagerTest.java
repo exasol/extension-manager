@@ -70,7 +70,7 @@ class PreviousVersionManagerTest {
         final IllegalStateException exception = assertThrows(IllegalStateException.class,
                 () -> testee.fetchExtension(uri));
         assertThat(exception.getMessage(),
-                equalTo("E-EMIT-39: Download of '" + uri + "' failed with non-OK status 404"));
+                equalTo("E-EITFJ-39: Download of '" + uri + "' failed with non-OK status 404"));
         assertThat(Files.list(tempDir).collect(toList()), empty());
     }
 
@@ -79,7 +79,7 @@ class PreviousVersionManagerTest {
         final URI url = URI.create("https://invalid-url");
         final UncheckedIOException exception = assertThrows(UncheckedIOException.class,
                 () -> testee.fetchExtension(url));
-        assertThat(exception.getMessage(), startsWith("E-EMIT-42: Failed to download '" + url + "' to"));
+        assertThat(exception.getMessage(), startsWith("E-EITFJ-42: Failed to download '" + url + "' to"));
         assertThat(Files.list(tempDir).collect(toList()), empty());
     }
 
@@ -98,6 +98,6 @@ class PreviousVersionManagerTest {
         final IllegalStateException exception = assertThrows(IllegalStateException.class,
                 () -> testee.prepareBucketFsFile(url, "filename"));
         assertThat(exception.getMessage(), equalTo(
-                "E-EMIT-39: Download of 'https://extensions-internal.exasol.com/missing-file' failed with non-OK status 404"));
+                "E-EITFJ-39: Download of 'https://extensions-internal.exasol.com/missing-file' failed with non-OK status 404"));
     }
 }
