@@ -40,7 +40,7 @@ public abstract class AbstractScriptExtensionIT {
     protected abstract ExtensionManagerSetup getSetup();
 
     /**
-     * Creates a new configuration for the integration tests.
+     * Create a new configuration for the integration tests.
      * 
      * @return new configuration
      */

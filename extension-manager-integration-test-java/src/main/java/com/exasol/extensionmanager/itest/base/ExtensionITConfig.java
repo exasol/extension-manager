@@ -106,7 +106,7 @@ public class ExtensionITConfig {
     }
 
     /**
-     * Creates builder to build {@link ExtensionITConfig}.
+     * Create builder to build {@link ExtensionITConfig}.
      *
      * @return created builder
      */
