@@ -92,7 +92,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
         try {
             return exasolTestSetup.createConnection();
         } catch (final SQLException exception) {
-            throw new AssertionError(ExaError.messageBuilder("E-EMIT-20")
+            throw new AssertionError(ExaError.messageBuilder("E-EITFJ-20")
                     .message("Failed to create db connection: {{error message}}", exception.getMessage()).toString(),
                     exception);
         }
@@ -103,7 +103,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
         try {
             return Files.createTempDirectory("extension-manager-itest");
         } catch (final IOException exception) {
-            throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-21")
+            throw new UncheckedIOException(ExaError.messageBuilder("E-EITFJ-21")
                     .message("Failed to create temp directory: {{error message}}", exception.getMessage()).toString(),
                     exception);
         }
@@ -119,7 +119,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
         }
         final Path extensionFile = extensionBuilder.getExtensionFile();
         if (!Files.exists(extensionFile)) {
-            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-1")
+            throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-1")
                     .message("Extension file {{extension file}} not found.", extensionFile)
                     .mitigation("Set buildExtension to true in {{config file}}.", config.getConfigFile())
                     .mitigation("Ensure that extension was built successfully.").toString());
@@ -132,7 +132,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
         try {
             Files.copy(sourceFile, targetFile);
         } catch (final IOException exception) {
-            throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-22")
+            throw new UncheckedIOException(ExaError.messageBuilder("E-EITFJ-22")
                     .message(
                             "Error copying extension from {{source path}} to {{target path}} failed: {{error message}}",
                             sourceFile, targetFile, exception.getMessage())
@@ -203,7 +203,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
                 LOGGER.fine(() -> "Executing statement '" + statement + "'");
                 createStatement().execute(statement);
             } catch (final SQLException exception) {
-                throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-23")
+                throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-23")
                         .message("Failed to execute statement {{sql statement}}: {{error message}}", statement,
                                 exception.getMessage())
                         .toString(), exception);
@@ -226,7 +226,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
                 LOGGER.fine(() -> "Deleting file '" + fileToDelete + "'");
                 Files.delete(fileToDelete);
             } catch (final IOException exception) {
-                throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-31")
+                throw new UncheckedIOException(ExaError.messageBuilder("E-EITFJ-31")
                         .message("Failed to delete file {{path}}: {{error message}}", fileToDelete,
                                 exception.getMessage())
                         .toString(), exception);
@@ -250,7 +250,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
         try {
             createStatement().execute("DROP SCHEMA IF EXISTS \"" + EXTENSION_SCHEMA_NAME + "\" CASCADE");
         } catch (final SQLException exception) {
-            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-25")
+            throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-25")
                     .message("Failed to delete extension schema {{schema name}}", EXTENSION_SCHEMA_NAME).toString(),
                     exception);
         }
@@ -275,7 +275,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
                     .map(Path::toFile) //
                     .forEach(File::delete);
         } catch (final IOException exception) {
-            throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-24")
+            throw new UncheckedIOException(ExaError.messageBuilder("E-EITFJ-24")
                     .message("Failed to extension folder {{folder}}", extensionFolder).toString(), exception);
         }
     }

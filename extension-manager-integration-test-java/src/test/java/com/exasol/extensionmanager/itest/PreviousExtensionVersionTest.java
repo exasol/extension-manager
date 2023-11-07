@@ -62,7 +62,7 @@ class PreviousExtensionVersionTest {
         final PreviousExtensionVersion testee = builder().build();
         final IllegalStateException exception = assertThrows(IllegalStateException.class, testee::getExtensionId);
         assertThat(exception.getMessage(),
-                equalTo("E-EMIT-37: Previous version not prepared. Call method prepare first."));
+                equalTo("E-EITFJ-37: Previous version not prepared. Call method prepare first."));
     }
 
     @Test

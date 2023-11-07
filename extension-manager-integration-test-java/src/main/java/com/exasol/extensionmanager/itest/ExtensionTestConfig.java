@@ -42,7 +42,7 @@ public class ExtensionTestConfig {
             props.load(stream);
             return props;
         } catch (final IOException e) {
-            throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-26")
+            throw new UncheckedIOException(ExaError.messageBuilder("E-EITFJ-26")
                     .message("Error reading config file {{config file path}}", configFile).toString(), e);
         }
     }
@@ -59,7 +59,7 @@ public class ExtensionTestConfig {
                 .map(path -> {
                     if (!Files.exists(path) || !Files.isDirectory(path)) {
                         throw new IllegalStateException(
-                                ExaError.messageBuilder("E-EMIT-27")
+                                ExaError.messageBuilder("E-EITFJ-27")
                                         .message("Invalid extension manager {{path}} in config file {{config file}}.",
                                                 path, getConfigFile())
                                         .mitigation("Specify a valid directory.").toString());
@@ -69,9 +69,8 @@ public class ExtensionTestConfig {
     }
 
     /**
-     * Get the extension manager version to use for the tests. 
-     * If the POM file of the extension does not specify a version, this defaults to 
-     * version of the Manifest in the JAR or {@code "latest"} if no Manifest exists.
+     * Get the extension manager version to use for the tests. If the POM file of the extension does not specify a
+     * version, this defaults to version of the Manifest in the JAR or {@code "latest"} if no Manifest exists.
      * 
      * @return extension manager version
      */

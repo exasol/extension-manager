@@ -105,7 +105,7 @@ public class SimpleProcess {
             new AsyncStreamReader().startCollectingConsumer(process.getErrorStream(), errorStreamConsumer);
             return new SimpleProcess(process, workingDirectory, command, startTime);
         } catch (final IOException exception) {
-            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-8")
+            throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-8")
                     .message("Error executing command {{command}}.", String.join(" ", command))
                     .mitigation("Verify that the executable {{executable}} is on the PATH.", command.get(0)).toString(),
                     exception);
@@ -124,7 +124,7 @@ public class SimpleProcess {
         final Duration duration = Duration.between(this.startTime, Instant.now());
         final int exitCode = this.process.exitValue();
         if (exitCode != 0) {
-            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-12").message(
+            throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-12").message(
                     "Command {{command}} in working dir {{working dir}} failed with exit code {{exit code|u}} after {{duration|u}}.",
                     formatCommand(), workingDirectory, exitCode, duration).mitigation("See log output for details.")
                     .toString());
@@ -142,7 +142,7 @@ public class SimpleProcess {
     private void waitForProcessTerminated(final Duration executionTimeout) {
         try {
             if (!this.process.waitFor(executionTimeout.toMillis(), TimeUnit.MILLISECONDS)) {
-                throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-9")
+                throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-9")
                         .message("Timeout while waiting {{timeout duration|u}} for command {{command}}",
                                 executionTimeout, formatCommand())
                         .toString());
@@ -154,7 +154,7 @@ public class SimpleProcess {
 
     private RuntimeException handleInterruptedException(final InterruptedException exception) {
         Thread.currentThread().interrupt();
-        return new IllegalStateException(ExaError.messageBuilder("E-EMIT-10")
+        return new IllegalStateException(ExaError.messageBuilder("E-EITFJ-10")
                 .message("Interrupted while waiting for command {{command}} to terminate.", formatCommand())
                 .ticketMitigation().toString(), exception);
     }

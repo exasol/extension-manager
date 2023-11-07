@@ -39,7 +39,7 @@ class InstallerFromGitHub implements ExtensionManagerInstaller {
         final String executableName = "cmd" + OsCheck.getExecutableSuffix();
         final Path executablePath = getGoPath().resolve("bin").resolve(executableName);
         if (!Files.exists(executablePath)) {
-            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-3")
+            throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-3")
                     .message("Failed to install extension manager executable at {{path}}.", executableName)
                     .ticketMitigation().toString());
         }
@@ -51,7 +51,7 @@ class InstallerFromGitHub implements ExtensionManagerInstaller {
         final Path goPath = Paths.get(rawPath.trim());
         if (!Files.exists(goPath)) {
             throw new IllegalStateException(
-                    ExaError.messageBuilder("E-EMIT-4").message("GOPATH does not exist at {{GOPATH}}.", goPath)
+                    ExaError.messageBuilder("E-EITFJ-4").message("GOPATH does not exist at {{GOPATH}}.", goPath)
                             .mitigation("Ensure your Go installation is valid.").toString());
         }
         LOGGER.info(() -> "Got GOPATH '" + goPath + "'");

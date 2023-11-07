@@ -260,7 +260,7 @@ public class ExtensionManagerClient {
             return jsonb.fromJson(errorMessage, JsonObject.class);
         } catch (final Exception jsonbException) {
             throw new IllegalArgumentException(
-                    ExaError.messageBuilder("E-EMIT-15")
+                    ExaError.messageBuilder("E-EITFJ-15")
                             .message("Failed to parse error message {{error message}} as JSON")
                             .parameter("error message", errorMessage, "messaged to be parsed as JSON").toString(),
                     jsonbException);
@@ -282,7 +282,7 @@ public class ExtensionManagerClient {
     ExtensionsResponseExtension getSingleExtension() {
         final List<ExtensionsResponseExtension> extensions = this.getExtensions();
         if (extensions.size() != 1) {
-            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-28")
+            throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-28")
                     .message(
                             "Expected exactly one extension but found {{actual count}}: {{actual list of extensions}}.",
                             extensions.size(), extensions)
@@ -294,7 +294,7 @@ public class ExtensionManagerClient {
     Extension getExtension() {
         final ExtensionsResponseExtension extension = getSingleExtension();
         if (extension.getInstallableVersions().size() != 1) {
-            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-16").message(
+            throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-16").message(
                     "Expected exactly one installable version for extension {{extension id}} but got {{actual list of versions}}.",
                     extension.getId(), extension.getInstallableVersions()).toString());
         }

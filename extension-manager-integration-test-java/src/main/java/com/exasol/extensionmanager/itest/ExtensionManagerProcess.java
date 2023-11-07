@@ -45,7 +45,7 @@ class ExtensionManagerProcess implements AutoCloseable {
                         serverPortConsumer));
         if (!serverPortConsumer.isStartupFinished(SERVER_STARTUP_TIMEOUT)) {
             process.stop();
-            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-17")
+            throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-17")
                     .message("Extension manager did not log server port after {{timeout}}.", SERVER_STARTUP_TIMEOUT)
                     .mitigation("Check log output for error messages.").toString());
         }
@@ -72,7 +72,7 @@ class ExtensionManagerProcess implements AutoCloseable {
         try (ServerSocket socket = new ServerSocket(0)) {
             return socket.getLocalPort();
         } catch (final IOException exception) {
-            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-18")
+            throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-18")
                     .message("Failed to find an open port: {{error message}}", exception.getMessage()).toString(),
                     exception);
         }
@@ -112,7 +112,7 @@ class ExtensionManagerProcess implements AutoCloseable {
             } catch (final InterruptedException exception) {
                 Thread.currentThread().interrupt();
                 throw new IllegalStateException(
-                        ExaError.messageBuilder("E-EMIT-19")
+                        ExaError.messageBuilder("E-EITFJ-19")
                                 .message("Interrupted while waiting for server startup to finish").toString(),
                         exception);
             }

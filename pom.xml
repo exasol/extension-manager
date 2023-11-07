@@ -10,7 +10,7 @@
     <url>https://github.com/exasol/extension-manager/</url>
     <properties>
         <revision>0.5.5</revision>
-        <junit.version>5.10.0</junit.version>
+        <junit.version>5.10.1</junit.version>
     </properties>
     <modules>
         <module>extension-manager-integration-test-java</module>

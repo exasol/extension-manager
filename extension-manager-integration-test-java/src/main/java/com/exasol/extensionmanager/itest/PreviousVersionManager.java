@@ -69,7 +69,7 @@ public class PreviousVersionManager {
         try {
             this.exasolTestSetup.getDefaultBucket().uploadFile(adapterTempFile, fileName);
         } catch (FileNotFoundException | BucketAccessException | TimeoutException exception) {
-            throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-35")
+            throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-35")
                     .message("Failed to upload file {{local file}} to {{bucket file}} in default bucket",
                             adapterTempFile, adapterTempFile)
                     .toString(), exception);
@@ -85,21 +85,20 @@ public class PreviousVersionManager {
                     + " with file size " + fileSize + " bytes");
             if (response.statusCode() / 100 != 2) {
                 deleteFile(file);
-                throw new IllegalStateException(ExaError.messageBuilder("E-EMIT-39")
+                throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-39")
                         .message("Download of {{url}} failed with non-OK status {{status code}}", url,
                                 response.statusCode())
                         .toString());
             }
         } catch (final IOException exception) {
             deleteFile(file);
-            throw new UncheckedIOException(ExaError.messageBuilder("E-EMIT-42")
+            throw new UncheckedIOException(ExaError.messageBuilder("E-EITFJ-42")
                     .message("Failed to download {{url}} to {{target file}}", url, file).toString(), exception);
         } catch (final InterruptedException exception) {
             deleteFile(file);
             Thread.currentThread().interrupt();
-            throw new IllegalStateException(
-                    ExaError.messageBuilder("E-EMIT-32").message("Download of {{url}} was interrupted", url).toString(),
-                    exception);
+            throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-32")
+                    .message("Download of {{url}} was interrupted", url).toString(), exception);
         }
     }
 
@@ -124,7 +123,7 @@ public class PreviousVersionManager {
             return Files.createTempFile(extensionFolder, "ext-", ".js");
         } catch (final IOException exception) {
             throw new UncheckedIOException(
-                    ExaError.messageBuilder("E-EMIT-40")
+                    ExaError.messageBuilder("E-EITFJ-40")
                             .message("Failed to create a temp file in {{directory}}", extensionFolder).toString(),
                     exception);
         }
@@ -135,7 +134,8 @@ public class PreviousVersionManager {
             return Files.createTempFile("adapter-", ".tmp");
         } catch (final IOException exception) {
             throw new UncheckedIOException(
-                    ExaError.messageBuilder("E-EMIT-41").message("Failed to create a temp file").toString(), exception);
+                    ExaError.messageBuilder("E-EITFJ-41").message("Failed to create a temp file").toString(),
+                    exception);
         }
     }
 
@@ -144,7 +144,7 @@ public class PreviousVersionManager {
             Files.delete(file);
         } catch (final IOException exception) {
             throw new UncheckedIOException(
-                    ExaError.messageBuilder("E-EMIT-34").message("Error deleting file {{file}}", file).toString(),
+                    ExaError.messageBuilder("E-EITFJ-34").message("Error deleting file {{file}}", file).toString(),
                     exception);
         }
     }
