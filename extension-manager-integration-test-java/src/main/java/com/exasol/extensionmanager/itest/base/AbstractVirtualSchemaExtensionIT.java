@@ -33,7 +33,7 @@ public abstract class AbstractVirtualSchemaExtensionIT {
     }
 
     /**
-     * Creates a new configuration for the integration tests.
+     * Create a new configuration for the integration tests.
      * 
      * @return new configuration
      */
