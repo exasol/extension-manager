@@ -101,11 +101,11 @@ type rawJsExtensionVersion struct {
 }
 
 type BucketFsUpload struct {
-	Name             string `json:"name"`
-	DownloadURL      string `json:"downloadUrl"`
-	LicenseURL       string `json:"licenseUrl"`
-	FileSize         int    `json:"fileSize"`
-	BucketFsFilename string `json:"bucketFsFilename"`
+	Name             string `json:"name"`             // Human-readable name or short description of the file
+	DownloadURL      string `json:"downloadUrl"`      // Optional
+	LicenseURL       string `json:"licenseUrl"`       // Optional
+	FileSize         int    `json:"fileSize"`         // File size in bytes. Negative if EM should ignore the file size
+	BucketFsFilename string `json:"bucketFsFilename"` // File name in BucketFS
 }
 
 type JsExtInstallation struct {
