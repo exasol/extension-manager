@@ -103,13 +103,16 @@ func (c *controllerImpl) requiredFilesAvailable(extension *extensionAPI.JsExtens
 
 func existsFileInBfs(bfsFiles []bfs.BfsFile, requiredFile extensionAPI.BucketFsUpload) bool {
 	for _, existingFile := range bfsFiles {
-		if requiredFile.BucketFsFilename == existingFile.Name && requiredFile.FileSize == existingFile.Size {
+		if requiredFile.BucketFsFilename == existingFile.Name && (requiredFile.FileSize < 0 || requiredFile.FileSize == existingFile.Size) {
+			log.Tracef("Found required file %q of size %db, required size was %db", existingFile.Name, existingFile.Size, requiredFile.FileSize)
 			return true
 		}
+
 		if requiredFile.BucketFsFilename == existingFile.Name {
 			log.Debugf("File %q exists but has wrong size %d, expected %d bytes", existingFile.Name, existingFile.Size, requiredFile.FileSize)
 		}
 	}
+	log.Tracef("Required file %q of size %db not found", requiredFile.Name, requiredFile.FileSize)
 	return false
 }
 

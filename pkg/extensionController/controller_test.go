@@ -102,6 +102,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsAndBucketFSContainsJar() 
 	suite.Equal([]*Extension{{Name: "MyDemoExtension", Id: "testing-extension.js", Category: "Demo category", Description: "An extension for testing.",
 		InstallableVersions: []extensionAPI.JsExtensionVersion{{Name: "0.1.0", Latest: true, Deprecated: false}}}}, extensions)
 }
+
 func (suite *ControllerUTestSuite) TestGetAllExtensionsFailsStartingTransaction() {
 	suite.simulateTransactionBeginFails(mockError)
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
@@ -119,6 +120,32 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsButNoJarInBucketFS() {
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
 	suite.NoError(err)
 	suite.Empty(extensions)
+}
+
+func (suite *ControllerUTestSuite) TestGetAllExtensionsWrongFileSize() {
+	suite.registerDefaultExtensionDefinition()
+	suite.dbMock.ExpectBegin()
+	suite.bucketFsMock.SimulateFiles([]bfs.BfsFile{{Name: "my-extension.1.2.3.jar", Size: 5, Path: "path"}})
+	suite.bucketFsMock.SimulateCloseSuccess()
+	suite.dbMock.ExpectRollback()
+	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
+	suite.NoError(err)
+	suite.Empty(extensions)
+}
+
+func (suite *ControllerUTestSuite) TestGetAllExtensionsIgnoresFileSizeForNegativeValue() {
+	integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "my-extension.1.2.3.jar", FileSize: -1, DownloadUrl: "", LicenseUrl: "", LicenseAgreementRequired: false}).
+		Build().
+		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
+	suite.dbMock.ExpectBegin()
+	suite.bucketFsMock.SimulateFiles([]bfs.BfsFile{{Name: "my-extension.1.2.3.jar", Size: 3, Path: "path"}})
+	suite.bucketFsMock.SimulateCloseSuccess()
+	suite.dbMock.ExpectRollback()
+	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
+	suite.NoError(err)
+	suite.Equal([]*Extension{{Name: "MyDemoExtension", Id: "testing-extension.js", Category: "Demo category", Description: "An extension for testing.",
+		InstallableVersions: []extensionAPI.JsExtensionVersion{{Name: "0.1.0", Latest: true, Deprecated: false}}}}, extensions)
 }
 
 func (suite *ControllerUTestSuite) TestGetAllExtensionsFailsForInvalidExtension() {
