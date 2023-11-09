@@ -133,6 +133,17 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsWrongFileSize() {
 	suite.Empty(extensions)
 }
 
+func (suite *ControllerUTestSuite) TestGetAllExtensionsWrongFileName() {
+	suite.registerDefaultExtensionDefinition()
+	suite.dbMock.ExpectBegin()
+	suite.bucketFsMock.SimulateFiles([]bfs.BfsFile{{Name: "wrong.jar", Size: 3, Path: "path"}})
+	suite.bucketFsMock.SimulateCloseSuccess()
+	suite.dbMock.ExpectRollback()
+	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
+	suite.NoError(err)
+	suite.Empty(extensions)
+}
+
 func (suite *ControllerUTestSuite) TestGetAllExtensionsIgnoresFileSizeForNegativeValue() {
 	integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithBucketFsUpload(integrationTesting.BucketFsUploadParams{Name: "extension jar", BucketFsFilename: "my-extension.1.2.3.jar", FileSize: -1, DownloadUrl: "", LicenseUrl: "", LicenseAgreementRequired: false}).
