@@ -30,6 +30,7 @@ func CreateTestExtensionBuilder(t *testing.T) *TestExtensionBuilder {
 		deleteInstanceFunc:                  "context.sqlClient.execute(`drop instance ${instanceId}`)",
 		getInstanceParameterDefinitionsFunc: "return []",
 		bucketFsUploads:                     []BucketFsUploadParams{},
+		rawBucketFsUploads:                  "",
 	}
 	return &builder
 }
@@ -37,6 +38,7 @@ func CreateTestExtensionBuilder(t *testing.T) *TestExtensionBuilder {
 type TestExtensionBuilder struct {
 	testing                             *testing.T
 	extensionApiVersion                 string
+	rawBucketFsUploads                  string
 	bucketFsUploads                     []BucketFsUploadParams
 	findInstallationsFunc               string
 	installFunc                         string
@@ -110,6 +112,11 @@ func (builder *TestExtensionBuilder) WithBucketFsUpload(upload BucketFsUploadPar
 	return builder
 }
 
+func (builder *TestExtensionBuilder) WithRawBucketFsUpload(uploads string) *TestExtensionBuilder {
+	builder.rawBucketFsUploads = uploads
+	return builder
+}
+
 func (builder TestExtensionBuilder) Build() *BuiltExtension {
 	workDir := builder.createWorkDir()
 	err := os.WriteFile(path.Join(workDir, "package.json"), []byte(builder.createPackageJsonContent()), 0600)
@@ -146,11 +153,8 @@ func (builder TestExtensionBuilder) createPackageJsonContent() string {
 var extensionTemplate string
 
 func (builder TestExtensionBuilder) createExtensionTsContent() string {
-	bfsUploadsJson, err := json.Marshal(builder.bucketFsUploads)
-	if err != nil {
-		panic(err)
-	}
-	content := strings.Replace(extensionTemplate, "$UPLOADS$", string(bfsUploadsJson), 1)
+
+	content := strings.Replace(extensionTemplate, "$UPLOADS$", builder.getBucketFsUpload(), 1)
 	content = strings.Replace(content, "$FIND_INSTALLATIONS$", builder.findInstallationsFunc, 1)
 	content = strings.Replace(content, "$INSTALL_EXTENSION$", builder.installFunc, 1)
 	content = strings.Replace(content, "$UNINSTALL_EXTENSION$", builder.uninstallFunc, 1)
@@ -160,6 +164,17 @@ func (builder TestExtensionBuilder) createExtensionTsContent() string {
 	content = strings.Replace(content, "$DELETE_INSTANCE$", builder.deleteInstanceFunc, 1)
 	content = strings.Replace(content, "$GET_INSTANCE_PARAMETER_DEFINITIONS$", builder.getInstanceParameterDefinitionsFunc, 1)
 	return content
+}
+
+func (builder TestExtensionBuilder) getBucketFsUpload() string {
+	if builder.rawBucketFsUploads != "" {
+		return builder.rawBucketFsUploads
+	}
+	json, err := json.Marshal(builder.bucketFsUploads)
+	if err != nil {
+		panic(err)
+	}
+	return string(json)
 }
 
 type BuiltExtension struct {

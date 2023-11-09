@@ -47,6 +47,41 @@ func (suite *ExtensionApiSuite) TestLoadExtension() {
 	extension := suite.loadExtension(extensionContent)
 	suite.Equal("MyDemoExtension", extension.Name)
 	suite.Equal("Demo category", extension.Category)
+	suite.Equal([]JsExtensionVersion{{Name: "0.1.0", Latest: true, Deprecated: false}}, extension.InstallableVersions)
+	suite.Empty(extension.BucketFsUploads)
+}
+
+func (suite *ExtensionApiSuite) TestNoBucketFsUploads() {
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithRawBucketFsUpload("[]").
+		Build().AsString()
+	extension := suite.loadExtension(extensionContent)
+	suite.Empty(extension.BucketFsUploads)
+}
+
+func (suite *ExtensionApiSuite) TestSingleBucketFsUploads() {
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithRawBucketFsUpload(`[{name:"name",downloadUrl:"url",licenseUrl:"license",fileSize:123,bucketFsFilename:"filename"}]`).
+		Build().AsString()
+	extension := suite.loadExtension(extensionContent)
+	suite.Equal([]BucketFsUpload{{Name: "name", DownloadURL: "url", LicenseURL: "license", FileSize: 123, BucketFsFilename: "filename"}}, extension.BucketFsUploads)
+}
+
+func (suite *ExtensionApiSuite) TestBucketFsUploadsWithMissingValues() {
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithRawBucketFsUpload(`[{}]`).
+		Build().AsString()
+	extension := suite.loadExtension(extensionContent)
+	suite.Equal([]BucketFsUpload{{Name: "", DownloadURL: "", LicenseURL: "", FileSize: 0, BucketFsFilename: ""}}, extension.BucketFsUploads)
+}
+
+func (suite *ExtensionApiSuite) TestTwoBucketFsUploadsWithMissingValues() {
+	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
+		WithRawBucketFsUpload(`[{}, {}]`).
+		Build().AsString()
+	extension := suite.loadExtension(extensionContent)
+	suite.Equal([]BucketFsUpload{{Name: "", DownloadURL: "", LicenseURL: "", FileSize: 0, BucketFsFilename: ""},
+		{Name: "", DownloadURL: "", LicenseURL: "", FileSize: 0, BucketFsFilename: ""}}, extension.BucketFsUploads)
 }
 
 func (suite *ExtensionApiSuite) TestGetParameterDefinitionsEmptyResult() {
