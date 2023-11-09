@@ -1,4 +1,4 @@
-# Extension Manager 0.5.6, released 2023-??-??
+# Extension Manager 0.5.6, released 2023-11-09
 
 Code name: Adapt for JDBC based virtual schema extensions
 

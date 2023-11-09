@@ -153,7 +153,6 @@ func (builder TestExtensionBuilder) createPackageJsonContent() string {
 var extensionTemplate string
 
 func (builder TestExtensionBuilder) createExtensionTsContent() string {
-
 	content := strings.Replace(extensionTemplate, "$UPLOADS$", builder.getBucketFsUpload(), 1)
 	content = strings.Replace(content, "$FIND_INSTALLATIONS$", builder.findInstallationsFunc, 1)
 	content = strings.Replace(content, "$INSTALL_EXTENSION$", builder.installFunc, 1)
