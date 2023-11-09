@@ -4,7 +4,9 @@ Code name: Adapt for JDBC based virtual schema extensions
 
 ## Summary
 
-This release adapts Extension Manager integration test framework for JDBC based extensions.
+This release adapts Extension Manager integration test framework for JDBC based extensions:
+* Skip `upgradeFromPreviousVersion()` when no previous version is available
+* Update `createInstanceWithSingleQuote()` to accept any adapter name, not just the hard-coded S3 adapter
 
 ## Features
 

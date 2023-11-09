@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -232,6 +233,7 @@ public abstract class AbstractScriptExtensionIT {
      */
     @Test
     void upgradeFromPreviousVersion() {
+        assumeTrue(config.getPreviousVersion() != null, "No previous version available for testing");
         final PreviousExtensionVersion previousVersion = createPreviousVersion();
         previousVersion.prepare();
         previousVersion.install();
