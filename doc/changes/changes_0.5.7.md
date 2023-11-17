@@ -1,10 +1,11 @@
-# Extension Manager 0.5.7, released 2023-11-27
+# Extension Manager 0.5.7, released 2023-11-20
 
 Code name: Fix base integration test
 
 ## Summary
 
 This release fixes a hard coded project name in `AbstractScriptExtensionIT`, which made the test base unusable for other extensions.
+
 ## Bugfix
 
 * #163: Fixed hard coded project name in `AbstractScriptExtensionIT`
