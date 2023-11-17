@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-const defaultExasolDbVersion = "8.23.0"
+const defaultExasolDbVersion = "8.23.1"
 
 type DbTestSetup struct {
 	suite          *suite.Suite
