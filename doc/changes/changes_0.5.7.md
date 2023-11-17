@@ -19,10 +19,6 @@ This release fixes a hard coded project name in `AbstractScriptExtensionIT`, whi
 * Updated `com.fasterxml.jackson.core:jackson-core:2.15.3` to `2.16.0`
 * Updated `com.fasterxml.jackson.core:jackson-databind:2.15.3` to `2.16.0`
 * Updated `io.swagger.core.v3:swagger-annotations:2.2.18` to `2.2.19`
-* Updated `org.glassfish.jersey.core:jersey-client:2.41` to `3.1.3`
-* Updated `org.glassfish.jersey.inject:jersey-hk2:2.41` to `3.1.3`
-* Updated `org.glassfish.jersey.media:jersey-media-json-jackson:2.41` to `3.1.3`
-* Updated `org.glassfish.jersey.media:jersey-media-multipart:2.41` to `3.1.3`
 
 #### Plugin Dependency Updates
 

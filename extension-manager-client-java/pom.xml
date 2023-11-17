@@ -13,7 +13,7 @@
         <project-keeper.skip>true</project-keeper.skip>
         <!-- Generated code dependencies -->
         <swagger-core-version>2.2.19</swagger-core-version>
-        <jersey-version>3.1.3</jersey-version>
+        <jersey-version>2.41</jersey-version> <!-- Version 2.x required to compile generated code. -->
         <jackson-version>2.16.0</jackson-version>
     </properties>
     <dependencies>
