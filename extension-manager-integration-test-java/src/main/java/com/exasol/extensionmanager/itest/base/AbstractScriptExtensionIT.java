@@ -259,7 +259,7 @@ public abstract class AbstractScriptExtensionIT {
                 .previousVersion(config.getPreviousVersion()) //
                 .adapterFileName(config.getPreviousVersionJarFile()) //
                 .extensionFileName(config.getExtensionId()) //
-                .project("cloud-storage-extension") //
+                .project(config.getProjectName()) //
                 .build();
     }
 }

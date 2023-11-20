@@ -18,7 +18,7 @@ class IntegrationTestCommon {
 
     static ExasolTestSetup createExasolTestSetup() {
         if (System.getProperty("com.exasol.dockerdb.image") == null) {
-            System.setProperty("com.exasol.dockerdb.image", "8.23.0");
+            System.setProperty("com.exasol.dockerdb.image", "8.23.1");
         }
         return new ExasolTestSetupFactory(Path.of("dummy-config")).getTestSetup();
     }
