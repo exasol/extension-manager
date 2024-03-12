@@ -44,10 +44,17 @@ This release fixed vulnerabilities CVE-2024-25710 and CVE-2024-26308 in compile 
 
 #### Plugin Dependency Updates
 
+* Updated `com.exasol:error-code-crawler-maven-plugin:1.3.1` to `2.0.0`
 * Removed `com.exasol:project-keeper-maven-plugin:2.9.16`
 * Updated `io.swagger.codegen.v3:swagger-codegen-maven-plugin:3.0.47` to `3.0.54`
+* Updated `org.apache.maven.plugins:maven-compiler-plugin:3.11.0` to `3.12.1`
+* Updated `org.apache.maven.plugins:maven-javadoc-plugin:3.6.2` to `3.6.3`
+* Updated `org.apache.maven.plugins:maven-surefire-plugin:3.2.2` to `3.2.5`
+* Added `org.apache.maven.plugins:maven-toolchains-plugin:3.1.0`
 * Updated `org.codehaus.mojo:build-helper-maven-plugin:3.4.0` to `3.5.0`
 * Updated `org.codehaus.mojo:exec-maven-plugin:3.1.0` to `3.2.0`
+* Updated `org.codehaus.mojo:flatten-maven-plugin:1.5.0` to `1.6.0`
+* Updated `org.codehaus.mojo:versions-maven-plugin:2.16.1` to `2.16.2`
 
 ### Extension Integration Tests Library
 
@@ -66,7 +73,15 @@ This release fixed vulnerabilities CVE-2024-25710 and CVE-2024-26308 in compile 
 
 #### Plugin Dependency Updates
 
+* Updated `com.exasol:error-code-crawler-maven-plugin:1.3.1` to `2.0.0`
 * Removed `com.exasol:project-keeper-maven-plugin:2.9.16`
+* Updated `org.apache.maven.plugins:maven-compiler-plugin:3.11.0` to `3.12.1`
+* Updated `org.apache.maven.plugins:maven-failsafe-plugin:3.2.2` to `3.2.5`
+* Updated `org.apache.maven.plugins:maven-javadoc-plugin:3.6.2` to `3.6.3`
+* Updated `org.apache.maven.plugins:maven-surefire-plugin:3.2.2` to `3.2.5`
+* Added `org.apache.maven.plugins:maven-toolchains-plugin:3.1.0`
+* Updated `org.codehaus.mojo:flatten-maven-plugin:1.5.0` to `1.6.0`
+* Updated `org.codehaus.mojo:versions-maven-plugin:2.16.1` to `2.16.2`
 
 ### Registry
 
