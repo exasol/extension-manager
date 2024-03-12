@@ -4,9 +4,9 @@
     "clean": "rm -rf dist/"
   },
   "dependencies": {
-    "@exasol/extension-manager-interface": "0.4.0"
+    "@exasol/extension-manager-interface": "0.4.1"
   },
   "devDependencies": {
-    "esbuild": "^0.18.16"
+    "esbuild": "^0.20.1"
   }
 }

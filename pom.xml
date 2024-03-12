@@ -9,7 +9,7 @@
     <packaging>pom</packaging>
     <url>https://github.com/exasol/extension-manager/</url>
     <properties>
-        <revision>0.5.7</revision>
+        <revision>0.5.8</revision>
         <junit.version>5.10.1</junit.version>
     </properties>
     <modules>
@@ -49,26 +49,6 @@
                         <exclude>CVE-2023-4586</exclude>
                     </excludeVulnerabilityIds>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.2.1</version>
-                <executions>
-                    <execution>
-                        <id>enforce-maven</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireMavenVersion>
-                                    <version>[3.8.7,3.9.0)</version>
-                                </requireMavenVersion>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

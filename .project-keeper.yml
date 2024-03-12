@@ -26,10 +26,12 @@ sources:
     path: registry-upload/package.json
   - type: npm
     path: pkg/parameterValidator/package.json
-version: 0.5.7
+version: 0.5.8
 linkReplacements:
   - "Unknown|https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE"
   - "https://github.com/swagger-api/swagger-core/modules/swagger-annotations|https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-annotations"
   - "jquery.org/license|https://jquery.org/license/"
   - "https://github.com/swagger-api/swagger-codegen/modules/swagger-codegen-maven-plugin|https://github.com/swagger-api/swagger-codegen/tree/master/modules/swagger-codegen-maven-plugin"
 excludes:
+  # We use the PK shell script instead of the Maven plugin
+  - "W-PK-CORE-151: Pom file '.*/pom.xml' contains no reference to project-keeper-maven-plugin."
