@@ -31,21 +31,4 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.sonatype.ossindex.maven</groupId>
-                <artifactId>ossindex-maven-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <excludeVulnerabilityIds>
-                        <!-- Transitive dependency fr.turri:aXMLRPC Transitive dependency fr.turri:aXMLRPC used by
-                             com.exasol:exasol-test-setup-abstraction-java for connecting to ExaOperation.
-                             We accept this vulnerability (CWE-833: Deadlock) as we assume that we only connect to the known endpoint ExaOperations. -->
-                       <exclude>CVE-2017-10355</exclude>
-                    </excludeVulnerabilityIds>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

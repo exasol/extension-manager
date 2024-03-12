@@ -6,8 +6,6 @@ Code name: Fix vulnerabilities CVE-2024-25710 and CVE-2024-26308 in compile depe
 
 This release fixed vulnerabilities CVE-2024-25710 and CVE-2024-26308 in compile dependency `org.apache.commons:commons-compress` of the integration test framework.
 
-**Excluded Vulnerability in integration testing framework** We accept vulnerability CVE-2017-10355 (CWE-833: Deadlock) in transitive compile dependency `xerces:xercesImpl:jar:2.12.2` as we assume that we only connect to the known endpoint ExaOperations.
-
 ## Security
 
 * #165: Fixed vulnerabilities CVE-2024-25710 and CVE-2024-26308 in compile dependency `org.apache.commons:commons-compress`

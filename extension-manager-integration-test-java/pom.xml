@@ -27,6 +27,11 @@
                     <groupId>org.hamcrest</groupId>
                     <artifactId>hamcrest-core</artifactId>
                 </exclusion>
+                <exclusion>
+                    <!-- Fix CVE-2017-10355 -->
+                    <groupId>fr.turri</groupId>
+                    <artifactId>aXMLRPC</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
