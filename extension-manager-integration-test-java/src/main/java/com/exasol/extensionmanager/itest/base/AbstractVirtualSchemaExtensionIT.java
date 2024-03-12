@@ -90,6 +90,14 @@ public abstract class AbstractVirtualSchemaExtensionIT {
     }
 
     /**
+     * Verify that current and previous version are different.
+     */
+    @Test
+    public void checkPreviousVersion() {
+        assertThat(config.getCurrentVersion(), not(equalTo(config.getPreviousVersion())));
+    }
+
+    /**
      * Verify that extension is listed with expected properties.
      */
     @Test
