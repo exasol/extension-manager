@@ -37,7 +37,7 @@ func (suite *ParameterValidatorSuite) TestValidateParameter() {
 
 	for _, testCase := range cases {
 		result, err := suite.validator.ValidateParameter(suite.convertParam(testCase.definition), "test")
-		suite.NoError(err)
+		suite.Require().NoError(err)
 		suite.Equal(testCase.expected, *result)
 	}
 }
@@ -107,7 +107,7 @@ func (suite *ParameterValidatorSuite) TestValidateParameters() {
 	for _, t := range tests {
 		suite.Run(t.name, func() {
 			result, err := suite.validator.ValidateParameters(suite.convert(t.definitions), extensionAPI.ParameterValues{Values: t.params})
-			suite.NoError(err)
+			suite.Require().NoError(err)
 			suite.Len(result, len(t.expected))
 			suite.Equal(t.expected, result)
 		})
@@ -117,7 +117,7 @@ func (suite *ParameterValidatorSuite) TestValidateParameters() {
 func (suite *ParameterValidatorSuite) TestInvalidDefinitionIgnored() {
 	rawDefinition := []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "invalidType"}}
 	result, err := suite.validator.ValidateParameters(suite.convert(rawDefinition), extensionAPI.ParameterValues{Values: []extensionAPI.ParameterValue{}})
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Empty(result)
 }
 
@@ -139,7 +139,7 @@ func (suite *ParameterValidatorSuite) TestConvertDefinitionsSucceeds() {
 	for _, test := range tests {
 		suite.T().Run(test.name, func(t *testing.T) {
 			converted, err := ConvertDefinitions(test.rawDefinitions)
-			suite.NoError(err)
+			suite.Require().NoError(err)
 			suite.Equal(test.expected, converted)
 		})
 	}
@@ -158,7 +158,7 @@ func (suite *ParameterValidatorSuite) TestConvertDefinitionsFails() {
 	for _, test := range tests {
 		suite.T().Run(test.name, func(t *testing.T) {
 			converted, err := ConvertDefinitions(test.rawDefinitions)
-			suite.EqualError(err, test.expectedError)
+			suite.Require().EqualError(err, test.expectedError)
 			suite.Nil(converted)
 		})
 	}

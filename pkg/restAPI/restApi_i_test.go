@@ -47,7 +47,7 @@ func (suite *RestAPIIntegrationTestSuite) SetupTest() {
 		ExtensionRegistryURL: suite.registryServer.IndexUrl(),
 		ExtensionSchema:      EXTENSION_SCHEMA,
 		BucketFSBasePath:     "/buckets/bfsdefault/default/"})
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.restApi = startRestApi(&suite.Suite, false, ctrl)
 	suite.registryServer.Reset()
 	suite.registryServer.SetRegistryContent(`{"extensions":[]}`)

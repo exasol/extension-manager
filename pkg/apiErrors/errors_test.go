@@ -7,6 +7,7 @@ import (
 
 	"github.com/exasol/extension-manager/pkg/apiErrors"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewInternalServerError(t *testing.T) {
@@ -81,7 +82,7 @@ func assertApiError(t *testing.T, err error, expectedMsg string, expectedStatus 
 		assert.Equal(t, expectedMsg, apiErr.Message)
 		assert.Equal(t, expectedStatus, apiErr.Status)
 		if expectedOrgError == nil {
-			assert.NoError(t, apiErr.OriginalError, "original error")
+			require.NoError(t, apiErr.OriginalError, "original error")
 		} else {
 			assert.Same(t, expectedOrgError, apiErr.OriginalError, "original error")
 		}

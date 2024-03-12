@@ -50,7 +50,7 @@ func (s *MockRegistryServer) Start() {
 func (s *MockRegistryServer) sendResponse(w http.ResponseWriter, content string, status int) {
 	w.WriteHeader(status)
 	_, err := w.Write([]byte(content))
-	s.suite.NoError(err)
+	s.suite.Require().NoError(err)
 }
 
 func (s *MockRegistryServer) SetRegistryContent(content string) {

@@ -3,6 +3,7 @@ package backend
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"testing"
 
@@ -37,7 +38,7 @@ func (suite *ExasolSqlClientUTestSuite) createClient() SimpleSQLClient {
 func (suite *ExasolSqlClientUTestSuite) createMockTransaction() *sql.Tx {
 	suite.dbMock.ExpectBegin()
 	tx, err := suite.db.Begin()
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	return tx
 }
 
@@ -46,15 +47,15 @@ func (suite *ExasolSqlClientUTestSuite) TestExecuteSucceeds() {
 	client := suite.createClient()
 	suite.dbMock.ExpectExec("select 1").WillReturnResult(sqlmock.NewResult(1, 1))
 	result, err := client.Execute("select 1")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.NotNil(result)
 }
 
 func (suite *ExasolSqlClientUTestSuite) TestExecuteFails() {
 	client := suite.createClient()
-	suite.dbMock.ExpectExec("invalid").WillReturnError(fmt.Errorf("expected"))
+	suite.dbMock.ExpectExec("invalid").WillReturnError(errors.New("expected"))
 	result, err := client.Execute("invalid")
-	suite.EqualError(err, "error executing statement 'invalid': expected")
+	suite.Require().EqualError(err, "error executing statement 'invalid': expected")
 	suite.Nil(result)
 }
 
@@ -82,12 +83,12 @@ func (suite *ExasolSqlClientUTestSuite) TestExecuteValidation() {
 			if test.forbiddenCommand != "" {
 				expectedError := fmt.Sprintf("statement %q contains forbidden command %q. Transaction handling is done by extension manager", test.statement, test.forbiddenCommand)
 				result, err := client.Execute(test.statement)
-				suite.EqualError(err, expectedError)
+				suite.Require().EqualError(err, expectedError)
 				suite.Nil(result)
 			} else {
 				suite.dbMock.ExpectExec(test.statement).WillReturnResult(sqlmock.NewResult(1, 0))
 				result, err := client.Execute(test.statement)
-				suite.NoError(err)
+				suite.Require().NoError(err)
 				suite.NotNil(result)
 			}
 		})
@@ -96,9 +97,9 @@ func (suite *ExasolSqlClientUTestSuite) TestExecuteValidation() {
 
 func (suite *ExasolSqlClientUTestSuite) TestQueryFails() {
 	client := suite.createClient()
-	suite.dbMock.ExpectQuery("invalid").WillReturnError(fmt.Errorf("expected")).RowsWillBeClosed()
+	suite.dbMock.ExpectQuery("invalid").WillReturnError(errors.New("expected")).RowsWillBeClosed()
 	result, err := client.Query("invalid")
-	suite.EqualError(err, "error executing query 'invalid': expected")
+	suite.Require().EqualError(err, "error executing query 'invalid': expected")
 	suite.Nil(result)
 }
 
@@ -114,7 +115,7 @@ func (suite *ExasolSqlClientUTestSuite) TestQuerySucceeds() {
 			AddRow(2, "b")).
 		RowsWillBeClosed()
 	result, err := client.Query("query")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.NotNil(result)
 	suite.Equal(&QueryResult{
 		Columns: []Column{{Name: "col1", TypeName: "type1"}, {Name: "col2", TypeName: "type2"}},
@@ -123,17 +124,17 @@ func (suite *ExasolSqlClientUTestSuite) TestQuerySucceeds() {
 
 func (suite *ExasolSqlClientUTestSuite) TestQueryRowFails() {
 	client := suite.createClient()
-	suite.dbMock.ExpectQuery("query").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).AddRow(2, "b").RowError(0, fmt.Errorf("mock"))).RowsWillBeClosed()
+	suite.dbMock.ExpectQuery("query").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).AddRow(2, "b").RowError(0, errors.New("mock"))).RowsWillBeClosed()
 	result, err := client.Query("query")
-	suite.EqualError(err, "error while iterating result: mock")
+	suite.Require().EqualError(err, "error while iterating result: mock")
 	suite.Nil(result)
 }
 
 func (suite *ExasolSqlClientUTestSuite) TestQueryCloseFails() {
 	client := suite.createClient()
-	suite.dbMock.ExpectQuery("query").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).CloseError(fmt.Errorf("mock error"))).RowsWillBeClosed()
+	suite.dbMock.ExpectQuery("query").WillReturnRows(sqlmock.NewRows([]string{"col1", "col2"}).CloseError(errors.New("mock error"))).RowsWillBeClosed()
 	result, err := client.Query("query")
-	suite.EqualError(err, "error while iterating result: mock error")
+	suite.Require().EqualError(err, "error while iterating result: mock error")
 	suite.Nil(result)
 }
 
@@ -144,12 +145,12 @@ func (suite *ExasolSqlClientUTestSuite) TestQueryValidation() {
 			if test.forbiddenCommand != "" {
 				expectedError := fmt.Sprintf("statement %q contains forbidden command %q. Transaction handling is done by extension manager", test.statement, test.forbiddenCommand)
 				result, err := client.Query(test.statement)
-				suite.EqualError(err, expectedError)
+				suite.Require().EqualError(err, expectedError)
 				suite.Nil(result)
 			} else {
 				suite.dbMock.ExpectQuery(test.statement).WillReturnRows(sqlmock.NewRows([]string{"col1"})).RowsWillBeClosed()
 				result, err := client.Query(test.statement)
-				suite.NoError(err)
+				suite.Require().NoError(err)
 				suite.NotNil(result)
 			}
 		})

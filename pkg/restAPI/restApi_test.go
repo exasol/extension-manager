@@ -1,6 +1,7 @@
 package restAPI
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -34,7 +35,7 @@ const (
 	VALID_DB_ARGS             = "?dbHost=host&dbPort=8563"
 )
 
-var mockError = fmt.Errorf("mock error")
+var mockError = errors.New("mock error")
 
 func TestRestApiSuite(t *testing.T) {
 	suite.Run(t, new(RestAPISuite))

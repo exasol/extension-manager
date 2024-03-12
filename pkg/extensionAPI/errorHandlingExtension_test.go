@@ -1,6 +1,7 @@
 package extensionAPI
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -83,7 +84,7 @@ func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsSuccessful() {
 		return expectedInstallations
 	}
 	installations, err := suite.extension.FindInstallations(createMockContext(), createMetaData())
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal(expectedInstallations, installations)
 }
 
@@ -92,14 +93,14 @@ func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsFailure() {
 		panic(mockErrorMessage)
 	}
 	installations, err := suite.extension.FindInstallations(createMockContext(), createMetaData())
-	suite.EqualError(err, `failed to find installations for extension "id": `+mockErrorMessage)
+	suite.Require().EqualError(err, `failed to find installations for extension "id": `+mockErrorMessage)
 	suite.Nil(installations)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestFindInstallationsUnsupported() {
 	suite.rawExtension.FindInstallations = nil
 	installations, err := suite.extension.FindInstallations(createMockContext(), createMetaData())
-	suite.EqualError(err, `extension "id" does not support operation "findInstallations"`)
+	suite.Require().EqualError(err, `extension "id" does not support operation "findInstallations"`)
 	suite.Nil(installations)
 }
 
@@ -111,7 +112,7 @@ func (suite *ErrorHandlingExtensionSuite) GetParameterDefinitionsSuccessful() {
 		return expectedDefinitions
 	}
 	definitions, err := suite.extension.GetParameterDefinitions(createMockContext(), "ext-version")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal(expectedDefinitions, definitions)
 }
 
@@ -120,14 +121,14 @@ func (suite *ErrorHandlingExtensionSuite) GetParameterDefinitionsFailure() {
 		panic(mockErrorMessage)
 	}
 	installations, err := suite.extension.GetParameterDefinitions(createMockContext(), "ext-version")
-	suite.EqualError(err, "failed to get parameter definitions for extension \"id\": "+mockErrorMessage)
+	suite.Require().EqualError(err, "failed to get parameter definitions for extension \"id\": "+mockErrorMessage)
 	suite.Nil(installations)
 }
 
 func (suite *ErrorHandlingExtensionSuite) GetParameterDefinitionsUnsupported() {
 	suite.rawExtension.GetParameterDefinitions = nil
 	installations, err := suite.extension.GetParameterDefinitions(createMockContext(), "ext-version")
-	suite.EqualError(err, `extension "id" does not support operation "getInstanceParameters"`)
+	suite.Require().EqualError(err, `extension "id" does not support operation "getInstanceParameters"`)
 	suite.Nil(installations)
 }
 
@@ -138,7 +139,7 @@ func (suite *ErrorHandlingExtensionSuite) TestInstallSuccessful() {
 		// empty mocked function
 	}
 	err := suite.extension.Install(createMockContext(), "version")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestInstallFailure() {
@@ -146,13 +147,13 @@ func (suite *ErrorHandlingExtensionSuite) TestInstallFailure() {
 		panic(mockErrorMessage)
 	}
 	err := suite.extension.Install(createMockContext(), "version")
-	suite.EqualError(err, `failed to install extension "id": `+mockErrorMessage)
+	suite.Require().EqualError(err, `failed to install extension "id": `+mockErrorMessage)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestInstallUnsupported() {
 	suite.rawExtension.Install = nil
 	err := suite.extension.Install(createMockContext(), "version")
-	suite.EqualError(err, `extension "id" does not support operation "install"`)
+	suite.Require().EqualError(err, `extension "id" does not support operation "install"`)
 }
 
 // Uninstall
@@ -162,7 +163,7 @@ func (suite *ErrorHandlingExtensionSuite) TestUninstallSuccessful() {
 		// empty mocked function
 	}
 	err := suite.extension.Uninstall(createMockContext(), "version")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestUninstallFailure() {
@@ -170,13 +171,13 @@ func (suite *ErrorHandlingExtensionSuite) TestUninstallFailure() {
 		panic(mockErrorMessage)
 	}
 	err := suite.extension.Uninstall(createMockContext(), "version")
-	suite.EqualError(err, `failed to uninstall extension "id": `+mockErrorMessage)
+	suite.Require().EqualError(err, `failed to uninstall extension "id": `+mockErrorMessage)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestUninstallUnsupported() {
 	suite.rawExtension.Uninstall = nil
 	err := suite.extension.Uninstall(createMockContext(), "version")
-	suite.EqualError(err, `extension "id" does not support operation "uninstall"`)
+	suite.Require().EqualError(err, `extension "id" does not support operation "uninstall"`)
 }
 
 // Upgrade
@@ -186,7 +187,7 @@ func (suite *ErrorHandlingExtensionSuite) TestUpgradeSuccessful() {
 		return &JsUpgradeResult{PreviousVersion: "old", NewVersion: "new"}
 	}
 	result, err := suite.extension.Upgrade(createMockContext())
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal(&JsUpgradeResult{PreviousVersion: "old", NewVersion: "new"}, result)
 }
 
@@ -195,14 +196,14 @@ func (suite *ErrorHandlingExtensionSuite) TestUpgradeFails() {
 		panic(mockErrorMessage)
 	}
 	result, err := suite.extension.Upgrade(createMockContext())
-	suite.EqualError(err, `failed to upgrade extension "id": `+mockErrorMessage)
+	suite.Require().EqualError(err, `failed to upgrade extension "id": `+mockErrorMessage)
 	suite.Nil(result)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestUpgradeUnsupported() {
 	suite.rawExtension.Upgrade = nil
 	instance, err := suite.extension.Upgrade(createMockContext())
-	suite.EqualError(err, `extension "id" does not support operation "upgrade"`)
+	suite.Require().EqualError(err, `extension "id" does not support operation "upgrade"`)
 	suite.Nil(instance)
 }
 
@@ -234,7 +235,7 @@ func (suite *ErrorHandlingExtensionSuite) TestListInstancesSuccessful() {
 		return []*JsExtInstance{{Id: "inst1", Name: "Inst 1"}, {Id: "inst2", Name: "Inst 2"}}
 	}
 	instances, err := suite.extension.ListInstances(createMockContext(), "version")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal([]*JsExtInstance{{Id: "inst1", Name: "Inst 1"}, {Id: "inst2", Name: "Inst 2"}}, instances)
 }
 
@@ -243,14 +244,14 @@ func (suite *ErrorHandlingExtensionSuite) TestListInstancesFails() {
 		panic(mockErrorMessage)
 	}
 	instances, err := suite.extension.ListInstances(createMockContext(), "version")
-	suite.EqualError(err, `failed to list instances for extension "id" in version "version": `+mockErrorMessage)
+	suite.Require().EqualError(err, `failed to list instances for extension "id" in version "version": `+mockErrorMessage)
 	suite.Nil(instances)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestListInstancesUnsupported() {
 	suite.rawExtension.FindInstances = nil
 	instances, err := suite.extension.ListInstances(createMockContext(), "version")
-	suite.EqualError(err, `extension "id" does not support operation "findInstances"`)
+	suite.Require().EqualError(err, `extension "id" does not support operation "findInstances"`)
 	suite.Nil(instances)
 }
 
@@ -261,7 +262,7 @@ func (suite *ErrorHandlingExtensionSuite) TetsGetParameterDefinitionsSuccessful(
 		return []interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}
 	}
 	instance, err := suite.extension.GetParameterDefinitions(createMockContext(), "version")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal([]interface{}{map[string]interface{}{"id": "param1", "name": "My param", "type": "string"}}, instance)
 }
 
@@ -270,14 +271,14 @@ func (suite *ErrorHandlingExtensionSuite) TestGetParameterDefinitionsFails() {
 		panic(mockErrorMessage)
 	}
 	instance, err := suite.extension.GetParameterDefinitions(createMockContext(), "version")
-	suite.EqualError(err, `failed to get parameter definitions for extension "id": `+mockErrorMessage)
+	suite.Require().EqualError(err, `failed to get parameter definitions for extension "id": `+mockErrorMessage)
 	suite.Nil(instance)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestGetParameterDefinitionsUnsupported() {
 	suite.rawExtension.GetParameterDefinitions = nil
 	instance, err := suite.extension.GetParameterDefinitions(createMockContext(), "version")
-	suite.EqualError(err, `extension "id" does not support operation "getParameterDefinitions"`)
+	suite.Require().EqualError(err, `extension "id" does not support operation "getParameterDefinitions"`)
 	suite.Nil(instance)
 }
 
@@ -288,7 +289,7 @@ func (suite *ErrorHandlingExtensionSuite) TestAddInstanceSuccessful() {
 		return &JsExtInstance{Id: "inst", Name: "newInstance"}
 	}
 	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{Values: []ParameterValue{}})
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal(&JsExtInstance{Id: "inst", Name: "newInstance"}, instance)
 }
 
@@ -297,14 +298,14 @@ func (suite *ErrorHandlingExtensionSuite) TestAddInstanceFails() {
 		panic(mockErrorMessage)
 	}
 	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{Values: []ParameterValue{}})
-	suite.EqualError(err, `failed to add instance for extension "id": `+mockErrorMessage)
+	suite.Require().EqualError(err, `failed to add instance for extension "id": `+mockErrorMessage)
 	suite.Nil(instance)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestAddInstanceUnsupported() {
 	suite.rawExtension.AddInstance = nil
 	instance, err := suite.extension.AddInstance(createMockContext(), "version", &ParameterValues{Values: []ParameterValue{}})
-	suite.EqualError(err, `extension "id" does not support operation "addInstance"`)
+	suite.Require().EqualError(err, `extension "id" does not support operation "addInstance"`)
 	suite.Nil(instance)
 }
 
@@ -315,7 +316,7 @@ func (suite *ErrorHandlingExtensionSuite) TestDeleteInstanceSuccessful() {
 		// empty mocked function
 	}
 	err := suite.extension.DeleteInstance(createMockContext(), "version", "instance-id")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestDeleteInstanceFails() {
@@ -323,13 +324,13 @@ func (suite *ErrorHandlingExtensionSuite) TestDeleteInstanceFails() {
 		panic(mockErrorMessage)
 	}
 	err := suite.extension.DeleteInstance(createMockContext(), "version", "instance-id")
-	suite.EqualError(err, `failed to delete instance "instance-id" for extension "id": `+mockErrorMessage)
+	suite.Require().EqualError(err, `failed to delete instance "instance-id" for extension "id": `+mockErrorMessage)
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestDeleteInstanceUnsupported() {
 	suite.rawExtension.DeleteInstance = nil
 	err := suite.extension.DeleteInstance(createMockContext(), "version", "instance-id")
-	suite.EqualError(err, `extension "id" does not support operation "deleteInstance"`)
+	suite.Require().EqualError(err, `extension "id" does not support operation "deleteInstance"`)
 }
 
 // convertError
@@ -340,7 +341,7 @@ func (suite *ErrorHandlingExtensionSuite) TestConvertErrorNonErrorObject() {
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestConvertErrorErrorObject() {
-	err := suite.extension.convertError("msg", fmt.Errorf(mockErrorMessage))
+	err := suite.extension.convertError("msg", errors.New(mockErrorMessage))
 	suite.assertErrorStringError(err, "msg: "+mockErrorMessage)
 }
 
@@ -372,7 +373,7 @@ func (suite *ErrorHandlingExtensionSuite) TestConvertErrorJavaScriptErrorWithSta
 	exception := suite.getGojaException("const err = new Error('jsError'); err.status = 400; throw err")
 	err := suite.extension.convertError("msg", exception)
 	suite.Equal("*apiErrors.APIError", fmt.Sprintf("%T", err))
-	suite.EqualError(err, "jsError")
+	suite.Require().EqualError(err, "jsError")
 	apiErr, ok := apiErrors.AsAPIError(err)
 	suite.True(ok)
 	suite.Equal(apiErrors.NewAPIError(400, "jsError"), apiErr)
@@ -380,7 +381,7 @@ func (suite *ErrorHandlingExtensionSuite) TestConvertErrorJavaScriptErrorWithSta
 
 func (suite *ErrorHandlingExtensionSuite) getGojaException(javaScript string) *goja.Exception {
 	_, err := suite.extension.vm.RunString(javaScript)
-	suite.Error(err)
+	suite.Require().Error(err)
 	suite.Equal("*goja.Exception", fmt.Sprintf("%T", err))
 	//nolint:errorlint // Type assertion is OK here because the error is not wrapped
 	exception := err.(*goja.Exception)
@@ -395,5 +396,5 @@ func createMetaData() *exaMetadata.ExaMetadata {
 
 func (suite *ErrorHandlingExtensionSuite) assertErrorStringError(err error, expectedMessage string) {
 	suite.Equal("*errors.errorString", fmt.Sprintf("%T", err))
-	suite.EqualError(err, expectedMessage)
+	suite.Require().EqualError(err, expectedMessage)
 }

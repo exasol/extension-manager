@@ -93,7 +93,7 @@ func (suite *ExaMetadataITestSuite) TestGetScriptByName() {
 	fixture := integrationTesting.CreateJavaAdapterScriptFixture(suite.exasol.GetConnection())
 	fixture.Cleanup(suite.T())
 	result, err := suite.getScriptByName(fixture.GetSchemaName(), "VS_ADAPTER")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal(
 		&exaMetadata.ExaScriptRow{
 			Schema:     "TEST",
@@ -107,20 +107,20 @@ func (suite *ExaMetadataITestSuite) TestGetScriptByName() {
 
 func (suite *ExaMetadataITestSuite) TestGetScriptByNameNoResult() {
 	result, err := suite.getScriptByName("schema", "script")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Nil(result)
 }
 
 func (suite *ExaMetadataITestSuite) readMetaDataTables(schemaName string) *exaMetadata.ExaMetadata {
 	tx, err := suite.exasol.GetConnection().Begin()
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	metaData, err := exaMetadata.CreateExaMetaDataReader().ReadMetadataTables(tx, schemaName)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	return metaData
 }
 
 func (suite *ExaMetadataITestSuite) getScriptByName(schemaName, scriptName string) (*exaMetadata.ExaScriptRow, error) {
 	tx, err := suite.exasol.GetConnection().Begin()
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	return exaMetadata.CreateExaMetaDataReader().GetScriptByName(tx, schemaName, scriptName)
 }

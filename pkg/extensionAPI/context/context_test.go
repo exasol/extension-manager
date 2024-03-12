@@ -30,7 +30,7 @@ const BUCKETFS_BASE_PATH = "bucketfs-base-path"
 
 func (suite *ContextSuite) SetupTest() {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherRegexp))
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.db = db
 	suite.dbMock = mock
 	suite.dbMock.MatchExpectationsInOrder(true)
@@ -132,13 +132,13 @@ func (suite *ContextSuite) TestMetadataGetScriptByNameFails() {
 func (suite *ContextSuite) createContext() *ExtensionContext {
 	suite.dbMock.ExpectBegin()
 	txCtx, err := transaction.BeginTransaction(context.Background(), suite.db, BUCKETFS_BASE_PATH)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	return CreateContext(txCtx, "EXT_SCHEMA")
 }
 
 func (suite *ContextSuite) createContextWithClients() *ExtensionContext {
 	suite.dbMock.ExpectBegin()
 	txCtx, err := transaction.BeginTransaction(context.Background(), suite.db, BUCKETFS_BASE_PATH)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	return CreateContextWithClient("EXT_SCHEMA", txCtx, nil, suite.bucketFSMock, suite.metadataReaderMock)
 }

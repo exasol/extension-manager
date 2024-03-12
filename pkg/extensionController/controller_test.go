@@ -3,6 +3,7 @@ package extensionController
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -98,7 +99,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsAndBucketFSContainsJar() 
 	suite.bucketFsMock.SimulateCloseSuccess()
 	suite.dbMock.ExpectRollback()
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal([]*Extension{{Name: "MyDemoExtension", Id: "testing-extension.js", Category: "Demo category", Description: "An extension for testing.",
 		InstallableVersions: []extensionAPI.JsExtensionVersion{{Name: "0.1.0", Latest: true, Deprecated: false}}}}, extensions)
 }
@@ -106,7 +107,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsAndBucketFSContainsJar() 
 func (suite *ControllerUTestSuite) TestGetAllExtensionsFailsStartingTransaction() {
 	suite.simulateTransactionBeginFails(mockError)
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
-	suite.EqualError(err, beginTransactionFailedErrorMsg)
+	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 	suite.Nil(extensions)
 }
 
@@ -118,7 +119,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsButNoJarInBucketFS() {
 	suite.bucketFsMock.SimulateCloseSuccess()
 	suite.dbMock.ExpectRollback()
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Empty(extensions)
 }
 
@@ -129,7 +130,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsWrongFileSize() {
 	suite.bucketFsMock.SimulateCloseSuccess()
 	suite.dbMock.ExpectRollback()
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Empty(extensions)
 }
 
@@ -140,7 +141,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsWrongFileName() {
 	suite.bucketFsMock.SimulateCloseSuccess()
 	suite.dbMock.ExpectRollback()
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Empty(extensions)
 }
 
@@ -154,7 +155,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsIgnoresFileSizeForNegativ
 	suite.bucketFsMock.SimulateCloseSuccess()
 	suite.dbMock.ExpectRollback()
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal([]*Extension{{Name: "MyDemoExtension", Id: "testing-extension.js", Category: "Demo category", Description: "An extension for testing.",
 		InstallableVersions: []extensionAPI.JsExtensionVersion{{Name: "0.1.0", Latest: true, Deprecated: false}}}}, extensions)
 }
@@ -166,7 +167,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsFailsForInvalidExtension(
 	suite.bucketFsMock.SimulateCloseSuccess()
 	suite.dbMock.ExpectRollback()
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
-	suite.ErrorContains(err, `failed to load extension "broken-extension.js": failed to run extension "broken-extension.js" with content "invalid javascript": SyntaxError`)
+	suite.Require().ErrorContains(err, `failed to load extension "broken-extension.js": failed to run extension "broken-extension.js" with content "invalid javascript": SyntaxError`)
 	suite.Empty(extensions)
 }
 
@@ -201,14 +202,14 @@ func (suite *ControllerUTestSuite) TestGetAllInstallations() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
 	installations, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal([]*extensionAPI.JsExtInstallation{{ID: "testing-extension.js", Name: "schema.script", Version: "0.1.0"}}, installations)
 }
 
 func (suite *ControllerUTestSuite) TestGetAllInstallationsFailsStartingTransaction() {
 	suite.simulateTransactionBeginFails(mockError)
 	installations, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
-	suite.EqualError(err, beginTransactionFailedErrorMsg)
+	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 	suite.Nil(installations)
 }
 
@@ -223,7 +224,7 @@ func (suite *ControllerUTestSuite) TestGetAllInstallationsReturnsEmptyList() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
 	installations, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Empty(installations)
 }
 
@@ -257,7 +258,7 @@ func (suite *ControllerUTestSuite) TestFindInstancesReturnsEmptyList() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
 	extensions, err := suite.controller.FindInstances(mockContext(), suite.db, EXTENSION_ID, "ver")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Empty(extensions)
 }
 
@@ -269,14 +270,14 @@ func (suite *ControllerUTestSuite) TestFindInstancesReturnsEntries() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
 	extensions, err := suite.controller.FindInstances(mockContext(), suite.db, EXTENSION_ID, "ver")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal([]*extensionAPI.JsExtInstance{{Id: "ext1", Name: "ext-name1"}, {Id: "ext2", Name: "ext-name2"}}, extensions)
 }
 
 func (suite *ControllerUTestSuite) TestFindInstancesFailsStartingTransaction() {
 	suite.simulateTransactionBeginFails(mockError)
 	extensions, err := suite.controller.FindInstances(mockContext(), suite.db, EXTENSION_ID, "ver")
-	suite.EqualError(err, beginTransactionFailedErrorMsg)
+	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 	suite.Nil(extensions)
 }
 
@@ -326,7 +327,7 @@ func (suite *ControllerUTestSuite) TestGetParameterDefinitionsSucceeds() {
 	suite.dbMock.ExpectQuery("param definitions").WillReturnRows(sqlmock.NewRows([]string{"col1"}))
 	suite.dbMock.ExpectRollback()
 	definitions, err := suite.controller.GetParameterDefinitions(mockContext(), suite.db, EXTENSION_ID, "ext-version")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal([]parameterValidator.ParameterDefinition{{Id: "param1", Name: "My param:ext-version",
 		RawDefinition: map[string]interface{}{"id": "param1", "name": "My param:ext-version", "type": "string"}}}, definitions)
 }
@@ -334,7 +335,7 @@ func (suite *ControllerUTestSuite) TestGetParameterDefinitionsSucceeds() {
 func (suite *ControllerUTestSuite) TestGetParameterDefinitionsFailsStartingTransaction() {
 	suite.simulateTransactionBeginFails(mockError)
 	definitions, err := suite.controller.GetParameterDefinitions(mockContext(), suite.db, EXTENSION_ID, "ext-version")
-	suite.EqualError(err, beginTransactionFailedErrorMsg)
+	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 	suite.Nil(definitions)
 }
 
@@ -357,14 +358,14 @@ func (suite *ControllerUTestSuite) TestInstallFailsForUnknownExtensionId() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
 	err := suite.controller.InstallExtension(mockContext(), suite.db, "unknown-extension-id", "ver")
-	suite.ErrorContains(err, `failed to load extension "unknown-extension-id"`)
-	suite.ErrorContains(err, `unknown-extension-id" not found`)
+	suite.Require().ErrorContains(err, `failed to load extension "unknown-extension-id"`)
+	suite.Require().ErrorContains(err, `unknown-extension-id" not found`)
 }
 
 func (suite *ControllerUTestSuite) TestInstallFailsStartingTransaction() {
 	suite.simulateTransactionBeginFails(mockError)
 	err := suite.controller.InstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
-	suite.EqualError(err, beginTransactionFailedErrorMsg)
+	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 }
 
 func (suite *ControllerUTestSuite) TestInstallSucceeds() {
@@ -377,7 +378,7 @@ func (suite *ControllerUTestSuite) TestInstallSucceeds() {
 	suite.dbMock.ExpectExec("install extension").WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()
 	err := suite.controller.InstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 }
 
 func (suite *ControllerUTestSuite) TestInstallQueryFails() {
@@ -387,10 +388,10 @@ func (suite *ControllerUTestSuite) TestInstallQueryFails() {
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
-	suite.dbMock.ExpectExec("install extension").WillReturnError(fmt.Errorf("mock"))
+	suite.dbMock.ExpectExec("install extension").WillReturnError(errors.New("mock"))
 	suite.dbMock.ExpectRollback()
 	err := suite.controller.InstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
-	suite.EqualError(err, "failed to install extension \"testing-extension.js\": error executing statement 'install extension': mock")
+	suite.Require().EqualError(err, "failed to install extension \"testing-extension.js\": error executing statement 'install extension': mock")
 }
 
 func (suite *ControllerUTestSuite) TestInstallFails() {
@@ -416,14 +417,14 @@ func (suite *ControllerUTestSuite) TestUninstallFailsForUnknownExtensionId() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
 	err := suite.controller.UninstallExtension(mockContext(), suite.db, "unknown-extension-id", "ver")
-	suite.ErrorContains(err, `failed to load extension "unknown-extension-id"`)
-	suite.ErrorContains(err, `unknown-extension-id" not found`)
+	suite.Require().ErrorContains(err, `failed to load extension "unknown-extension-id"`)
+	suite.Require().ErrorContains(err, `unknown-extension-id" not found`)
 }
 
 func (suite *ControllerUTestSuite) TestUninstallFailsStartingTransaction() {
 	suite.simulateTransactionBeginFails(mockError)
 	err := suite.controller.UninstallExtension(mockContext(), suite.db, "unknown-extension-id", "ver")
-	suite.EqualError(err, beginTransactionFailedErrorMsg)
+	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 }
 
 func (suite *ControllerUTestSuite) TestUninstallSucceeds() {
@@ -435,7 +436,7 @@ func (suite *ControllerUTestSuite) TestUninstallSucceeds() {
 	suite.dbMock.ExpectExec("uninstall extension version ver").WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()
 	err := suite.controller.UninstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 }
 
 func (suite *ControllerUTestSuite) TestUninstallQueryFails() {
@@ -444,10 +445,10 @@ func (suite *ControllerUTestSuite) TestUninstallQueryFails() {
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.dbMock.ExpectBegin()
-	suite.dbMock.ExpectExec("uninstall extension version ver").WillReturnError(fmt.Errorf("mock"))
+	suite.dbMock.ExpectExec("uninstall extension version ver").WillReturnError(errors.New("mock"))
 	suite.dbMock.ExpectRollback()
 	err := suite.controller.UninstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
-	suite.EqualError(err, "failed to uninstall extension \"testing-extension.js\": error executing statement 'uninstall extension version ver': mock")
+	suite.Require().EqualError(err, "failed to uninstall extension \"testing-extension.js\": error executing statement 'uninstall extension version ver': mock")
 }
 
 func (suite *ControllerUTestSuite) TestUninstallFails() {
@@ -475,7 +476,7 @@ func (suite *ControllerUTestSuite) TestUninstallFailsWhenInstanceExists() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
 	err := suite.controller.UninstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
-	suite.ErrorContains(err, "cannot uninstall extension because 2 instance(s) still exist: ext-name1, ext-name2")
+	suite.Require().ErrorContains(err, "cannot uninstall extension because 2 instance(s) still exist: ext-name1, ext-name2")
 	apiErr := apiErrors.UnwrapAPIError(err)
 	if apiErr != nil {
 		suite.Equal(400, apiErr.Status)
@@ -494,7 +495,7 @@ func (suite *ControllerUTestSuite) TestUninstallSucceedsWhenInstancesNotSupporte
 	suite.dbMock.ExpectExec("uninstall extension version ver").WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()
 	err := suite.controller.UninstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 }
 
 func (suite *ControllerUTestSuite) TestUninstallFailsListingInstances() {
@@ -506,7 +507,7 @@ func (suite *ControllerUTestSuite) TestUninstallFailsListingInstances() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
 	err := suite.controller.UninstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
-	suite.ErrorContains(err, `failed to check existing instances: failed to list instances for extension "testing-extension.js" in version "ver": Error: mock js error`)
+	suite.Require().ErrorContains(err, `failed to check existing instances: failed to list instances for extension "testing-extension.js" in version "ver": Error: mock js error`)
 }
 
 // Upgrade
@@ -515,15 +516,15 @@ func (suite *ControllerUTestSuite) TestUpgradeFailsForUnknownExtensionId() {
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectRollback()
 	result, err := suite.controller.UpgradeExtension(mockContext(), suite.db, "unknown-extension-id")
-	suite.ErrorContains(err, `failed to load extension "unknown-extension-id"`)
-	suite.ErrorContains(err, `unknown-extension-id" not found`)
+	suite.Require().ErrorContains(err, `failed to load extension "unknown-extension-id"`)
+	suite.Require().ErrorContains(err, `unknown-extension-id" not found`)
 	suite.Nil(result)
 }
 
 func (suite *ControllerUTestSuite) TestUpgradeFailsStartingTransaction() {
 	suite.simulateTransactionBeginFails(mockError)
 	result, err := suite.controller.UpgradeExtension(mockContext(), suite.db, "unknown-extension-id")
-	suite.EqualError(err, beginTransactionFailedErrorMsg)
+	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 	suite.Nil(result)
 }
 
@@ -537,7 +538,7 @@ func (suite *ControllerUTestSuite) TestUpgradeSucceeds() {
 	suite.dbMock.ExpectExec("upgrade extension").WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()
 	result, err := suite.controller.UpgradeExtension(mockContext(), suite.db, EXTENSION_ID)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal(&extensionAPI.JsUpgradeResult{PreviousVersion: "old", NewVersion: "new"}, result)
 }
 
@@ -547,10 +548,10 @@ func (suite *ControllerUTestSuite) TestUpgradeQueryFails() {
 		Build().
 		WriteToFile(path.Join(suite.tempExtensionRepo, EXTENSION_ID))
 	suite.dbMock.ExpectBegin()
-	suite.dbMock.ExpectExec("upgrade extension").WillReturnError(fmt.Errorf("mock"))
+	suite.dbMock.ExpectExec("upgrade extension").WillReturnError(errors.New("mock"))
 	suite.dbMock.ExpectRollback()
 	result, err := suite.controller.UpgradeExtension(mockContext(), suite.db, EXTENSION_ID)
-	suite.EqualError(err, "failed to upgrade extension \"testing-extension.js\": error executing statement 'upgrade extension': mock")
+	suite.Require().EqualError(err, "failed to upgrade extension \"testing-extension.js\": error executing statement 'upgrade extension': mock")
 	suite.Nil(result)
 }
 
@@ -585,14 +586,14 @@ func (suite *ControllerUTestSuite) TestCreateInstanceInvalidParameters() {
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectRollback()
 	instance, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{})
-	suite.EqualError(err, `invalid parameters: Failed to validate parameter 'My param' (param1): This is a required parameter.`)
+	suite.Require().EqualError(err, `invalid parameters: Failed to validate parameter 'My param' (param1): This is a required parameter.`)
 	suite.Nil(instance)
 }
 
 func (suite *ControllerUTestSuite) TestCreateInstanceFailsStartingTransaction() {
 	suite.simulateTransactionBeginFails(mockError)
 	instance, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{})
-	suite.EqualError(err, beginTransactionFailedErrorMsg)
+	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 	suite.Nil(instance)
 }
 
@@ -624,7 +625,7 @@ func (suite *ControllerUTestSuite) TestCreateInstanceValidParameters() {
 	suite.dbMock.ExpectExec(`CREATE SCHEMA IF NOT EXISTS "test"`).WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()
 	instance, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{{Name: "p1", Value: "val"}})
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal(&extensionAPI.JsExtInstance{Id: "instId", Name: "ext_0.1.0_p1_val"}, instance)
 }
 
@@ -655,13 +656,13 @@ func (suite *ControllerUTestSuite) TestDeleteInstanceSucceeds() {
 	suite.dbMock.ExpectExec("delete instance instId").WillReturnResult(sqlmock.NewResult(0, 0))
 	suite.dbMock.ExpectCommit()
 	err := suite.controller.DeleteInstance(mockContext(), suite.db, EXTENSION_ID, "extVersion", "instId")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 }
 
 func (suite *ControllerUTestSuite) TestDeleteInstanceFailsStartingTransaction() {
 	suite.simulateTransactionBeginFails(mockError)
 	err := suite.controller.DeleteInstance(mockContext(), suite.db, EXTENSION_ID, "extVersion", "instId")
-	suite.EqualError(err, beginTransactionFailedErrorMsg)
+	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 }
 
 func (suite *ControllerUTestSuite) registerDefaultExtensionDefinition() {
@@ -683,7 +684,7 @@ func mockContext() context.Context {
 func (suite *ControllerUTestSuite) assertApiError(err error, expectedStatus int, expectedMessage string) {
 	suite.T().Helper()
 	if apiError, ok := apiErrors.AsAPIError(err); ok {
-		suite.ErrorContains(apiError, expectedMessage)
+		suite.Require().ErrorContains(apiError, expectedMessage)
 		suite.Contains(apiError.Message, expectedMessage)
 		suite.Equal(expectedStatus, apiError.Status)
 	} else {
@@ -696,6 +697,6 @@ func (suite *ControllerUTestSuite) assertNonApiError(err error, expectedMessage 
 	if _, ok := apiErrors.AsAPIError(err); ok {
 		suite.Fail("wrong error type", "Expected non-APIError but got %T: %v", err, err)
 	} else {
-		suite.ErrorContains(err, expectedMessage)
+		suite.Require().ErrorContains(err, expectedMessage)
 	}
 }
