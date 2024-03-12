@@ -3,7 +3,7 @@ package context
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"errors"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -70,7 +70,7 @@ func (suite *ContextSuite) TestSqlClientQuerySuccess() {
 
 func (suite *ContextSuite) TestSqlClientQueryFailure() {
 	ctx := suite.createContext()
-	suite.dbMock.ExpectQuery("invalid").WillReturnError(fmt.Errorf("mock error"))
+	suite.dbMock.ExpectQuery("invalid").WillReturnError(errors.New("mock error"))
 	suite.PanicsWithError("error executing query 'invalid': mock error", func() {
 		ctx.SqlClient.Query("invalid")
 	})
@@ -87,7 +87,7 @@ func (suite *ContextSuite) TestSqlClientExecuteSuccess() {
 
 func (suite *ContextSuite) TestSqlClientExecuteFailure() {
 	ctx := suite.createContext()
-	suite.dbMock.ExpectExec("invalid").WillReturnError(fmt.Errorf("mock error"))
+	suite.dbMock.ExpectExec("invalid").WillReturnError(errors.New("mock error"))
 	suite.PanicsWithError("error executing statement 'invalid': mock error", func() {
 		ctx.SqlClient.Execute("invalid")
 	})
@@ -123,7 +123,7 @@ func (suite *ContextSuite) TestMetadataGetScriptByNameNoScriptFound() {
 
 func (suite *ContextSuite) TestMetadataGetScriptByNameFails() {
 	ctx := suite.createContextWithClients()
-	suite.metadataReaderMock.SimulateGetScriptByNameFails("script", fmt.Errorf("mock error"))
+	suite.metadataReaderMock.SimulateGetScriptByNameFails("script", errors.New("mock error"))
 	suite.PanicsWithError(`failed to find script "EXT_SCHEMA"."script". Caused by: mock error`, func() {
 		ctx.Metadata.GetScriptByName("script")
 	})

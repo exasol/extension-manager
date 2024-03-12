@@ -1,6 +1,7 @@
 package apiErrors_test
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -9,7 +10,7 @@ import (
 )
 
 func TestNewInternalServerError(t *testing.T) {
-	orgErr := fmt.Errorf("mock")
+	orgErr := errors.New("mock")
 	err := apiErrors.NewInternalServerError(orgErr)
 	assertApiError(t, err, "Internal server error", 500, orgErr)
 }
@@ -41,13 +42,13 @@ func TestNewAPIErrorWithCauseApiErrorCause(t *testing.T) {
 }
 
 func TestNewAPIErrorWithCauseNonApiErrorCause(t *testing.T) {
-	cause := fmt.Errorf("cause")
+	cause := errors.New("cause")
 	err := apiErrors.NewAPIErrorWithCause("msg", cause)
 	assert.EqualError(t, err, "msg: cause")
 }
 
 func TestUnwrapAPIErrorNormalError(t *testing.T) {
-	orgErr := fmt.Errorf("mock")
+	orgErr := errors.New("mock")
 	err := apiErrors.UnwrapAPIError(orgErr)
 	assertApiError(t, err, "Internal server error", 500, orgErr)
 }
@@ -80,7 +81,7 @@ func assertApiError(t *testing.T, err error, expectedMsg string, expectedStatus 
 		assert.Equal(t, expectedMsg, apiErr.Message)
 		assert.Equal(t, expectedStatus, apiErr.Status)
 		if expectedOrgError == nil {
-			assert.Nil(t, apiErr.OriginalError, "original error")
+			assert.NoError(t, apiErr.OriginalError, "original error")
 		} else {
 			assert.Same(t, expectedOrgError, apiErr.OriginalError, "original error")
 		}

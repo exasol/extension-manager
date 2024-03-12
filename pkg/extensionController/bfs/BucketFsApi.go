@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	_ "embed"
+	"errors"
 	"fmt"
 	"time"
 
@@ -39,7 +40,7 @@ type BfsFile struct {
 /* [impl -> dsn~configure-bucketfs-path~1]. */
 func CreateBucketFsAPI(bucketFsBasePath string, ctx context.Context, db *sql.DB) (BucketFsAPI, error) {
 	if bucketFsBasePath == "" {
-		return nil, fmt.Errorf("bucketFsBasePath is empty")
+		return nil, errors.New("bucketFsBasePath is empty")
 	}
 	transaction, err := db.BeginTx(ctx, nil)
 	if err != nil {

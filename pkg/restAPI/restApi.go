@@ -77,7 +77,7 @@ func (api *restAPIImpl) startServer() {
 }
 
 func (api *restAPIImpl) waitUntilServerReplies() {
-	request, err := http.NewRequestWithContext(context.Background(), "GET", fmt.Sprintf("http://%s", api.serverAddress), strings.NewReader(""))
+	request, err := http.NewRequestWithContext(context.Background(), "GET", "http://"+api.serverAddress, strings.NewReader(""))
 	if err != nil {
 		log.Fatalf("failed to create request: %v", err)
 	}

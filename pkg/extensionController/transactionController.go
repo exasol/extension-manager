@@ -3,6 +3,7 @@ package extensionController
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
@@ -119,13 +120,13 @@ func CreateWithValidatedConfig(config ExtensionManagerConfig) (TransactionContro
 
 func validateConfig(config ExtensionManagerConfig) error {
 	if config.BucketFSBasePath == "" {
-		return fmt.Errorf("missing BucketFSBasePath")
+		return errors.New("missing BucketFSBasePath")
 	}
 	if config.ExtensionRegistryURL == "" {
-		return fmt.Errorf("missing ExtensionRegistryURL")
+		return errors.New("missing ExtensionRegistryURL")
 	}
 	if config.ExtensionSchema == "" {
-		return fmt.Errorf("missing ExtensionSchema")
+		return errors.New("missing ExtensionSchema")
 	}
 	return nil
 }

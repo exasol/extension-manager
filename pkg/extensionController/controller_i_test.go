@@ -51,7 +51,7 @@ func (suite *ControllerITestSuite) TestGetAllExtensions() {
 	suite.uploadBucketFsFile("123", jarFile) // create file with 3B size
 	extensions, err := suite.createController().GetAllExtensions(mockContext(), suite.exasol.GetConnection())
 	suite.NoError(err)
-	suite.Equal(1, len(extensions))
+	suite.Len(extensions, 1)
 	suite.Equal("MyDemoExtension", extensions[0].Name, "name")
 	suite.Equal(EXTENSION_ID, extensions[0].Id, "id")
 }

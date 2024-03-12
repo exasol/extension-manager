@@ -75,6 +75,6 @@ func (suite *HttpRegistrySuite) TestReadExtensionSucceeds() {
 	suite.server.SetPathContent("/ext1.js", "ext-content")
 	suite.server.SetRegistryContent(`{"extensions":[{"id": "ext1", "url": "` + url + `"}]}`)
 	content, err := suite.registry.ReadExtension("ext1")
-	suite.Nil(err)
+	suite.NoError(err)
 	suite.Equal("ext-content", content)
 }

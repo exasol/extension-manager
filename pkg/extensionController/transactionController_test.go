@@ -108,7 +108,7 @@ func (suite *extCtrlUnitTestSuite) TestGetAllExtensionsSuccess() {
 	suite.mockCtrl.On("GetAllExtensions", mock.Anything).Return([]*Extension{}, nil)
 	extensions, err := suite.ctrl.GetAllExtensions(mockContext(), suite.db)
 	suite.NoError(err)
-	suite.Len(extensions, 0)
+	suite.Empty(extensions)
 }
 
 func (suite *extCtrlUnitTestSuite) TestGetAllExtensionsBucketFsListFails() {
