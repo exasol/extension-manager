@@ -79,11 +79,19 @@ public abstract class AbstractVirtualSchemaExtensionIT {
      */
     protected abstract Collection<ParameterValue> createValidParameterValues();
 
+    /**
+     * Log test name before each test.
+     * 
+     * @param testInfo test info
+     */
     @BeforeEach
     public void logTestName(final TestInfo testInfo) {
         LOG.info(">>> " + testInfo.getDisplayName());
     }
 
+    /**
+     * Cleanup after each test.
+     */
     @AfterEach
     public void cleanup() {
         getSetup().cleanup();
