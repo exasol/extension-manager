@@ -3,7 +3,7 @@ package transaction
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"errors"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -12,7 +12,7 @@ import (
 
 const BUCKETFS_BASE_PATH = "bucketfs-base-path"
 
-var mockError = fmt.Errorf("mock error")
+var mockError = errors.New("mock error")
 
 type TransactionContextSuite struct {
 	suite.Suite
@@ -26,7 +26,7 @@ func TestTransactionContextSuite(t *testing.T) {
 
 func (suite *TransactionContextSuite) SetupTest() {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherRegexp))
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.db = db
 	suite.dbMock = mock
 	suite.dbMock.MatchExpectationsInOrder(true)
@@ -39,27 +39,27 @@ func (suite *TransactionContextSuite) AfterTest(suiteName, testName string) {
 func (suite *TransactionContextSuite) TestBeginTransaction() {
 	suite.dbMock.ExpectBegin()
 	txCtx, err := suite.beginTransaction()
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.NotNil(txCtx)
 }
 
 func (suite *TransactionContextSuite) TestBeginTransactionFailsWithEmptyBucketFsBasePath() {
 	txCtx, err := BeginTransaction(context.Background(), suite.db, "")
-	suite.EqualError(err, "bucketFsBasePath is empty")
+	suite.Require().EqualError(err, "bucketFsBasePath is empty")
 	suite.Nil(txCtx)
 }
 
 func (suite *TransactionContextSuite) TestBeginTransactionFails() {
 	suite.dbMock.ExpectBegin().WillReturnError(mockError)
 	txCtx, err := suite.beginTransaction()
-	suite.EqualError(err, "failed to begin transaction: mock error")
+	suite.Require().EqualError(err, "failed to begin transaction: mock error")
 	suite.Nil(txCtx)
 }
 
 func (suite *TransactionContextSuite) TestBeginTransactionAuthenticationFails() {
-	suite.dbMock.ExpectBegin().WillReturnError(fmt.Errorf("mock error: 'Connection exception - authentication failed'"))
+	suite.dbMock.ExpectBegin().WillReturnError(errors.New("mock error: 'Connection exception - authentication failed'"))
 	txCtx, err := suite.beginTransaction()
-	suite.EqualError(err, "invalid database credentials")
+	suite.Require().EqualError(err, "invalid database credentials")
 	suite.Nil(txCtx)
 }
 
@@ -90,7 +90,7 @@ func (suite *TransactionContextSuite) TestGetBucketFsClient() {
 	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
 	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
 	bfsClient, err := txCtx.GetBucketFsClient()
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.NotNil(bfsClient)
 }
 
@@ -101,11 +101,11 @@ func (suite *TransactionContextSuite) TestGetBucketFsClientTwiceReturnsSameObjec
 	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
 	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
 	bfsClient1, err := txCtx.GetBucketFsClient()
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.NotNil(bfsClient1)
 
 	bfsClient2, err := txCtx.GetBucketFsClient()
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.NotNil(bfsClient2)
 
 	suite.Same(bfsClient1, bfsClient2)
@@ -117,7 +117,7 @@ func (suite *TransactionContextSuite) TestGetBucketFsClientFailsCreatingSchema()
 	suite.dbMock.ExpectBegin()
 	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnError(mockError)
 	bfsClient, err := txCtx.GetBucketFsClient()
-	suite.EqualError(err, "failed to create a schema for BucketFS list script. Cause: mock error")
+	suite.Require().EqualError(err, "failed to create a schema for BucketFS list script. Cause: mock error")
 	suite.Nil(bfsClient)
 }
 
@@ -138,7 +138,7 @@ func (suite *TransactionContextSuite) TestRollbackClosesBfsClient() {
 	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
 	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
 	_, err := txCtx.GetBucketFsClient()
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	suite.dbMock.ExpectRollback() // Rollback from BFS client
 	suite.dbMock.ExpectRollback() // Rollback transaction
@@ -153,7 +153,7 @@ func (suite *TransactionContextSuite) TestRollbackClosingBfsClientFails() {
 	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
 	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
 	_, err := txCtx.GetBucketFsClient()
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	suite.dbMock.ExpectRollback().WillReturnError(mockError) // Rollback from BFS client
 	suite.dbMock.ExpectRollback()
@@ -177,7 +177,7 @@ func (suite *TransactionContextSuite) TestCommitClosesBfsClient() {
 	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
 	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
 	_, err := txCtx.GetBucketFsClient()
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	suite.dbMock.ExpectRollback() // Rollback from BFS client
 	suite.dbMock.ExpectCommit()   // Commit transaction
@@ -192,10 +192,10 @@ func (suite *TransactionContextSuite) TestCommitClosingBfsClientFails() {
 	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnResult(sqlmock.NewResult(0, 1))
 	suite.dbMock.ExpectExec("(?m)CREATE OR REPLACE PYTHON3 SCALAR SCRIPT.*").WillReturnResult(sqlmock.NewResult(0, 1))
 	_, err := txCtx.GetBucketFsClient()
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	suite.dbMock.ExpectRollback().WillReturnError(mockError) // Rollback from BFS client
-	suite.EqualError(txCtx.Commit(), "failed to close BucketFS client: failed to rollback transaction to cleanup resources. Cause: mock error")
+	suite.Require().EqualError(txCtx.Commit(), "failed to close BucketFS client: failed to rollback transaction to cleanup resources. Cause: mock error")
 }
 
 func (suite *TransactionContextSuite) beginTransaction() (*TransactionContext, error) {

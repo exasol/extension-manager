@@ -3,7 +3,6 @@ package exaMetadata
 import (
 	"database/sql"
 	"fmt"
-	"strings"
 )
 
 // ExaMetadataReader allows accessing the Exasol metadata tables.
@@ -122,14 +121,6 @@ FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS`)
 		rows = append(rows, row)
 	}
 	return &ExaVirtualSchemasTable{Rows: rows}, nil
-}
-
-func extractSchemaAndName(schemaAndName string) (schema, name string, err error) {
-	i := strings.Index(schemaAndName, ".")
-	if i < 0 {
-		return "", "", fmt.Errorf("invalid format for adapter script: %q", schemaAndName)
-	}
-	return schemaAndName[:i], schemaAndName[i+1:], nil
 }
 
 type ExaScriptTable struct {

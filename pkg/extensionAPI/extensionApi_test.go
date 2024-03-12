@@ -1,7 +1,7 @@
 package extensionAPI
 
 import (
-	"fmt"
+	"errors"
 	"strings"
 	"testing"
 
@@ -108,7 +108,7 @@ func (suite *ExtensionApiSuite) TestInstall() {
 	extension := suite.loadExtension(extensionContent)
 	suite.mockSQLClient.SimulateExecuteSuccess("select 1")
 	err := extension.Install(suite.mockContext(), "extVersion")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 }
 
 /* [itest -> dsn~resolving-files-in-bucketfs~1] */
@@ -123,7 +123,7 @@ func (suite *ExtensionApiSuite) TestInstallResolveBucketFsPath() {
 	extension := suite.loadExtension(extensionContent)
 	suite.mockSQLClient.SimulateExecuteSuccess("create script path " + absolutePath)
 	err := extension.Install(suite.mockContext(), version)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 }
 
 func (suite *ExtensionApiSuite) TestInstallResolveBucketFsPathFails() {
@@ -134,7 +134,7 @@ func (suite *ExtensionApiSuite) TestInstallResolveBucketFsPathFails() {
 		Build().AsString()
 	extension := suite.loadExtension(extensionContent)
 	err := extension.Install(suite.mockContext(), version)
-	suite.EqualError(err, `failed to install extension "ext-id": mock error`)
+	suite.Require().EqualError(err, `failed to install extension "ext-id": mock error`)
 }
 
 func (suite *ExtensionApiSuite) TestJavaScriptConsoleLogging() {
@@ -150,7 +150,7 @@ func (suite *ExtensionApiSuite) TestJavaScriptConsoleLogging() {
 				Build().AsString()
 			extension := suite.loadExtension(extensionContent)
 			err := extension.Install(suite.mockContext(), "extensionVersion")
-			suite.NoError(err)
+			suite.Require().NoError(err)
 		})
 	}
 }
@@ -162,7 +162,7 @@ func (suite *ExtensionApiSuite) TestUninstall() {
 	extension := suite.loadExtension(extensionContent)
 	suite.mockSQLClient.SimulateExecuteSuccess("uninstall version extVersion")
 	err := extension.Uninstall(suite.mockContext(), "extVersion")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 }
 
 func (suite *ExtensionApiSuite) TestAddInstanceValidParameters() {
@@ -173,7 +173,7 @@ func (suite *ExtensionApiSuite) TestAddInstanceValidParameters() {
 	extension := suite.loadExtension(extensionContent)
 	suite.mockSQLClient.SimulateExecuteSuccess("create vs")
 	instance, err := extension.AddInstance(suite.mockContext(), "extensionVersion", &ParameterValues{Values: []ParameterValue{{Name: "p1", Value: "v1"}}})
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal(&JsExtInstance{Id: "instId", Name: "instance_extensionVersion_p1_v1"}, instance)
 }
 
@@ -182,7 +182,7 @@ func (suite *ExtensionApiSuite) TestListInstancesEmptyResult() {
 		Build().AsString()
 	extension := suite.loadExtension(extensionContent)
 	instances, err := extension.ListInstances(suite.mockContext(), "ver")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Empty(instances)
 }
 
@@ -192,7 +192,7 @@ func (suite *ExtensionApiSuite) TestListInstancesNonEmptyResult() {
 		Build().AsString()
 	extension := suite.loadExtension(extensionContent)
 	instances, err := extension.ListInstances(suite.mockContext(), "ver")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal([]*JsExtInstance{{Id: "instId", Name: "instName"}}, instances)
 }
 
@@ -203,7 +203,7 @@ func (suite *ExtensionApiSuite) TestDeleteInstance() {
 	extension := suite.loadExtension(extensionContent)
 	suite.mockSQLClient.SimulateExecuteSuccess("drop instance instId")
 	err := extension.DeleteInstance(suite.mockContext(), "extVersion", "instId")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 }
 
 func createMockMetadata() *exaMetadata.ExaMetadata {
@@ -222,7 +222,7 @@ func (suite *ExtensionApiSuite) TestFindInstallationsCanReadAllScriptsTable() {
 	extension := suite.loadExtension(extensionContent)
 	result, err := extension.FindInstallations(suite.mockContext(), createMockMetadata())
 	suite.Equal([]*JsExtInstallation{{ID: "", Name: "test", Version: "0.1.0"}}, result)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 }
 
 func (suite *ExtensionApiSuite) TestFindInstallationsReturningParameters() {
@@ -232,7 +232,7 @@ func (suite *ExtensionApiSuite) TestFindInstallationsReturningParameters() {
 	extension := suite.loadExtension(extensionContent)
 	result, err := extension.FindInstallations(suite.mockContext(), createMockMetadata())
 	suite.Equal([]*JsExtInstallation{{ID: "", Name: "test", Version: "0.1.0"}}, result)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 }
 
 /* [itest -> dsn~extension-context-metadata~1]. */
@@ -242,7 +242,7 @@ func (suite *ExtensionApiSuite) TestUpgradeReadsMetadata() {
 	extension := suite.loadExtension(extensionContent)
 	suite.mockMetadataReader.SimulateGetScriptByNameScriptText("script", "scriptText")
 	result, err := extension.Upgrade(suite.mockContext())
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal(&JsUpgradeResult{PreviousVersion: "0.1.0", NewVersion: "scriptText"}, result)
 }
 
@@ -250,9 +250,9 @@ func (suite *ExtensionApiSuite) TestUpgradeReadMetadataFails() {
 	extensionContent := integrationTesting.CreateTestExtensionBuilder(suite.T()).
 		WithUpgradeFunc("const text = context.metadata.getScriptByName('script').text; return {previousVersion:'0.1.0',newVersion:text};").Build().AsString()
 	extension := suite.loadExtension(extensionContent)
-	suite.mockMetadataReader.SimulateGetScriptByNameFails("script", fmt.Errorf("mock error"))
+	suite.mockMetadataReader.SimulateGetScriptByNameFails("script", errors.New("mock error"))
 	result, err := extension.Upgrade(suite.mockContext())
-	suite.EqualError(err, `failed to upgrade extension "ext-id": failed to find script "extension_schema"."script". Caused by: mock error`)
+	suite.Require().EqualError(err, `failed to upgrade extension "ext-id": failed to find script "extension_schema"."script". Caused by: mock error`)
 	suite.Nil(result)
 }
 
@@ -260,7 +260,7 @@ func (suite *ExtensionApiSuite) TestUpgradeReadMetadataFails() {
 func (suite *ExtensionApiSuite) TestLoadExtensionWithCompatibleApiVersion() {
 	extensionContent := minimalExtension("0.1.15")
 	extension, err := LoadExtension("ext-id", extensionContent)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.NotNil(extension)
 }
 
@@ -268,21 +268,21 @@ func (suite *ExtensionApiSuite) TestLoadExtensionWithCompatibleApiVersion() {
 func (suite *ExtensionApiSuite) TestLoadExtensionWithIncompatibleApiVersion() {
 	extensionContent := minimalExtension("99.0.0")
 	extension, err := LoadExtension("ext-id", extensionContent)
-	suite.ErrorContains(err, `extension "ext-id" uses incompatible API version "99.0.0". Please update the extension to use supported version "`+supportedApiVersion+`"`)
+	suite.Require().ErrorContains(err, `extension "ext-id" uses incompatible API version "99.0.0". Please update the extension to use supported version "`+supportedApiVersion+`"`)
 	suite.Nil(extension)
 }
 
 func (suite *ExtensionApiSuite) TestLoadExtensionWithInvalidApiVersion() {
 	extensionContent := minimalExtension("invalid")
 	extension, err := LoadExtension("ext-id", extensionContent)
-	suite.ErrorContains(err, `extension "ext-id" uses invalid API version number "invalid"`)
+	suite.Require().ErrorContains(err, `extension "ext-id" uses invalid API version number "invalid"`)
 	suite.Nil(extension)
 }
 
 func (suite *ExtensionApiSuite) TestUsingExtensionWithMissingPropertiesWorks() {
 	extensionContent := minimalExtension("0.1.15")
 	extension, err := LoadExtension("ext-id", extensionContent)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal("ext-id", extension.Id)
 	suite.Equal("", extension.Category)
 	suite.Equal("", extension.Description)
@@ -293,9 +293,9 @@ func (suite *ExtensionApiSuite) TestUsingExtensionWithMissingPropertiesWorks() {
 func (suite *ExtensionApiSuite) TestUsingExtensionWithMissingFunctionFailsGracefully() {
 	extensionContent := minimalExtension("0.1.15")
 	extension, err := LoadExtension("ext-id", extensionContent)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	err = extension.Install(nil, "version")
-	suite.EqualError(err, `extension "ext-id" does not support operation "install"`)
+	suite.Require().EqualError(err, `extension "ext-id" does not support operation "install"`)
 }
 
 func minimalExtension(version string) string {
@@ -311,15 +311,15 @@ func minimalExtension(version string) string {
 
 func (suite *ExtensionApiSuite) TestLoadExtensionWithoutSettingGlobalVariable() {
 	extension, err := LoadExtension("ext-id", `(function(){ })()`)
-	suite.EqualError(err, `extension "ext-id" did not set global.installedExtension`)
+	suite.Require().EqualError(err, `extension "ext-id" did not set global.installedExtension`)
 	suite.Nil(extension)
 }
 
 func (suite *ExtensionApiSuite) TestLoadExtensionInvalidJavaScript() {
 	extension, err := LoadExtension("ext-id", `invalid javascript`)
-	suite.ErrorContains(err, `failed to run extension "ext-id"`)
-	suite.ErrorContains(err, "SyntaxError")
-	suite.ErrorContains(err, "Unexpected identifier")
+	suite.Require().ErrorContains(err, `failed to run extension "ext-id"`)
+	suite.Require().ErrorContains(err, "SyntaxError")
+	suite.Require().ErrorContains(err, "Unexpected identifier")
 	suite.Nil(extension)
 }
 

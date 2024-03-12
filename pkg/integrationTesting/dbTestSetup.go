@@ -53,7 +53,7 @@ func (setup *DbTestSetup) StopDb() {
 
 func (setup *DbTestSetup) ExecSQL(query string) {
 	_, err := setup.connection.Exec(query)
-	setup.suite.NoError(err)
+	setup.suite.Require().NoError(err)
 }
 
 func (setup *DbTestSetup) GetConnection() *sql.DB {
@@ -79,6 +79,6 @@ func (setup *DbTestSetup) CloseConnection() {
 		setup.suite.FailNow("no connection to close after test. Run CreateConnection() in BeforeTest(suiteName, testName string).")
 	}
 	err := setup.connection.Close()
-	setup.suite.NoError(err)
+	setup.suite.Require().NoError(err)
 	setup.connection = nil
 }

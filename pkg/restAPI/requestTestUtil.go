@@ -4,7 +4,6 @@ package restAPI
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -18,7 +17,7 @@ func startRestApi(suite *suite.Suite, addCauseToInternalServerError bool, contro
 	api := baseRestAPITest{
 		suite:   suite,
 		restAPI: Create(controller, hostAndPort, addCauseToInternalServerError),
-		baseUrl: fmt.Sprintf("http://%s", hostAndPort)}
+		baseUrl: "http://" + hostAndPort}
 	api.restAPI.StartInBackground()
 	return &api
 }

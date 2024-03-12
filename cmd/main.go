@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -40,7 +41,7 @@ func main() {
 
 func startServer(pathToExtensionFolder string, serverAddress string, addCauseToInternalServerError bool) error {
 	if pathToExtensionFolder == "" {
-		return fmt.Errorf("please specify extension registry with parameter '-extensionRegistryURL'")
+		return errors.New("please specify extension registry with parameter '-extensionRegistryURL'")
 	}
 	log.Printf("Starting extension manager with extension folder %q", pathToExtensionFolder)
 	controller, err := extensionController.CreateWithValidatedConfig(extensionController.ExtensionManagerConfig{

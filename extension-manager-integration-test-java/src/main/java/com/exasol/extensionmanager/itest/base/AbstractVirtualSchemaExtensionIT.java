@@ -79,14 +79,30 @@ public abstract class AbstractVirtualSchemaExtensionIT {
      */
     protected abstract Collection<ParameterValue> createValidParameterValues();
 
+    /**
+     * Log test name before each test.
+     * 
+     * @param testInfo test info
+     */
     @BeforeEach
-    void logTestName(final TestInfo testInfo) {
+    public void logTestName(final TestInfo testInfo) {
         LOG.info(">>> " + testInfo.getDisplayName());
     }
 
+    /**
+     * Cleanup after each test.
+     */
     @AfterEach
-    void cleanup() {
+    public void cleanup() {
         getSetup().cleanup();
+    }
+
+    /**
+     * Verify that current and previous version are different.
+     */
+    @Test
+    public void checkPreviousVersion() {
+        assertThat(config.getCurrentVersion(), not(equalTo(config.getPreviousVersion())));
     }
 
     /**

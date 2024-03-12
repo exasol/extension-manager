@@ -4,7 +4,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-oft_version="3.7.0"
+oft_version="3.8.0"
 
 base_dir="$( cd "$(dirname "$0")/.." >/dev/null 2>&1 ; pwd -P )"
 readonly base_dir

@@ -18,16 +18,16 @@ func TestApiContextSuite(t *testing.T) {
 func (suite *ApiContextSuite) TestExtractUserPasswordExample() {
 	// Example from https://datatracker.ietf.org/doc/html/rfc7617#page-5
 	user, password, err := extractUserPassword("QWxhZGRpbjpvcGVuIHNlc2FtZQ==")
-	suite.NoError(err)
-	suite.Equal(user, "Aladdin")
-	suite.Equal(password, "open sesame")
+	suite.Require().NoError(err)
+	suite.Equal("Aladdin", user)
+	suite.Equal("open sesame", password)
 }
 
 func (suite *ApiContextSuite) TestExtractUserPasswordInvalidBase64() {
 	user, password, err := extractUserPassword("invalid base64")
-	suite.EqualError(err, "invalid basic auth header \"invalid base64\": illegal base64 data at input byte 7")
-	suite.Equal(user, "")
-	suite.Equal(password, "")
+	suite.Require().EqualError(err, "invalid basic auth header \"invalid base64\": illegal base64 data at input byte 7")
+	suite.Equal("", user)
+	suite.Equal("", password)
 }
 
 func (suite *ApiContextSuite) TestExtractUserPassword() {
@@ -47,11 +47,11 @@ func (suite *ApiContextSuite) TestExtractUserPassword() {
 			encoded := base64.StdEncoding.EncodeToString([]byte(test.input))
 			user, password, err := extractUserPassword(encoded)
 			if test.expectedError == "" {
-				suite.NoError(err)
+				suite.Require().NoError(err)
 				suite.Equal(test.expectedUser, user)
 				suite.Equal(test.expectedPassword, password)
 			} else {
-				suite.EqualError(err, test.expectedError)
+				suite.Require().EqualError(err, test.expectedError)
 				suite.Equal("", user)
 				suite.Equal("", password)
 			}

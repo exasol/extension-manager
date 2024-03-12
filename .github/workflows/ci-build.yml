@@ -21,20 +21,22 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: "1.20"
         id: go
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
+      - name: Set up JDKs
+        uses: actions/setup-java@v4
         with:
           distribution: "temurin"
-          java-version: 11
+          java-version: |
+            11
+            17
           cache: "maven"
 
       - name: Cache go modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/go-build
@@ -48,7 +50,7 @@ jobs:
         id: npm-cache-dir
         run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
       - name: Cache npm modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.npm-cache-dir.outputs.dir }}
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -57,7 +59,7 @@ jobs:
 
       - name: Install Poetry
         run: pipx install poetry
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "poetry"
@@ -155,7 +157,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
       - name: Cache OpenFastTrace
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2/repository
           key: oft-${{ hashFiles('ci/trace-requirements.sh') }}
@@ -174,9 +176,9 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v4
         with:
-          version: v1.54.2
+          version: v1.56.2
           args: --timeout=15m
 
   build-python-udf:
@@ -189,7 +191,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Install Poetry
         run: pipx install poetry
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "poetry"

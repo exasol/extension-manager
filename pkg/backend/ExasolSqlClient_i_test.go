@@ -45,49 +45,49 @@ func (suite *ExasolSqlClientITestSuite) SetupTest() {
 
 func (suite *ExasolSqlClientITestSuite) TestExecuteSucceeds() {
 	result, err := suite.client.Execute("select 1")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.NotNil(result)
 }
 
 func (suite *ExasolSqlClientITestSuite) TestExecuteWithArgumentSucceeds() {
 	result, err := suite.client.Execute("select 1 from dual where 1 = ?", 1)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.NotNil(result)
 }
 
 func (suite *ExasolSqlClientITestSuite) TestExecuteFails() {
 	result, err := suite.client.Execute("invalid")
-	suite.ErrorContains(err, "error executing statement 'invalid': E-EGOD-11: execution failed")
+	suite.Require().ErrorContains(err, "error executing statement 'invalid': E-EGOD-11: execution failed")
 	suite.Nil(result)
 }
 
 func (suite *ExasolSqlClientITestSuite) TestQueryFails() {
 	result, err := suite.client.Query("invalid")
-	suite.ErrorContains(err, "error executing query 'invalid': E-EGOD-11: execution failed")
+	suite.Require().ErrorContains(err, "error executing query 'invalid': E-EGOD-11: execution failed")
 	suite.Nil(result)
 }
 
 func (suite *ExasolSqlClientITestSuite) TestQuerySucceeds() {
 	result, err := suite.client.Query("select 1 as col")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal(&backend.QueryResult{Columns: []backend.Column{{Name: "COL", TypeName: "DECIMAL"}}, Rows: []backend.Row{{(float64(1))}}}, result)
 }
 
 func (suite *ExasolSqlClientITestSuite) TestQueryWithArgument() {
 	result, err := suite.client.Query("select 1 as col from dual where 1 = ?", 1)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal(&backend.QueryResult{Columns: []backend.Column{{Name: "COL", TypeName: "DECIMAL"}}, Rows: []backend.Row{{(float64(1))}}}, result)
 }
 
 func (suite *ExasolSqlClientITestSuite) TestQueryNoRow() {
 	result, err := suite.client.Query("select 1 as col from dual where 1=2")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal(&backend.QueryResult{Columns: []backend.Column{{Name: "COL", TypeName: "DECIMAL"}}, Rows: []backend.Row{}}, result)
 }
 
 func (suite *ExasolSqlClientITestSuite) TestQueryMultipleRows() {
 	result, err := suite.client.Query("select t.* from (values (1, 'a'), (2, 'b'), (3, 'c')) as t(num, txt)")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal(&backend.QueryResult{
 		Columns: []backend.Column{{Name: "NUM", TypeName: "DECIMAL"}, {Name: "TXT", TypeName: "VARCHAR"}},
 		Rows:    []backend.Row{{float64(1), "a"}, {float64(2), "b"}, {float64(3), "c"}},

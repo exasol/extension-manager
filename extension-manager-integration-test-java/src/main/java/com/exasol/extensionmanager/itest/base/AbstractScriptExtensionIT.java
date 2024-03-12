@@ -57,21 +57,37 @@ public abstract class AbstractScriptExtensionIT {
      */
     protected abstract void assertScriptsExist();
 
+    /**
+     * Log test name before each test.
+     * 
+     * @param testInfo test info
+     */
     @BeforeEach
-    void logTestName(final TestInfo testInfo) {
+    public void logTestName(final TestInfo testInfo) {
         LOG.info(">>> " + testInfo.getDisplayName());
     }
 
+    /**
+     * Cleanup after each test.
+     */
     @AfterEach
-    void cleanup() {
+    public void cleanup() {
         getSetup().cleanup();
+    }
+
+    /**
+     * Verify that current and previous version are different.
+     */
+    @Test
+    public void checkPreviousVersion() {
+        assertThat(config.getCurrentVersion(), not(equalTo(config.getPreviousVersion())));
     }
 
     /**
      * Verify that extension is listed with expected properties.
      */
     @Test
-    void listExtensions() {
+    public void listExtensions() {
         final List<ExtensionsResponseExtension> extensions = getSetup().client().getExtensions();
         assertAll(() -> assertThat(extensions, hasSize(1)), //
                 () -> assertThat(extensions.get(0).getName(), equalTo(config.getExtensionName())),
@@ -94,7 +110,7 @@ public abstract class AbstractScriptExtensionIT {
      * Verify that listing installations finds {@code SCRIPT}s created by the extension.
      */
     @Test
-    void getInstallationsReturnsResult() {
+    public void getInstallationsReturnsResult() {
         getSetup().client().install();
         assertThat(getSetup().client().getInstallations(), contains(new InstallationsResponseInstallation() //
                 .id(config.getExtensionId()) //
@@ -106,7 +122,7 @@ public abstract class AbstractScriptExtensionIT {
      * Verify that installing an unknown version fails.
      */
     @Test
-    void installingWrongVersionFails() {
+    public void installingWrongVersionFails() {
         getSetup().client().assertRequestFails(() -> getSetup().client().install("wrongVersion"),
                 equalTo("Version 'wrongVersion' not supported, can only use '" + config.getCurrentVersion() + "'."),
                 equalTo(404));
@@ -117,7 +133,7 @@ public abstract class AbstractScriptExtensionIT {
      * Verify that installing the extension creates expected {@code SCRIPT}s.
      */
     @Test
-    void installCreatesScripts() {
+    public void installCreatesScripts() {
         getSetup().client().install();
         assertScriptsExist();
     }
@@ -126,7 +142,7 @@ public abstract class AbstractScriptExtensionIT {
      * Verify that installing the extension twice creates expected {@code SCRIPT}s.
      */
     @Test
-    void installingTwiceCreatesScripts() {
+    public void installingTwiceCreatesScripts() {
         getSetup().client().install();
         getSetup().client().install();
         assertScriptsExist();
@@ -136,7 +152,7 @@ public abstract class AbstractScriptExtensionIT {
      * Verify that installed {@code SCRIPT}s work as expected.
      */
     @Test
-    void installedScriptsWork() {
+    public void installedScriptsWork() {
         getSetup().client().install();
         assertScriptsWork();
     }
@@ -145,7 +161,7 @@ public abstract class AbstractScriptExtensionIT {
      * Verify that uninstalling an extension that is not yet install does not fail.
      */
     @Test
-    void uninstallExtensionWithoutInstallation() {
+    public void uninstallExtensionWithoutInstallation() {
         assertDoesNotThrow(() -> getSetup().client().uninstall());
     }
 
@@ -153,7 +169,7 @@ public abstract class AbstractScriptExtensionIT {
      * Verify that uninstalling the extension removes all {@code SCRIPT}s.
      */
     @Test
-    void uninstallExtensionRemovesScripts() {
+    public void uninstallExtensionRemovesScripts() {
         getSetup().client().install();
         assertScriptsExist();
         getSetup().client().uninstall();
@@ -164,7 +180,7 @@ public abstract class AbstractScriptExtensionIT {
      * Verify that uninstalling an unknown version fails.
      */
     @Test
-    void uninstallWrongVersionFails() {
+    public void uninstallWrongVersionFails() {
         getSetup().client().assertRequestFails(() -> getSetup().client().uninstall("wrongVersion"),
                 equalTo("Version 'wrongVersion' not supported, can only use '" + config.getCurrentVersion() + "'."),
                 equalTo(404));
@@ -174,7 +190,7 @@ public abstract class AbstractScriptExtensionIT {
      * Verify that listing instances is not supported.
      */
     @Test
-    void listingInstancesNotSupported() {
+    public void listingInstancesNotSupported() {
         getSetup().client().assertRequestFails(() -> getSetup().client().listInstances(),
                 equalTo("Finding instances not supported"), equalTo(404));
     }
@@ -183,7 +199,7 @@ public abstract class AbstractScriptExtensionIT {
      * Verify that creating instances is not supported.
      */
     @Test
-    void creatingInstancesNotSupported() {
+    public void creatingInstancesNotSupported() {
         getSetup().client().assertRequestFails(() -> getSetup().client().createInstance(emptyList()),
                 equalTo("Creating instances not supported"), equalTo(404));
     }
@@ -192,7 +208,7 @@ public abstract class AbstractScriptExtensionIT {
      * Verify that deleting instances is not supported.
      */
     @Test
-    void deletingInstancesNotSupported() {
+    public void deletingInstancesNotSupported() {
         getSetup().client().assertRequestFails(() -> getSetup().client().deleteInstance("inst"),
                 equalTo("Deleting instances not supported"), equalTo(404));
     }
@@ -201,7 +217,7 @@ public abstract class AbstractScriptExtensionIT {
      * Verify that getting extension details is not supported.
      */
     @Test
-    void getExtensionDetailsInstancesNotSupported() {
+    public void getExtensionDetailsInstancesNotSupported() {
         getSetup().client().assertRequestFails(
                 () -> getSetup().client().getExtensionDetails(config.getCurrentVersion()),
                 equalTo("Creating instances not supported"), equalTo(404));
@@ -232,7 +248,7 @@ public abstract class AbstractScriptExtensionIT {
      * Verify that upgrading from the previous version works and the scripts continue working.
      */
     @Test
-    void upgradeFromPreviousVersion() {
+    public void upgradeFromPreviousVersion() {
         assumeTrue(config.getPreviousVersion() != null, "No previous version available for testing");
         final PreviousExtensionVersion previousVersion = createPreviousVersion();
         previousVersion.prepare();

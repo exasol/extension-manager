@@ -41,7 +41,7 @@ func (suite *BucketFsClientITestSuite) TeardownSuite() {
 /* [utest -> dsn~extension-components~1]. */
 func (suite *BucketFsClientITestSuite) TestListEmptyDir() {
 	result, err := suite.listFiles()
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Empty(result)
 }
 
@@ -50,7 +50,7 @@ func (suite *BucketFsClientITestSuite) TestListSingleFile() {
 	fileName := fmt.Sprintf("myFile-%d.txt", time.Now().Unix())
 	suite.uploadStringContent(fileName, "12345")
 	result, err := suite.listFiles()
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Len(result, 1)
 	suite.Equal([]bfs.BfsFile{{Name: fileName, Path: DEFAULT_BUCKET_PATH + fileName, Size: 5}}, result)
 }
@@ -63,7 +63,7 @@ func (suite *BucketFsClientITestSuite) TestListFilesRecursively() {
 	suite.uploadStringContent(file2, "12")
 	suite.uploadStringContent(file3, "123")
 	result, err := suite.listFiles()
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Len(result, 3)
 	suite.Equal([]bfs.BfsFile{
 		{Name: "file2", Path: DEFAULT_BUCKET_PATH + file2, Size: 2},
@@ -74,7 +74,7 @@ func (suite *BucketFsClientITestSuite) TestListFilesRecursively() {
 func (suite *BucketFsClientITestSuite) TestFindAbsolutePathNoFileFound() {
 	time.Sleep(3 * time.Second)
 	result, err := suite.findAbsolutePath("no-such-file")
-	suite.EqualError(err, `file "no-such-file" not found in BucketFS`)
+	suite.Require().EqualError(err, `file "no-such-file" not found in BucketFS`)
 	suite.Equal("", result)
 }
 
@@ -84,14 +84,14 @@ func (suite *BucketFsClientITestSuite) TestFindAbsolutePathFileInRoot() {
 	fileName := "file01.txt"
 	suite.uploadStringContent(fileName, "123")
 	result, err := suite.findAbsolutePath(fileName)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal("/buckets/bfsdefault/default/"+fileName, result)
 }
 
 func (suite *BucketFsClientITestSuite) TestFindAbsolutePathFileInSubDir() {
 	suite.uploadStringContent("dir/file02.txt", "123")
 	result, err := suite.findAbsolutePath("file02.txt")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal("/buckets/bfsdefault/default/dir/file02.txt", result)
 }
 
@@ -99,7 +99,7 @@ func (suite *BucketFsClientITestSuite) TestFindAbsolutePathMultipleFiles() {
 	suite.uploadStringContent("dirA/file03.txt", "123")
 	suite.uploadStringContent("dirB/file03.txt", "98765")
 	result, err := suite.findAbsolutePath("file03.txt")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal("/buckets/bfsdefault/default/dirA/file03.txt", result)
 }
 
@@ -107,7 +107,7 @@ func (suite *BucketFsClientITestSuite) TestFindAbsolutePathMultipleFilesFirstFil
 	suite.uploadStringContent("dirA/file05.txt", "123")
 	suite.uploadStringContent("dirB/file06.txt", "98765")
 	result, err := suite.findAbsolutePath("file06.txt")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 	suite.Equal("/buckets/bfsdefault/default/dirB/file06.txt", result)
 }
 

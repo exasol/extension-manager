@@ -255,6 +255,8 @@ public class ExtensionManagerClient {
                 () -> assertThat("status code", error.getJsonNumber("code").intValue(), statusMatcher));
     }
 
+    @SuppressWarnings("try") // auto-closeable resource Jsonb has a member method close() that could throw
+                             // InterruptedException
     JsonObject parseErrorMessageJson(final String errorMessage) throws MultipleFailuresError {
         try (Jsonb jsonb = JsonbBuilder.create()) {
             return jsonb.fromJson(errorMessage, JsonObject.class);

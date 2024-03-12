@@ -3,6 +3,7 @@ package transaction
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -25,7 +26,7 @@ type (
 // BeginTransaction starts a new database transaction.
 func BeginTransaction(ctx context.Context, db *sql.DB, bucketFsBasePath string) (*TransactionContext, error) {
 	if bucketFsBasePath == "" {
-		return nil, fmt.Errorf("bucketFsBasePath is empty")
+		return nil, errors.New("bucketFsBasePath is empty")
 	}
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
