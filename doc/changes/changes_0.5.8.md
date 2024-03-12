@@ -1,4 +1,4 @@
-# Extension Manager 0.5.8, released 2024-??-??
+# Extension Manager 0.5.8, released 2024-03-12
 
 Code name: Fix vulnerabilities CVE-2024-25710 and CVE-2024-26308 in compile dependency `org.apache.commons:commons-compress` of the integration test framework
 
