@@ -39,14 +39,10 @@
                 <version>3.2.0</version>
                 <configuration>
                     <excludeVulnerabilityIds>
-                        <!-- Transitive dependency fr.turri:aXMLRPC used by com.exasol:bucketfs-java.
-                        CVE-2020-36641 is reported to be fixed in aXMLRPC 1.12.1. We use version 1.13.0, so this is a false
-                        positive. -->
-                        <exclude>CVE-2020-36641</exclude>
-                        <!-- Transitive dependency io.netty:netty-handler used by software.amazon.awssdk/exasol-test-setup-abstraction-java.
-                        Vulnerability still present in latest version 4.1.97.Final.
-                        We assume that the AWS SDK's usage of netty is not affected. -->
-                        <exclude>CVE-2023-4586</exclude>
+                        <!-- Transitive dependency fr.turri:aXMLRPC Transitive dependency fr.turri:aXMLRPC used by
+                             com.exasol:exasol-test-setup-abstraction-java for connecting to ExaOperation.
+                             We accept this vulnerability (CWE-833: Deadlock) as we assume that we only connect to the known endpoint ExaOperations. -->
+                       <exclude>CVE-2017-10355</exclude>
                     </excludeVulnerabilityIds>
                 </configuration>
             </plugin>
