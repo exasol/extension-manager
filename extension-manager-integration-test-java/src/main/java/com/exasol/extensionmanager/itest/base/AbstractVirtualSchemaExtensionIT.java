@@ -80,12 +80,12 @@ public abstract class AbstractVirtualSchemaExtensionIT {
     protected abstract Collection<ParameterValue> createValidParameterValues();
 
     @BeforeEach
-    void logTestName(final TestInfo testInfo) {
+    public void logTestName(final TestInfo testInfo) {
         LOG.info(">>> " + testInfo.getDisplayName());
     }
 
     @AfterEach
-    void cleanup() {
+    public void cleanup() {
         getSetup().cleanup();
     }
 
