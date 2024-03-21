@@ -4,6 +4,7 @@
   "scripts": {
     "build": "tsc",
     "upload": "ts-node src/main.ts",
+    "generate": "ts-node src/generate.ts",
     "lint": "eslint --report-unused-disable-directives --exit-on-fatal-error ./src/"
   },
   "devDependencies": {
@@ -20,6 +21,7 @@
     "@aws-sdk/client-cloudformation": "^3.537.0",
     "@aws-sdk/client-cloudfront": "^3.535.0",
     "@aws-sdk/client-s3": "^3.537.0",
-    "follow-redirects": "^1.15.6"
+    "follow-redirects": "^1.15.6",
+    "octokit": "^3.1.2"
   }
 }
