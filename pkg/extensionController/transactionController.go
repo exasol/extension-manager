@@ -146,7 +146,7 @@ func (c *transactionControllerImpl) GetAllExtensions(ctx context.Context, db *sq
 		return nil, err
 	}
 	extensions, err := c.controller.GetAllExtensions(bfsFiles)
-	log.Debugf("Found %d extensions in %.2fs (%d files in BucketFS)", len(extensions), time.Since(t0).Seconds(), len(bfsFiles))
+	log.Debugf("Found %d extensions in %dms (%d files in BucketFS)", len(extensions), time.Since(t0).Milliseconds(), len(bfsFiles))
 	return extensions, err
 }
 
@@ -217,12 +217,15 @@ func (c *transactionControllerImpl) UpgradeExtension(ctx context.Context, db *sq
 }
 
 func (c *transactionControllerImpl) GetInstalledExtensions(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
+	t0 := time.Now()
 	tx, err := c.beginTransaction(ctx, db)
 	if err != nil {
 		return nil, err
 	}
 	defer tx.Rollback()
-	return c.controller.GetAllInstallations(tx)
+	installations, err := c.controller.GetAllInstallations(tx)
+	log.Debugf("Found %d installed extensions in %dms", len(installations), time.Since(t0).Milliseconds())
+	return installations, err
 }
 
 func (c *transactionControllerImpl) GetParameterDefinitions(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {
