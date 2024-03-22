@@ -10,10 +10,11 @@ import (
 
 	"github.com/exasol/extension-manager/pkg/apiErrors"
 	"github.com/exasol/extension-manager/pkg/extensionController/registry/index"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 func newHttpRegistry(url string) Registry {
+	log.Debugf("Creating HTTP registry for %q", url)
 	return &httpRegistry{url: url, index: nil}
 }
 
@@ -55,7 +56,7 @@ func loadIndex(url string) (*index.RegistryIndex, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode index from %q: %w", url, err)
 	}
-	logrus.Debugf("Loaded registry index with %d extensions from %q in %dms", len(index.Extensions), url, time.Since(t0).Milliseconds())
+	log.Debugf("Loaded registry index with %d extensions from %q in %dms", len(index.Extensions), url, time.Since(t0).Milliseconds())
 	return &index, nil
 }
 

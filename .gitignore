@@ -39,6 +39,8 @@ vendor/
 /doc/tracing-report.md
 /doc/tracing-report.html
 
+/manual-test.properties
+
 !/pkg/extensionController/bfs/udf/poetry.lock
 /pkg/extensionController/bfs/udf/__pycache__
 /pkg/extensionController/bfs/udf/.pytest_cache
