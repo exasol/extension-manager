@@ -74,7 +74,12 @@ func (bfs bucketFsAPIImpl) ListFiles() ([]BfsFile, error) {
 	}
 	defer result.Close()
 	files, err := readQueryResult(result)
-	logrus.Tracef("Listed %d files in %.2fs", len(files), time.Since(t0).Seconds())
+	if logrus.IsLevelEnabled(logrus.TraceLevel) {
+		for _, file := range files {
+			logrus.Tracef("- Found file %q with size %d", file.Path, file.Size)
+		}
+	}
+	logrus.Debugf("Listed %d files under %q in %dms", len(files), bfs.bucketFsBasePath, time.Since(t0).Milliseconds())
 	return files, err
 }
 

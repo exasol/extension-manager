@@ -5,11 +5,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/transaction"
 	"github.com/exasol/extension-manager/pkg/parameterValidator"
+	log "github.com/sirupsen/logrus"
 )
 
 // TransactionController is the core part of the extension-manager that provides the extension handling functionality.
@@ -138,11 +140,14 @@ type transactionControllerImpl struct {
 }
 
 func (c *transactionControllerImpl) GetAllExtensions(ctx context.Context, db *sql.DB) ([]*Extension, error) {
+	t0 := time.Now()
 	bfsFiles, err := c.listBfsFiles(ctx, db)
 	if err != nil {
 		return nil, err
 	}
-	return c.controller.GetAllExtensions(bfsFiles)
+	extensions, err := c.controller.GetAllExtensions(bfsFiles)
+	log.Debugf("Found %d extensions in %.2fs (%d files in BucketFS)", len(extensions), time.Since(t0).Seconds(), len(bfsFiles))
+	return extensions, err
 }
 
 func (c *transactionControllerImpl) listBfsFiles(ctx context.Context, db *sql.DB) ([]bfs.BfsFile, error) {
