@@ -25,19 +25,57 @@ interface Extension {
     url: string
 }
 
+interface GitHubAsset {
+    url: string;
+    browser_download_url: string;
+    name: string;
+    content_type: string;
+    size: number;
+}
+
 async function fetchLatestExtensions(gitHubRepos: string[]): Promise<Extension[]> {
     const octokit = await createGitHubClient()
     async function fetchLatestExtension(gitHubRepo: string): Promise<Extension> {
         const latestRelease = await octokit.rest.repos.getLatestRelease({ owner: "exasol", repo: gitHubRepo })
         const version = latestRelease.data.tag_name
-        const extensionAssetsNames = latestRelease.data.assets.map(asset => asset.name).filter(name => name.endsWith(".js"))
-        if (extensionAssetsNames.length !== 1) {
-            const url = `https://github.com/exasol/${gitHubRepo}/releases/tag/${version}`
-            throw new Error(`Expected exactly one .js extension in release ${url}, but got ${extensionAssetsNames.length}`)
-        }
-        return { id: gitHubRepo, url: `https://extensions-internal.exasol.com/com.exasol/${gitHubRepo}/${version}/${extensionAssetsNames[0]}` }
+        const extensionAssetName = getExtensionAssetName(latestRelease.data.assets, gitHubRepo, version);
+        logAdapterJar(latestRelease.data.assets, gitHubRepo, version)
+        return { id: gitHubRepo, url: buildExtensionUrl(gitHubRepo, version, extensionAssetName) }
     }
     return Promise.all(gitHubRepos.map(fetchLatestExtension))
+}
+
+function getExtensionAssetName(assets: GitHubAsset[], gitHubRepo: string, version: string): string {
+    const extensionAssetsNames = assets.map(asset => asset.name).filter(name => name.endsWith(".js"));
+    if (extensionAssetsNames.length !== 1) {
+        throw new Error(`Expected exactly one .js extension in release ${getGitHubReleaseUrl(gitHubRepo, version)}, but got ${extensionAssetsNames.length}`);
+    }
+    const extensionAssetName = extensionAssetsNames[0];
+    return extensionAssetName;
+}
+
+function getGitHubReleaseUrl(gitHubRepo: string, version: string) {
+    return `https://github.com/exasol/${gitHubRepo}/releases/tag/${version}`;
+}
+
+function logAdapterJar(assets: GitHubAsset[], gitHubRepo: string, version: string) {
+    const adapterAssets = assets.filter(asset => isAdapterAsset(asset.name));
+    if (adapterAssets.length !== 1) {
+        throw new Error(`Expected exactly one .jar adapter in release ${getGitHubReleaseUrl(gitHubRepo, version)}, but got ${adapterAssets.length}`);
+    }
+    console.log(`Adapter for ${gitHubRepo} ${version}: ${adapterAssets[0].browser_download_url}`);
+}
+
+function isAdapterAsset(assetName: string): boolean {
+    if (assetName.endsWith(".lua")) {
+        return true
+    }
+    return assetName.endsWith(".jar") && !assetName.includes("javadoc")
+}
+
+function buildExtensionUrl(gitHubRepo: string, version: string, extensionAssetName: string): string {
+    // We use the internal URL to avoid inconsistent statistics in the public CDN
+    return `https://extensions-internal.exasol.com/com.exasol/${gitHubRepo}/${version}/${extensionAssetName}`;
 }
 
 function writeRegistry(stage: Stage, content: RegistryContent) {
