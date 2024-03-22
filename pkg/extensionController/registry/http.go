@@ -6,9 +6,11 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/exasol/extension-manager/pkg/apiErrors"
 	"github.com/exasol/extension-manager/pkg/extensionController/registry/index"
+	"github.com/sirupsen/logrus"
 )
 
 func newHttpRegistry(url string) Registry {
@@ -23,25 +25,38 @@ type httpRegistry struct {
 /* [impl -> dsn~extension-registry~1] */
 /* [impl -> dsn~extension-definitions-storage~1]. */
 func (h *httpRegistry) FindExtensions() ([]string, error) {
-	err := h.loadIndex()
+	index, err := h.getIndex()
 	if err != nil {
 		return nil, err
 	}
-	return h.index.GetExtensionIDs(), nil
+	return index.GetExtensionIDs(), nil
 }
 
-func (h *httpRegistry) loadIndex() error {
-	response, err := getResponse(h.url)
+/* [impl -> dsn~extension-registry.cache~1] */
+func (h *httpRegistry) getIndex() (*index.RegistryIndex, error) {
+	if h.index == nil {
+		index, err := loadIndex(h.url)
+		if err != nil {
+			return nil, err
+		}
+		h.index = index
+	}
+	return h.index, nil
+}
+
+func loadIndex(url string) (*index.RegistryIndex, error) {
+	t0 := time.Now()
+	response, err := getResponse(url)
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("failed to load index from %q: %w", url, err)
 	}
 	defer response.Body.Close()
 	index, err := index.Decode(response.Body)
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("failed to decode index from %q: %w", url, err)
 	}
-	h.index = &index
-	return nil
+	logrus.Debugf("Loaded registry index with %d extensions from %q in %dms", len(index.Extensions), url, time.Since(t0).Milliseconds())
+	return &index, nil
 }
 
 func getResponse(url string) (*http.Response, error) {
@@ -61,14 +76,15 @@ func getResponse(url string) (*http.Response, error) {
 }
 
 func (h *httpRegistry) ReadExtension(id string) (string, error) {
-	err := h.loadIndex()
+	index, err := h.getIndex()
 	if err != nil {
 		return "", err
 	}
-	ext, ok := h.index.GetExtension(id)
+	ext, ok := index.GetExtension(id)
 	if !ok {
 		return "", apiErrors.NewNotFoundErrorF("extension %q not found", id)
 	}
+
 	extContent, err := getUrlContent(ext.URL)
 	if err != nil {
 		return "", fmt.Errorf("failed to load extension %q: %w", id, err)

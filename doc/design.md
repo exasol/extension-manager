@@ -106,6 +106,20 @@ Covers:
 
 Needs: impl, utest, itest
 
+#### Extension Registry Caches Registry Content
+`dsn~extension-registry.cache~1`
+
+EM caches the content returned by the registry.
+
+Rationale:
+* Caching the registry content avoids fetching the same data multiple times and speeds up the process.
+* Cache expiration is not necessary because a new instance of the EM controller is created for each request.
+
+Covers:
+* [`req~finding-available-extensions~1`](system_requirements.md#em-finds-available-extensions)
+
+Needs: impl, itest
+
 ### Extensions
 
 The Extension Manager has an extension mechanism.

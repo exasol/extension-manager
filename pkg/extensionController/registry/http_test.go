@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/exasol/extension-manager/pkg/integrationTesting"
@@ -31,7 +32,7 @@ func (suite *HttpRegistrySuite) SetupTest() {
 	suite.server.Reset()
 }
 
-func (suite *HttpRegistrySuite) TestFindExtensions_noExtensionsAvailable() {
+func (suite *HttpRegistrySuite) TestFindExtensionsNoExtensionsAvailable() {
 	suite.server.SetRegistryContent(`{}`)
 	extensions, err := suite.registry.FindExtensions()
 	suite.Require().NoError(err)
@@ -42,15 +43,28 @@ func (suite *HttpRegistrySuite) TestFindExtensions_noExtensionsAvailable() {
 /* [itest -> dsn~extension-definitions-storage~1]. */
 func (suite *HttpRegistrySuite) TestFindExtensions() {
 	suite.server.SetRegistryContent(`{"extensions":[{"id": "ext1"},{"id": "ext2"},{"id": "ext3"}]}`)
+	suite.assertExtensions([]string{"ext1", "ext2", "ext3"})
+}
+
+/* [itest -> dsn~extension-registry.cache~1] */
+func (suite *HttpRegistrySuite) TestFindExtensionsCachesContent() {
+	suite.server.SetRegistryContent(`{"extensions":[{"id": "ext1"},{"id": "ext2"},{"id": "ext3"}]}`)
+	suite.assertExtensions([]string{"ext1", "ext2", "ext3"})
+
+	suite.server.SetRegistryContent(`invalid content`)
+	suite.assertExtensions([]string{"ext1", "ext2", "ext3"})
+}
+
+func (suite *HttpRegistrySuite) assertExtensions(expectedExtensions []string) {
 	extensions, err := suite.registry.FindExtensions()
 	suite.Require().NoError(err)
-	suite.Equal([]string{"ext1", "ext2", "ext3"}, extensions)
+	suite.Equal(expectedExtensions, extensions)
 }
 
 func (suite *HttpRegistrySuite) TestReadExtensionFailsWhenLoadingIndex() {
 	suite.server.SetRegistryContent(`invalid`)
 	content, err := suite.registry.ReadExtension("unknown-ext-id")
-	suite.Require().EqualError(err, "failed to decode registry content: invalid character 'i' looking for beginning of value")
+	suite.Require().EqualError(err, fmt.Sprintf(`failed to decode index from "%s": failed to decode registry content: invalid character 'i' looking for beginning of value`, suite.server.IndexUrl()))
 	suite.Equal("", content)
 }
 
