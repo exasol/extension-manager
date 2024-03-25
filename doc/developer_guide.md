@@ -170,6 +170,17 @@ aws cloudformation describe-stacks --stack-name ExtensionManagerRegistry --query
 
 ### Deploy Registry Content
 
+#### Generate Registry Content
+
+Run the following command to generate the registry content using the latest extension versions:
+
+```sh
+cd registry-upload
+npm run generate
+```
+
+#### Upload Registry
+
 To deploy the content of the Extension Registry to `test` or `prod` stage, run the following command:
 
 ```sh

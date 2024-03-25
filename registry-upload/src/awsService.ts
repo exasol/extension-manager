@@ -57,6 +57,7 @@ export async function readStackConfiguration(cloudFormationStackName: string): P
 
 export async function uploadFileContent(bucket: string, key: string, localFilePath: string): Promise<void> {
     const stream = createReadStream(localFilePath)
+    console.log(`Uploading file ${localFilePath} to ${bucket}/${key}...`)
     await s3Client.putObject({ Bucket: bucket, Key: key, Body: stream })
 }
 

@@ -15,7 +15,7 @@ export async function upload(args: CommandLineArgs) {
     const config = await readStackConfiguration(EXTENSION_MANAGER_STACK_NAME)
     console.log(`Read configuration: bucket ${config.bucketName}, domain: ${config.domainName}`)
     if (args.dryRun) {
-        console.log("Dry run, skipping upload")
+        console.log("Dry run, skipping upload. Specify --no-dry-run to actually upload.")
         return
     }
     await uploadFiles(args.stage, config.bucketName)
@@ -67,5 +67,3 @@ async function verifyExtensionEntry(extension: any): Promise<void> {
         throw new Error(`URL for extension ${id} is invalid`, { cause: error })
     }
 }
-
-

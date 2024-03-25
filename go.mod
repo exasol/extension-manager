@@ -1,6 +1,6 @@
 module github.com/exasol/extension-manager
 
-go 1.20
+go 1.21
 
 require (
 	github.com/dop251/goja v0.0.0-20240220182346-e401ed450204
@@ -11,8 +11,8 @@ require (
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
-	github.com/exasol/exasol-driver-go v1.0.4
-	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.5
+	github.com/exasol/exasol-driver-go v1.0.6
+	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.6
 	github.com/go-chi/chi/v5 v5.0.12
 	github.com/kinbiko/jsonassert v1.1.1
 	github.com/swaggo/http-swagger v1.3.4
@@ -24,7 +24,7 @@ require (
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
 	github.com/go-openapi/spec v0.21.0 // indirect
-	github.com/google/pprof v0.0.0-20240227163752-401108e1b7e7 // indirect
+	github.com/google/pprof v0.0.0-20240320155624-b11c3daa6f07 // indirect
 	github.com/iancoleman/orderedmap v0.3.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
@@ -41,7 +41,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.19.0 // indirect
-	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
+	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
