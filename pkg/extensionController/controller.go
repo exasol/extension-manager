@@ -142,7 +142,7 @@ func (c *controllerImpl) getAllExtensions() ([]*extensionAPI.JsExtension, error)
 		}
 		extensions = append(extensions, extension)
 	}
-	log.Debugf("Loaded %d extensions in %dms", len(extensions), time.Since(t0).Milliseconds())
+	log.Debugf("Loaded %d extensions JS files in %dms", len(extensions), time.Since(t0).Milliseconds())
 	return extensions, nil
 }
 

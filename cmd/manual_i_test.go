@@ -19,13 +19,8 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type SimpleFormatter struct{}
-
-func (f *SimpleFormatter) Format(entry *log.Entry) ([]byte, error) {
-	return []byte(fmt.Sprintf("%-7s %s\n", strings.ToUpper(entry.Level.String()), entry.Message)), nil
-}
-
-// Run this test with `go test -v ./cmd/...`
+// Create file manual-test.properties, add configuration and
+// run this test with `go test -v ./cmd/...`
 
 type ManualITestSuite struct {
 	suite.Suite
@@ -38,7 +33,7 @@ func TestManualITestSuite(t *testing.T) {
 
 func (suite *ManualITestSuite) SetupSuite() {
 	log.SetLevel(log.DebugLevel)
-	log.SetFormatter(new(SimpleFormatter))
+	log.SetFormatter(new(simpleFormatter))
 	config, err := readPropertiesFile("../manual-test.properties")
 	if err != nil {
 		suite.T().Skip("Skipping manual integration tests: " + err.Error())
@@ -84,20 +79,19 @@ func (suite *ManualITestSuite) createDBConnection() *sql.DB {
 		Autocommit(false).
 		String())
 	if err != nil {
-		panic("Error connecting to database: " + err.Error())
+		suite.FailNow("Error connecting to database: " + err.Error())
 	}
-	testConnection(db)
+	suite.testConnection(db)
 	return db
 }
 
-func testConnection(db *sql.DB) {
+func (suite *ManualITestSuite) testConnection(db *sql.DB) {
 	row := db.QueryRow("SELECT 'a'")
 	var value sql.NullString
 	err := row.Scan(&value)
 	if err != nil {
-		panic("Error scanning row: " + err.Error())
+		suite.FailNow("Error scanning row: " + err.Error())
 	}
-	log.Debugf("Connected to Exasol database")
 }
 
 func (suite *ManualITestSuite) getConfigValue(key string) string {
