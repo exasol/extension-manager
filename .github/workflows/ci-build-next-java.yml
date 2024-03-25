@@ -27,16 +27,6 @@ jobs:
           distribution: "temurin"
           java-version: 17
           cache: "maven"
-      - name: Cache go modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-            ${{ runner.os }}-go-
 
       - name: Run tests and build with Maven
         run: |

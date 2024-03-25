@@ -24,16 +24,6 @@ jobs:
         with:
           go-version: "1.21"
         id: go
-      - name: Cache go modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-            ${{ runner.os }}-go-
 
       - name: Prepare testing extension
         run: cd ./extension-manager-integration-test-java/testing-extension && npm ci
