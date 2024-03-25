@@ -46,7 +46,7 @@ func (suite *HttpRegistrySuite) TestFindExtensions() {
 	suite.assertExtensions([]string{"ext1", "ext2", "ext3"})
 }
 
-/* [itest -> dsn~extension-registry.cache~1] */
+/* [itest -> dsn~extension-registry.cache~1]. */
 func (suite *HttpRegistrySuite) TestFindExtensionsCachesContent() {
 	suite.server.SetRegistryContent(`{"extensions":[{"id": "ext1"},{"id": "ext2"},{"id": "ext3"}]}`)
 	suite.assertExtensions([]string{"ext1", "ext2", "ext3"})

@@ -33,7 +33,7 @@ func (h *httpRegistry) FindExtensions() ([]string, error) {
 	return index.GetExtensionIDs(), nil
 }
 
-/* [impl -> dsn~extension-registry.cache~1] */
+/* [impl -> dsn~extension-registry.cache~1]. */
 func (h *httpRegistry) getIndex() (*index.RegistryIndex, error) {
 	if h.index == nil {
 		index, err := loadIndex(h.url)
