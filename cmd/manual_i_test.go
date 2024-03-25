@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/exasol/exasol-driver-go"
+	"github.com/exasol/extension-manager/pkg/extensionAPI"
 	"github.com/exasol/extension-manager/pkg/extensionController"
 
 	log "github.com/sirupsen/logrus"
@@ -25,6 +26,8 @@ import (
 type ManualITestSuite struct {
 	suite.Suite
 	config configProperties
+	db     *sql.DB
+	ctrl   extensionController.TransactionController // Add this line
 }
 
 func TestManualITestSuite(t *testing.T) {
@@ -39,26 +42,20 @@ func (suite *ManualITestSuite) SetupSuite() {
 		suite.T().Skip("Skipping manual integration tests: " + err.Error())
 	}
 	suite.config = config
-
+	suite.db = suite.createDBConnection()
+	suite.ctrl = suite.createController()
 }
 
-func (suite *ManualITestSuite) TestListInstalledExtensions() {
-	var db *sql.DB = suite.createDBConnection()
-	t0 := time.Now()
+func (suite *ManualITestSuite) TearDownSuite() {
+	suite.NoError(suite.db.Close())
+}
+
+func (suite *ManualITestSuite) createController() extensionController.TransactionController {
 	ctrl, err := extensionController.CreateWithValidatedConfig(suite.createExtensionManagerConfig())
 	if err != nil {
 		suite.FailNow("Error creating controller: " + err.Error())
 	}
-	extensions, err := ctrl.GetAllExtensions(context.Background(), db)
-	if err != nil {
-		suite.FailNow("Error getting extensions: " + err.Error())
-	}
-	log.Infof("Found %d extensions, listing installed extensions...", len(extensions))
-	installed, err := ctrl.GetInstalledExtensions(context.Background(), db)
-	if err != nil {
-		suite.FailNow("Error getting installed extensions: " + err.Error())
-	}
-	log.Infof("Total duration %dms: %v", time.Since(t0).Milliseconds(), installed)
+	return ctrl
 }
 
 func (suite *ManualITestSuite) createExtensionManagerConfig() extensionController.ExtensionManagerConfig {
@@ -67,6 +64,53 @@ func (suite *ManualITestSuite) createExtensionManagerConfig() extensionControlle
 		BucketFSBasePath:     suite.getConfigValue("bucketFSBasePath"),
 		ExtensionSchema:      suite.getConfigValue("extensionSchema"),
 	}
+}
+
+func (suite *ManualITestSuite) TestListInstalledExtensions() {
+	t0 := time.Now()
+	extensions := suite.getAllExtensions()
+	suite.GreaterOrEqual(len(extensions), 6, "Expected at least six extension")
+	log.Infof("Found %d extensions, listing installed extensions...", len(extensions))
+	installed := suite.getInstalledExtensions()
+	suite.GreaterOrEqual(len(installed), 1, "Expected at least one installations")
+	duration := time.Since(t0)
+	log.Infof("Total duration %dms: %v", duration.Milliseconds(), installed)
+	suite.LessOrEqual(duration.Milliseconds(), int64(2000), "Process took too long")
+}
+
+func (suite *ManualITestSuite) getAllExtensions() []*extensionController.Extension {
+	extensions, err := suite.ctrl.GetAllExtensions(context.Background(), suite.db)
+	if err != nil {
+		suite.FailNow("Error getting extensions: " + err.Error())
+	}
+	return extensions
+}
+
+func (suite *ManualITestSuite) getInstalledExtensions() []*extensionAPI.JsExtInstallation {
+	installed, err := suite.ctrl.GetInstalledExtensions(context.Background(), suite.db)
+	if err != nil {
+		suite.FailNow("Error getting installed extensions: " + err.Error())
+	}
+	return installed
+}
+
+func (suite *ManualITestSuite) TestInstallAndUninstallExtension() {
+	t0 := time.Now()
+	extensions := suite.getAllExtensions()
+	ext := extensions[0]
+	log.Infof("Installing extension %q...", ext.Id)
+	err := suite.ctrl.InstallExtension(context.Background(), suite.db, ext.Id, ext.InstallableVersions[0].Name)
+	if err != nil {
+		suite.FailNow("Error installing extension: " + err.Error())
+	}
+
+	err = suite.ctrl.UninstallExtension(context.Background(), suite.db, ext.Id, ext.InstallableVersions[0].Name)
+	if err != nil {
+		suite.FailNow("Error uninstalling extension: " + err.Error())
+	}
+	duration := time.Since(t0)
+	log.Infof("Total duration %dms", duration.Milliseconds())
+	suite.LessOrEqual(duration.Milliseconds(), int64(2500), "Process took too long")
 }
 
 func (suite *ManualITestSuite) createDBConnection() *sql.DB {
