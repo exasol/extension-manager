@@ -74,7 +74,12 @@ func (bfs bucketFsAPIImpl) ListFiles() ([]BfsFile, error) {
 	}
 	defer result.Close()
 	files, err := readQueryResult(result)
-	logrus.Tracef("Listed %d files in %.2fs", len(files), time.Since(t0).Seconds())
+	if logrus.IsLevelEnabled(logrus.TraceLevel) {
+		for _, file := range files {
+			logrus.Tracef("- Found file %q with size %d", file.Path, file.Size)
+		}
+	}
+	logrus.Debugf("Listed %d files under %q in %dms", len(files), bfs.bucketFsBasePath, time.Since(t0).Milliseconds())
 	return files, err
 }
 
@@ -104,7 +109,7 @@ func (bfs bucketFsAPIImpl) FindAbsolutePath(fileName string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed reading absolute path. Cause: %w", err)
 	}
-	logrus.Tracef("Found absolute path %q for file %q in %.2fs", absolutePath, fileName, time.Since(t0).Seconds())
+	logrus.Tracef("Found absolute path %q for file %q in %dms", absolutePath, fileName, time.Since(t0))
 	return absolutePath, nil
 }
 
@@ -127,7 +132,7 @@ func createUdfScript(transaction *sql.Tx) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to create UDF script for listing bucket. Cause: %w", err)
 	}
-	logrus.Tracef("Created UDF script %s in %.2f", udfScriptName, time.Since(t0).Seconds())
+	logrus.Debugf("Created UDF script %s in %dms", udfScriptName, time.Since(t0).Milliseconds())
 	return udfScriptName, nil
 }
 

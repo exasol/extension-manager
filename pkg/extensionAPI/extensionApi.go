@@ -2,6 +2,7 @@ package extensionAPI
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/exasol/extension-manager/pkg/extensionAPI/context"
 	"github.com/exasol/extension-manager/pkg/extensionAPI/exaMetadata"
@@ -15,6 +16,7 @@ import (
 // LoadExtension loads an extension from the given file content.
 /* [impl -> dsn~extension-definition~1]. */
 func LoadExtension(id, content string) (*JsExtension, error) {
+	t0 := time.Now()
 	logPrefix := fmt.Sprintf("JS:%s>", id)
 	vm := newJavaScriptVm(logPrefix)
 	extensionJs, err := loadExtension(vm, id, content)
@@ -26,7 +28,7 @@ func LoadExtension(id, content string) (*JsExtension, error) {
 		return nil, err
 	}
 	wrappedExtension := wrapExtension(&extensionJs.Extension, id, vm)
-	log.Debugf("Extension %q with id %q using API version %q loaded successfully", wrappedExtension.Name, wrappedExtension.Id, extensionJs.APIVersion)
+	log.Tracef("Extension %q with id %q using API version %q loaded in %dms", wrappedExtension.Name, wrappedExtension.Id, extensionJs.APIVersion, time.Since(t0).Milliseconds())
 	return wrappedExtension, nil
 }
 

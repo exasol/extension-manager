@@ -1,11 +1,14 @@
 # Extension Manager 0.5.9, released 2024-??-??
 
-Code name:
+Code name: Speedup listing extensions
 
 ## Summary
 
+This release speeds up listing extensions and installations by caching the extension registry.
+
 ## Features
 
+* #169: Enabled caching for http registry
 * #167: Added script for automatically generating extension registry
 
 ## Dependency Updates

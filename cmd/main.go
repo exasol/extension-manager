@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"errors"
 	"flag"
 	"fmt"
@@ -99,10 +98,5 @@ type simpleFormatter struct {
 }
 
 func (f *simpleFormatter) Format(entry *log.Entry) ([]byte, error) {
-	b := &bytes.Buffer{}
-	b.WriteString(strings.ToUpper(entry.Level.String()))
-	b.WriteByte(' ')
-	b.WriteString(entry.Message)
-	b.WriteByte('\n')
-	return b.Bytes(), nil
+	return []byte(fmt.Sprintf("%-7s %s\n", strings.ToUpper(entry.Level.String()), entry.Message)), nil
 }

@@ -3,6 +3,7 @@ package extensionController
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -94,7 +95,7 @@ func convertExtension(jsExtension *extensionAPI.JsExtension) *Extension {
 func (c *controllerImpl) requiredFilesAvailable(extension *extensionAPI.JsExtension, bfsFiles []bfs.BfsFile) bool {
 	for _, requiredFile := range extension.BucketFsUploads {
 		if !existsFileInBfs(bfsFiles, requiredFile) {
-			log.Debugf("Ignoring extension %q since the required file %q (%q) does not exist or has a wrong file size.\n", extension.Name, requiredFile.Name, requiredFile.BucketFsFilename)
+			log.Debugf("Ignoring extension %q since the required file %q does not exist or has a wrong file size.\n", extension.Name, requiredFile.BucketFsFilename)
 			return false
 		}
 	}
@@ -107,7 +108,7 @@ func existsFileInBfs(bfsFiles []bfs.BfsFile, requiredFile extensionAPI.BucketFsU
 			return true
 		}
 	}
-	log.Debugf("Required file %q of size %db not found", requiredFile.Name, requiredFile.FileSize)
+	log.Tracef("Required file %q of size %db not found", requiredFile.Name, requiredFile.FileSize)
 	return false
 }
 
@@ -128,6 +129,7 @@ func fileMatches(requiredFile extensionAPI.BucketFsUpload, existingFile bfs.BfsF
 }
 
 func (c *controllerImpl) getAllExtensions() ([]*extensionAPI.JsExtension, error) {
+	t0 := time.Now()
 	extensionIds, err := c.registry.FindExtensions()
 	if err != nil {
 		return nil, err
@@ -140,6 +142,7 @@ func (c *controllerImpl) getAllExtensions() ([]*extensionAPI.JsExtension, error)
 		}
 		extensions = append(extensions, extension)
 	}
+	log.Debugf("Loaded %d extensions JS files in %dms", len(extensions), time.Since(t0).Milliseconds())
 	return extensions, nil
 }
 

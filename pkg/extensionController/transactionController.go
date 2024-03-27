@@ -5,11 +5,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
 	"github.com/exasol/extension-manager/pkg/extensionController/bfs"
 	"github.com/exasol/extension-manager/pkg/extensionController/transaction"
 	"github.com/exasol/extension-manager/pkg/parameterValidator"
+	log "github.com/sirupsen/logrus"
 )
 
 // TransactionController is the core part of the extension-manager that provides the extension handling functionality.
@@ -138,11 +140,14 @@ type transactionControllerImpl struct {
 }
 
 func (c *transactionControllerImpl) GetAllExtensions(ctx context.Context, db *sql.DB) ([]*Extension, error) {
+	t0 := time.Now()
 	bfsFiles, err := c.listBfsFiles(ctx, db)
 	if err != nil {
 		return nil, err
 	}
-	return c.controller.GetAllExtensions(bfsFiles)
+	extensions, err := c.controller.GetAllExtensions(bfsFiles)
+	log.Debugf("Found %d extensions in %dms (%d files in BucketFS)", len(extensions), time.Since(t0).Milliseconds(), len(bfsFiles))
+	return extensions, err
 }
 
 func (c *transactionControllerImpl) listBfsFiles(ctx context.Context, db *sql.DB) ([]bfs.BfsFile, error) {
@@ -212,12 +217,15 @@ func (c *transactionControllerImpl) UpgradeExtension(ctx context.Context, db *sq
 }
 
 func (c *transactionControllerImpl) GetInstalledExtensions(ctx context.Context, db *sql.DB) ([]*extensionAPI.JsExtInstallation, error) {
+	t0 := time.Now()
 	tx, err := c.beginTransaction(ctx, db)
 	if err != nil {
 		return nil, err
 	}
 	defer tx.Rollback()
-	return c.controller.GetAllInstallations(tx)
+	installations, err := c.controller.GetAllInstallations(tx)
+	log.Debugf("Found %d installed extensions in %dms", len(installations), time.Since(t0).Milliseconds())
+	return installations, err
 }
 
 func (c *transactionControllerImpl) GetParameterDefinitions(ctx context.Context, db *sql.DB, extensionId string, extensionVersion string) ([]parameterValidator.ParameterDefinition, error) {

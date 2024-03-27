@@ -9,9 +9,11 @@ import (
 	"strings"
 
 	"github.com/exasol/extension-manager/pkg/apiErrors"
+	log "github.com/sirupsen/logrus"
 )
 
 func newLocalDirRegistry(dir string) Registry {
+	log.Debugf("Creating local directory registry using dir %q", dir)
 	return &localDirRegistry{dir: dir}
 }
 

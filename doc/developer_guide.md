@@ -4,7 +4,9 @@ This guide describes how to develop, test and build Extension Manager (EM).
 
 If you want to embed EM into another application, see the [embedding guide](./embedding_extension_manager.md). If you want to develop an extension for EM, see the [extension developer guide](./extension_developer_guide.md).
 
-## Building
+## Extension Manager
+
+### Building
 
 To build the binary, run
 
@@ -28,7 +30,7 @@ After starting the server you can get the OpenApi definition by executing
 curl "http://localhost:8080/openapi.json" -o extension-manager-api.json
 ```
 
-## Requirement Tracing
+### Requirement Tracing
 
 You can run requirements tracing by executing:
 
@@ -38,7 +40,7 @@ You can run requirements tracing by executing:
 
 If tracing fails with a `org.xml.sax.SAXParseException` you might need to run `mvn clean` before to delete temporary files like `target/site/jacoco/jacoco.xml`.
 
-## Testing
+### Testing
 
 The extension-manager project contains unit and integration tests that verify
 * Loading and executing of JavaScript extensions
@@ -48,7 +50,7 @@ The extension-manager project contains unit and integration tests that verify
 
 Tests use dummy extensions, no real extensions.
 
-### Non-Parallel Tests
+#### Non-Parallel Tests
 
 The tests of this project use [`exasol-test-setup-abstraction-server`](https://github.com/exasol/exasol-test-setup-abstraction-server/). There the tests connect to an Exasol database running in a docker container. For performance reasons the test-setup-abstraction reuses that container. This feature is not compatible with running tests in parallel.
 
@@ -74,9 +76,29 @@ go test -p 1 -short ./...
 
 Please note that also `-short` tests need `-p 1` because extension integration tests share a directory for building a test extension. Tests will fail randomly without `-p 1`.
 
-## Static Code Analysis
+#### Manual Integration Tests With SaaS
 
-### Go Linter
+Normal integration test EM against an Exasol DB running in a Docker container. There might be differences to a real Exasol SaaS DB. Tests against SaaS are not automated, you need to run them manually:
+
+1. Create a Personal Access Token in SaaS with scope `databases:use`
+2. Create a new schema you want to use for testing
+3. Upload required Adapter JARs to BucketFS
+4. Create file `manual-test.properties` with the following content:
+   ```properties
+   databaseHost = <SaaS DB host>
+   databaseToken = <SaaS DB personal access token>
+   extensionRegistryURL= <Registry URL>
+   extensionSchema = <Extension Schema>
+   bucketFSBasePath = <Bucket FS base path>
+   ```
+5. Run test with
+   ```sh
+   go test -v ./cmd/...
+   ```
+
+### Static Code Analysis
+
+#### Go Linter
 
 To install golangci-lint on your machine, follow [these instruction](https://golangci-lint.run/usage/install/#local-installation).
 
@@ -88,7 +110,7 @@ golangci-lint run
 
 File `.golangci.yml` contains configuration like enabled or disabled linters.
 
-### Sonar
+#### Sonar
 
 Download sonar-scanner as a zip file from [sonarqube.org](https://docs.sonarqube.org/latest/analysis/scan/sonarscanner/) and unpack it.
 
@@ -105,7 +127,7 @@ Then run Sonar with the following command in the project root:
 sonar-scanner -Dsonar.token=$SONAR_TOKEN
 ```
 
-## Using a Local Extension Interface
+### Using a Local Extension Interface
 
 To use a local, non-published version of the extension interface for testing EM follow these steps:
 
@@ -187,6 +209,7 @@ cd pkg/extensionController/bfs/udf
 poetry env use 3.8
 poetry install
 ```
+
 ### Run tests
 
 ```sh
