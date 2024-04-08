@@ -70,7 +70,7 @@
 | [Build Helper Maven Plugin][51]                         | [The MIT License][52]             |
 | [Apache Maven Javadoc Plugin][53]                       | [Apache-2.0][28]                  |
 | [Nexus Staging Maven Plugin][54]                        | [Eclipse Public License][55]      |
-| [JaCoCo :: Maven Plugin][56]                            | [Eclipse Public License 2.0][57]  |
+| [JaCoCo :: Maven Plugin][56]                            | [EPL-2.0][57]                     |
 | [error-code-crawler-maven-plugin][58]                   | [MIT License][59]                 |
 | [Reproducible Build Maven Plugin][60]                   | [Apache 2.0][42]                  |
 
@@ -115,7 +115,7 @@
 | [Apache Maven Javadoc Plugin][53]                       | [Apache-2.0][28]                  |
 | [Nexus Staging Maven Plugin][54]                        | [Eclipse Public License][55]      |
 | [Maven Failsafe Plugin][76]                             | [Apache-2.0][28]                  |
-| [JaCoCo :: Maven Plugin][56]                            | [Eclipse Public License 2.0][57]  |
+| [JaCoCo :: Maven Plugin][56]                            | [EPL-2.0][57]                     |
 | [error-code-crawler-maven-plugin][58]                   | [MIT License][59]                 |
 | [Reproducible Build Maven Plugin][60]                   | [Apache 2.0][42]                  |
 | [Apache Maven JAR Plugin][77]                           | [Apache License, Version 2.0][28] |
