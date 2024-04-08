@@ -35,3 +35,8 @@ linkReplacements:
 excludes:
   # We use the PK shell script instead of the Maven plugin
   - "W-PK-CORE-151: Pom file '.*/pom.xml' contains no reference to project-keeper-maven-plugin."
+  # We use release-droid until PK supports Go projects
+  - "E-PK-CORE-26: '.github/workflows/release_droid_prepare_original_checksum.yml' exists but must not exist. Reason: Release-droid workflows are replaced by release.yml"
+  - "E-PK-CORE-26: '.github/workflows/release_droid_print_quick_checksum.yml' exists but must not exist. Reason: Release-droid workflows are replaced by release.yml"
+  - "E-PK-CORE-26: '.github/workflows/release_droid_upload_github_release_assets.yml' exists but must not exist. Reason: Release-droid workflows are replaced by release.yml"
+  - "E-PK-CORE-26: '.github/workflows/release_droid_release_on_maven_central.yml' exists but must not exist. Reason: Release-droid workflows are replaced by release.yml"
