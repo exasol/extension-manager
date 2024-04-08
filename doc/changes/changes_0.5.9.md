@@ -56,7 +56,7 @@ Additionally the release fixes a vulnerability in transitive test dependency `io
 #### Compile Dependency Updates
 
 * Updated `com.exasol:exasol-test-setup-abstraction-java:2.1.1` to `2.1.2`
-* Updated `com.exasol:extension-manager-client-java:0.5.8` to `0.5.10`
+* Updated `com.exasol:extension-manager-client-java:0.5.8` to `0.5.9`
 
 #### Plugin Dependency Updates
 
