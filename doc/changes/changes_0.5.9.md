@@ -1,4 +1,4 @@
-# Extension Manager 0.5.9, released 2024-??-??
+# Extension Manager 0.5.9, released 2024-04-09
 
 Code name: Speedup listing extensions
 
