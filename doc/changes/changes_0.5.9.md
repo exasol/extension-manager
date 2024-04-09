@@ -1,4 +1,4 @@
-# Extension Manager 0.5.9, released 2024-??-??
+# Extension Manager 0.5.9, released 2024-04-09
 
 Code name: Speedup listing extensions
 
@@ -6,11 +6,16 @@ Code name: Speedup listing extensions
 
 This release speeds up listing extensions and installations by caching the extension registry.
 
+Additionally the release fixes a vulnerability in transitive test dependency `io.netty:netty-codec-http:jar:4.1.107.Final` by updating dependencies.
+
 ## Features
 
 * #169: Enabled caching for http registry
 * #167: Added script for automatically generating extension registry
 
+## Security
+
+* #172: Fix CVE-2024-29025 in transitive test dependency `io.netty:netty-codec-http:jar:4.1.107.Final`
 ## Dependency Updates
 
 ### Extension-manager
@@ -21,6 +26,10 @@ This release speeds up listing extensions and installations by caching the exten
 * Updated `github.com/exasol/exasol-driver-go:v1.0.4` to `v1.0.6`
 * Updated `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.3.5` to `v0.3.6`
 
+#### Test Dependency Updates
+
+* Updated `golang.org/x/mod:v0.16.0` to `v0.17.0`
+
 ### Extension Manager Java Client
 
 #### Compile Dependency Updates
@@ -30,11 +39,32 @@ This release speeds up listing extensions and installations by caching the exten
 * Updated `com.fasterxml.jackson.core:jackson-databind:2.16.2` to `2.17.0`
 * Updated `io.swagger.core.v3:swagger-annotations:2.2.20` to `2.2.21`
 
+#### Test Dependency Updates
+
+* Updated `nl.jqno.equalsverifier:equalsverifier:3.15.8` to `3.16.1`
+
+#### Plugin Dependency Updates
+
+* Updated `com.exasol:error-code-crawler-maven-plugin:2.0.0` to `2.0.2`
+* Updated `org.apache.maven.plugins:maven-compiler-plugin:3.12.1` to `3.13.0`
+* Updated `org.apache.maven.plugins:maven-gpg-plugin:3.1.0` to `3.2.2`
+* Updated `org.jacoco:jacoco-maven-plugin:0.8.11` to `0.8.12`
+* Updated `org.sonarsource.scanner.maven:sonar-maven-plugin:3.10.0.2594` to `3.11.0.3922`
+
 ### Extension Integration Tests Library
 
 #### Compile Dependency Updates
 
+* Updated `com.exasol:exasol-test-setup-abstraction-java:2.1.1` to `2.1.2`
 * Updated `com.exasol:extension-manager-client-java:0.5.8` to `0.5.9`
+
+#### Plugin Dependency Updates
+
+* Updated `com.exasol:error-code-crawler-maven-plugin:2.0.0` to `2.0.2`
+* Updated `org.apache.maven.plugins:maven-compiler-plugin:3.12.1` to `3.13.0`
+* Updated `org.apache.maven.plugins:maven-gpg-plugin:3.1.0` to `3.2.2`
+* Updated `org.jacoco:jacoco-maven-plugin:0.8.11` to `0.8.12`
+* Updated `org.sonarsource.scanner.maven:sonar-maven-plugin:3.10.0.2594` to `3.11.0.3922`
 
 ### Registry
 

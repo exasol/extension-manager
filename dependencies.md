@@ -70,7 +70,7 @@
 | [Build Helper Maven Plugin][51]                         | [The MIT License][52]             |
 | [Apache Maven Javadoc Plugin][53]                       | [Apache-2.0][28]                  |
 | [Nexus Staging Maven Plugin][54]                        | [Eclipse Public License][55]      |
-| [JaCoCo :: Maven Plugin][56]                            | [Eclipse Public License 2.0][57]  |
+| [JaCoCo :: Maven Plugin][56]                            | [EPL-2.0][57]                     |
 | [error-code-crawler-maven-plugin][58]                   | [MIT License][59]                 |
 | [Reproducible Build Maven Plugin][60]                   | [Apache 2.0][42]                  |
 
@@ -115,7 +115,7 @@
 | [Apache Maven Javadoc Plugin][53]                       | [Apache-2.0][28]                  |
 | [Nexus Staging Maven Plugin][54]                        | [Eclipse Public License][55]      |
 | [Maven Failsafe Plugin][76]                             | [Apache-2.0][28]                  |
-| [JaCoCo :: Maven Plugin][56]                            | [Eclipse Public License 2.0][57]  |
+| [JaCoCo :: Maven Plugin][56]                            | [EPL-2.0][57]                     |
 | [error-code-crawler-maven-plugin][58]                   | [MIT License][59]                 |
 | [Reproducible Build Maven Plugin][60]                   | [Apache 2.0][42]                  |
 | [Apache Maven JAR Plugin][77]                           | [Apache License, Version 2.0][28] |
@@ -161,7 +161,7 @@
 [8]: https://github.com/swaggo/http-swagger/blob/v1.3.4/LICENSE
 [9]: https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE
 [10]: https://github.com/kinbiko/jsonassert/blob/HEAD/LICENSE
-[11]: https://cs.opensource.google/go/x/mod/+/v0.16.0:LICENSE
+[11]: https://cs.opensource.google/go/x/mod/+/v0.17.0:LICENSE
 [12]: https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-annotations
 [13]: http://www.apache.org/licenses/LICENSE-2.0.html
 [14]: https://projects.eclipse.org/projects/ee4j.jersey/jersey-client
