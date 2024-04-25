@@ -54,6 +54,7 @@ func CreateVirtualSchemaFixtureNullValues(db *sql.DB) ScriptFixture {
 	execSQL(db, "CREATE SCHEMA TEST_META_DATA")
 	createMetaDataTable(db, "EXA_ALL_VIRTUAL_SCHEMAS")
 	createMetaDataTable(db, "EXA_ALL_SCRIPTS")
+	// nolint:dupword // Duplicating the word "NULL" is required here
 	execSQL(db, `INSERT INTO TEST_META_DATA.EXA_ALL_VIRTUAL_SCHEMAS VALUES (NULL, NULL, NULL, 'TEST', NULL, NULL, NULL, NULL)`)
 	return ScriptFixture{db: db}
 }
@@ -62,6 +63,7 @@ func CreateScriptFixtureNullValues(db *sql.DB) ScriptFixture {
 	execSQL(db, "CREATE SCHEMA TEST_META_DATA")
 	createMetaDataTable(db, "EXA_ALL_VIRTUAL_SCHEMAS")
 	createMetaDataTable(db, "EXA_ALL_SCRIPTS")
+	// nolint:dupword // Duplicating the word "NULL" is required here
 	execSQL(db, `INSERT INTO TEST_META_DATA.EXA_ALL_SCRIPTS VALUES ('TEST', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)`)
 	return ScriptFixture{db: db}
 }

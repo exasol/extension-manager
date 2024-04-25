@@ -52,6 +52,7 @@ func (r *metaDataReaderImpl) ReadMetadataTables(tx *sql.Tx, schemaName string) (
 
 /* [impl -> dsn~extension-context-metadata~1]. */
 func (r *metaDataReaderImpl) GetScriptByName(tx *sql.Tx, schemaName, scriptName string) (*ExaScriptRow, error) {
+	// #nosec G201 Using schema as query parameter is not possible
 	query := fmt.Sprintf(`
 SELECT SCRIPT_SCHEMA, SCRIPT_NAME, SCRIPT_TYPE, SCRIPT_INPUT_TYPE, SCRIPT_RESULT_TYPE, SCRIPT_TEXT, SCRIPT_COMMENT
 FROM %s.EXA_ALL_SCRIPTS
@@ -72,6 +73,7 @@ WHERE SCRIPT_SCHEMA=? AND SCRIPT_NAME=?`, r.metaDataSchema)
 }
 
 func (r *metaDataReaderImpl) readExaAllScriptTable(tx *sql.Tx, schemaName string) (*ExaScriptTable, error) {
+	// #nosec G201 Using schema as query parameter is not possible
 	query := fmt.Sprintf(`
 SELECT SCRIPT_SCHEMA, SCRIPT_NAME, SCRIPT_TYPE, SCRIPT_INPUT_TYPE, SCRIPT_RESULT_TYPE, SCRIPT_TEXT, SCRIPT_COMMENT
 FROM %s.EXA_ALL_SCRIPTS
@@ -120,6 +122,7 @@ func readScriptRow(result *sql.Rows) (*ExaScriptRow, error) {
 }
 
 func (r *metaDataReaderImpl) readExaAllVirtualSchemasTable(tx *sql.Tx) (*ExaVirtualSchemasTable, error) {
+	// #nosec G201 Using schema as query parameter is not possible
 	query := fmt.Sprintf(`
 SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT_SCHEMA, ADAPTER_SCRIPT_NAME, ADAPTER_NOTES
 FROM %s.EXA_ALL_VIRTUAL_SCHEMAS`, r.metaDataSchema)
