@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/dop251/goja v0.0.0-20240220182346-e401ed450204
-	github.com/dop251/goja_nodejs v0.0.0-20240221231712-27eeffc9c235
+	github.com/dop251/goja_nodejs v0.0.0-20240418154818-2aae10d4cbcf
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/mod v0.17.0
 )
@@ -12,7 +12,7 @@ require (
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/exasol/exasol-driver-go v1.0.6
-	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.6
+	github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.8
 	github.com/go-chi/chi/v5 v5.0.12
 	github.com/kinbiko/jsonassert v1.1.1
 	github.com/swaggo/http-swagger v1.3.4
@@ -24,7 +24,7 @@ require (
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
 	github.com/go-openapi/spec v0.21.0 // indirect
-	github.com/google/pprof v0.0.0-20240402174815-29b9bb013b0f // indirect
+	github.com/google/pprof v0.0.0-20240424215950-a892ee059fd6 // indirect
 	github.com/iancoleman/orderedmap v0.3.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect

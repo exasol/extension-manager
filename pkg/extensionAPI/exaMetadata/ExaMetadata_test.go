@@ -89,9 +89,13 @@ func (suite *ExaMetadataUTestSuite) TestReadMetadataTablesAllVirtualSchemasFails
 func (suite *ExaMetadataUTestSuite) TestReadExaAllScriptTableQueryFails() {
 	tx := suite.beginTransaction()
 	suite.dbMock.ExpectQuery("(?m)SELECT .*FROM SYS.EXA_ALL_SCRIPTS .*").WithArgs(SCHEMA_NAME).WillReturnError(errors.New("mock error"))
-	result, err := readExaAllScriptTable(tx, SCHEMA_NAME)
+	result, err := testee().readExaAllScriptTable(tx, SCHEMA_NAME)
 	suite.Require().EqualError(err, "failed to read SYS.EXA_ALL_SCRIPTS: mock error")
 	suite.Nil(result)
+}
+
+func testee() *metaDataReaderImpl {
+	return &metaDataReaderImpl{metaDataSchema: "SYS"}
 }
 
 func (suite *ExaMetadataUTestSuite) TestReadExaAllScriptTableScanFails() {
@@ -99,15 +103,15 @@ func (suite *ExaMetadataUTestSuite) TestReadExaAllScriptTableScanFails() {
 	suite.dbMock.ExpectQuery("(?m)SELECT .*FROM SYS.EXA_ALL_SCRIPTS .*").WithArgs(SCHEMA_NAME).
 		WillReturnRows(sqlmock.NewRows([]string{"WRONG_COL"}).AddRow("Wrong")).
 		RowsWillBeClosed()
-	result, err := readExaAllScriptTable(tx, SCHEMA_NAME)
-	suite.Require().EqualError(err, "failed to read row of SYS.EXA_ALL_SCRIPTS: sql: expected 1 destination arguments in Scan, not 7")
+	result, err := testee().readExaAllScriptTable(tx, SCHEMA_NAME)
+	suite.Require().EqualError(err, "failed to read row of EXA_ALL_SCRIPTS: sql: expected 1 destination arguments in Scan, not 7")
 	suite.Nil(result)
 }
 
 func (suite *ExaMetadataUTestSuite) TestReadExaAllVirtualSchemasTableFails() {
 	tx := suite.beginTransaction()
 	suite.dbMock.ExpectQuery("(?m)SELECT .* FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS").WillReturnError(errors.New("mock error"))
-	result, err := readExaAllVirtualSchemasTable(tx)
+	result, err := testee().readExaAllVirtualSchemasTable(tx)
 	suite.Require().EqualError(err, "failed to read SYS.EXA_ALL_VIRTUAL_SCHEMAS: mock error")
 	suite.Nil(result)
 }
@@ -115,8 +119,8 @@ func (suite *ExaMetadataUTestSuite) TestReadExaAllVirtualSchemasTableFails() {
 func (suite *ExaMetadataUTestSuite) TestReadExaAllVirtualSchemasTableScanFails() {
 	tx := suite.beginTransaction()
 	suite.dbMock.ExpectQuery("(?m)SELECT .* FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS").WillReturnRows(sqlmock.NewRows([]string{"wrong"}).AddRow("wrong"))
-	result, err := readExaAllVirtualSchemasTable(tx)
-	suite.Require().EqualError(err, "failed to read row of SYS.EXA_ALL_VIRTUAL_SCHEMAS: sql: expected 1 destination arguments in Scan, not 5")
+	result, err := testee().readExaAllVirtualSchemasTable(tx)
+	suite.Require().EqualError(err, "failed to read row of EXA_ALL_VIRTUAL_SCHEMAS: sql: expected 1 destination arguments in Scan, not 5")
 	suite.Nil(result)
 }
 
@@ -174,7 +178,7 @@ func (suite *ExaMetadataUTestSuite) TestGetScriptByNameReadingFails() {
 		WillReturnRows(sqlmock.NewRows([]string{"invalid"}).AddRow("invalid")).
 		RowsWillBeClosed()
 	result, err := CreateExaMetaDataReader().GetScriptByName(tx, SCHEMA_NAME, "script")
-	suite.Require().EqualError(err, `failed to read row of SYS.EXA_ALL_SCRIPTS: sql: expected 1 destination arguments in Scan, not 7`)
+	suite.Require().EqualError(err, `failed to read row of EXA_ALL_SCRIPTS: sql: expected 1 destination arguments in Scan, not 7`)
 	suite.Nil(result)
 }
 
