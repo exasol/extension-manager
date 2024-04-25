@@ -21,7 +21,7 @@ Could not get database installed extension list failed to read metadata tables. 
 #### Compile Dependency Updates
 
 * Updated `github.com/dop251/goja_nodejs:v0.0.0-20240221231712-27eeffc9c235` to `v0.0.0-20240418154818-2aae10d4cbcf`
-* Updated `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.3.6` to `v0.3.7`
+* Updated `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.3.6` to `v0.3.8`
 
 ### Extension Integration Tests Library
 

@@ -154,7 +154,7 @@
 [1]: https://github.com/dop251/goja/blob/e401ed450204/LICENSE
 [2]: https://github.com/dop251/goja_nodejs/blob/2aae10d4cbcf/LICENSE
 [3]: https://github.com/exasol/exasol-driver-go/blob/v1.0.6/LICENSE
-[4]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.3.7/go-client/LICENSE
+[4]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.3.8/go-client/LICENSE
 [5]: https://github.com/go-chi/chi/blob/v5.0.12/LICENSE
 [6]: https://github.com/sirupsen/logrus/blob/v1.9.3/LICENSE
 [7]: https://github.com/stretchr/testify/blob/v1.9.0/LICENSE
