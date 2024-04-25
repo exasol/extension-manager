@@ -42,6 +42,34 @@ EMITS(...) AS
 	return ScriptFixture{db: db}
 }
 
+func CreateVirtualSchemaFixture(db *sql.DB) ScriptFixture {
+	execSQL(db, "CREATE SCHEMA TEST_META_DATA")
+	createMetaDataTable(db, "EXA_ALL_VIRTUAL_SCHEMAS")
+	createMetaDataTable(db, "EXA_ALL_SCRIPTS")
+	execSQL(db, `INSERT INTO TEST_META_DATA.EXA_ALL_VIRTUAL_SCHEMAS VALUES ('schema1', 'owner1', 1, 'TEST', 'script1', '2024-04-25 09:31:08', 'user1', 'notes1')`)
+	return ScriptFixture{db: db}
+}
+
+func CreateVirtualSchemaFixtureNullValues(db *sql.DB) ScriptFixture {
+	execSQL(db, "CREATE SCHEMA TEST_META_DATA")
+	createMetaDataTable(db, "EXA_ALL_VIRTUAL_SCHEMAS")
+	createMetaDataTable(db, "EXA_ALL_SCRIPTS")
+	execSQL(db, `INSERT INTO TEST_META_DATA.EXA_ALL_VIRTUAL_SCHEMAS VALUES (NULL, NULL, NULL, 'TEST', NULL, NULL, NULL, NULL)`)
+	return ScriptFixture{db: db}
+}
+
+func CreateScriptFixtureNullValues(db *sql.DB) ScriptFixture {
+	execSQL(db, "CREATE SCHEMA TEST_META_DATA")
+	createMetaDataTable(db, "EXA_ALL_VIRTUAL_SCHEMAS")
+	createMetaDataTable(db, "EXA_ALL_SCRIPTS")
+	execSQL(db, `INSERT INTO TEST_META_DATA.EXA_ALL_SCRIPTS VALUES ('TEST', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)`)
+	return ScriptFixture{db: db}
+}
+
+func createMetaDataTable(db *sql.DB, tableName string) {
+	execSQL(db, fmt.Sprintf(`CREATE TABLE TEST_META_DATA.%s AS SELECT * FROM SYS.%s WHERE 1=2`, tableName, tableName))
+}
+
 func execSQL(db *sql.DB, sql string) {
 	_, err := db.Exec(sql)
 	if err != nil {
@@ -53,8 +81,13 @@ func (f ScriptFixture) GetSchemaName() string {
 	return "TEST"
 }
 
+func (f ScriptFixture) GetMetaDataSchemaName() string {
+	return "TEST_META_DATA"
+}
+
 func (f ScriptFixture) Cleanup(t *testing.T) {
 	t.Cleanup(func() {
 		execSQL(f.db, "DROP SCHEMA IF EXISTS TEST CASCADE")
+		execSQL(f.db, "DROP SCHEMA IF EXISTS TEST_META_DATA CASCADE")
 	})
 }

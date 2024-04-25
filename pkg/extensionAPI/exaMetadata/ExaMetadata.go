@@ -21,21 +21,29 @@ type ExaMetadata struct {
 	AllVirtualSchemas ExaVirtualSchemasTable `json:"allVirtualSchemas"`
 }
 
+// CreateExaMetaDataReader creates a new ExaMetadataReader for the Exasol meta data schema SYS.
 func CreateExaMetaDataReader() ExaMetadataReader {
-	return &metaDataReaderImpl{}
+	return CreateExaMetaDataReaderForCustomMetadataSchema("SYS")
+}
+
+// CreateExaMetaDataReaderForCustomMetadataSchema creates a new ExaMetadataReader for the given Exasol meta data schema.
+// This is only used for integration tests.
+func CreateExaMetaDataReaderForCustomMetadataSchema(metaDataSchema string) ExaMetadataReader {
+	return &metaDataReaderImpl{metaDataSchema: metaDataSchema}
 }
 
 type metaDataReaderImpl struct {
+	metaDataSchema string
 }
 
 // ReadMetadataTables reads the metadata tables of the given schema.
 /* [impl -> dsn~extension-components~1]. */
 func (r *metaDataReaderImpl) ReadMetadataTables(tx *sql.Tx, schemaName string) (*ExaMetadata, error) {
-	allScripts, err := readExaAllScriptTable(tx, schemaName)
+	allScripts, err := r.readExaAllScriptTable(tx, schemaName)
 	if err != nil {
 		return nil, err
 	}
-	allVirtualSchemas, err := readExaAllVirtualSchemasTable(tx)
+	allVirtualSchemas, err := r.readExaAllVirtualSchemasTable(tx)
 	if err != nil {
 		return nil, err
 	}
@@ -44,12 +52,13 @@ func (r *metaDataReaderImpl) ReadMetadataTables(tx *sql.Tx, schemaName string) (
 
 /* [impl -> dsn~extension-context-metadata~1]. */
 func (r *metaDataReaderImpl) GetScriptByName(tx *sql.Tx, schemaName, scriptName string) (*ExaScriptRow, error) {
-	result, err := tx.Query(`
+	query := fmt.Sprintf(`
 SELECT SCRIPT_SCHEMA, SCRIPT_NAME, SCRIPT_TYPE, SCRIPT_INPUT_TYPE, SCRIPT_RESULT_TYPE, SCRIPT_TEXT, SCRIPT_COMMENT
-FROM SYS.EXA_ALL_SCRIPTS
-WHERE SCRIPT_SCHEMA=? AND SCRIPT_NAME=?`, schemaName, scriptName)
+FROM %s.EXA_ALL_SCRIPTS
+WHERE SCRIPT_SCHEMA=? AND SCRIPT_NAME=?`, r.metaDataSchema)
+	result, err := tx.Query(query, schemaName, scriptName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read SYS.EXA_ALL_SCRIPTS: %w", err)
+		return nil, fmt.Errorf("failed to read %s.EXA_ALL_SCRIPTS: %w", r.metaDataSchema, err)
 	}
 	defer result.Close()
 	if !result.Next() {
@@ -62,19 +71,20 @@ WHERE SCRIPT_SCHEMA=? AND SCRIPT_NAME=?`, schemaName, scriptName)
 	return row, nil
 }
 
-func readExaAllScriptTable(tx *sql.Tx, schemaName string) (*ExaScriptTable, error) {
-	result, err := tx.Query(`
+func (r *metaDataReaderImpl) readExaAllScriptTable(tx *sql.Tx, schemaName string) (*ExaScriptTable, error) {
+	query := fmt.Sprintf(`
 SELECT SCRIPT_SCHEMA, SCRIPT_NAME, SCRIPT_TYPE, SCRIPT_INPUT_TYPE, SCRIPT_RESULT_TYPE, SCRIPT_TEXT, SCRIPT_COMMENT
-FROM SYS.EXA_ALL_SCRIPTS
-WHERE SCRIPT_SCHEMA=?`, schemaName)
+FROM %s.EXA_ALL_SCRIPTS
+WHERE SCRIPT_SCHEMA=?`, r.metaDataSchema)
+	result, err := tx.Query(query, schemaName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read SYS.EXA_ALL_SCRIPTS: %w", err)
+		return nil, fmt.Errorf("failed to read %s.EXA_ALL_SCRIPTS: %w", r.metaDataSchema, err)
 	}
 	defer result.Close()
 	rows := make([]ExaScriptRow, 0)
 	for result.Next() {
 		if result.Err() != nil {
-			return nil, fmt.Errorf("failed to iterate SYS.EXA_ALL_SCRIPTS: %w", result.Err())
+			return nil, fmt.Errorf("failed to iterate %s.EXA_ALL_SCRIPTS: %w", r.metaDataSchema, result.Err())
 		}
 		row, err := readScriptRow(result)
 		if err != nil {
@@ -86,41 +96,70 @@ WHERE SCRIPT_SCHEMA=?`, schemaName)
 }
 
 func readScriptRow(result *sql.Rows) (*ExaScriptRow, error) {
-	var row ExaScriptRow
+	var schema sql.NullString
+	var name sql.NullString
+	var scriptType sql.NullString
 	var inputType sql.NullString
 	var resultType sql.NullString
+	var text sql.NullString
 	var comment sql.NullString
-	err := result.Scan(&row.Schema, &row.Name, &row.Type, &inputType, &resultType, &row.Text, &comment)
+	err := result.Scan(&schema, &name, &scriptType, &inputType, &resultType, &text, &comment)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read row of SYS.EXA_ALL_SCRIPTS: %w", err)
+		return nil, fmt.Errorf("failed to read row of EXA_ALL_SCRIPTS: %w", err)
 	}
-	row.InputType = inputType.String
-	row.ResultType = resultType.String
-	row.Comment = comment.String
+	row := ExaScriptRow{
+		Schema:     schema.String,
+		Name:       name.String,
+		Type:       scriptType.String,
+		InputType:  inputType.String,
+		ResultType: resultType.String,
+		Text:       text.String,
+		Comment:    comment.String,
+	}
 	return &row, nil
 }
 
-func readExaAllVirtualSchemasTable(tx *sql.Tx) (*ExaVirtualSchemasTable, error) {
-	result, err := tx.Query(`
+func (r *metaDataReaderImpl) readExaAllVirtualSchemasTable(tx *sql.Tx) (*ExaVirtualSchemasTable, error) {
+	query := fmt.Sprintf(`
 SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT_SCHEMA, ADAPTER_SCRIPT_NAME, ADAPTER_NOTES
-FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS`)
+FROM %s.EXA_ALL_VIRTUAL_SCHEMAS`, r.metaDataSchema)
+	result, err := tx.Query(query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
+		return nil, fmt.Errorf("failed to read %s.EXA_ALL_VIRTUAL_SCHEMAS: %w", r.metaDataSchema, err)
 	}
 	defer result.Close()
 	rows := make([]ExaVirtualSchemaRow, 0)
 	for result.Next() {
 		if result.Err() != nil {
-			return nil, fmt.Errorf("failed to iterate SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", result.Err())
+			return nil, fmt.Errorf("failed to iterate %s.EXA_ALL_VIRTUAL_SCHEMAS: %w", r.metaDataSchema, result.Err())
 		}
-		var row ExaVirtualSchemaRow
-		err := result.Scan(&row.Name, &row.Owner, &row.AdapterScriptSchema, &row.AdapterScriptName, &row.AdapterNotes)
+		row, err := readVirtualSchemaRow(result)
 		if err != nil {
-			return nil, fmt.Errorf("failed to read row of SYS.EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
+			return nil, err
 		}
-		rows = append(rows, row)
+		rows = append(rows, *row)
 	}
 	return &ExaVirtualSchemasTable{Rows: rows}, nil
+}
+
+func readVirtualSchemaRow(result *sql.Rows) (*ExaVirtualSchemaRow, error) {
+	var name sql.NullString
+	var owner sql.NullString
+	var adapterScriptSchema sql.NullString
+	var adapterScriptName sql.NullString
+	var adapterNotes sql.NullString
+	err := result.Scan(&name, &owner, &adapterScriptSchema, &adapterScriptName, &adapterNotes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read row of EXA_ALL_VIRTUAL_SCHEMAS: %w", err)
+	}
+	row := ExaVirtualSchemaRow{
+		Name:                name.String,
+		Owner:               owner.String,
+		AdapterScriptSchema: adapterScriptSchema.String,
+		AdapterScriptName:   adapterScriptName.String,
+		AdapterNotes:        adapterNotes.String,
+	}
+	return &row, nil
 }
 
 type ExaScriptTable struct {

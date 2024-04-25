@@ -88,6 +88,30 @@ func (suite *ExaMetadataITestSuite) TestReadMetadataVirtualSchemasEmpty() {
 	suite.Equal(exaMetadata.ExaVirtualSchemasTable{Rows: []exaMetadata.ExaVirtualSchemaRow{}}, result.AllVirtualSchemas)
 }
 
+func (suite *ExaMetadataITestSuite) TestReadMetadataVirtualSchemasSingleEntry() {
+	fixture := integrationTesting.CreateVirtualSchemaFixture(suite.exasol.GetConnection())
+	fixture.Cleanup(suite.T())
+	result := suite.readMetaDataTablesFromCustomMetadataSchema(fixture.GetSchemaName(), fixture.GetMetaDataSchemaName())
+	suite.Equal(exaMetadata.ExaVirtualSchemasTable{Rows: []exaMetadata.ExaVirtualSchemaRow{
+		{Name: "schema1", Owner: "owner1", AdapterScriptSchema: "TEST", AdapterScriptName: "script1", AdapterNotes: "notes1"}}}, result.AllVirtualSchemas)
+}
+
+func (suite *ExaMetadataITestSuite) TestReadMetadataVirtualSchemasSingleEntryNullValues() {
+	fixture := integrationTesting.CreateVirtualSchemaFixtureNullValues(suite.exasol.GetConnection())
+	fixture.Cleanup(suite.T())
+	result := suite.readMetaDataTablesFromCustomMetadataSchema(fixture.GetSchemaName(), fixture.GetMetaDataSchemaName())
+	suite.Equal(exaMetadata.ExaVirtualSchemasTable{Rows: []exaMetadata.ExaVirtualSchemaRow{
+		{Name: "", Owner: "", AdapterScriptSchema: "TEST", AdapterScriptName: "", AdapterNotes: ""}}}, result.AllVirtualSchemas)
+}
+
+func (suite *ExaMetadataITestSuite) TestReadMetadataScriptsSingleEntryNullValues() {
+	fixture := integrationTesting.CreateScriptFixtureNullValues(suite.exasol.GetConnection())
+	fixture.Cleanup(suite.T())
+	result := suite.readMetaDataTablesFromCustomMetadataSchema(fixture.GetSchemaName(), fixture.GetMetaDataSchemaName())
+	suite.Equal(exaMetadata.ExaScriptTable{Rows: []exaMetadata.ExaScriptRow{
+		{Schema: "TEST", Name: "", Type: "", InputType: "", ResultType: "", Text: "", Comment: ""}}}, result.AllScripts)
+}
+
 /* [itest -> dsn~extension-context-metadata~1]. */
 func (suite *ExaMetadataITestSuite) TestGetScriptByName() {
 	fixture := integrationTesting.CreateJavaAdapterScriptFixture(suite.exasol.GetConnection())
@@ -115,6 +139,14 @@ func (suite *ExaMetadataITestSuite) readMetaDataTables(schemaName string) *exaMe
 	tx, err := suite.exasol.GetConnection().Begin()
 	suite.Require().NoError(err)
 	metaData, err := exaMetadata.CreateExaMetaDataReader().ReadMetadataTables(tx, schemaName)
+	suite.Require().NoError(err)
+	return metaData
+}
+
+func (suite *ExaMetadataITestSuite) readMetaDataTablesFromCustomMetadataSchema(schemaName string, metaDataSchema string) *exaMetadata.ExaMetadata {
+	tx, err := suite.exasol.GetConnection().Begin()
+	suite.Require().NoError(err)
+	metaData, err := exaMetadata.CreateExaMetaDataReaderForCustomMetadataSchema(metaDataSchema).ReadMetadataTables(tx, schemaName)
 	suite.Require().NoError(err)
 	return metaData
 }
