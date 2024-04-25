@@ -1,4 +1,4 @@
-# Extension Manager 0.5.10, released 2024-05-25
+# Extension Manager 0.5.10, released 2024-04-25
 
 Code name: Fix reading NULL values from metadata tables
 
