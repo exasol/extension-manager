@@ -1,4 +1,4 @@
-# Extension Manager 0.5.11, released 2024-05-06
+# Extension Manager 0.5.11, released 2024-05-07
 
 Code name: Improve error message for creating duplicate instances
 
