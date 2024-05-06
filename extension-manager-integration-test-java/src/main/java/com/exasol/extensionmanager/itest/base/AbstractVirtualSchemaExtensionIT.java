@@ -337,6 +337,18 @@ public abstract class AbstractVirtualSchemaExtensionIT {
     }
 
     /**
+     * Verify that a creating a {@code VIRTUAL SCHEMA} with name of different case fails.
+     */
+    @Test
+    public void createVirtualSchemaWithDuplicateNameFailsCaseInsensitive() {
+        getSetup().client().install();
+        prepareInstance();
+        createInstance("my_VS");
+        getSetup().client().assertRequestFails(() -> createInstance("MY_vs"), //
+                "Virtual Schema 'my_VS' already exists", 400);
+    }
+
+    /**
      * Verify that listing instances returns an empty list when no instance exists.
      */
     @Test
@@ -394,9 +406,11 @@ public abstract class AbstractVirtualSchemaExtensionIT {
     @Test
     public void createTwoInstances() {
         getSetup().client().install();
+        prepareInstance();
         createInstance("vs1");
         createInstance("vs2");
-        assertAll(
+        assertAll(() -> assertVirtualSchemaContent("vs1"), //
+                () -> assertVirtualSchemaContent("vs2"),
                 () -> getSetup().exasolMetadata()
                         .assertConnection(table().row("VS1_CONNECTION", getInstanceComment("vs1"))
                                 .row("VS2_CONNECTION", getInstanceComment("vs2")).matches()),
@@ -407,26 +421,6 @@ public abstract class AbstractVirtualSchemaExtensionIT {
                                 .matches()),
                 () -> assertThat(getSetup().client().listInstances(), allOf(hasSize(2),
                         equalTo(List.of(new Instance().id("vs1").name("vs1"), new Instance().id("vs2").name("vs2"))))));
-    }
-
-    /**
-     * Verify that creating two instances with different lower/upper case works.
-     */
-    @Test
-    public void createTwoInstancesDifferentCase() {
-        getSetup().client().install();
-        createInstance("my_VS");
-        createInstance("MY_vs");
-        assertAll(
-                () -> getSetup().exasolMetadata()
-                        .assertConnection(table().row("my_VS_CONNECTION", getInstanceComment("my_VS"))
-                                .row("MY_vs_CONNECTION", getInstanceComment("MY_vs")).matches()),
-                () -> getSetup().exasolMetadata().assertVirtualSchema(table()
-                        .row("MY_vs", "SYS", EXTENSION_SCHEMA, not(emptyOrNullString()), not(emptyOrNullString()))
-                        .row("my_VS", "SYS", EXTENSION_SCHEMA, not(emptyOrNullString()), not(emptyOrNullString()))
-                        .matches()),
-                () -> assertThat(getSetup().client().listInstances(), allOf(hasSize(2), equalTo(
-                        List.of(new Instance().id("MY_vs").name("MY_vs"), new Instance().id("my_VS").name("my_VS"))))));
     }
 
     /**
