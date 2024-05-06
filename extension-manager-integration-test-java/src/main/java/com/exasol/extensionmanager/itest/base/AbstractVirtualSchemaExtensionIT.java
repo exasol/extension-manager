@@ -21,8 +21,10 @@ import com.exasol.extensionmanager.itest.*;
  * for installing/listing/uninstalling extensions and creating/listing/deleting instances.
  */
 public abstract class AbstractVirtualSchemaExtensionIT {
+    /** Name of the schema where the extension scripts are stored. */
     protected static final String EXTENSION_SCHEMA = "EXA_EXTENSIONS";
     private static final Logger LOG = Logger.getLogger(AbstractVirtualSchemaExtensionIT.class.getName());
+    /** Configuration for the integration tests */
     protected final ExtensionITConfig config;
 
     /**
@@ -281,7 +283,7 @@ public abstract class AbstractVirtualSchemaExtensionIT {
                 () -> assertVirtualSchemaContent(virtualSchemaName));
     }
 
-    protected PreviousExtensionVersion createPreviousVersion() {
+    private PreviousExtensionVersion createPreviousVersion() {
         return getSetup().previousVersionManager().newVersion().currentVersion(config.getCurrentVersion()) //
                 .previousVersion(config.getPreviousVersion()) //
                 .adapterFileName(config.getPreviousVersionJarFile()) //
@@ -290,12 +292,20 @@ public abstract class AbstractVirtualSchemaExtensionIT {
                 .build();
     }
 
+    /**
+     * Verify that there are two installations, one with the old and one with the new extension ID.
+     * <p>
+     * Override this if the extension name changed compared to the previous version.
+     * 
+     * @param expectedVersion expected version
+     * @param previousVersion previous version
+     */
     protected void assertInstalledVersion(final String expectedVersion,
             final PreviousExtensionVersion previousVersion) {
         // The extension is installed twice (previous and current version), so each one returns one installation.
         final List<InstallationsResponseInstallation> installations = getSetup().client().getInstallations();
-        assertAll(() -> assertThat("installations after upgrade", installations, hasSize(greaterThan(1))),
-                () -> assertThat("installations after upgrade", installations,
+        assertAll(() -> assertThat("installations", installations, hasSize(2)),
+                () -> assertThat("installations", installations,
                         containsInAnyOrder(
                                 new InstallationsResponseInstallation().name(config.getExtensionName())
                                         .version(expectedVersion).id(config.getExtensionId()), //
@@ -458,20 +468,24 @@ public abstract class AbstractVirtualSchemaExtensionIT {
                 () -> getSetup().exasolMetadata().assertNoVirtualSchema());
     }
 
-    protected void createInstance(final String virtualSchemaName) {
-        createInstance(config.getExtensionId(), config.getCurrentVersion(), virtualSchemaName);
+    /**
+     * Create a new instance with the given name.
+     * 
+     * @param name name of the instance
+     */
+    protected void createInstance(final String name) {
+        createInstance(config.getExtensionId(), config.getCurrentVersion(), name);
     }
 
-    protected void createInstance(final String extensionId, final String extensionVersion,
-            final String virtualSchemaName) {
-        getSetup().addVirtualSchemaToCleanupQueue(virtualSchemaName);
-        getSetup().addConnectionToCleanupQueue(virtualSchemaName.toUpperCase() + "_CONNECTION");
+    private void createInstance(final String extensionId, final String extensionVersion, final String name) {
+        getSetup().addVirtualSchemaToCleanupQueue(name);
+        getSetup().addConnectionToCleanupQueue(name.toUpperCase() + "_CONNECTION");
         final String instanceName = getSetup().client().createInstance(extensionId, extensionVersion,
-                createValidParameters(virtualSchemaName));
-        assertThat(instanceName, equalTo(virtualSchemaName));
+                createValidParameters(name));
+        assertThat(instanceName, equalTo(name));
     }
 
-    protected List<ParameterValue> createValidParameters(final String virtualSchemaName) {
+    private List<ParameterValue> createValidParameters(final String virtualSchemaName) {
         final List<ParameterValue> parameters = new ArrayList<>();
         parameters.add(param(config.getVirtualSchemaNameParameterName(), virtualSchemaName));
         parameters.addAll(createValidParameterValues());
