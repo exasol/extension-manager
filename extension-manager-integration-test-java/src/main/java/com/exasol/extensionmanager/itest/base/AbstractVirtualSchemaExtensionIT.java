@@ -410,6 +410,26 @@ public abstract class AbstractVirtualSchemaExtensionIT {
     }
 
     /**
+     * Verify that creating two instances with different lower/upper case works.
+     */
+    @Test
+    public void createTwoInstancesDifferentCase() {
+        getSetup().client().install();
+        createInstance("my_VS");
+        createInstance("MY_vs");
+        assertAll(
+                () -> getSetup().exasolMetadata()
+                        .assertConnection(table().row("my_VS_CONNECTION", getInstanceComment("my_VS"))
+                                .row("MY_vs_CONNECTION", getInstanceComment("MY_vs")).matches()),
+                () -> getSetup().exasolMetadata().assertVirtualSchema(table()
+                        .row("MY_vs", "SYS", EXTENSION_SCHEMA, not(emptyOrNullString()), not(emptyOrNullString()))
+                        .row("my_VS", "SYS", EXTENSION_SCHEMA, not(emptyOrNullString()), not(emptyOrNullString()))
+                        .matches()),
+                () -> assertThat(getSetup().client().listInstances(), allOf(hasSize(2), equalTo(
+                        List.of(new Instance().id("MY_vs").name("MY_vs"), new Instance().id("my_VS").name("my_VS"))))));
+    }
+
+    /**
      * Verify that creating an instance with a name containing a single quote works.
      */
     @Test
