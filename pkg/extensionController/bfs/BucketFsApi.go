@@ -109,7 +109,7 @@ func (bfs bucketFsAPIImpl) FindAbsolutePath(fileName string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed reading absolute path. Cause: %w", err)
 	}
-	logrus.Tracef("Found absolute path %q for file %q in %dms", absolutePath, fileName, time.Since(t0))
+	logrus.Tracef("Found absolute path %q for file %q in %dms", absolutePath, fileName, time.Since(t0).Milliseconds())
 	return absolutePath, nil
 }
 
