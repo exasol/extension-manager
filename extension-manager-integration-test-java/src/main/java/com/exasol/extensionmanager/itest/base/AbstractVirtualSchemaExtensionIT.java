@@ -304,7 +304,7 @@ public abstract class AbstractVirtualSchemaExtensionIT {
             final PreviousExtensionVersion previousVersion) {
         // The extension is installed twice (previous and current version), so each one returns one installation.
         final List<InstallationsResponseInstallation> installations = getSetup().client().getInstallations();
-        assertAll(() -> assertThat("installations", installations, hasSize(2)),
+        assertAll(() -> assertThat("number installations", installations, hasSize(2)),
                 () -> assertThat("installations", installations,
                         containsInAnyOrder(
                                 new InstallationsResponseInstallation().name(config.getExtensionName())
