@@ -4,7 +4,7 @@ Code name: Improve error message for creating duplicate instances
 
 ## Summary
 
-This release adds a new test to the shared integration test class `AbstractVirtualSchemaExtensionIT` that verifies the error message in case the user tries to create a virtual schema that already exists. It also allows overriding the parameter name of the virtual schema. This is required in case an extensions is not based on the base virtual schema extension.
+This release adds a new test to the shared integration test class `AbstractVirtualSchemaExtensionIT` verifying the error message in case the user tries to create a virtual schema that already exists. It also allows overriding the parameter name of the virtual schema. This is required in case an extension supports this parameter while not inheriting from the base virtual schema extension.
 
 ## Bugfix
 
