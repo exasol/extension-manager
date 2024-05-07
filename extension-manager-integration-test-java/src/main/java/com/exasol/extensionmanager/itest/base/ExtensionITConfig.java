@@ -6,6 +6,7 @@ import java.util.Objects;
  * Configuration for {@link AbstractScriptExtensionIT} and {@link AbstractVirtualSchemaExtensionIT}.
  */
 public class ExtensionITConfig {
+    private static final String DEFAULT_VIRTUAL_SCHEMA_NAME_PARAM_NAME = "base-vs.virtual-schema-name";
     private final String projectName;
     private final String extensionId;
     private final String extensionName;
@@ -14,6 +15,7 @@ public class ExtensionITConfig {
     private final int expectedParameterCount;
     private final String previousVersion;
     private final String previousVersionJarFile;
+    private final String virtualSchemaNameParameterName;
 
     private ExtensionITConfig(final Builder builder) {
         this.projectName = Objects.requireNonNull(builder.projectName, "projectName");
@@ -24,6 +26,8 @@ public class ExtensionITConfig {
         this.expectedParameterCount = builder.expectedParameterCount == null ? -1 : builder.expectedParameterCount;
         this.previousVersion = builder.previousVersion;
         this.previousVersionJarFile = builder.previousVersionJarFile;
+        this.virtualSchemaNameParameterName = Objects.requireNonNull(builder.virtualSchemaNameParameterName,
+                "virtualSchemaNameParameterName");
     }
 
     /**
@@ -106,6 +110,15 @@ public class ExtensionITConfig {
     }
 
     /**
+     * Get the parameter name for the virtual schema name. Default is {@code base-vs.virtual-schema-name}.
+     * 
+     * @return parameter name for the virtual schema name
+     */
+    public String getVirtualSchemaNameParameterName() {
+        return virtualSchemaNameParameterName;
+    }
+
+    /**
      * Create builder to build {@link ExtensionITConfig}.
      *
      * @return created builder
@@ -126,6 +139,7 @@ public class ExtensionITConfig {
         private Integer expectedParameterCount;
         private String previousVersion;
         private String previousVersionJarFile;
+        private String virtualSchemaNameParameterName = DEFAULT_VIRTUAL_SCHEMA_NAME_PARAM_NAME;
 
         private Builder() {
             // empty by intention
@@ -223,6 +237,20 @@ public class ExtensionITConfig {
          */
         public Builder previousVersionJarFile(final String previousVersionJarFile) {
             this.previousVersionJarFile = previousVersionJarFile;
+            return this;
+        }
+
+        /**
+         * Parameter name for the virtual schema name. Default is {@code base-vs.virtual-schema-name}.
+         * <p>
+         * Set this only if your virtual schema extension does not extend the base extension and uses a custom parameter
+         * name, e.g. {@code virtualSchemaName}.
+         * 
+         * @param virtualSchemaNameParameterName parameter name for the virtual schema name
+         * @return {@code this} for fluent programming
+         */
+        public Builder virtualSchemaNameParameterName(final String virtualSchemaNameParameterName) {
+            this.virtualSchemaNameParameterName = virtualSchemaNameParameterName;
             return this;
         }
 

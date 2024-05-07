@@ -35,7 +35,7 @@ public class ExasolMetadata {
                         + " WHERE SCRIPT_SCHEMA=?" //
                         + " ORDER BY SCRIPT_NAME")) {
             statement.setString(1, this.extensionSchemaName);
-            assertThat(statement.executeQuery(), matcher);
+            assertThat("SYS.EXA_ALL_SCRIPTS content", statement.executeQuery(), matcher);
         } catch (final SQLException exception) {
             throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-13")
                     .message("Failed to read EXA_ALL_SCRIPTS table: {{error message}}.", exception.getMessage())
@@ -57,7 +57,7 @@ public class ExasolMetadata {
      * @param matcher matcher for verifying the table content
      */
     public void assertConnection(final Matcher<ResultSet> matcher) {
-        assertResult(
+        assertResult("SYS.EXA_ALL_CONNECTIONS content",
                 "SELECT CONNECTION_NAME, CONNECTION_COMMENT FROM SYS.EXA_ALL_CONNECTIONS ORDER BY CONNECTION_NAME ASC",
                 matcher);
     }
@@ -75,7 +75,7 @@ public class ExasolMetadata {
      * @param matcher matcher for verifying the table content
      */
     public void assertVirtualSchema(final Matcher<ResultSet> matcher) {
-        assertResult(
+        assertResult("SYS.EXA_ALL_VIRTUAL_SCHEMAS content",
                 "SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT_SCHEMA, ADAPTER_SCRIPT_NAME, ADAPTER_NOTES FROM SYS.EXA_ALL_VIRTUAL_SCHEMAS ORDER BY SCHEMA_NAME ASC",
                 matcher);
     }
@@ -88,9 +88,9 @@ public class ExasolMetadata {
                 .table(VARCHAR_TYPE, VARCHAR_TYPE, VARCHAR_TYPE, VARCHAR_TYPE, VARCHAR_TYPE).matches());
     }
 
-    private void assertResult(final String sql, final Matcher<ResultSet> matcher) {
+    private void assertResult(final String reason, final String sql, final Matcher<ResultSet> matcher) {
         try (final PreparedStatement statement = this.connection.prepareStatement(sql)) {
-            assertThat(statement.executeQuery(), matcher);
+            assertThat(reason, statement.executeQuery(), matcher);
         } catch (final SQLException exception) {
             throw new IllegalStateException(ExaError.messageBuilder("E-EITFJ-14")
                     .message("Failed to execute query {{query}}: {{error message}}.", sql, exception.getMessage())

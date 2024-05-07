@@ -21,10 +21,11 @@ import com.exasol.extensionmanager.itest.*;
  * for installing/listing/uninstalling extensions and creating/listing/deleting instances.
  */
 public abstract class AbstractVirtualSchemaExtensionIT {
-    private static final String VIRTUAL_SCHEMA_NAME_PARAM_NAME = "base-vs.virtual-schema-name";
-    private static final String EXTENSION_SCHEMA = "EXA_EXTENSIONS";
+    /** Name of the schema where the extension scripts are stored. */
+    protected static final String EXTENSION_SCHEMA = "EXA_EXTENSIONS";
     private static final Logger LOG = Logger.getLogger(AbstractVirtualSchemaExtensionIT.class.getName());
-    private final ExtensionITConfig config;
+    /** Configuration for the integration tests */
+    protected final ExtensionITConfig config;
 
     /**
      * Create a new base integration test.
@@ -102,7 +103,7 @@ public abstract class AbstractVirtualSchemaExtensionIT {
      */
     @Test
     public void checkPreviousVersion() {
-        assertThat(config.getCurrentVersion(), not(equalTo(config.getPreviousVersion())));
+        assertThat("current project version", config.getCurrentVersion(), not(equalTo(config.getPreviousVersion())));
     }
 
     /**
@@ -111,13 +112,16 @@ public abstract class AbstractVirtualSchemaExtensionIT {
     @Test
     public void listExtensions() {
         final List<ExtensionsResponseExtension> extensions = getSetup().client().getExtensions();
-        assertAll(() -> assertThat(extensions, hasSize(1)), //
-                () -> assertThat(extensions.get(0).getName(), equalTo(config.getExtensionName())),
-                () -> assertThat(extensions.get(0).getInstallableVersions().get(0).getName(),
+        assertAll(() -> assertThat("extension count", extensions, hasSize(1)), //
+                () -> assertThat("name", extensions.get(0).getName(), equalTo(config.getExtensionName())),
+                () -> assertThat("version", extensions.get(0).getInstallableVersions().get(0).getName(),
                         equalTo(config.getCurrentVersion())),
-                () -> assertThat(extensions.get(0).getInstallableVersions().get(0).isLatest(), is(true)),
-                () -> assertThat(extensions.get(0).getInstallableVersions().get(0).isDeprecated(), is(false)),
-                () -> assertThat(extensions.get(0).getDescription(), equalTo(config.getExtensionDescription())));
+                () -> assertThat("is latest version", extensions.get(0).getInstallableVersions().get(0).isLatest(),
+                        is(true)),
+                () -> assertThat("is deprecated version",
+                        extensions.get(0).getInstallableVersions().get(0).isDeprecated(), is(false)),
+                () -> assertThat("description", extensions.get(0).getDescription(),
+                        equalTo(config.getExtensionDescription())));
     }
 
     /**
@@ -136,9 +140,9 @@ public abstract class AbstractVirtualSchemaExtensionIT {
     public void listInstallationsFindsMatchingScripts() {
         createScripts();
         final List<InstallationsResponseInstallation> installations = getSetup().client().getInstallations();
-        assertAll(() -> assertThat(installations, hasSize(1)), //
-                () -> assertThat(installations.get(0).getName(), equalTo(config.getExtensionName())),
-                () -> assertThat(installations.get(0).getVersion(), equalTo(config.getCurrentVersion())));
+        assertAll(() -> assertThat("installations", installations, hasSize(1)), //
+                () -> assertThat("name", installations.get(0).getName(), equalTo(config.getExtensionName())),
+                () -> assertThat("version", installations.get(0).getVersion(), equalTo(config.getCurrentVersion())));
     }
 
     /**
@@ -148,9 +152,9 @@ public abstract class AbstractVirtualSchemaExtensionIT {
     public void listInstallationsFindsOwnInstallation() {
         getSetup().client().install();
         final List<InstallationsResponseInstallation> installations = getSetup().client().getInstallations();
-        assertAll(() -> assertThat(installations, hasSize(1)), //
-                () -> assertThat(installations.get(0).getName(), equalTo(config.getExtensionName())),
-                () -> assertThat(installations.get(0).getVersion(), equalTo(config.getCurrentVersion())));
+        assertAll(() -> assertThat("installations", installations, hasSize(1)), //
+                () -> assertThat("name", installations.get(0).getName(), equalTo(config.getExtensionName())),
+                () -> assertThat("version", installations.get(0).getVersion(), equalTo(config.getCurrentVersion())));
     }
 
     /**
@@ -171,9 +175,9 @@ public abstract class AbstractVirtualSchemaExtensionIT {
         final ExtensionDetailsResponse extensionDetails = getSetup().client()
                 .getExtensionDetails(config.getCurrentVersion());
         final List<ParamDefinition> parameters = extensionDetails.getParameterDefinitions();
-        final ParamDefinition param1 = new ParamDefinition().id(VIRTUAL_SCHEMA_NAME_PARAM_NAME)
+        final ParamDefinition param1 = new ParamDefinition().id(config.getVirtualSchemaNameParameterName())
                 .name("Virtual Schema name").definition(Map.of( //
-                        "id", VIRTUAL_SCHEMA_NAME_PARAM_NAME, //
+                        "id", config.getVirtualSchemaNameParameterName(), //
                         "name", "Virtual Schema name", //
                         "description", "Name for the new virtual schema", //
                         "placeholder", "MY_VIRTUAL_SCHEMA", //
@@ -212,8 +216,9 @@ public abstract class AbstractVirtualSchemaExtensionIT {
     public void createInstanceFailsWithoutRequiredParameters() {
         final ExtensionManagerClient client = getSetup().client();
         client.install();
-        client.assertRequestFails(() -> client.createInstance(emptyList()), startsWith(
-                "invalid parameters: Failed to validate parameter 'Virtual Schema name' (base-vs.virtual-schema-name): This is a required parameter."),
+        client.assertRequestFails(() -> client.createInstance(emptyList()),
+                startsWith("invalid parameters: Failed to validate parameter 'Virtual Schema name' ("
+                        + config.getVirtualSchemaNameParameterName() + "): This is a required parameter."),
                 equalTo(400));
     }
 
@@ -271,11 +276,11 @@ public abstract class AbstractVirtualSchemaExtensionIT {
         prepareInstance();
         final String virtualSchemaName = "my_upgrading_VS";
         createInstance(previousVersion.getExtensionId(), config.getPreviousVersion(), virtualSchemaName);
-        assertVirtualSchemaContent(virtualSchemaName);
-        assertInstalledVersion(config.getPreviousVersion(), previousVersion);
+        assertAll(() -> assertVirtualSchemaContent(virtualSchemaName),
+                () -> assertInstalledVersion(config.getPreviousVersion(), previousVersion));
         previousVersion.upgrade();
-        assertInstalledVersion(config.getCurrentVersion(), previousVersion);
-        assertVirtualSchemaContent(virtualSchemaName);
+        assertAll(() -> assertInstalledVersion(config.getCurrentVersion(), previousVersion),
+                () -> assertVirtualSchemaContent(virtualSchemaName));
     }
 
     private PreviousExtensionVersion createPreviousVersion() {
@@ -287,14 +292,25 @@ public abstract class AbstractVirtualSchemaExtensionIT {
                 .build();
     }
 
-    private void assertInstalledVersion(final String expectedVersion, final PreviousExtensionVersion previousVersion) {
+    /**
+     * Verify that there are two installations, one with the old and one with the new extension ID.
+     * <p>
+     * Override this if the extension name changed compared to the previous version.
+     * 
+     * @param expectedVersion expected version
+     * @param previousVersion previous version
+     */
+    protected void assertInstalledVersion(final String expectedVersion,
+            final PreviousExtensionVersion previousVersion) {
         // The extension is installed twice (previous and current version), so each one returns one installation.
-        assertThat(getSetup().client().getInstallations(),
-                containsInAnyOrder(
-                        new InstallationsResponseInstallation().name(config.getExtensionName()).version(expectedVersion)
-                                .id(config.getExtensionId()), //
-                        new InstallationsResponseInstallation().name(config.getExtensionName()).version(expectedVersion)
-                                .id(previousVersion.getExtensionId())));
+        final List<InstallationsResponseInstallation> installations = getSetup().client().getInstallations();
+        assertAll(() -> assertThat("number installations", installations, hasSize(2)),
+                () -> assertThat("installations", installations,
+                        containsInAnyOrder(
+                                new InstallationsResponseInstallation().name(config.getExtensionName())
+                                        .version(expectedVersion).id(config.getExtensionId()), //
+                                new InstallationsResponseInstallation().name(config.getExtensionName())
+                                        .version(expectedVersion).id(previousVersion.getExtensionId()))));
     }
 
     /**
@@ -306,6 +322,18 @@ public abstract class AbstractVirtualSchemaExtensionIT {
         prepareInstance();
         createInstance("my_VS");
         assertVirtualSchemaContent("my_VS");
+    }
+
+    /**
+     * Verify that a creating a {@code VIRTUAL SCHEMA} with name of different case fails.
+     */
+    @Test
+    public void createVirtualSchemaWithDuplicateNameFailsCaseInsensitive() {
+        getSetup().client().install();
+        prepareInstance();
+        createInstance("my_VS");
+        getSetup().client().assertRequestFails(() -> createInstance("MY_vs"), //
+                "Virtual Schema 'my_VS' already exists", 400);
     }
 
     /**
@@ -366,9 +394,11 @@ public abstract class AbstractVirtualSchemaExtensionIT {
     @Test
     public void createTwoInstances() {
         getSetup().client().install();
+        prepareInstance();
         createInstance("vs1");
         createInstance("vs2");
-        assertAll(
+        assertAll(() -> assertVirtualSchemaContent("vs1"), //
+                () -> assertVirtualSchemaContent("vs2"),
                 () -> getSetup().exasolMetadata()
                         .assertConnection(table().row("VS1_CONNECTION", getInstanceComment("vs1"))
                                 .row("VS2_CONNECTION", getInstanceComment("vs2")).matches()),
@@ -440,22 +470,26 @@ public abstract class AbstractVirtualSchemaExtensionIT {
                 () -> getSetup().exasolMetadata().assertNoVirtualSchema());
     }
 
-    private void createInstance(final String virtualSchemaName) {
-        createInstance(config.getExtensionId(), config.getCurrentVersion(), virtualSchemaName);
+    /**
+     * Create a new instance with the given name.
+     * 
+     * @param name name of the instance
+     */
+    protected void createInstance(final String name) {
+        createInstance(config.getExtensionId(), config.getCurrentVersion(), name);
     }
 
-    private void createInstance(final String extensionId, final String extensionVersion,
-            final String virtualSchemaName) {
-        getSetup().addVirtualSchemaToCleanupQueue(virtualSchemaName);
-        getSetup().addConnectionToCleanupQueue(virtualSchemaName.toUpperCase() + "_CONNECTION");
+    private void createInstance(final String extensionId, final String extensionVersion, final String name) {
+        getSetup().addVirtualSchemaToCleanupQueue(name);
+        getSetup().addConnectionToCleanupQueue(name.toUpperCase() + "_CONNECTION");
         final String instanceName = getSetup().client().createInstance(extensionId, extensionVersion,
-                createValidParameters(virtualSchemaName));
-        assertThat(instanceName, equalTo(virtualSchemaName));
+                createValidParameters(name));
+        assertThat(instanceName, equalTo(name));
     }
 
     private List<ParameterValue> createValidParameters(final String virtualSchemaName) {
         final List<ParameterValue> parameters = new ArrayList<>();
-        parameters.add(param(VIRTUAL_SCHEMA_NAME_PARAM_NAME, virtualSchemaName));
+        parameters.add(param(config.getVirtualSchemaNameParameterName(), virtualSchemaName));
         parameters.addAll(createValidParameterValues());
         return parameters;
     }

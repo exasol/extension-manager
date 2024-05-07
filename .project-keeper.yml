@@ -26,7 +26,7 @@ sources:
     path: registry-upload/package.json
   - type: npm
     path: pkg/parameterValidator/package.json
-version: 0.5.10
+version: 0.5.11
 linkReplacements:
   - "Unknown|https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE"
   - "https://github.com/swagger-api/swagger-core/modules/swagger-annotations|https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-annotations"

@@ -9,8 +9,8 @@
     <packaging>pom</packaging>
     <url>https://github.com/exasol/extension-manager/</url>
     <properties>
-        <revision>0.5.10</revision>
-        <junit.version>5.10.1</junit.version>
+        <revision>0.5.11</revision>
+        <junit.version>5.10.2</junit.version>
     </properties>
     <modules>
         <module>extension-manager-integration-test-java</module>
