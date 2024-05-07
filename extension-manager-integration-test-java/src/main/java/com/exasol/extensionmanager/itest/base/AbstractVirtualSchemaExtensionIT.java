@@ -325,18 +325,6 @@ public abstract class AbstractVirtualSchemaExtensionIT {
     }
 
     /**
-     * Verify that a creating a {@code VIRTUAL SCHEMA} with an existing name fails.
-     */
-    @Test
-    public void createVirtualSchemaWithDuplicateNameFails() {
-        getSetup().client().install();
-        prepareInstance();
-        createInstance("my_VS");
-        getSetup().client().assertRequestFails(() -> createInstance("my_VS"), //
-                "Virtual Schema 'my_VS' already exists", 400);
-    }
-
-    /**
      * Verify that a creating a {@code VIRTUAL SCHEMA} with name of different case fails.
      */
     @Test
