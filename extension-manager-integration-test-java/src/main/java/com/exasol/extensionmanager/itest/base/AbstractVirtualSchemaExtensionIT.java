@@ -73,14 +73,6 @@ public abstract class AbstractVirtualSchemaExtensionIT {
     protected abstract void createScripts();
 
     /**
-     * Create valid parameters for a new instance. The instance/virtual schema name will be added automatically and is
-     * not required here.
-     *
-     * @return valid parameters for a new instance
-     */
-    protected abstract Collection<ParameterValue> createValidParameterValues();
-
-    /**
      * Log test name before each test.
      * 
      * @param testInfo test info
@@ -176,12 +168,12 @@ public abstract class AbstractVirtualSchemaExtensionIT {
                 .getExtensionDetails(config.getCurrentVersion());
         final List<ParamDefinition> parameters = extensionDetails.getParameterDefinitions();
         final ParamDefinition param1 = new ParamDefinition().id(config.getVirtualSchemaNameParameterName())
-                .name("Virtual Schema name").definition(Map.of( //
+                .name("Virtual schema name").definition(Map.of( //
                         "id", config.getVirtualSchemaNameParameterName(), //
-                        "name", "Virtual Schema name", //
+                        "name", "Virtual schema name", //
                         "description", "Name for the new virtual schema", //
                         "placeholder", "MY_VIRTUAL_SCHEMA", //
-                        "regex", "[a-zA-Z_]+", //
+                        "regex", "[a-zA-Z][a-zA-Z0-9_]*", //
                         "required", true, //
                         "type", "string"));
         assertAll(() -> assertThat(extensionDetails.getId(), equalTo(config.getExtensionId())),
@@ -217,7 +209,7 @@ public abstract class AbstractVirtualSchemaExtensionIT {
         final ExtensionManagerClient client = getSetup().client();
         client.install();
         client.assertRequestFails(() -> client.createInstance(emptyList()),
-                startsWith("invalid parameters: Failed to validate parameter 'Virtual Schema name' ("
+                startsWith("invalid parameters: Failed to validate parameter 'Virtual schema name' ("
                         + config.getVirtualSchemaNameParameterName() + "): This is a required parameter."),
                 equalTo(400));
     }
@@ -483,16 +475,37 @@ public abstract class AbstractVirtualSchemaExtensionIT {
         getSetup().addVirtualSchemaToCleanupQueue(name);
         getSetup().addConnectionToCleanupQueue(name.toUpperCase() + "_CONNECTION");
         final String instanceName = getSetup().client().createInstance(extensionId, extensionVersion,
-                createValidParameters(name));
+                createValidParameters(extensionVersion, name));
         assertThat(instanceName, equalTo(name));
     }
 
-    private List<ParameterValue> createValidParameters(final String virtualSchemaName) {
+    /**
+     * Create valid parameters for a new instance.
+     * <p>
+     * Override this only if the previous version has a different virtual schema name parameter. Usually implementing
+     * {@link #createValidParameterValues(String)} should be sufficient.
+     * </p>
+     * 
+     * @param extensionVersion  extension version. This may be useful in case the parameters depend on the version.
+     * @param virtualSchemaName name of the virtual schema
+     * @return valid parameters for a new instance
+     */
+    protected List<ParameterValue> createValidParameters(final String extensionVersion,
+            final String virtualSchemaName) {
         final List<ParameterValue> parameters = new ArrayList<>();
         parameters.add(param(config.getVirtualSchemaNameParameterName(), virtualSchemaName));
-        parameters.addAll(createValidParameterValues());
+        parameters.addAll(createValidParameterValues(extensionVersion));
         return parameters;
     }
+
+    /**
+     * Create valid parameters for a new instance. The instance/virtual schema name will be added automatically and is
+     * not required here.
+     *
+     * @param extensionVersion extension version. This may be useful in case the parameters depend on the version.
+     * @return valid parameters for a new instance
+     */
+    protected abstract Collection<ParameterValue> createValidParameterValues(String extensionVersion);
 
     /**
      * Create a new parameter value.

@@ -6,7 +6,7 @@ import java.util.Objects;
  * Configuration for {@link AbstractScriptExtensionIT} and {@link AbstractVirtualSchemaExtensionIT}.
  */
 public class ExtensionITConfig {
-    private static final String DEFAULT_VIRTUAL_SCHEMA_NAME_PARAM_NAME = "base-vs.virtual-schema-name";
+    private static final String DEFAULT_VIRTUAL_SCHEMA_NAME_PARAM_NAME = "baseVirtualSchemaName";
     private final String projectName;
     private final String extensionId;
     private final String extensionName;
