@@ -54,7 +54,7 @@
 | Dependency                                              | License                           |
 | ------------------------------------------------------- | --------------------------------- |
 | [SonarQube Scanner for Maven][35]                       | [GNU LGPL 3][36]                  |
-| [Apache Maven Toolchains Plugin][37]                    | [Apache License, Version 2.0][28] |
+| [Apache Maven Toolchains Plugin][37]                    | [Apache-2.0][28]                  |
 | [Apache Maven Compiler Plugin][38]                      | [Apache-2.0][28]                  |
 | [Apache Maven Enforcer Plugin][39]                      | [Apache-2.0][28]                  |
 | [Maven Flatten Plugin][40]                              | [Apache Software Licenese][28]    |
@@ -101,7 +101,7 @@
 | Dependency                                              | License                           |
 | ------------------------------------------------------- | --------------------------------- |
 | [SonarQube Scanner for Maven][35]                       | [GNU LGPL 3][36]                  |
-| [Apache Maven Toolchains Plugin][37]                    | [Apache License, Version 2.0][28] |
+| [Apache Maven Toolchains Plugin][37]                    | [Apache-2.0][28]                  |
 | [Apache Maven Compiler Plugin][38]                      | [Apache-2.0][28]                  |
 | [Apache Maven Enforcer Plugin][39]                      | [Apache-2.0][28]                  |
 | [Maven Flatten Plugin][40]                              | [Apache Software Licenese][28]    |
@@ -151,9 +151,9 @@
 | [@exasol/extension-parameter-validator][92] | MIT     |
 
 [0]: https://github.com/Nightapes/go-rest/blob/v0.3.3/LICENSE
-[1]: https://github.com/dop251/goja/blob/e401ed450204/LICENSE
+[1]: https://github.com/dop251/goja/blob/393f6d42497b/LICENSE
 [2]: https://github.com/dop251/goja_nodejs/blob/2aae10d4cbcf/LICENSE
-[3]: https://github.com/exasol/exasol-driver-go/blob/v1.0.6/LICENSE
+[3]: https://github.com/exasol/exasol-driver-go/blob/v1.0.7/LICENSE
 [4]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.3.8/go-client/LICENSE
 [5]: https://github.com/go-chi/chi/blob/v5.0.12/LICENSE
 [6]: https://github.com/sirupsen/logrus/blob/v1.9.3/LICENSE
@@ -161,7 +161,7 @@
 [8]: https://github.com/swaggo/http-swagger/blob/v1.3.4/LICENSE
 [9]: https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE
 [10]: https://github.com/kinbiko/jsonassert/blob/HEAD/LICENSE
-[11]: https://cs.opensource.google/go/x/mod/+/v0.17.0:LICENSE
+[11]: https://cs.opensource.google/go/x/mod/+/v0.18.0:LICENSE
 [12]: https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-annotations
 [13]: http://www.apache.org/licenses/LICENSE-2.0.html
 [14]: https://projects.eclipse.org/projects/ee4j.jersey/jersey-client
