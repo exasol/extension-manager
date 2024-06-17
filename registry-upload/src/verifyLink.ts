@@ -1,4 +1,5 @@
-import { request } from "follow-redirects/https";
+import { FollowResponse, https } from "follow-redirects";
+import { IncomingMessage } from "http";
 import { RequestOptions } from "https";
 import { URL } from "url";
 
@@ -24,7 +25,7 @@ function httpRequest(url: URL, options: RequestOptions): Promise<string> {
     // Convert the `request()` function to a Promise.
     // Callback `resolve()` signals a successful result, `reject()` signals a failure.
     return new Promise(function (resolve, reject) {
-        const req = request(url, options, function (res) {
+        const req = https.request(url, options, function (res: IncomingMessage & FollowResponse) {
             // Verify status code is 2xx OK
             if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
                 return reject(new Error(`Request ${options.method} ${url.toString()} failed with status ${res.statusCode}`));
@@ -44,7 +45,7 @@ function httpRequest(url: URL, options: RequestOptions): Promise<string> {
             });
         });
         // Handle request errors
-        req.on('error', function (err) {
+        req.on('error', function (err: Error) {
             reject(err);
         });
         req.end();

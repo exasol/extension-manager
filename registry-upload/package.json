@@ -1,19 +1,20 @@
 {
   "name": "registry-upload",
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "build": "tsc",
-    "upload": "ts-node src/main.ts",
-    "generate": "ts-node src/generate.ts",
+    "upload": "node --loader ts-node/esm src/main.ts",
+    "generate": "node --loader ts-node/esm src/generate.ts",
     "lint": "eslint --report-unused-disable-directives --exit-on-fatal-error ./src/"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^7.13.0",
-    "@typescript-eslint/parser": "^7.13.0",
-    "eslint": "^8.57.0",
     "@types/follow-redirects": "^1.14.4",
     "@types/node": "^20.14.2",
     "@types/prettier": "2.7.3",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser": "^7.13.0",
+    "eslint": "^8.57.0",
     "ts-node": "^10.9.2",
     "typescript": "~5.4.5"
   },

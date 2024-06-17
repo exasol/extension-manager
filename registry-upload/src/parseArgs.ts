@@ -1,5 +1,5 @@
 import { ParseArgsConfig, parseArgs } from "node:util"
-import { CommandLineArgs, Stage, getAvailableStages } from "./common"
+import { CommandLineArgs, Stage, getAvailableStages } from "./common.js"
 
 export function parseArguments(args: string[]): CommandLineArgs {
     const options: any = {
@@ -32,4 +32,3 @@ function parseStage(value: any): Stage {
             throw new Error(`Got unexpected value ${value} for stage, allowed values: ${getAvailableStages().join(", ")}`)
     }
 }
-
