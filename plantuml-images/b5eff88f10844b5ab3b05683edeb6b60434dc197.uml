@@ -1,0 +1,22 @@
+@startuml
+database Database {
+  storage BucketFS {
+    file "postgres-vs-v1.jar" as vsJar
+  }
+  storage "Adapter Schema" {
+    component Installation {
+      component "ADAPTER SCRIPT" as adapterScript
+      component "SET SCRIPT" as setScript
+      adapterScript -> vsJar : references
+      setScript -> vsJar : references
+    }
+    component "Instance" as vs1 {
+      component "CONNECTION" as conn
+      component "VIRTUAL SCHEMA" as vs
+      vs -> conn : references
+      vs -> adapterScript : references
+      vs ...> setScript : implicit reference\nby name at runtime
+    }
+  }
+}
+@enduml
