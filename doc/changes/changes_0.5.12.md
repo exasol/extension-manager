@@ -1,12 +1,16 @@
-# Extension Manager 0.5.12, released 2024-??-??
+# Extension Manager 0.5.12, released 2024-06-17
 
-Code name:
+Code name: Adapt to new base VS extension
 
 ## Summary
 
+This release adapts the shared extension integration tests to version 0.4.3 of the base virtual schema extension:
+* The VS name parameter was renamed from `base-vs.virtual-schema-name` to `baseVirtualSchemaName`.
+* Tests now allow returning different parameters depending on the extension version. This is useful in case parameters change between versions.
+
 ## Features
 
-* ISSUE_NUMBER: description
+* #182: Adapted shared extension integration tests to base VS extension 0.4.3
 
 ## Dependency Updates
 
