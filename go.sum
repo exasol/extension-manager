@@ -21,8 +21,8 @@ github.com/exasol/error-reporting-go v0.2.0 h1:nKIe4zYiTHbYrKJRlSNJcmGjTJCZredDh
 github.com/exasol/error-reporting-go v0.2.0/go.mod h1:lUzRJqKLiSuYpqRUN2LVyj08WeHzhMEC/8Gmgtuqh1Y=
 github.com/exasol/exasol-driver-go v1.0.7 h1:+YL3DxypsGVN+nA0q/T8kd2CuE22E1gQl1H+Gbd5Icw=
 github.com/exasol/exasol-driver-go v1.0.7/go.mod h1:aDRx3YDvLihnoyQGqcQmXZ7YDHcZ9fk7Q6Au8G/yXCw=
-github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.8 h1:xLEEFihDIJJfPtVR1072olrRbW3fF71iBkl/khfJqKI=
-github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.8/go.mod h1:rCRBpEaw5/1Y8xnLM0Ti2kPoQ11nGBJ8B3AABLAJs7s=
+github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.9 h1:vkOiwqum2hOK1WHgBop3TZrRGiygDRTvet8lzxP7Gl4=
+github.com/exasol/exasol-test-setup-abstraction-server/go-client v0.3.9/go.mod h1:g0gO9UJh2LOYlwJIzrw7c1QZJqEBSvYnAaOycu7M5/c=
 github.com/gabriel-vasile/mimetype v1.4.4 h1:QjV6pZ7/XZ7ryI2KuyeEDE8wnh7fHP9YnQy+R0LnH8I=
 github.com/gabriel-vasile/mimetype v1.4.4/go.mod h1:JwLei5XPtWdGiMFB5Pjle1oEeoSeEuJfJE+TtfvdB/s=
 github.com/go-chi/chi/v5 v5.0.12 h1:9euLV5sTrTNTRUU9POmDUvfxyj6LAABLUcEWO+JJb4s=

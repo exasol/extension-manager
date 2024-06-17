@@ -20,6 +20,7 @@ This release adapts the shared extension integration tests to version 0.4.3 of t
 
 * Updated `github.com/dop251/goja:v0.0.0-20240220182346-e401ed450204` to `v0.0.0-20240610225006-393f6d42497b`
 * Updated `github.com/exasol/exasol-driver-go:v1.0.6` to `v1.0.7`
+* Updated `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.3.8` to `v0.3.9`
 
 #### Test Dependency Updates
 
@@ -88,8 +89,8 @@ This release adapts the shared extension integration tests to version 0.4.3 of t
 
 #### Development Dependency Updates
 
-* Updated `@typescript-eslint/parser:^7.3.1` to `^7.13.0`
 * Updated `@types/node:^20.11.30` to `^20.14.2`
+* Updated `@typescript-eslint/parser:^7.3.1` to `^7.13.0`
 * Updated `typescript:~5.4.3` to `~5.4.5`
 * Updated `@typescript-eslint/eslint-plugin:^7.3.1` to `^7.13.0`
 
