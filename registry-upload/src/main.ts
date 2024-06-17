@@ -1,6 +1,6 @@
-import { CommandLineArgs, getAvailableStages } from "./common"
-import { parseArguments } from "./parseArgs"
-import { upload } from "./upload"
+import { CommandLineArgs, getAvailableStages } from "./common.js"
+import { parseArguments } from "./parseArgs.js"
+import { upload } from "./upload.js"
 
 function printUsage() {
     const stages = getAvailableStages().join("|")

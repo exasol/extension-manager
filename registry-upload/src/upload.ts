@@ -4,9 +4,9 @@
 import { existsSync } from "fs";
 import { readFile } from "fs/promises";
 import { resolve } from "path";
-import { invalidateCloudFrontCache, readStackConfiguration, uploadFileContent } from "./awsService";
-import { CommandLineArgs, Stage } from "./common";
-import { verifyLink } from "./verifyLink";
+import { invalidateCloudFrontCache, readStackConfiguration, uploadFileContent } from "./awsService.js";
+import { CommandLineArgs, Stage } from "./common.js";
+import { verifyLink } from "./verifyLink.js";
 
 const EXTENSION_MANAGER_STACK_NAME = "ExtensionManagerRegistry";
 

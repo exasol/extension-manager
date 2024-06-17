@@ -348,7 +348,7 @@ func (suite *ErrorHandlingExtensionSuite) TestConvertErrorErrorObject() {
 func (suite *ErrorHandlingExtensionSuite) TestConvertErrorNilGojaException() {
 	var exception goja.Exception
 	err := suite.extension.convertError("msg", &exception)
-	suite.assertErrorStringError(err, "msg: <nil>")
+	suite.assertErrorStringError(err, "msg: ")
 }
 
 func (suite *ErrorHandlingExtensionSuite) TestConvertErrorGenericJavaScriptError() {

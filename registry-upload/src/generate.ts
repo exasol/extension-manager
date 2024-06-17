@@ -2,7 +2,7 @@ import { exec } from "child_process";
 import { writeFileSync } from "fs";
 import { Octokit } from "octokit";
 import { promisify } from "util";
-import { Stage, getExtensionGitHubRepos } from "./common";
+import { Stage, getExtensionGitHubRepos } from "./common.js";
 
 const TESTING_EXTENSION: Extension = { id: "testing-extension", url: "https://d3d6d68cbkri8h.cloudfront.net/testing-extension.js" }
 

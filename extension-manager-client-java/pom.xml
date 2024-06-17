@@ -12,7 +12,7 @@
         <!-- ProjectKeeper already included in root project -->
         <project-keeper.skip>true</project-keeper.skip>
         <!-- Generated code dependencies -->
-        <swagger-core-version>2.2.21</swagger-core-version>
+        <swagger-core-version>2.2.22</swagger-core-version>
         <!-- Jersey version 2.x required to compile generated code. -->
         <jersey-version>2.41</jersey-version>
         <jackson-version>2.17.1</jackson-version>
