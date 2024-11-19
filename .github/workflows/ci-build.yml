@@ -165,9 +165,9 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.56.2
+          version: v1.62.0
           args: --timeout=15m
 
   build-python-udf:

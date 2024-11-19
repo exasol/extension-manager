@@ -193,7 +193,7 @@ func (suite *RestAPISuite) TestCreateInstanceSuccessfully() {
 		suite.Run(test.authHeader, func() {
 			responseString := suite.restApi.makeRequestWithAuthHeader("POST", CREATE_INSTANCE_URL+VALID_DB_ARGS, test.authHeader,
 				`{"parameterValues": [{"name":"p1", "value":"v1"}]}`, 200)
-			suite.Equal(`{"instanceId":"instId","instanceName":"instName"}`+"\n", responseString)
+			suite.JSONEq(`{"instanceId":"instId","instanceName":"instName"}`+"\n", responseString)
 		})
 	}
 }
@@ -219,7 +219,7 @@ func (suite *RestAPISuite) TestListInstancesSuccessfully() {
 	for _, test := range authSuccessTests {
 		suite.Run(test.authHeader, func() {
 			responseString := suite.restApi.makeRequestWithAuthHeader("GET", LIST_INSTANCES_URL+VALID_DB_ARGS, test.authHeader, "", 200)
-			suite.Equal(`{"instances":[{"id":"instId","name":"instName"}]}`+"\n", responseString)
+			suite.JSONEq(`{"instances":[{"id":"instId","name":"instName"}]}`+"\n", responseString)
 		})
 	}
 }

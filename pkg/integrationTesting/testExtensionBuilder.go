@@ -18,6 +18,7 @@ import (
 const defaultExtensionApiVersion = "0.3.0"
 
 func CreateTestExtensionBuilder(t *testing.T) *TestExtensionBuilder {
+	t.Helper()
 	builder := TestExtensionBuilder{
 		testing:                             t,
 		extensionApiVersion:                 defaultExtensionApiVersion,
@@ -117,7 +118,7 @@ func (builder *TestExtensionBuilder) WithRawBucketFsUpload(uploads string) *Test
 	return builder
 }
 
-func (builder TestExtensionBuilder) Build() *BuiltExtension {
+func (builder *TestExtensionBuilder) Build() *BuiltExtension {
 	workDir := builder.createWorkDir()
 	err := os.WriteFile(path.Join(workDir, "package.json"), []byte(builder.createPackageJsonContent()), 0600)
 	if err != nil {
@@ -131,7 +132,7 @@ func (builder TestExtensionBuilder) Build() *BuiltExtension {
 	return &BuiltExtension{content: content, testing: builder.testing}
 }
 
-func (builder TestExtensionBuilder) createWorkDir() string {
+func (builder *TestExtensionBuilder) createWorkDir() string {
 	workDir := path.Join(os.TempDir(), "extension-manager-test-extension", "api-"+builder.extensionApiVersion)
 	if _, err := os.Stat(workDir); errors.Is(err, os.ErrNotExist) {
 		err := os.MkdirAll(workDir, os.ModePerm)
@@ -145,14 +146,14 @@ func (builder TestExtensionBuilder) createWorkDir() string {
 //go:embed extensionForTesting/package.json
 var packageJsonTemplate string
 
-func (builder TestExtensionBuilder) createPackageJsonContent() string {
+func (builder *TestExtensionBuilder) createPackageJsonContent() string {
 	return strings.Replace(packageJsonTemplate, "$EXTENSION_API_VERSION$", builder.extensionApiVersion, 1)
 }
 
 //go:embed extensionForTesting/extensionForTestingTemplate.js
 var extensionTemplate string
 
-func (builder TestExtensionBuilder) createExtensionTsContent() string {
+func (builder *TestExtensionBuilder) createExtensionTsContent() string {
 	content := strings.Replace(extensionTemplate, "$UPLOADS$", builder.getBucketFsUpload(), 1)
 	content = strings.Replace(content, "$FIND_INSTALLATIONS$", builder.findInstallationsFunc, 1)
 	content = strings.Replace(content, "$INSTALL_EXTENSION$", builder.installFunc, 1)
@@ -165,7 +166,7 @@ func (builder TestExtensionBuilder) createExtensionTsContent() string {
 	return content
 }
 
-func (builder TestExtensionBuilder) getBucketFsUpload() string {
+func (builder *TestExtensionBuilder) getBucketFsUpload() string {
 	if builder.rawBucketFsUploads != "" {
 		return builder.rawBucketFsUploads
 	}
@@ -223,6 +224,7 @@ func (extension BuiltExtension) Publish(server *MockRegistryServer, id string) {
 }
 
 func cleanupFile(t *testing.T, fileName string) {
+	t.Helper()
 	t.Cleanup(func() {
 		if _, err := os.Stat(fileName); errors.Is(err, os.ErrNotExist) {
 			return
@@ -236,7 +238,7 @@ func cleanupFile(t *testing.T, fileName string) {
 
 var buildLock sync.Mutex
 
-func (builder TestExtensionBuilder) runBuild(workDir string) []byte {
+func (builder *TestExtensionBuilder) runBuild(workDir string) []byte {
 	buildLock.Lock()
 	builder.runNpmInstall(workDir)
 	builder.runNpmBuild(workDir)
@@ -252,7 +254,7 @@ func (builder TestExtensionBuilder) runBuild(workDir string) []byte {
 
 var isNpmInstallCalledForVersion = make(map[string]bool)
 
-func (builder TestExtensionBuilder) runNpmInstall(workDir string) {
+func (builder *TestExtensionBuilder) runNpmInstall(workDir string) {
 	if isNpmInstallCalledForVersion[builder.extensionApiVersion] {
 		// running "npm install" once for each version is enough
 		return
@@ -268,7 +270,7 @@ func (builder TestExtensionBuilder) runNpmInstall(workDir string) {
 	}
 }
 
-func (TestExtensionBuilder) runNpmBuild(workDir string) {
+func (builder *TestExtensionBuilder) runNpmBuild(workDir string) {
 	buildCommand := exec.Command("npm", "run", "build")
 	buildCommand.Dir = workDir
 	output, err := buildCommand.CombinedOutput()

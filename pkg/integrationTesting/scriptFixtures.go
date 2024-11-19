@@ -88,6 +88,7 @@ func (f ScriptFixture) GetMetaDataSchemaName() string {
 }
 
 func (f ScriptFixture) Cleanup(t *testing.T) {
+	t.Helper()
 	t.Cleanup(func() {
 		execSQL(f.db, "DROP SCHEMA IF EXISTS TEST CASCADE")
 		execSQL(f.db, "DROP SCHEMA IF EXISTS TEST_META_DATA CASCADE")

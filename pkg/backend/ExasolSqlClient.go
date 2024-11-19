@@ -79,7 +79,7 @@ func closeRows(rows *sql.Rows) error {
 	return nil
 }
 
-func (c exasolSqlClient) extractResult(rows *sql.Rows) (*QueryResult, error) {
+func (c *exasolSqlClient) extractResult(rows *sql.Rows) (*QueryResult, error) {
 	colTypes, err := rows.ColumnTypes()
 	if err != nil {
 		return nil, err
