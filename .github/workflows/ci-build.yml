@@ -13,7 +13,7 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}-build
       cancel-in-progress: true
     env:
-      EXASOL_VERSION: "8.27.0"
+      EXASOL_VERSION: "8.32.0"
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -23,7 +23,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.21"
+          go-version: "1.22"
         id: go
 
       - name: Set up JDKs
