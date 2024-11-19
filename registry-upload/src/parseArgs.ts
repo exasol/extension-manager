@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ParseArgsConfig, parseArgs } from "node:util"
 import { CommandLineArgs, Stage, getAvailableStages } from "./common.js"
 
@@ -11,7 +12,6 @@ export function parseArguments(args: string[]): CommandLineArgs {
             default: false
         }
     }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const config: ParseArgsConfig = { args, options, allowPositionals: false, strict: true }
     const { values } = parseArgs(config)
     return {
