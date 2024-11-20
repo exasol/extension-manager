@@ -97,7 +97,7 @@ func loggerMiddleware() func(next http.Handler) http.Handler {
 				buf.WriteString(r.RemoteAddr)
 				buf.WriteString(" - ")
 				fmt.Fprintf(buf, "%d %dB in %s", ww.Status(), ww.BytesWritten(), time.Since(t1))
-				logger.Infof(buf.String())
+				logger.Info(buf.String())
 			}()
 
 			next.ServeHTTP(ww, r)

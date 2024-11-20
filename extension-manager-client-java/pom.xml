@@ -12,10 +12,10 @@
         <!-- ProjectKeeper already included in root project -->
         <project-keeper.skip>true</project-keeper.skip>
         <!-- Generated code dependencies -->
-        <swagger-core-version>2.2.22</swagger-core-version>
+        <swagger-core-version>2.2.26</swagger-core-version>
         <!-- Jersey version 2.x required to compile generated code. -->
-        <jersey-version>2.41</jersey-version>
-        <jackson-version>2.17.1</jackson-version>
+        <jersey-version>2.45</jersey-version>
+        <jackson-version>2.18.1</jackson-version>
     </properties>
     <dependencies>
         <!-- Dependencies for generated extension-manager client -->
@@ -82,7 +82,7 @@
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>3.16.1</version>
+            <version>3.17.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -115,7 +115,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <id>generate-openapi-spec</id>
@@ -135,7 +135,7 @@
             <plugin>
                 <groupId>io.swagger.codegen.v3</groupId>
                 <artifactId>swagger-codegen-maven-plugin</artifactId>
-                <version>3.0.54</version>
+                <version>3.0.64</version>
                 <executions>
                     <execution>
                         <goals>
@@ -169,7 +169,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
                         <id>add-generated-source</id>
