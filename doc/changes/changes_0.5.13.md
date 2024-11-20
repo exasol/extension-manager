@@ -1,4 +1,4 @@
-# Extension Manager 0.5.13, released 2024-11-19
+# Extension Manager 0.5.13, released 2024-11-20
 
 Code name: Fix CVE-2024-47535 in `io.netty:netty-common:jar:4.1.108.Final:runtime`
 
