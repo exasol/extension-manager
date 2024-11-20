@@ -25,7 +25,7 @@ jobs:
           pandoc ../doc/design.md -o design.html --filter pandoc-plantuml
           pandoc ../doc/system_requirements.md -o system_requirements.html --filter pandoc-plantuml
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.3.0
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: gh-pages
