@@ -20,6 +20,7 @@ This release fixes vulnerability CVE-2024-47535 in `io.netty:netty-common:jar:4.
 * Updated `github.com/dop251/goja:v0.0.0-20240610225006-393f6d42497b` to `v0.0.0-20241024094426-79f3a7efcdbd`
 * Updated `github.com/dop251/goja_nodejs:v0.0.0-20240418154818-2aae10d4cbcf` to `v0.0.0-20240728170619-29b559befffc`
 * Updated `github.com/exasol/exasol-driver-go:v1.0.7` to `v1.0.10`
+* Updated `github.com/exasol/exasol-test-setup-abstraction-server/go-client:v0.3.9` to `v0.3.10`
 * Updated `github.com/go-chi/chi/v5:v5.0.12` to `v5.1.0`
 
 #### Test Dependency Updates
