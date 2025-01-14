@@ -15,6 +15,9 @@ jobs:
     env:
       EXASOL_VERSION: "8.32.0"
     steps:
+      - name: Allow unprivileged user namespaces
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
       - name: Check out code
         uses: actions/checkout@v4
         with:
