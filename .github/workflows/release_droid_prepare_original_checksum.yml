@@ -7,6 +7,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Allow unprivileged user namespaces
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
       - name: Checkout the repository
         uses: actions/checkout@v4
         with:
