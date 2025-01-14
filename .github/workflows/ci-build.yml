@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-build
       cancel-in-progress: true
@@ -142,6 +144,8 @@ jobs:
 
   trace-requirements:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-trace-requirements
       cancel-in-progress: true
@@ -161,6 +165,8 @@ jobs:
 
   static-code-analysis-go:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-static-code-analysis-go
       cancel-in-progress: true
@@ -175,6 +181,8 @@ jobs:
 
   build-python-udf:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-build-python-udf
       cancel-in-progress: true
