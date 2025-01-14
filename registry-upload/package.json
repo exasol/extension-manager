@@ -10,18 +10,18 @@
   },
   "devDependencies": {
     "@types/follow-redirects": "^1.14.4",
-    "@types/node": "^22.9.0",
+    "@types/node": "^22.10.6",
     "@types/prettier": "2.7.3",
-    "eslint": "9.14.0",
-    "typescript-eslint": "^8.14.0",
+    "eslint": "9.18.0",
+    "typescript-eslint": "^8.20.0",
     "ts-node": "^10.9.2",
-    "typescript": "~5.6.3"
+    "typescript": "~5.7.3"
   },
   "dependencies": {
-    "@aws-sdk/client-cloudformation": "^3.695.0",
-    "@aws-sdk/client-cloudfront": "^3.693.0",
-    "@aws-sdk/client-s3": "^3.693.0",
+    "@aws-sdk/client-cloudformation": "^3.726.1",
+    "@aws-sdk/client-cloudfront": "^3.726.1",
+    "@aws-sdk/client-s3": "^3.726.1",
     "follow-redirects": "^1.15.9",
-    "octokit": "^4.0.2"
+    "octokit": "^4.1.0"
   }
 }
