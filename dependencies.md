@@ -56,7 +56,7 @@
 | [Apache Maven Clean Plugin][35]                         | [Apache-2.0][28]                  |
 | [Apache Maven Install Plugin][36]                       | [Apache-2.0][28]                  |
 | [Apache Maven Resources Plugin][37]                     | [Apache-2.0][28]                  |
-| [Apache Maven Site Plugin][38]                          | [Apache License, Version 2.0][28] |
+| [Apache Maven Site Plugin][38]                          | [Apache-2.0][28]                  |
 | [SonarQube Scanner for Maven][39]                       | [GNU LGPL 3][40]                  |
 | [Apache Maven Toolchains Plugin][41]                    | [Apache-2.0][28]                  |
 | [Apache Maven Compiler Plugin][42]                      | [Apache-2.0][28]                  |
@@ -108,7 +108,7 @@
 | [Apache Maven Clean Plugin][35]                         | [Apache-2.0][28]                  |
 | [Apache Maven Install Plugin][36]                       | [Apache-2.0][28]                  |
 | [Apache Maven Resources Plugin][37]                     | [Apache-2.0][28]                  |
-| [Apache Maven Site Plugin][38]                          | [Apache License, Version 2.0][28] |
+| [Apache Maven Site Plugin][38]                          | [Apache-2.0][28]                  |
 | [SonarQube Scanner for Maven][39]                       | [GNU LGPL 3][40]                  |
 | [Apache Maven Toolchains Plugin][41]                    | [Apache-2.0][28]                  |
 | [Apache Maven Compiler Plugin][42]                      | [Apache-2.0][28]                  |
@@ -165,9 +165,9 @@
 [2]: https://github.com/dop251/goja_nodejs/blob/29b559befffc/LICENSE
 [3]: https://github.com/exasol/exasol-driver-go/blob/v1.0.10/LICENSE
 [4]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.3.10/go-client/LICENSE
-[5]: https://github.com/go-chi/chi/blob/v5.1.0/LICENSE
+[5]: https://github.com/go-chi/chi/blob/v5.2.0/LICENSE
 [6]: https://github.com/sirupsen/logrus/blob/v1.9.3/LICENSE
-[7]: https://github.com/stretchr/testify/blob/v1.9.0/LICENSE
+[7]: https://github.com/stretchr/testify/blob/v1.10.0/LICENSE
 [8]: https://github.com/swaggo/http-swagger/blob/v1.3.4/LICENSE
 [9]: https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE
 [10]: https://github.com/kinbiko/jsonassert/blob/HEAD/LICENSE
@@ -199,7 +199,7 @@
 [36]: https://maven.apache.org/plugins/maven-install-plugin/
 [37]: https://maven.apache.org/plugins/maven-resources-plugin/
 [38]: https://maven.apache.org/plugins/maven-site-plugin/
-[39]: http://sonarsource.github.io/sonar-scanner-maven/
+[39]: http://docs.sonarqube.org/display/PLUG/Plugin+Library/sonar-maven-plugin
 [40]: http://www.gnu.org/licenses/lgpl.txt
 [41]: https://maven.apache.org/plugins/maven-toolchains-plugin/
 [42]: https://maven.apache.org/plugins/maven-compiler-plugin/
@@ -244,18 +244,18 @@
 [81]: http://www.slf4j.org
 [82]: https://maven.apache.org/surefire/maven-failsafe-plugin/
 [83]: https://maven.apache.org/plugins/maven-jar-plugin/
-[84]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.167.1.tgz
+[84]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.175.1.tgz
 [85]: https://github.com/aws/aws-cdk
 [86]: https://registry.npmjs.org/constructs/-/constructs-10.4.2.tgz
 [87]: https://github.com/aws/constructs
 [88]: https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz
 [89]: https://github.com/evanw/node-source-map-support
-[90]: https://registry.npmjs.org/@aws-sdk/client-cloudformation/-/client-cloudformation-3.695.0.tgz
+[90]: https://registry.npmjs.org/@aws-sdk/client-cloudformation/-/client-cloudformation-3.726.1.tgz
 [91]: https://github.com/aws/aws-sdk-js-v3
-[92]: https://registry.npmjs.org/@aws-sdk/client-cloudfront/-/client-cloudfront-3.693.0.tgz
-[93]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.693.0.tgz
+[92]: https://registry.npmjs.org/@aws-sdk/client-cloudfront/-/client-cloudfront-3.726.1.tgz
+[93]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.726.1.tgz
 [94]: https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.9.tgz
 [95]: https://github.com/follow-redirects/follow-redirects
-[96]: https://registry.npmjs.org/octokit/-/octokit-4.0.2.tgz
+[96]: https://registry.npmjs.org/octokit/-/octokit-4.1.0.tgz
 [97]: https://github.com/octokit/octokit.js
 [98]: https://registry.npmjs.org/@exasol/extension-parameter-validator/-/extension-parameter-validator-0.3.0.tgz
