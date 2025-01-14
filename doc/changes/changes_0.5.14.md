@@ -1,12 +1,16 @@
-# Extension Manager 0.5.14, released 2025-??-??
+# Extension Manager 0.5.14, released 2025-01-14
 
-Code name:
+Code name: Fix vulnerabilities CVE-2024-45337 & CVE-2024-45338
 
 ## Summary
 
-## Features
+This release updates dependencies to fix vulnerabilities
+* `golang.org/x/crypto`: CVE-2024-45337
+* `golang.org/x/net`: CVE-2024-45338
 
-* ISSUE_NUMBER: description
+## Security
+
+* #187: Fix vulnerabilities CVE-2024-45337 & CVE-2024-45338 in dependencies
 
 ## Dependency Updates
 
