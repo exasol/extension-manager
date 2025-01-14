@@ -1,0 +1,307 @@
+<h1 id="system-requirement-specification-extension-manager">System
+Requirement Specification — Extension Manager</h1>
+<h2 id="introduction">Introduction</h2>
+<p>The Extension Manager (EM) is a REST service that manages extensions
+(e.g. virtual schemas) in an Exasol database.</p>
+<h2 id="about-this-document">About This Document</h2>
+<h3 id="target-audience">Target Audience</h3>
+<p>The target audience are software developers, requirement engineers,
+software designers. See section <a
+href="#stakeholders">“Stakeholders”</a> for more details.</p>
+<h3 id="goal">Goal</h3>
+<p>The EM main goal is to simplify installing, configuring and updating
+extensions for database administrators.</p>
+<h2 id="stakeholders">Stakeholders</h2>
+<h3 id="database-administrators">Database Administrators</h3>
+<p>Database Administrators (DBA) use EM through it’s REST API or a user
+interface for managing extensions in their Exasol databases.</p>
+<h3 id="extension-developers">Extension Developers</h3>
+<p>Extension developers create and maintain extensions for EM. They
+write integration tests for extensions and release and deploy
+extensions.</p>
+<h2 id="terms-and-abbreviations">Terms and Abbreviations</h2>
+<p>The following list gives you an overview of terms and abbreviations
+commonly used in the requirements specification.</p>
+<ul>
+<li><strong>EM</strong>: Extension Manager</li>
+<li><strong>UDF</strong> / <strong>User defined function</strong>:
+Extension point in the Exasol database that allows users to write their
+own SQL functions, see <a
+href="https://docs.exasol.com/db/latest/database_concepts/udf_scripts.htm">UDF
+documentation</a> for details.</li>
+<li><strong>Virtual Schema</strong>: Projection of an external data
+source that can be accessed like an Exasol database schema.</li>
+<li><strong>Virtual Schema adapter</strong>: Plug-in based on the
+Virtual Schema API that translates between Exasol and the original data
+source.</li>
+<li><strong>Extension</strong>: A user managed extension of the Exasol
+database (e.g. a Virtual Schema, bulk loaders and other in-database
+integration). An extension might consist of multiple parts e.g. files in
+BucketFS, adapter scripts, connections.</li>
+<li><strong>DBA</strong>: <a href="#database-administrators">Database
+Administrator</a> (role).</li>
+<li><strong>DBO</strong>: A Database Object, e.g. a table, view, script,
+connection, virtual schema.</li>
+</ul>
+<h2 id="features">Features</h2>
+<p>Features are the highest level requirements in this document that
+describe the main functionality of EM.</p>
+<h3 id="managing-extensions">Managing Extensions</h3>
+<p>EM allows managing extensions by providing the following actions in
+particular.</p>
+<h4 id="list-extensions">List Extensions</h4>
+<p><code>feat~list-extensions~1</code></p>
+<p>EM lists extensions.</p>
+<p>Needs: dsn</p>
+<h4 id="install-extensions">Install Extensions</h4>
+<p><code>feat~install-extension~1</code></p>
+<p>EM allows the DBA to install extensions.</p>
+<p>Needs: req</p>
+<h4 id="configure-an-extension">Configure an Extension</h4>
+<p><code>feat~configure-extension~1</code></p>
+<p>EM allows the DBA to configure an extension, e.g. in order to set up
+a Virtual Schema source system.</p>
+<p>Needs: req</p>
+<h4 id="upgrading-an-extension">Upgrading an Extension</h4>
+<p><code>feat~upgrade-extension~1</code></p>
+<p>EM allows DBA to install a new version of an extension that was
+already installed in an older version.</p>
+<p>Needs: req</p>
+<h4 id="uninstall-an-extension">Uninstall an Extension</h4>
+<p><code>feat~uninstall-extension~1</code></p>
+<p>EM allows the DBA to uninstall an extension.</p>
+<p>Needs: req</p>
+<h3 id="developing-extensions">Developing Extensions</h3>
+<p><code>feat~developing-extensions~1</code></p>
+<p>As extensions are an important part of EM’s ecosystem it must be easy
+for developers to create and maintain new extensions.</p>
+<p>Needs: req</p>
+<h3 id="rest-interface">REST Interface</h3>
+<p><code>feat~rest-interface~1</code></p>
+<p>EM provides a REST interface for clients.</p>
+<p>Needs: req</p>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<h2 id="functional-requirements">Functional Requirements</h2>
+<h3 id="managing-extensions-1">Managing Extensions</h3>
+<h4 id="em-finds-available-extensions">EM Finds Available
+Extensions</h4>
+<p><code>req~finding-available-extensions~1</code></p>
+<p>EM automatically finds available extensions at runtime. It allows
+adding new extensions at runtime.</p>
+<p>Rationale:</p>
+<p>When developers create new extensions for EM, these new extensions
+should be available to users as fast as possible.</p>
+<p>Covers: * <a
+href="#developing-extensions"><code>feat~developing-extensions~1</code></a></p>
+<p>Needs: dsn</p>
+<h4 id="extension-compatibility">Extension Compatibility</h4>
+<p><code>req~extension-compatibility~1</code></p>
+<p>EM only loads extensions that use a compatible version of the
+extension API. Versions are considered compatible when they have the
+same major version.</p>
+<p>Rationale:</p>
+<p>Requiring the exact extension API version is not feasible as updating
+all extensions before updating the API version in EM is too much effort.
+That’s why EM must support loading extensions that use an older but
+compatible API version.</p>
+<p>Covers: * <a
+href="#developing-extensions"><code>feat~developing-extensions~1</code></a></p>
+<p>Needs: dsn</p>
+<h4 id="extensions">Extensions</h4>
+<p><code>req~extension~1</code></p>
+<p>An extension might consist of JDBC driver, artifacts, configuration
+and database objects. Depending on the nature of the extension not all
+artifacts might be required.</p>
+<p>Covers: * <a
+href="#configure-an-extension"><code>feat~install-extension~1</code></a>
+* <a
+href="#configure-an-extension"><code>feat~configure-extension~1</code></a>
+* <a href="#extensions"><code>feat~uninstall-extension~1</code></a></p>
+<p>Needs: dsn</p>
+<h4 id="installation">Installation</h4>
+<h5 id="install-required-artifacts">Install Required Artifacts</h5>
+<p><code>req~install-extension-artifacts~1</code></p>
+<p>EM installs all artifacts required by an extension from GitHub (Jar
+files, 3rd party libraries, JDBC drivers etc.).</p>
+<p>Covers: * <a
+href="#configure-an-extension"><code>feat~install-extension~1</code></a></p>
+<p>Needs: dsn</p>
+<h5 id="install-database-objects">Install Database Objects</h5>
+<p><code>req~install-extension-database-objects~1</code></p>
+<p>EM installs corresponding database objects for an extension (UDFs,
+LUA Scripts, credentials, configuration tables etc.).</p>
+<p>Covers: * <a
+href="#configure-an-extension"><code>feat~install-extension~1</code></a></p>
+<p>Needs: dsn</p>
+<h4 id="upgrade-extension">Upgrade Extension</h4>
+<p><code>req~upgrade-extension~1</code></p>
+<p>When upgrading an extension that is already installed in an older
+version, EM runs code provided by the extension.</p>
+<p>Rationale:</p>
+<ul>
+<li>Upgrading to a new version requires actions specific for a concrete
+extension. Thus a general implementation in EM is not feasible.</li>
+<li>Extensions usually upgrade themselves by updating referenced files
+in <code>ADAPTER SCRIPT</code>s and <code>SET SCRIPT</code>s. This will
+automatically upgrade all instances (e.g. virtual schemas) using these
+scripts.</li>
+<li>If necessary the extension’s upgrade code may list and modify
+individual instances of the extension, e.g. when parameters of a virtual
+schema change between versions and can be converted automatically.
+<ul>
+<li>The extension’s upgrade code must fail with a meaningful error
+message if automatic modification is not possible.</li>
+<li>EM currently does not allow reading parameter values from a
+<code>CONNECTION</code>. This means that upgrades requiring modifying
+parameters are not possible at the moment.</li>
+<li>If necessary, we can implement this using a <a
+href="https://docs.exasol.com/db/latest/database_concepts/udf_scripts/lua.htm#AccessingConnectionDefinitions">Lua
+UDF</a> and provide a context method to the extension’s code.</li>
+</ul></li>
+</ul>
+<p>Covers: * <a
+href="#upgrading-an-extension"><code>feat~upgrade-extension~1</code></a></p>
+<p>Needs: dsn</p>
+<h4 id="uninstalling-extensions">Uninstalling extensions</h4>
+<p><code>req~uninstall-extension~1</code></p>
+<p>Covers: * <a
+href="#extensions"><code>feat~uninstall-extension~1</code></a></p>
+<p>Needs: dsn</p>
+<h4 id="define-configuration-parameters-for-extensions">Define
+Configuration Parameters for Extensions</h4>
+<p><code>req~define-configuration-parameters~1</code></p>
+<p>EM allows extensions to define a set of parameters. Each extension
+might have different parameters.</p>
+<p>Covers: * <a
+href="#configure-an-extension"><code>feat~configure-extension~1</code></a></p>
+<p>Needs: dsn</p>
+<h5 id="parameter-types">Parameter Types</h5>
+<p><code>req~parameter-types~1</code></p>
+<p>EM supports the following types for configuration parameters *
+strings * select a single option from a given list of available values *
+mandatory parameters * optional parameters * conditional parameters,
+i.e. parameters depending on other parameter’s values</p>
+<p>Rationale: EM’s UI can then present all relevant parameters to the
+user and allow the user to assign a value to each parameter, e.g. enter
+credentials, select values from option lists.</p>
+<p>Covers * <a
+href="#configure-an-extension"><code>feat~configure-extension~1</code></a></p>
+<p>Needs: dsn</p>
+<h5 id="validation-of-parameter-values">Validation of parameter
+values</h5>
+<p><code>req~validate-parameter-values~1</code></p>
+<p>EM validates parameter values selected or entered by the DBA.</p>
+<p>Rationale: * improve user experience * detect errors as soon as
+possible * ensure security</p>
+<p>Covers: * <a
+href="#configure-an-extension"><code>feat~configure-extension~1</code></a></p>
+<p>Needs: dsn</p>
+<h3 id="em-interface">EM Interface</h3>
+<h4 id="em-provides-a-rest-interface">EM Provides a REST Interface</h4>
+<p><code>req~rest-interface~1</code></p>
+<p>EM provides a REST interface.</p>
+<p>Rationale:</p>
+<p>EM needs to support both a Web UI and custom clients. A REST
+interface can be used by both.</p>
+<p>Covers: * <a
+href="#rest-interface"><code>feat~rest-interface~1</code></a></p>
+<p>Needs: dsn</p>
+<h4 id="em-provides-an-openapi-specification">EM Provides an OpenAPI
+Specification</h4>
+<p><code>req~openapi-spec~1</code></p>
+<p>EM provides an interface specification in OpenAPI format.</p>
+<p>Rationale:</p>
+<p>This allows users of EM to generate client code for the EM API in
+arbitrary programming languages and frameworks.</p>
+<p>Covers: * <a
+href="#rest-interface"><code>feat~rest-interface~1</code></a></p>
+<p>Needs: dsn</p>
+<h4 id="rest-interface-is-embeddable">REST Interface is Embeddable</h4>
+<p><code>req~embeddable-rest-interface~1</code></p>
+<p>EM’s REST interface can be embedded into other applications.</p>
+<p>Rationale:</p>
+<p>This allows including EM’s functionality and REST interface into
+other applications which simplifies deployment.</p>
+<p>Covers: * <a
+href="#rest-interface"><code>feat~rest-interface~1</code></a></p>
+<p>Needs: dsn</p>
+<h3 id="easy-extension-development">Easy Extension Development</h3>
+<h4 id="extension-api">Extension API</h4>
+<p><code>req~extension-api~1</code></p>
+<p>The Extension API provides a defined interface that extensions need
+to implement in order to be compatible with EM.</p>
+<p>Covers: * <a
+href="#developing-extensions"><code>feat~developing-extensions~1</code></a></p>
+<p>Needs: dsn</p>
+<h4 id="integration-test-framework-for-extensions">Integration Test
+Framework for Extensions</h4>
+<p><code>req~extension-testing-framework~1</code></p>
+<p>The Extension Testing Framework contains common setup code and
+convenient helper methods to simplify writing integration tests for new
+extensions.</p>
+<p>Covers: * <a
+href="#developing-extensions"><code>feat~developing-extensions~1</code></a></p>
+<p>Needs: dsn</p>
+<h2 id="non-functional-requirements">Non-functional Requirements</h2>
+<h3 id="ui-languages">UI Languages</h3>
+<p><code>req~ui-languages~1</code></p>
+<p>The current SaaS implementation only supports English as language in
+the user interface. To avoid complexity EM currently only supports
+English language in the user interface, too. This avoids additional
+efforts for UI translation until this is required.</p>
+<p>Covers: * <a
+href="#configure-an-extension"><code>feat~configure-extension~1</code></a>
+* <a
+href="#configure-an-extension"><code>feat~install-extension~1</code></a>
+* <a href="#extensions"><code>feat~uninstall-extension~1</code></a></p>
+<h2 id="constraints">Constraints</h2>
+<h3 id="em-uses-a-dedicated-schema">EM Uses a Dedicated Schema</h3>
+<p><code>const~use-reserved-schema~1</code></p>
+<p>EM manages extensions only in a reserved, Exasol-controlled schema
+called <code>EXA_EXTENSION</code>.</p>
+<p>Rationale:</p>
+<p>This makes it clear to DBAs that objects in this schema are managed
+and should not be modified by hand.</p>
+<p>Needs: impl, itest</p>
+<h3 id="em-works-with-exasol-saas">EM works with Exasol SaaS</h3>
+<p><code>const~works-with-saas~1</code></p>
+<p>EM works in an Exasol SaaS environment.</p>
+<p>Needs: dsn</p>
+<h2 id="out-of-scope">Out-of-Scope</h2>
+<h3 id="downgrade-to-an-older-version">Downgrade to an Older
+Version</h3>
+<p>EM does not need to support downgrading an installed extension to an
+older version.</p>
+<h2 id="potential-future-enhancements">Potential Future
+Enhancements</h2>
+<p>The following features are out of scope for now, but the architecture
+of the extension manager must be prepared to support them.</p>
+<h3 id="on-premise-support">On Premise Support</h3>
+<p>The extension manager is also useful for customer using Exasol on
+premise.</p>
+<h3 id="automatic-installation-of-required-files">Automatic Installation
+of Required Files</h3>
+<p>Currently the extension manager expects that required files like
+virtual schema JARs or JDBC drivers are already available in BucketFS. A
+future version might download and install these files automatically or
+update them to the latest version.</p>
+<h3 id="automatic-updates-of-installed-extensions">Automatic Updates of
+Installed Extensions</h3>
+<p>When new versions of a virtual schema become available that
+potentially fix security issues, it would be helpful to automatically
+install the new version and update the virtual schemas during a
+maintenance window.</p>
+<h3 id="install-older-versions">Install Older Versions</h3>
+<p>If an older version of the VS JAR is available on BucketFS we could
+allow the user to choose the version they want to use.</p>
+<p>Currently the extension manager will always use the Jar matching the
+extension’s version.</p>
+<h3 id="use-custom-adapter-scripts">Use Custom Adapter Scripts</h3>
+<p>In case the user wants to use an existing <code>ADAPTER SCRIPT</code>
+or explicitly wants to create a new one, the extension manager allows
+them to choose between these options.</p>
+<h3 id="usage-via-a-automation-tools">Usage via a Automation Tools</h3>
+<p>Currently the extension manager is only meant to be used by the SaaS
+UI. In the future we might allow using the extension manager also via
+automation tools like Terraform that automatically configure virtual
+schemas.</p>
