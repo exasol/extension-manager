@@ -1,10 +1,11 @@
 {
+  "type": "module",
   "scripts": {
     "build": "esbuild extensionForTesting.js --bundle --outfile=dist.js --target=es6",
     "clean": "rm -rf dist/"
   },
   "dependencies": {
-    "@exasol/extension-manager-interface": "0.4.5"
+    "@exasol/extension-manager-interface": "0.4.3"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"
