@@ -26,7 +26,7 @@ sources:
     path: registry-upload/package.json
   - type: npm
     path: pkg/parameterValidator/package.json
-version: 0.5.14
+version: 0.5.15
 linkReplacements:
   - "Unknown|https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE"
   - "https://github.com/swagger-api/swagger-core/modules/swagger-annotations|https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-annotations"
@@ -41,3 +41,5 @@ excludes:
   - "E-PK-CORE-26: '.github/workflows/release_droid_upload_github_release_assets.yml' exists but must not exist. Reason: Release-droid workflows are replaced by release.yml"
   - "E-PK-CORE-26: '.github/workflows/release_droid_release_on_maven_central.yml' exists but must not exist. Reason: Release-droid workflows are replaced by release.yml"
   - "E-PK-CORE-26: 'release_config.yml' exists but must not exist. Reason: Release-droid configuration is replaced by release.yml"
+  # Project uses Go 1.23, see https://github.com/exasol/project-keeper/issues/616
+  - "E-PK-CORE-18: Outdated content: '.github/workflows/project-keeper-verify.yml'"
