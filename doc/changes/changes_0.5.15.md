@@ -6,6 +6,8 @@ Code name: Fix CWE-346, CWE-346, CVE-2025-23206, CVE-2025-25193, CVE-2025-24970,
 
 This release fixes the following vulnerabilities: CWE-346, CWE-346, CVE-2025-23206, CVE-2025-25193, CVE-2025-24970, CVE-2025-25193 and CVE-2025-24970.
 
+**Note:** This release upgrades to Go 1.23.
+
 ## Security
 
 * #189: Fixed vulnerabilities by upgrading dependencies

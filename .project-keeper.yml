@@ -41,3 +41,5 @@ excludes:
   - "E-PK-CORE-26: '.github/workflows/release_droid_upload_github_release_assets.yml' exists but must not exist. Reason: Release-droid workflows are replaced by release.yml"
   - "E-PK-CORE-26: '.github/workflows/release_droid_release_on_maven_central.yml' exists but must not exist. Reason: Release-droid workflows are replaced by release.yml"
   - "E-PK-CORE-26: 'release_config.yml' exists but must not exist. Reason: Release-droid configuration is replaced by release.yml"
+  # Project uses Go 1.23, see https://github.com/exasol/project-keeper/issues/616
+  - "E-PK-CORE-18: Outdated content: '.github/workflows/project-keeper-verify.yml'"
