@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="184px" preserveAspectRatio="none" style="width:734px;height:184px;" version="1.1" viewBox="0 0 734 184" width="734px" zoomAndPan="magnify"><defs><filter height="300%" id="ffsll1cshtjf6" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[0e1fecc31e3549f2a1667c6349b56d9e]
+entity postgres--><rect fill="#FEFECE" filter="url(#ffsll1cshtjf6)" height="52.5938" style="stroke: #A80036; stroke-width: 1.5;" width="207" x="308.5" y="121"/><rect fill="#FEFECE" height="5" style="stroke: #A80036; stroke-width: 1.5;" width="10" x="303.5" y="126"/><rect fill="#FEFECE" height="5" style="stroke: #A80036; stroke-width: 1.5;" width="10" x="303.5" y="163.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="187" x="318.5" y="143.9951">PostgreSQL Virtual Schema</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="135" x="318.5" y="160.292">Extension definition</text><!--MD5=[95056b5cbad1279cc73d9cc5c17a1af7]
+entity mysql--><rect fill="#FEFECE" filter="url(#ffsll1cshtjf6)" height="52.5938" style="stroke: #A80036; stroke-width: 1.5;" width="172" x="551" y="121"/><rect fill="#FEFECE" height="5" style="stroke: #A80036; stroke-width: 1.5;" width="10" x="546" y="126"/><rect fill="#FEFECE" height="5" style="stroke: #A80036; stroke-width: 1.5;" width="10" x="546" y="163.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="152" x="561" y="143.9951">MySQL Virtual Schema</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="135" x="561" y="160.292">Extension definition</text><!--MD5=[faafcfa3ab866b3a0a33883d3f4a4e25]
+entity extensionInterface--><rect fill="#FEFECE" filter="url(#ffsll1cshtjf6)" height="36.2969" style="stroke: #A80036; stroke-width: 1.5;" width="208" x="308" y="8"/><rect fill="#FEFECE" height="5" style="stroke: #A80036; stroke-width: 1.5;" width="10" x="303" y="13"/><rect fill="#FEFECE" height="5" style="stroke: #A80036; stroke-width: 1.5;" width="10" x="303" y="34.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="188" x="318" y="30.9951">Extension Manger interface</text><!--MD5=[73fc5e6abeeda282e3dd427e3cd20086]
+entity extensionManager--><rect fill="#FEFECE" filter="url(#ffsll1cshtjf6)" height="36.2969" style="stroke: #A80036; stroke-width: 1.5;" width="152" x="6" y="129.5"/><rect fill="#FEFECE" height="5" style="stroke: #A80036; stroke-width: 1.5;" width="10" x="1" y="134.5"/><rect fill="#FEFECE" height="5" style="stroke: #A80036; stroke-width: 1.5;" width="10" x="1" y="155.7969"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="132" x="16" y="152.4951">Extension Manager</text><!--MD5=[d0c058dc0db4d7bf7f181e7c7815dd2a]
+reverse link extensionInterface to extensionManager--><path d="M320.57,45.24 C289.16,52.68 254.1,62.32 223,74 C182.29,89.29 138.12,113.33 110.27,129.48 " fill="none" id="extensionInterface&lt;-extensionManager" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="325.58,44.06,315.9043,42.2214,320.7122,45.202,317.7315,50.0099,325.58,44.06" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[2ffa3f695e814a04d8f4e94377042410]
+reverse link extensionInterface to postgres--><path d="M412,64.24 C412,82.54 412,104.14 412,120.61 " fill="none" id="extensionInterface&lt;-postgres" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="405,64.12,412,44.12,419,64.12,405,64.12" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[526325c3251096fe7357c0e2bb1a7d4c]
+reverse link extensionInterface to mysql--><path d="M462.07,53.59 C499.83,73.65 551.34,101 588.67,120.83 " fill="none" id="extensionInterface&lt;-mysql" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="458.62,59.68,444.24,44.12,465.18,47.32,458.62,59.68" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[6d9aeea44aa39fae44844bd3422e003c]
+link extensionManager to postgres--><path d="M158.12,147.5 C201.19,147.5 255.77,147.5 303.28,147.5 " fill="none" id="extensionManager-&gt;postgres" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="308.44,147.5,299.44,143.5,303.44,147.5,299.44,151.5,308.44,147.5" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="114" x="176.25" y="140.5669">loaded at runtime</text><!--MD5=[1af29a25a0aa1a68c709ff5efe119996]
+link extensionManager to mysql--><path d="M113.91,129.42 C143.27,113.88 188.57,92.66 231,84 C345.11,60.7 478.79,92.94 560.67,119.36 " fill="none" id="extensionManager-&gt;mysql" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="565.5,120.93,558.173,114.3486,560.7439,119.3875,555.705,121.9583,565.5,120.93" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="114" x="232" y="87.0669">loaded at runtime</text><!--MD5=[a13dd95026341659df14299f59c52103]
+@startuml
+postgres as [PostgreSQL Virtual Schema\nExtension definition]
+mysql as [MySQL Virtual Schema\nExtension definition]
+extensionInterface as [Extension Manger interface]
+extensionManager as [Extension Manager]
+
+extensionInterface <- - extensionManager
+extensionInterface <|- - postgres
+extensionInterface <|- - mysql
+
+extensionManager -> postgres: loaded at runtime
+extensionManager -> mysql: loaded at runtime
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 17.0.14+7
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: null
+--></g></svg>

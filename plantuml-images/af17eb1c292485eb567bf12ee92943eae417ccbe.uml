@@ -1,0 +1,28 @@
+@startuml
+storage "prostgres-virtual-schema release 2.0.2" {
+  file installerInRepo as "postgresql-vs-extension.js"
+  file jarV2InRepo as "postgresql-vs-2.0.2.jar"
+}
+
+storage "prostgres-virtual-schema release 1.0.0" {
+  file "postgresql-vs-extension.js"
+  file jarV1InRepo as "postgresql-vs-1.0.0.jar"
+}
+
+node "Extension Registry" {
+  storage "Extension Definitions" {
+    file installerInBucketFS as "postgresql-vs-extension.js"
+  }
+}
+
+node "Exasol SaaS" {
+  storage BucketFS {
+    file jarV2InBucketFs as "postgresql-vs-2.0.2.jar"
+    file jarV1InBucketFS as "postgresql-vs-1.0.0.jar"
+  }
+}
+
+installerInBucketFS --> installerInRepo : Update reference during deployment (1)
+jarV2InRepo --> jarV2InBucketFs : Copy during deployment (2)
+jarV1InRepo --> jarV1InBucketFS : Copy during deployment (2)
+@enduml

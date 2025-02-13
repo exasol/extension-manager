@@ -1,0 +1,10 @@
+@startuml
+class Account as "Exasol SaaS Account"
+class Database
+class Installation as "Extension-Installation (UDFs, SCRIPTs, ...)"
+class Instance as "Extension-Instance (Virtual schema)"
+Account "1" o-- "*" Database
+Database "1" o-- "*" Installation
+Database "1" -- "1" BucketFs
+Installation "1" o-- "*" Instance
+@enduml

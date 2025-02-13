@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="487px" preserveAspectRatio="none" style="width:1259px;height:487px;" version="1.1" viewBox="0 0 1259 487" width="1259px" zoomAndPan="magnify"><defs><filter height="300%" id="f1uttlszeymj6z" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[1b0f1d4bc34feaedb5789fed429cabc9]
+cluster Account--><rect fill="#FFFFFF" filter="url(#f1uttlszeymj6z)" height="272" style="stroke: #000000; stroke-width: 1.5;" width="826" x="422" y="204"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="163" x="753.5" y="218.9951">Exasol SaaS Account</text><!--MD5=[b3d6363e42382f480594ffa33fc14f11]
+cluster Database (= 1 COS)--><rect fill="#FFFFFF" filter="url(#f1uttlszeymj6z)" height="205" style="stroke: #000000; stroke-width: 1.5;" width="778" x="446" y="247"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="155" x="757.5" y="261.9951">Database (= 1 COS)</text><!--MD5=[9783b8c4a6a68441616f37e357eb25d4]
+cluster BucketFS--><rect fill="#FFFFFF" filter="url(#f1uttlszeymj6z)" height="122" rx="35" ry="35" style="stroke: #000000; stroke-width: 1.5;" width="360" x="832" y="298"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="73" x="975.5" y="317.9951">BucketFS</text><!--MD5=[c7dc3fa6def24cc23a6ca573df2cbdce]
+cluster s3Bfs--><rect fill="#FFFFFF" filter="url(#f1uttlszeymj6z)" height="122" rx="35" ry="35" style="stroke: #000000; stroke-width: 1.5;" width="360" x="30" y="298"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="156" x="132" y="317.9951">S3BucketFs (global)</text><rect fill="#FEFECE" filter="url(#f1uttlszeymj6z)" height="33.9688" style="stroke: #A80036; stroke-width: 1.5;" width="146" x="659" y="361"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="132" x="666" y="374.1387">SYS.EXA_ALL_SCRIPTS</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="660" x2="804" y1="378.9688" y2="378.9688"/><rect fill="#FEFECE" filter="url(#f1uttlszeymj6z)" height="33.9688" style="stroke: #A80036; stroke-width: 1.5;" width="161" x="462.5" y="361"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="147" x="469.5" y="374.1387">ADAPTERS.MY_ADAPTER</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="463.5" x2="622.5" y1="378.9688" y2="378.9688"/><!--MD5=[13c7745981a6abb6004f7738a8ca5078]
+entity 1--><polygon fill="#FFFFFF" filter="url(#f1uttlszeymj6z)" points="1046,360,1046,396.2969,1168,396.2969,1168,370,1158,360,1046,360" style="stroke: #000000; stroke-width: 1.5;"/><path d="M1158,360 L1158,370 L1168,370 " fill="#FFFFFF" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="102" x="1056" y="382.9951">postgres-vs.jar</text><!--MD5=[773709cb2207c097691e7e7d3d2cc787]
+entity 2--><polygon fill="#FFFFFF" filter="url(#f1uttlszeymj6z)" points="875,360,875,396.2969,1011,396.2969,1011,370,1001,360,875,360" style="stroke: #000000; stroke-width: 1.5;"/><path d="M1001,360 L1001,370 L1011,370 " fill="#FFFFFF" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="116" x="885" y="382.9951">postgres-jdbc.jar</text><!--MD5=[5721696d2af8d327c8f4e7ea88061d17]
+entity 3--><polygon fill="#FFFFFF" filter="url(#f1uttlszeymj6z)" points="244,360,244,396.2969,366,396.2969,366,370,356,360,244,360" style="stroke: #000000; stroke-width: 1.5;"/><path d="M356,360 L356,370 L366,370 " fill="#FFFFFF" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="102" x="254" y="382.9951">postgres-vs.jar</text><!--MD5=[ca8cb0432c9090f8973c99138b4c3ca0]
+entity 4--><polygon fill="#FFFFFF" filter="url(#f1uttlszeymj6z)" points="73,360,73,396.2969,209,396.2969,209,370,199,360,73,360" style="stroke: #000000; stroke-width: 1.5;"/><path d="M199,360 L199,370 L209,370 " fill="#FFFFFF" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="116" x="83" y="382.9951">postgres-jdbc.jar</text><!--MD5=[2853ca5c8d96840d6316b7b6e968068a]
+link s3Bfs to BucketFS--><path d="M29.9421,340.8669 C29.8748,340.4247 29.808,339.9799 29.7419,339.5325 C29.4774,337.7429 29.2232,335.9119 28.9823,334.0443 C28.019,326.5741 27.2709,318.5181 26.9488,310.18 C25.66,276.8275 31.185,238.96 57,216 C121.67,158.47 774.05,155.56 836,216 C842.2425,222.09 845.6956,234.7325 847.3444,250.3964 C848.1688,258.2284 848.542,266.8157 848.5873,275.7169 C848.61,280.1676 848.5507,284.6967 848.4247,289.2491 C848.3618,291.5254 848.2821,293.8074 848.1878,296.0884 C848.1642,296.6586 848.1397,297.2288 848.1143,297.7988 " fill="none" id="s3Bfs-&gt;BucketFS" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="848.1143,297.7988,852.5109,288.9858,848.3369,292.8038,844.5189,288.6297,848.1143,297.7988" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="55" x="411.5" y="184.0669">mirrored</text><!--MD5=[ba984856647acb098f00d6446a67c23e]
+@startuml
+rectangle Account as "Exasol SaaS Account" {
+  rectangle "Database (= 1 COS)" {
+    object SYS.EXA_ALL_SCRIPTS {
+    }
+
+    object ADAPTERS.MY_ADAPTER {
+    }
+
+    storage BucketFS {
+      file 1 as "postgres-vs.jar" {
+      }
+      file 2 as "postgres-jdbc.jar" {
+      }
+    }
+  }
+}
+
+storage s3Bfs as "S3BucketFs (global)" {
+  file 3 as "postgres-vs.jar" {
+  }
+  file 4 as "postgres-jdbc.jar" {
+  }
+}
+s3Bfs -> BucketFS: mirrored
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 17.0.14+7
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: null
+--></g></svg>

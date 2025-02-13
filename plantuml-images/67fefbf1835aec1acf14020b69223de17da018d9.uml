@@ -1,0 +1,22 @@
+@startuml
+node "Exasol SaaS backend" {
+  rectangle backend as "Extension Manager Backend (Go)" {
+  rectangle JsVM
+}
+  storage Extensions {
+    file installer as "postgres-extension-def-1.0.0.js"
+  }
+}
+
+node customerCluster as "Customer Database" {
+}
+
+node Browser {
+  rectangle jsClient {
+  }
+}
+
+jsClient <-> backend
+JsVM <- installer: loaded into
+backend --> customerCluster: manages
+@enduml

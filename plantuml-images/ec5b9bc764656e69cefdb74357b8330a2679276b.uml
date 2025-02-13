@@ -1,0 +1,13 @@
+@startuml
+file postgres-extension-def.ts {
+}
+file postgres-extension-config.ts {
+}
+file postgres-extension-def.js {
+}
+
+note top of postgres-extension-config.ts: Generated during build
+
+"postgres-extension-def.ts" -> "postgres-extension-def.js": Compiled during build
+"postgres-extension-config.ts" -> "postgres-extension-def.js": Compiled during build
+@enduml

@@ -1,0 +1,707 @@
+<h1 id="design-extension-manager">Design – Extension Manager</h1>
+<!--
+INFO: This file contains embedded plantuml diagrams. For displaying them you need to enable editor support.
+IntelliJ: https://youtrack.jetbrains.com/api/files/74-1236265?sign=MTY1MDg0NDgwMDAwMHwxMS0xfDc0LTEyMzYyNjV8d2VXdWNFVkJfVWZQeV9ZX3JHNF9rYno4cFV2%0D%0AMy1BV2ZSNjZaOUxhdVBOSQ0K%0D%0A&updated=1639999300525
+Visual Studio Code: https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml (see https://github.com/qjebbs/vscode-plantuml/issues/449 for fixing Markdown preview)
+-->
+<h2 id="acknowledgments">Acknowledgments</h2>
+<p>This document’s section structure is derived from the “<a
+href="https://arc42.org/">arc42</a>” architectural template by
+Dr. Gernot Starke, Dr. Peter Hruschka.</p>
+<h2 id="constraints">Constraints</h2>
+<p>This section introduces technical system constraints.</p>
+<h2 id="solution-strategy">Solution Strategy</h2>
+<h3 id="requirement-overview">Requirement Overview</h3>
+<p>Please refer to the <a href="system_requirements.md">System
+Requirement Specification</a> for user-level requirements.</p>
+<h2 id="building-blocks">Building Blocks</h2>
+<h3 id="overall-architecture">Overall Architecture</h3>
+<p>The extension installer is split into a backend (running in the
+Exasol SaaS backend, see <a href="#does-em-need-a-backend">design
+decisions</a>) and a client (running in the SaaS UI).</p>
+<p><img
+src="plantuml-images/67fefbf1835aec1acf14020b69223de17da018d9.svg" /></p>
+<h4 id="em-provides-a-rest-interface">EM Provides a REST Interface</h4>
+<p><code>dsn~rest-interface~1</code></p>
+<p>EM provides a REST interface to clients.</p>
+<p>Covers: * <a
+href="system_requirements.md#em-provides-a-rest-interface"><code>req~rest-interface~1</code></a></p>
+<p>Needs: impl, itest</p>
+<h4 id="em-implemented-as-a-go-library">EM Implemented as a Go
+Library</h4>
+<p><code>dsn~go-library~1</code></p>
+<p>EM is implemented as a Go library instead of an executable Go
+program.</p>
+<p>Rationale:</p>
+<p>This allows embedding EM in other applications like SaaS, so it can
+be reused in different contexts</p>
+<p>Comment:</p>
+<p>Nevertheless EM additionally contains an executable Go program which
+is useful for testing EM and extensions.</p>
+<p>Covers: * <a
+href="system_requirements.md#rest-interface-is-embeddable"><code>req~embeddable-rest-interface~1</code></a>
+* <a
+href="system_requirements.md#em-works-with-exasol-saas"><code>const~works-with-saas~1</code></a></p>
+<p>Needs: impl</p>
+<h4 id="em-generates-an-openapi-specification">EM Generates an OpenAPI
+Specification</h4>
+<p><code>dsn~openapi-spec~1</code></p>
+<p>EM generates an OpenAPI specification at runtime using the <a
+href="https://github.com/Nightapes/go-rest">Nightapes/go-rest</a>
+library.</p>
+<p>The standalone executable of EM provides the OpenAPI specification as
+a web page and in JSON format. Applications that embed EM as a library
+need to create their own endpoint for that.</p>
+<p>Covers: * <a
+href="system_requirements.md#em-provides-an-openapi-specification"><code>req~openapi-spec~1</code></a></p>
+<p>Needs: impl, itest</p>
+<h4 id="extension-registry">Extension Registry</h4>
+<p><code>dsn~extension-registry~1</code></p>
+<p>EM uses a web service called Extension Registry (similar to service
+discovery) to find available extensions and their JavaScript
+definitions.</p>
+<p>Rationale:</p>
+<p>This will allow updating extension definitions without modifying the
+deployed EM. In the future this will also allow multiple instances of EM
+to use the same list of available extensions. During development and for
+integration tests it is easier to use a local directory with JavaScript
+files for finding available extensions. That’s why EM supports both
+variants. At startup it will check if the configured extension registry
+URL starts with <code>http</code> and will use the appropriate
+implementation.</p>
+<p>Covers: * <a
+href="system_requirements.md#em-finds-available-extensions"><code>req~finding-available-extensions~1</code></a></p>
+<p>Needs: impl, utest, itest</p>
+<h4 id="extension-registry-caches-registry-content">Extension Registry
+Caches Registry Content</h4>
+<p><code>dsn~extension-registry.cache~1</code></p>
+<p>EM caches the content returned by the registry.</p>
+<p>Rationale: * Caching the registry content avoids fetching the same
+data multiple times and speeds up the process. * Cache expiration is not
+necessary because a new instance of the EM controller is created for
+each request.</p>
+<p>Covers: * <a
+href="system_requirements.md#em-finds-available-extensions"><code>req~finding-available-extensions~1</code></a></p>
+<p>Needs: impl, itest</p>
+<h3 id="extensions">Extensions</h3>
+<p>The Extension Manager has an extension mechanism.</p>
+<p>The extensions are integration projects maintained by Exasol. For
+now, it’s not possible to install third party extensions, since it would
+be a security risk.</p>
+<p>The extension manager itself has no dependencies to the Virtual
+Schema projects. They are loaded at runtime.</p>
+<p><img
+src="plantuml-images/c84c88ff4633acd3cc091ee37975c6a735176d79.svg" /></p>
+<h4 id="components-of-an-extension">Components of an Extension</h4>
+<p><code>dsn~extension-components~1</code></p>
+<p>An extension might consist of JDBC driver, artifacts, configuration
+and database objects. Depending on it’s nature a specific extension
+might not require all artifacts.</p>
+<p>In the initial version when managing extensions EM requires the
+following components to be available in BucketFS and does not actively
+manage them: * JDBC driver * Artifacts in BucketFS, e.g. jar files * 3rd
+party libraries</p>
+<p>Instead, for managing extensions EM only considers the following
+database objects: * <code>ADAPTER SCRIPT</code> *
+<code>SET SCRIPT</code> * <code>CONNECTION</code> *
+<code>VIRTUAL SCHEMA</code> including mapping</p>
+<p>Note: In the following cases a separate artifact in BucketFS is not
+required, as extension definition can inline these contents into the SQL
+statements of either adapter script or set script: * JSON content of
+virtual schema EDML mapping, see <a
+href="https://github.com/exasol/virtual-schema-common-document/blob/main/doc/user_guide/edml_user_guide.md">EDML
+user guide</a> * Lua scripts</p>
+<p>When creating the required database objects EM will read all required
+arguments, configurations and credentials from the <a
+href="#extension-definitions">extension definition</a>. The extension
+definition can also define <a
+href="#parameters-for-extension-configuration">parameters</a>. EM will
+evaluate the parameter definitions and then ask the user to enter a
+value for each of the parameters. See also an example of the <a
+href="#installation-process">installation process</a>.</p>
+<p>Covers:</p>
+<ul>
+<li><a
+href="system_requirements.md#install-required-artifacts"><code>req~extension~1</code></a></li>
+<li><a
+href="system_requirements.md#install-database-objects"><code>req~install-extension-artifacts~1</code></a></li>
+</ul>
+<p>Needs: impl, utest</p>
+<h4 id="configurable-bucketfs-path">Configurable BucketFS Path</h4>
+<p><code>dsn~configure-bucketfs-path~1</code></p>
+<p>EM allows configuring the BucketFS path where extensions artifacts
+like JAR files are located.</p>
+<p>Rationale:</p>
+<p>As described in <a
+href="#components-of-an-extension"><code>dsn~extension-components~1</code></a>
+an extension may require files in BucketFS. The path to the BucketFS
+location depends on the Exasol database deployment.</p>
+<p>Needs: impl, utest, itest</p>
+<h3 id="extension-definitions">Extension Definitions</h3>
+<p><code>dsn~extension-definition~1</code></p>
+<p>Each extension might be implemented in an arbitrary programming
+language and typically is based on a so-called <a
+href="system_requirements.md#terms-and-abbreviations">user defined
+function</a>. In order to allow EM to manage multiple heterogenous
+extensions in a unique way, each extension is represented by small
+wrapper implementing a uniform interface. This wrapper is called an
+“extension definition”.</p>
+<p>Covers:</p>
+<ul>
+<li><a
+href="system_requirements.md#install-required-artifacts"><code>req~extension~1</code></a></li>
+</ul>
+<p>Needs: impl, utest, itest</p>
+<h4 id="extension-api-interface">Extension API Interface</h4>
+<p><code>dsn~extension-api~1</code></p>
+<p>Each <a href="#extension-definitions">extension definition</a>
+implements the TypeScript interface defined in <a
+href="https://github.com/exasol/extension-manager-interface/"><code>extension-manager-interface</code></a>.
+This allows EM to uniformly manage all extensions that implement this
+interface.</p>
+<p><img
+src="plantuml-images/103277b058348effcf06290a9238ea8e4389315e.svg" /></p>
+<p>Covers:</p>
+<ul>
+<li><a
+href="system_requirements.md#extension-api"><code>req~extension-api~1</code></a></li>
+</ul>
+<p>Needs: impl, utest</p>
+<h4 id="storage-for-extension-definitions">Storage for Extension
+Definitions</h4>
+<p><code>dsn~extension-definitions-storage~1</code></p>
+<p>The extension definitions are placed in a storage that is accessible
+from the extension-manager backend. Access from inside the database is
+not required.</p>
+<p>Covers: * <a
+href="system_requirements.md#install-database-objects"><code>req~install-extension-artifacts~1</code></a>
+* <a
+href="system_requirements.md#parameter-types"><code>req~define-configuration-parameters~1</code></a>
+* <a
+href="system_requirements.md#uninstalling-extensions"><code>req~uninstall-extension~1</code></a></p>
+<p>Needs: impl, itest</p>
+<h4 id="extension-compatibility">Extension Compatibility</h4>
+<p><code>dsn~extension-compatibility~1</code></p>
+<p>EM verifies that a loaded extension uses an extension API versions
+with the same major version as EM.</p>
+<p>Covers: * <a
+href="system_requirements.md#extension-compatibility"><code>req~extension-compatibility~1</code></a></p>
+<p>Needs: impl, utest, itest</p>
+<h4 id="versioning">Versioning</h4>
+<p><code>dsn~versioning~1</code></p>
+<p>Note that only the latest version of the extension definition is
+deployed.</p>
+<p>That does not mean that it’s impossible to install older versions of
+an extension. Just the extension definition (the plugin for the
+extension manager) is always the latest version.</p>
+<p>That means that the extension definition must be able to uninstall
+and update all old versions of its extension. That makes testing harder
+but is the only way to have the upgrade path tested.</p>
+<p>The alternative to also version the extension definition would lead
+to unmaintained and untested code, since the old version would not be
+tested with newer DB versions.</p>
+<p>This requirement must be covered by extensions.</p>
+<p>Covers: * <a
+href="system_requirements.md#install-database-objects"><code>req~install-extension-artifacts~1</code></a>
+* <a
+href="system_requirements.md#uninstall-an-extension"><code>req~uninstall-extension~1</code></a></p>
+<h3 id="parameters-for-extension-configuration">Parameters for Extension
+Configuration</h3>
+<p><code>dsn~configuration-parameters~1</code></p>
+<p>The extension definition also includes parameters for configuring the
+extension.</p>
+<p>Covers: * <a
+href="system_requirements.md#parameter-types"><code>req~define-configuration-parameters~1</code></a></p>
+<p>Needs: impl, utest</p>
+<h4 id="parameter-definition-format">Parameter Definition Format</h4>
+<p><code>dsn~parameter-definitions~1</code></p>
+<p>EM extension interface uses a flexible JSON structure to describe the
+parameters including <a href="#conditional-parameters">conditional
+parameters</a>.</p>
+<p>Rationale: Individual extensions might have different parameters. For
+example a virtual schema for another database might support multiple
+connection protocols or libraries (e.g. ODBC and JDBC) that require
+different configuration options. Depending on the selected protocol EM
+can then show only the parameters for the selected protocol but hide
+unrelated parameters.</p>
+<p>Example:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>extension <span class="op">=</span> {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ...</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">condition</span><span class="op">:</span> {</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">parameter</span><span class="op">:</span> <span class="st">&quot;connectorType&quot;</span><span class="op">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">operator</span><span class="op">:</span> Operators<span class="op">.</span><span class="at">EQ</span><span class="op">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">value</span><span class="op">:</span> <span class="st">&quot;jdbc&quot;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ...</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>While this requires interpretation of the JSON structure, it allows
+to transfer the parameter definition to the frontend as simple JSON in
+contrast to the alternative options considered.</p>
+<p>Covers: * <a
+href="system_requirements.md#parameter-types"><code>req~define-configuration-parameters~1</code></a>
+* <a
+href="system_requirements.md#validation-of-parameter-values"><code>req~parameter-types~1</code></a></p>
+<p>Needs: impl, utest, itest</p>
+<h4 id="parameter-types">Parameter Types</h4>
+<p><code>dsn~parameter-types~1</code></p>
+<p>Each extension can define parameter definitions. The UI then shows a
+form with these parameters to the users and passes the values to the
+<code>createInstance</code> endpoint.</p>
+<p>The following class hierarchy is used to model parameter
+definitions:</p>
+<p><img
+src="plantuml-images/d76bf65fb5c0a7298cd787b92fca961cf55dbfe6.svg" /></p>
+<p>Covers: * <a
+href="system_requirements.md#validation-of-parameter-values"><code>req~parameter-types~1</code></a></p>
+<p>Needs: impl, utest</p>
+<h4 id="conditional-parameters">Conditional Parameters</h4>
+<p><code>dsn~conditional-parameters~1</code> Status: draft</p>
+<p>Conditions for conditional parameters are represented by JSON
+structures, see <a
+href="#alternative-options-to-represent-conditional-parameters">design
+decision</a> against alternative options to represent conditional
+parameters.</p>
+<p>Covers: * <a
+href="system_requirements.md#validation-of-parameter-values"><code>req~parameter-types~1</code></a></p>
+<h4 id="parameters-versions-and-updates">Parameters, Versions and
+Updates</h4>
+<p><code>dsn~parameter-versioning~1</code></p>
+<p>Each parameter definition is attached to a specific version of the
+extension.</p>
+<p>Rationale: Parameters can change over time, see <a
+href="#upgrades">Upgrades</a>.</p>
+<p>Covers: * <a
+href="system_requirements.md#parameter-types"><code>req~define-configuration-parameters~1</code></a>
+* <a
+href="system_requirements.md#uninstalling-extensions"><code>req~upgrade-extension~1</code></a></p>
+<p>Needs: impl, utest</p>
+<h3 id="parameter-validation">Parameter Validation</h3>
+<h4 id="reuse-parameter-validation-rules">Reuse Parameter Validation
+Rules</h4>
+<p><code>dsn~reuse-parameter-validation-rules~1</code></p>
+<p>Parameter validation for both stages (frontend and backend) is
+configured in <a href="#extension-definitions">extension definition</a>,
+see related <a
+href="#typescript-library-for-parameter-validation">Design
+Decision</a>.</p>
+<p>Covers: * <a
+href="system_requirements.md#ui-languages"><code>req~validate-parameter-values~1</code></a></p>
+<p>Needs: impl, utest</p>
+<h4 id="simple-parameter-validation-rules">Simple Parameter Validation
+Rules</h4>
+<p><code>dsn~parameter-validation-rules-simple~1</code></p>
+<p>The extension definition can specify rules for parameter
+validation:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>param <span class="op">=</span> {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  id<span class="op">:</span> <span class="st">&quot;port&quot;</span><span class="op">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  name<span class="op">:</span> <span class="st">&quot;Port&quot;</span><span class="op">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  type<span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  regex<span class="op">:</span> <span class="ss">/</span><span class="sc">\d+</span><span class="ss">/</span> <span class="co">// &lt;-- Validation via regex</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Covers: * <a
+href="system_requirements.md#ui-languages"><code>req~validate-parameter-values~1</code></a></p>
+<p>Needs: impl, utest</p>
+<h4 id="complex-parameter-validation-rules">Complex Parameter Validation
+Rules</h4>
+<p><code>dsn~parameter-validation-rules-complex~1</code> Status:
+draft</p>
+<p>More complex validations involving multiple parameters can be defined
+via a JavaScript callback function that is executed only in the backend,
+not the frontend. That gives the extension definition the maximum
+flexibility while simplifying the validation in the frontend.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>extension <span class="op">=</span> {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">//...</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">validate</span>(parameterValues) {</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (parameterValues[<span class="st">&quot;connectorType&quot;</span>] <span class="op">===</span> <span class="st">&quot;jdbc&quot;</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="fu">isValidJdbcParameter</span>(parameterValues[<span class="st">&quot;additionalJdbcParameter&quot;</span>])) {</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> <span class="st">&quot;Invalid value for additionalJdbcParameter.&quot;</span><span class="op">;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>See design decision <a
+href="#callback-for-client-side-validation">against a callback for the
+client side validation</a>.</p>
+<p>Covers: * <a
+href="system_requirements.md#ui-languages"><code>req~validate-parameter-values~1</code></a></p>
+<h3 id="extension-integration-testing-framework">Extension Integration
+Testing Framework</h3>
+<p>The Extension Integration Testing Framework for Java (EITFJ) allows
+<a href="system_requirements.md#extension-developers">extension
+developers</a> to create integration tests for an extension involving
+its definition](#extension-definitions) and implementation.</p>
+<p>The EITFJ is written in Java as most extensions like virtual schemas
+are also written in Java. This way it’s easy to add integration tests
+for an extension into the existing Maven build.</p>
+<h4 id="starting-extension-manager-during-integration-tests">Starting
+Extension Manager during Integration Tests</h4>
+<p><code>dsn~eitfj-start-extension-manager~1</code></p>
+<p>The EITFJ provides a method for installing and starting an <a
+href="#em-provides-a-rest-interface">Extension Manager REST
+interface</a>.</p>
+<p>Covers: * <a
+href="system_requirements.md#integration-test-framework-for-extensions"><code>req~extension-testing-framework~1</code></a></p>
+<p>Needs: impl, itest, doc</p>
+<h4 id="accessing-the-extension-manager-rest-interface">Accessing the
+Extension Manager REST Interface</h4>
+<p><code>dsn~eitfj-access-extension-manager-rest-interface~1</code></p>
+<p>The EITFJ provides a Java API for accessing the EM REST
+interface.</p>
+<p>Rationale: This simplifies integration tests and avoids code
+duplication.</p>
+<p>Covers: * <a
+href="system_requirements.md#integration-test-framework-for-extensions"><code>req~extension-testing-framework~1</code></a></p>
+<p>Needs: impl, utest, itest, doc</p>
+<h4 id="preparing-previous-extension-versions">Preparing Previous
+Extension Versions</h4>
+<p><code>dsn~eitfj-prepare-previous-extension-version~1</code></p>
+<p>The EITFJ provides a Java API for preparing previous versions of an
+extension. This allows writing integration tests for upgrading from a
+previous version to the current version of an extension.</p>
+<p>Covers: * <a
+href="system_requirements.md#integration-test-framework-for-extensions"><code>req~extension-testing-framework~1</code></a>
+* <a
+href="system_requirements.md#upgrade-extension"><code>req~upgrade-extension~1</code></a></p>
+<p>Needs: impl, utest</p>
+<h2 id="runtime">Runtime</h2>
+<h3 id="listing-extensions">Listing Extensions</h3>
+<p><code>dsn~list-extensions~1</code></p>
+<p>EM builds the list of extensions based on the extension definitions.
+EM shows only extensions for which all components are available,
+e.g. required artifacts in BucketFS. The list also shows details about
+each extension: * status: available or installed * version</p>
+<p>Covers: * <a
+href="system_requirements.md#install-extensions"><code>feat~list-extensions~1</code></a></p>
+<p>Needs: impl, utest, itest</p>
+<h3 id="deploy-extension-definitions">Deploy Extension Definitions</h3>
+<p><code>dsn~extension-definitions-deployment~1</code></p>
+<p>During the build of each virtual-schema project the extension
+definitions (written in TypeScript) are compiled to a single JavaScript
+file:</p>
+<p><img
+src="plantuml-images/ec5b9bc764656e69cefdb74357b8330a2679276b.svg" /></p>
+<p>The built installers are attached to the release:</p>
+<p>Release assets:</p>
+<pre><code>postgresql-vs-2.0.2.jar
+postgresql-vs-2.0.2.jar.sha256
+postgresql-vs-extension.js
+postgresql-vs-extension.js.sha256</code></pre>
+<p>The following diagrams shows the deployment of the adapter JAR and
+the extension definition:</p>
+<p><img
+src="plantuml-images/af17eb1c292485eb567bf12ee92943eae417ccbe.svg" /></p>
+<p>The <a href="#extension-registry">extension registry</a> contains
+references to all available extension definitions.</p>
+<p>When a new version of an extension is released, the following steps
+are required for deployment:</p>
+<ul>
+<li><ol type="1">
+<li>Update extension registry to point to the new version’s extension
+definition <code>.js</code> file.</li>
+</ol></li>
+<li><ol start="2" type="1">
+<li>Copy the adapter <code>.jar</code> file to the Exasol SaaS
+BucketFS.</li>
+</ol></li>
+</ul>
+<p>Notes: * Both processes (1) and (2) are not yet automated. * See
+details about <a href="#bucketsfs-buckets-in-exasol-saas">BucketsFS
+Buckets in Exasol SaaS</a> in the next section.</p>
+<p>Covers: * <a
+href="system_requirements.md#install-database-objects"><code>req~install-extension-database-objects~1</code></a>
+* <a
+href="system_requirements.md#parameter-types"><code>req~define-configuration-parameters~1</code></a>
+* <a
+href="system_requirements.md#uninstalling-extensions"><code>req~uninstall-extension~1</code></a></p>
+<h4 id="bucketsfs-buckets-in-exasol-saas">BucketsFS Buckets in Exasol
+SaaS</h4>
+<p>An Exasol SaaS instance has access to the following BucketFS
+buckets:</p>
+<ul>
+<li><code>/buckets/bfssaas/default/</code></li>
+<li><code>/buckets/bfssaas/advanced/</code></li>
+<li><code>/buckets/uploads/default/</code></li>
+</ul>
+<p>The <code>bfssaas</code> BucketFS is managed globally for all Exasol
+SaaS instances by the SaaS team. All SaaS instances have read-only
+access to buckets <code>/buckets/bfssaas/default/</code> and
+<code>/buckets/bfssaas/advanced/</code> depending on the subscription.
+These buckets contain pre-loaded files for selected extensions.</p>
+<p>Bucket <code>/buckets/uploads/default/</code> is manged by end-users
+individually per SaaS instances. Users can upload files on their
+own.</p>
+<p>Currently Extension Manager does not have write access to BucketFS.
+That’s why all required files (e.g. adapter JAR files, JDBC drivers
+etc.) must be managed with a separate manual or automated process.</p>
+<p>This means that new releases of adapter JARs must be uploaded
+manually to one of the <code>bfssaas</code> buckets before end-users can
+install the extension in EM.</p>
+<p>In the future we might have an additional bucket for each SaaS
+instance where EM can upload adapter JARs on demand during the
+installation.</p>
+<h3 id="configure-an-extension">Configure an Extension</h3>
+<h4 id="validate-parameters">Validate Parameters</h4>
+<p><code>dsn~validate-parameters~1</code></p>
+<p>EM validates parameters in two stages:</p>
+<ul>
+<li>In the client: Simple validation of each parameter
+<ul>
+<li>Required fields also with conditions</li>
+<li>For text: regular expressions</li>
+<li>For numbers: min, max</li>
+</ul></li>
+<li>In the backend:
+<ul>
+<li>Everything validated in the frontend (validate again to prevent
+attacks)</li>
+<li>Validation of the whole input: Here EM can validate more complex
+constraints (for example multiple interdependent fields)</li>
+</ul></li>
+</ul>
+<p>Covers: * <a
+href="system_requirements.md#ui-languages"><code>req~validate-parameter-values~1</code></a></p>
+<p>Needs: impl, utest, itest</p>
+<h3 id="install-an-extension">Install an Extension</h3>
+<h4 id="installation-scope">Installation Scope</h4>
+<p><code>dsn~installation-scope~1</code></p>
+<p>The installation of an extension is scoped to an <em>Exasol
+database</em> (new term in SaaS context).</p>
+<p><img
+src="plantuml-images/8448884e68069fd63757fbe5d1498fecf6218246.svg" /></p>
+<p><img
+src="plantuml-images/dfb1a74b252bf41b40283f15a4f45a577cce39eb.svg" /></p>
+<p>Covers: * <a
+href="system_requirements.md#install-database-objects"><code>req~install-extension-database-objects~1</code></a></p>
+<h4 id="installation-metadata">Installation Metadata</h4>
+<p><code>dsn~installation~metadata~1</code></p>
+<p>Extensions don’t store their own metadata. Instead they read
+information about existing adapter scripts, connection definitions and
+virtual schemas from the Exasol database itself. In most cases this is
+implemented by querying Exasol’s metadata tables.</p>
+<p>However, for example for reading back the credentials stored in a
+connection, EM uses a temporary UDF that reads back the secret
+value.</p>
+<p>Covers: * <a
+href="system_requirements.md#install-database-objects"><code>req~install-extension-database-objects~1</code></a></p>
+<p>Needs: impl, utest, itest</p>
+<h4 id="installation-process">Installation Process</h4>
+<p><code>dsn~installation~process~1</code></p>
+<p>The following list describes the installation process using the
+extension for a <strong>virtual schema</strong> as example.</p>
+<ul>
+<li>Check if the version of the <code>extension-manager-interface</code>
+implemented by the extension is supported.</li>
+<li>Check if required files exist in BucketFs with the expected version
+and file size.
+<ul>
+<li>If not all files are available, then EM aborts the
+installation.</li>
+</ul></li>
+<li>Check if an <code>ADAPTER SCRIPT</code> exists for the required VS
+Jar.
+<ul>
+<li>Use the existing script and the schema it is located in.</li>
+<li>If no script exists: create a new schema and create a new adapter
+script.</li>
+</ul></li>
+<li>Check if a <code>SET SCRIPT</code> with name
+<code>IMPORT_FROM_&lt;vs-name&gt;</code> exists using the expected file.
+<ul>
+<li>Create one if necessary</li>
+<li>Fail if it exists with the wrong file version and another virtual
+schema is installed.</li>
+</ul></li>
+<li>Create or update an existing <code>CONNECTION</code> with the
+parameters entered by the user.</li>
+<li>Create or update an existing <code>VIRTUAL SCHEMA</code> with the
+parameters entered by the user.</li>
+</ul>
+<p>Deployment view of an installed virtual schema:</p>
+<p><img
+src="plantuml-images/b5eff88f10844b5ab3b05683edeb6b60434dc197.svg" /></p>
+<p>Covers: * <a
+href="system_requirements.md#install-database-objects"><code>req~install-extension-database-objects~1</code></a></p>
+<p>Needs: impl, utest, itest</p>
+<h4 id="upgrades">Upgrades</h4>
+<p><code>dsn~upgrade-extension~1</code></p>
+<p>EM can upgrade an installed extensions and its instances to the
+latest version.</p>
+<p>Covers: * <a
+href="system_requirements.md#uninstalling-extensions"><code>req~upgrade-extension~1</code></a>
+* <a
+href="system_requirements.md#install-database-objects"><code>req~install-extension-database-objects~1</code></a></p>
+<p>Needs: impl, utest, itest</p>
+<h3 id="extension-context">Extension Context</h3>
+<p>The extension context allows extension definitions to interact with
+the extension manager and the database (e.g. by executing queries).</p>
+<h4 id="extension-context-sql-client">Extension Context SQL Client</h4>
+<p><code>dsn~extension-context-sql-client~1</code></p>
+<p>The SQL client in the extension context allows the extension
+definition to execute statements and run queries against the database
+and process query results.</p>
+<p>Rationale:</p>
+<ul>
+<li>This allows the extension to create necessary database objects like
+<code>SCRIPT</code>s, <code>CONNECTION</code>s and
+<code>VIRTUAL SCHEMA</code>s.</li>
+<li>The extension can also run arbitrary queries in order to read
+required information about their installations (e.g. scripts) and
+instances (e.g. virtual schemas).</li>
+<li>While EM also provides <a href="#extension-context-metadata">access
+to metadata</a> via the context, this information may not be sufficient.
+Executing arbitrary queries ensures maximum flexibility for
+extensions.</li>
+</ul>
+<p>Covers: * <a
+href="system_requirements.md#install-database-objects"><code>req~install-extension-database-objects~1</code></a></p>
+<p>Needs: impl, utest, itest</p>
+<h4 id="extension-context-bucketfs">Extension Context BucketFS</h4>
+<p><code>dsn~extension-context-bucketfs~1</code></p>
+<p>The BucketFS client in the extension context allows the extension
+definition to interact with BucketFS.</p>
+<p>Covers: * <a
+href="system_requirements.md#install-database-objects"><code>req~install-extension-database-objects~1</code></a></p>
+<p>Needs: impl, utest, itest</p>
+<h5 id="resolving-files-in-bucketfs">Resolving Files in BucketFS</h5>
+<p><code>dsn~resolving-files-in-bucketfs~1</code></p>
+<p>EM resolves filenames to absolute paths in BucketFS.</p>
+<p>Rationale:</p>
+<p>Extensions require files in BucketFS. The exact location in BucketFS
+of the files is not known when creating an extension, only the file name
+(e.g. <code>document-files-virtual-schema-dist-7.3.3-s3-2.6.2.jar</code>).
+In order to create adapter scripts, the extension must know the absolute
+path of the file in BucketFS
+(e.g. <code>/buckets/bfsdefault/default/document-files-virtual-schema-dist-7.3.3-s3-2.6.2.jar</code>).
+So EM must allow the extension to resolve file names to an absolute path
+in BucketFS.</p>
+<p>Needs: impl, utest, itest</p>
+<h4 id="extension-context-metadata">Extension Context Metadata</h4>
+<p><code>dsn~extension-context-metadata~1</code></p>
+<p>The Metadata client in the extension context allows the extension
+definition to read Metadata (e.g. tables
+<code>SYS.EXA_ALL_SCRIPTS</code> or
+<code>SYS.EXA_ALL_VIRTUAL_SCHEMAS</code>) from the database.</p>
+<p>Rationale:</p>
+<ul>
+<li>This information is necessary for the extension to find its
+installations (e.g. scripts) and instances (e.g. virtual schemas).</li>
+<li>As an alternative extensions could also use the <a
+href="#extension-context-sql-client">SQL client</a> included in the
+context, but this would require duplicating SQL queries across many
+extensions.</li>
+<li>The schema for metadata table
+<code>SYS.EXA_ALL_VIRTUAL_SCHEMAS</code> has changed between Exasol v7
+and v8. So the code for reading this table requires distinction between
+the two versions.
+<ul>
+<li>Moving this code to the extensions would cause even more code
+duplication that is hard to maintain.</li>
+<li><strong>Note:</strong> EM will only need to work with Exasol v8, so
+support for v7 is actually not necessary. However the Docker container
+for v8 currently does not support running Python and Java UDFs. Until
+this is fixed we still need v7 for integration testing.</li>
+</ul></li>
+</ul>
+<p>Covers: * <a
+href="system_requirements.md#install-database-objects"><code>req~install-extension-database-objects~1</code></a></p>
+<p>Needs: impl, utest, itest</p>
+<h2 id="cross-cutting-concerns">Cross-cutting Concerns</h2>
+<h2 id="design-decisions">Design Decisions</h2>
+<h3 id="jdbc-driver">JDBC driver</h3>
+<p>Most virtual schemas (including for example the postgres virtual
+schema) require an additional third-party JDBC driver. That driver for
+now must be copied manually into the BucketFS of all SaaS offerings, see
+<a href="#components-of-an-extension">Components of an
+Extension</a>.</p>
+<h3 id="jar-files">JAR Files</h3>
+<p>Most virtual schemas (including for example the postgres virtual
+schema) are implemented as a jar file in BucketFS. The jar file for now
+must be copied manually into the BucketFS of all SaaS offerings, see <a
+href="#components-of-an-extension">Components of an Extension</a>.</p>
+<h3 id="does-em-need-a-backend">Does EM need a Backend?</h3>
+<p>One option would have been to implement everything in the JavaScript
+client. However, the developers discarded that option, since it does not
+allow us to upgrade the installed adapters automatically. An automated
+job can’t run in a browser.</p>
+<h4 id="execution-of-javascript-at-runtime">Execution of JavaScript at
+Runtime</h4>
+<p>The compiled JavaScript code is evaluated in the backend using a
+nested JavaScript interpreter.</p>
+<p>By that it is isolated and can’t access resources like disk or
+network.</p>
+<h3 id="typescript-library-for-parameter-validation">TypeScript Library
+for Parameter Validation</h3>
+<p>The developers decided to implement parameter validation as a
+TypeScript library <a
+href="https://github.com/exasol/extension-parameter-validator"><code>extension-parameter-validator</code></a>.</p>
+<p>Rationale: By this a single implementation can be used for both
+validation stages: frontend and backend. The Go backend will use a
+JavaScript VM.</p>
+<h3 id="callback-for-client-side-validation">Callback For Client Side
+Validation</h3>
+<p>We decided against a callback for the client side <a
+href="#parameter-validation">validation of parameters</a>. The main
+reason was that it would require to load code into the client at
+runtime. That would require to run <code>eval()</code> on code retrieved
+from a request. Even so the security risk of that seems acceptable, we
+decided against it since it would look suspicious.</p>
+<h3
+id="alternative-options-to-represent-conditional-parameters">Alternative
+Options to Represent Conditional Parameters</h3>
+<p>The developers considered the following options:</p>
+<ul>
+<li><p>Condition as JavaScript code in a string, e.g.</p>
+<p><code>condition: "parameters.connectorType === \"jdbc\""</code></p></li>
+<li><p>Condition as JavaScript callback, e.g.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode js"><code class="sourceCode javascript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>extension <span class="op">=</span> {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a> <span class="dt">condition</span><span class="op">:</span> (parameterValues) <span class="kw">=&gt;</span> parameterValues<span class="op">.</span><span class="at">connectorType</span> <span class="op">===</span> <span class="st">&quot;jdbc&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div></li>
+</ul>
+<p>While both options don’t need any interpretation logic they would
+require executing the JavaScript snippet in the frontend with
+<code>eval()</code> which poses a security risk.</p>
+<p>Interpretation of the JSON structure was implemented in a separate
+library <code>extension-parameter-validator</code> written in TypeScript
+which is used by both the frontend and the backend. By this additional
+implementation effort need to be invested only once.</p>
+<h3 id="programming-language">Programming language</h3>
+<p>The developers decided to implement extension definitions in
+TypeScript.</p>
+<h4 id="alternative-json">Alternative JSON</h4>
+<p>The developers decided for a programming language like JS since some
+extensions have more complex installation mechanisms. Expressing this by
+just providing SQL scripts with placeholders quickly reaches its
+limit.</p>
+<p>Especially the function for reading back parameter values can get a
+bit more complex.</p>
+<h4 id="alternative-lua">Alternative Lua</h4>
+<p>We could also use Lua. The developers decided for JS since:</p>
+<ul>
+<li>JS it more popular –&gt; more developers know it</li>
+<li>JS is used in the frontend. If at some point we change our decision
+and want to run the installation in the client, we don’t need to update
+the installers.</li>
+</ul>
+<h4 id="alternative-javascript">Alternative JavaScript</h4>
+<p>JavaScript does not provide type checking of the interface, hence not
+all potential incompatibilities with the Extension API can be found at
+compile time.</p>
+<p>TypeScript is compiled to JavaScript, so no additional tooling is
+required at runtime.</p>
+<p>TypeScript adds a bit of complexity at build time for transpiling
+TypeScript to JavaScript, but the developers decided to accept this
+additional effort.</p>
+<h2 id="quality-scenarios">Quality Scenarios</h2>
+<h2 id="risks">Risks</h2>
+<h3 id="multiple-versions-of-the-same-extension-definition">Multiple
+Versions of the Same Extension Definition</h3>
+<p>When multiple versions of the same extension definition
+(i.e. JavaScript files) are present in the extension registry, EM will
+query all of them when listing installations. For each version EM will
+find the same installations (e.g. adapter script). In result EM might
+return multiple installations where only one is present.</p>
+<h4 id="mitigation">Mitigation</h4>
+<p>A possible mitigation could be that EM filters the registry and for
+each extension definition keeps only the latest version.</p>
+<h4 id="decision">Decision</h4>
+<p>We accept the risk for now and ensure that the registry only contains
+a single version of each extension definition.</p>

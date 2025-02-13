@@ -1,0 +1,22 @@
+@startuml
+class BaseParameter{
+  id: string
+  name: string
+  required: bool
+  type: string
+  ...
+}
+
+class StringParameter{
+  regex: RegEx
+  type = string
+}
+
+class SelectParameter{
+  options: array
+  type = select
+}
+
+StringParameter <|-- BaseParameter
+SelectParameter <|-- BaseParameter
+@enduml

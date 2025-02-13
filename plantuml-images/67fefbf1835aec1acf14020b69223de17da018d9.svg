@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="502px" preserveAspectRatio="none" style="width:846px;height:502px;" version="1.1" viewBox="0 0 846 502" width="846px" zoomAndPan="magnify"><defs><filter height="300%" id="fqhamrge83ifr" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[90b176eb21103ba2dd5daf2d1507456c]
+cluster Exasol SaaS backend--><polygon fill="#FFFFFF" filter="url(#fqhamrge83ifr)" points="189,176,199,166,824,166,824,371,814,381,189,381,189,176" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="814" x2="823" y1="176" y2="167"/><line style="stroke: #000000; stroke-width: 1.5;" x1="189" x2="814" y1="176" y2="176"/><line style="stroke: #000000; stroke-width: 1.5;" x1="814" x2="814" y1="176" y2="381"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="165" x="420" y="191.9951">Exasol SaaS backend</text><!--MD5=[47c14c564e796a575e671c2b0469a7bb]
+cluster backend--><rect fill="#FFFFFF" filter="url(#fqhamrge83ifr)" height="122" style="stroke: #000000; stroke-width: 1.5;" width="277" x="515" y="227"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="261" x="523" y="241.9951">Extension Manager Backend (Go)</text><!--MD5=[36a841e18707cee00a362cb6d7051365]
+cluster Extensions--><rect fill="#FFFFFF" filter="url(#fqhamrge83ifr)" height="106" rx="35" ry="35" style="stroke: #000000; stroke-width: 1.5;" width="270" x="213" y="235"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="86" x="305" y="254.9951">Extensions</text><!--MD5=[8699c0c8e953ee53654a072cc875bfb4]
+cluster Browser--><polygon fill="#FFFFFF" filter="url(#fqhamrge83ifr)" points="22,235,32,225,165,225,165,331,155,341,22,341,22,235" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="155" x2="164" y1="235" y2="226"/><line style="stroke: #000000; stroke-width: 1.5;" x1="22" x2="155" y1="235" y2="235"/><line style="stroke: #000000; stroke-width: 1.5;" x1="155" x2="155" y1="235" y2="341"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="67" x="56" y="250.9951">Browser</text><!--MD5=[a064cbd4801145897a46b31a48748016]
+entity JsVM--><rect fill="#FEFECE" filter="url(#fqhamrge83ifr)" height="36.2969" style="stroke: #000000; stroke-width: 1.5;" width="52" x="558" y="289"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="32" x="568" y="311.9951">JsVM</text><!--MD5=[cfa4e52b1a5e747220fbc0f640efedd4]
+entity installer--><polygon fill="#FEFECE" filter="url(#fqhamrge83ifr)" points="229.5,289,229.5,325.2969,466.5,325.2969,466.5,299,456.5,289,229.5,289" style="stroke: #000000; stroke-width: 1.5;"/><path d="M456.5,289 L456.5,299 L466.5,299 " fill="#FEFECE" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="217" x="239.5" y="311.9951">postgres-extension-def-1.0.0.js</text><!--MD5=[de1079835e4555ce48eae4cc74e5f92b]
+entity customerCluster--><polygon fill="#FFFFFF" filter="url(#fqhamrge83ifr)" points="434,454,444,444,612,444,612,480.2969,602,490.2969,434,490.2969,434,454" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="602" x2="611" y1="454" y2="445"/><line style="stroke: #000000; stroke-width: 1.5;" x1="434" x2="602" y1="454" y2="454"/><line style="stroke: #000000; stroke-width: 1.5;" x1="602" x2="602" y1="454" y2="490.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="138" x="449" y="476.9951">Customer Database</text><!--MD5=[bab4e23f4d44c7f297e21356618ea02f]
+entity jsClient--><rect fill="#FFFFFF" filter="url(#fqhamrge83ifr)" height="36.2969" style="stroke: #000000; stroke-width: 1.5;" width="70" x="79" y="289"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="50" x="89" y="311.9951">jsClient</text><!--MD5=[06022418db1bc791c37f09e492dfabc2]
+link jsClient to backend--><path d="M121.04,283.89 C134.59,244.39 168.59,165.9 230.5,143 C279.48,124.88 416.52,124.88 465.5,143 C483.045,149.49 495.4644,162.4556 504.2117,178.3797 C508.5854,186.3417 512.0411,195.0434 514.7604,204.045 C516.1201,208.5458 517.2957,213.1216 518.3099,217.7174 C518.817,220.0153 519.2838,222.3182 519.7131,224.6193 C519.8204,225.1945 519.9254,225.7697 520.0281,226.3446 " fill="none" id="jsClient-backend" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="520.0281,226.3446,522.3835,216.7816,519.149,221.4225,514.5081,218.188,520.0281,226.3446" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="119.34,288.97,126.0136,281.7269,120.9426,284.2338,118.4357,279.1627,119.34,288.97" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[aacc5e07bd4c04282ae7a5dde7785146]
+reverse link JsVM to installer--><path d="M586.73,283.68 C588.93,252.42 587.32,197.77 554,171 C484.34,115.04 391.5,240.45 359.45,288.91 " fill="none" id="JsVM&lt;-installer" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="586.32,288.86,591.0269,280.2087,586.7199,283.876,583.0526,279.5689,586.32,288.86" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="71" x="476.5" y="146.0669">loaded into</text><!--MD5=[25a09921e6b53efcb756a91448b87110]
+link backend to customerCluster--><path d="M523,349.0341 C523,349.2319 523,349.43 523,349.6286 C523,350.0257 523,350.4245 523,350.8249 C523,351.6256 523,352.4327 523,353.2456 C523,354.8714 523,356.5208 523,358.19 C523,384.8975 523,416.695 523,438.81 " fill="none" id="backend-&gt;customerCluster" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="523,444,527,435,523,439,519,435,523,444" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="60" x="524" y="410.0669">manages</text><!--MD5=[77b9fa16d088c44b8ee22ba6168357c1]
+@startuml
+node "Exasol SaaS backend" {
+  rectangle backend as "Extension Manager Backend (Go)" {
+  rectangle JsVM
+}
+  storage Extensions {
+    file installer as "postgres-extension-def-1.0.0.js"
+  }
+}
+
+node customerCluster as "Customer Database" {
+}
+
+node Browser {
+  rectangle jsClient {
+  }
+}
+
+jsClient <-> backend
+JsVM <- installer: loaded into
+backend - -> customerCluster: manages
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 17.0.14+7
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: null
+--></g></svg>

@@ -1,0 +1,26 @@
+@startuml
+rectangle Account as "Exasol SaaS Account" {
+  rectangle "Database (= 1 COS)" {
+    object SYS.EXA_ALL_SCRIPTS {
+    }
+
+    object ADAPTERS.MY_ADAPTER {
+    }
+
+    storage BucketFS {
+      file 1 as "postgres-vs.jar" {
+      }
+      file 2 as "postgres-jdbc.jar" {
+      }
+    }
+  }
+}
+
+storage s3Bfs as "S3BucketFs (global)" {
+  file 3 as "postgres-vs.jar" {
+  }
+  file 4 as "postgres-jdbc.jar" {
+  }
+}
+s3Bfs -> BucketFS: mirrored
+@enduml

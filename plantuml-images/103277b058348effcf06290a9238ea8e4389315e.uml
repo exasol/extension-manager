@@ -1,0 +1,8 @@
+@startuml
+interface ExasolExtension {
+
+}
+
+ExasolExtension <-- "postgres-virtual-schema (repo).postgres-extension-definition"
+ExasolExtension <-- "mysql-virtual-schema (repo).MySqlExtensionDefinition"
+@enduml

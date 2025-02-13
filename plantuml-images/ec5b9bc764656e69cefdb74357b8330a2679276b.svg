@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="158px" preserveAspectRatio="none" style="width:853px;height:158px;" version="1.1" viewBox="0 0 853 158" width="853px" zoomAndPan="magnify"><defs><filter height="300%" id="f18b9jgcs16hya" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[6798bd01bdde09c6a2975da269bfb39d]
+entity postgres-extension-def.ts--><polygon fill="#FFFFFF" filter="url(#f18b9jgcs16hya)" points="6,110,6,146.2969,205,146.2969,205,120,195,110,6,110" style="stroke: #000000; stroke-width: 1.5;"/><path d="M195,110 L195,120 L205,120 " fill="#FFFFFF" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="179" x="16" y="132.9951">postgres-extension-def.ts</text><!--MD5=[50ee444ae77a986c1f850e157e2dbb14]
+entity postgres-extension-config.ts--><polygon fill="#FFFFFF" filter="url(#f18b9jgcs16hya)" points="240,110,240,146.2969,459,146.2969,459,120,449,110,240,110" style="stroke: #000000; stroke-width: 1.5;"/><path d="M449,110 L449,120 L459,120 " fill="#FFFFFF" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="199" x="250" y="132.9951">postgres-extension-config.ts</text><!--MD5=[6e45ebef8000904e643c0d541dcac130]
+entity postgres-extension-def.js--><polygon fill="#FFFFFF" filter="url(#f18b9jgcs16hya)" points="634,110,634,146.2969,831,146.2969,831,120,821,110,634,110" style="stroke: #000000; stroke-width: 1.5;"/><path d="M821,110 L821,120 L831,120 " fill="#FFFFFF" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="177" x="644" y="132.9951">postgres-extension-def.js</text><path d="M284,8 L284,33.1328 L451,33.1328 L451,18 L441,8 L284,8 " fill="#FBFB77" filter="url(#f18b9jgcs16hya)" style="stroke: #A80036; stroke-width: 1.0;"/><path d="M441,8 L441,18 L451,18 L441,8 " fill="#FBFB77" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="146" x="290" y="25.0669">Generated during build</text><!--MD5=[61699bc0410e1b509db6a0c296cadb1d]
+link GMN5 to postgres-extension-config.ts--><path d="M365.5,33.19 C362.34,51.76 356.14,88.07 352.46,109.67 " fill="none" id="GMN5-postgres-extension-config.ts" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><!--MD5=[6f2c834e5e9e87ce6352e8e96e7a02f4]
+link postgres-extension-def.ts to postgres-extension-def.js--><path d="M129.18,109.93 C148.34,96.52 176.62,79.34 204.5,72 C283.05,51.32 503.68,85.65 633.54,109.06 " fill="none" id="postgres-extension-def.ts-&gt;postgres-extension-def.js" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="638.5,109.95,630.3494,104.4212,633.5788,109.0656,628.9344,112.295,638.5,109.95" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="138" x="205.5" y="76.0669">Compiled during build</text><!--MD5=[6223e4827c541c5054a7251a5e4cd445]
+link postgres-extension-config.ts to postgres-extension-def.js--><path d="M459.25,128 C512.57,128 576.3,128 628.8,128 " fill="none" id="postgres-extension-config.ts-&gt;postgres-extension-def.js" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="633.84,128,624.84,124,628.84,128,624.84,132,633.84,128" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="138" x="477.5" y="121.0669">Compiled during build</text><!--MD5=[33a0e5dbba8ac761a92c468f70f42512]
+@startuml
+file postgres-extension-def.ts {
+}
+file postgres-extension-config.ts {
+}
+file postgres-extension-def.js {
+}
+
+note top of postgres-extension-config.ts: Generated during build
+
+"postgres-extension-def.ts" -> "postgres-extension-def.js": Compiled during build
+"postgres-extension-config.ts" -> "postgres-extension-def.js": Compiled during build
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 17.0.14+7
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: null
+--></g></svg>

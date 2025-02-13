@@ -1,0 +1,13 @@
+@startuml
+postgres as [PostgreSQL Virtual Schema\nExtension definition]
+mysql as [MySQL Virtual Schema\nExtension definition]
+extensionInterface as [Extension Manger interface]
+extensionManager as [Extension Manager]
+
+extensionInterface <-- extensionManager
+extensionInterface <|-- postgres
+extensionInterface <|-- mysql
+
+extensionManager -> postgres: loaded at runtime
+extensionManager -> mysql: loaded at runtime
+@enduml
