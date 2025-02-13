@@ -2,7 +2,8 @@
 
 .github/workflows/broken_links_checker.yml          linguist-generated=true
 .github/workflows/project-keeper.sh                 linguist-generated=true
-.github/workflows/project-keeper-verify.yml         linguist-generated=true
+# Project uses Go 1.23, see https://github.com/exasol/project-keeper/issues/616
+#.github/workflows/project-keeper-verify.yml         linguist-generated=true
 dependencies.md                                     linguist-generated=true
 doc/changes/changelog.md                            linguist-generated=true
 go.sum                                              linguist-generated=true
