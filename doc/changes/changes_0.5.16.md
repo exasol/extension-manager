@@ -41,25 +41,29 @@ The release also adds file `SECURITY.md` with instructions for reporting vulnera
 
 #### Compile Dependency Updates
 
-* Updated `aws-cdk-lib:2.178.2` to `2.179.0`
+* Updated `aws-cdk-lib:2.178.2` to `2.182.0`
 
 #### Development Dependency Updates
 
-* Updated `@types/node:^22.13.2` to `^22.13.4`
+* Updated `@types/node:^22.13.2` to `^22.13.10`
+* Updated `ts-jest:^29.2.5` to `^29.2.6`
+* Updated `typescript:~5.7.3` to `~5.8.2`
 * Updated `@types/prettier:2.7.3` to `3.0.0`
-* Updated `aws-cdk:2.178.2` to `2.179.0`
+* Updated `aws-cdk:2.178.2` to `2.1003.0`
 
 ### Registry-upload
 
 #### Compile Dependency Updates
 
-* Updated `@aws-sdk/client-cloudfront:^3.745.0` to `^3.750.0`
-* Updated `@aws-sdk/client-s3:^3.744.0` to `^3.750.0`
+* Updated `@aws-sdk/client-cloudfront:^3.745.0` to `^3.764.0`
+* Updated `@aws-sdk/client-s3:^3.744.0` to `^3.758.0`
 * Updated `octokit:^4.1.1` to `^4.1.2`
-* Updated `@aws-sdk/client-cloudformation:^3.744.0` to `^3.750.0`
+* Updated `@aws-sdk/client-cloudformation:^3.744.0` to `^3.758.0`
 
 #### Development Dependency Updates
 
-* Updated `@types/node:^22.13.2` to `^22.13.4`
-* Updated `typescript-eslint:^8.24.0` to `^8.24.1`
+* Updated `eslint:9.20.1` to `9.22.0`
+* Updated `@types/node:^22.13.2` to `^22.13.10`
+* Updated `typescript-eslint:^8.24.0` to `^8.26.0`
+* Updated `typescript:~5.7.3` to `~5.8.2`
 * Updated `@types/prettier:2.7.3` to `3.0.0`
