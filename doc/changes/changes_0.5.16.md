@@ -1,4 +1,4 @@
-# Extension Manager 0.5.16, released 2025-02-19
+# Extension Manager 0.5.16, released 2025-03-10
 
 Code name: Fix CVE-2025-25289, CVE-2025-25285, CVE-2025-25288 and CVE-2025-25290
 
