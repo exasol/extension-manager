@@ -10,7 +10,7 @@ This project uses a mix of different languages and build tools / helpers, so ple
 
 ### Project Keeper and Release Droid
 
-For Java and Go dependency management and documentation this project uses [Project Keeper (PK)](github.com/exasol/project-keeper). On the other hand it also uses [Release Droid (RD)](github.com/exasol/release-droid) to create the release. RD is deprecated and will be replaced once PK can handle the complex project setup used in this project.
+For Java and Go dependency management and documentation this project uses [Project Keeper (PK)](https://github.com/exasol/project-keeper). On the other hand it also uses [Release Droid (RD)](https://github.com/exasol/release-droid) to create the release. RD is deprecated and will be replaced once PK can handle the complex project setup used in this project.
 
 #### Updating the Dependency Documentation and Change Log
 
