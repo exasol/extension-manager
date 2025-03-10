@@ -21,3 +21,43 @@ We updated 3rd-party the following JavaScript libraries to fix vulnerabilities:
 
 #### Compile Dependency Updates
 
+* Updated `golang:1.23` to `1.23.0`
+* Updated `github.com/dop251/goja_nodejs:v0.0.0-20250211202206-2ae4cd213512` to `v0.0.0-20250309172600-86a40d630cdd`
+* Updated `github.com/dop251/goja:v0.0.0-20250125213203-5ef83b82af17` to `v0.0.0-20250309171923-bcd7cc6bf64c`
+
+#### Test Dependency Updates
+
+* Updated `golang.org/x/mod:v0.23.0` to `v0.24.0`
+
+### Extension Integration Tests Library
+
+#### Compile Dependency Updates
+
+* Updated `com.exasol:extension-manager-client-java:0.5.15` to `0.5.16`
+
+### Registry
+
+#### Compile Dependency Updates
+
+* Updated `aws-cdk-lib:2.178.2` to `2.179.0`
+
+#### Development Dependency Updates
+
+* Updated `@types/node:^22.13.2` to `^22.13.4`
+* Updated `@types/prettier:2.7.3` to `3.0.0`
+* Updated `aws-cdk:2.178.2` to `2.179.0`
+
+### Registry-upload
+
+#### Compile Dependency Updates
+
+* Updated `@aws-sdk/client-cloudfront:^3.745.0` to `^3.750.0`
+* Updated `@aws-sdk/client-s3:^3.744.0` to `^3.750.0`
+* Updated `octokit:^4.1.1` to `^4.1.2`
+* Updated `@aws-sdk/client-cloudformation:^3.744.0` to `^3.750.0`
+
+#### Development Dependency Updates
+
+* Updated `@types/node:^22.13.2` to `^22.13.4`
+* Updated `typescript-eslint:^8.24.0` to `^8.24.1`
+* Updated `@types/prettier:2.7.3` to `3.0.0`
