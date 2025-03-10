@@ -11,6 +11,8 @@ We updated 3rd-party the following JavaScript libraries to fix vulnerabilities:
 3. `@octokit/request` to version 9.2.1 or later to fix a Regular Expression Denial of Service (ReDoS) vulnerability (CVE-2025-34567) in the `fetchWrapper` function's handling of HTTP link headers.
 4. `@octokit/plugin-paginate-rest` to version 11.4.1 or later to fix a Regular Expression Denial of Service (ReDoS) vulnerability (CVE-2025-25288) in the `iterator` function's handling of HTTP Link headers.
 
+The release also adds file `SECURITY.md` with instructions for reporting vulnerabilities in this project.
+
 ## Security
 
 * #189: Fixed CVE-2025-25289, CVE-2025-25285, CVE-2025-25288 and CVE-2025-25290 by upgrading `octokit` from 4.1.1 to 4.1.2
