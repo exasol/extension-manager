@@ -1,4 +1,4 @@
-# Extension Manager 0.5.16, released 2025-03-10
+# Extension Manager 0.5.16, released 2025-03-11
 
 Code name: Fix CVE-2025-25289, CVE-2025-25285, CVE-2025-25288 and CVE-2025-25290
 
@@ -15,7 +15,7 @@ The release also adds file `SECURITY.md` with instructions for reporting vulnera
 
 ## Security
 
-* #189: Fixed CVE-2025-25289, CVE-2025-25285, CVE-2025-25288 and CVE-2025-25290 by upgrading `octokit` from 4.1.1 to 4.1.2
+* #191: Fixed CVE-2025-25289, CVE-2025-25285, CVE-2025-25288 and CVE-2025-25290 by upgrading `octokit` from 4.1.1 to 4.1.2
 
 ## Dependency Updates
 
