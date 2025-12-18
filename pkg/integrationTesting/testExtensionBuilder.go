@@ -260,7 +260,7 @@ func (builder *TestExtensionBuilder) runNpmInstall(workDir string) {
 		return
 	}
 	builder.testing.Logf("Running 'npm install in %s", workDir)
-	installCommand := exec.Command("npm", "install")
+	installCommand := exec.CommandContext(builder.testing.Context(), "npm", "install")
 	installCommand.Dir = workDir
 	output, err := installCommand.CombinedOutput()
 	if err != nil {
@@ -271,7 +271,7 @@ func (builder *TestExtensionBuilder) runNpmInstall(workDir string) {
 }
 
 func (builder *TestExtensionBuilder) runNpmBuild(workDir string) {
-	buildCommand := exec.Command("npm", "run", "build")
+	buildCommand := exec.CommandContext(builder.testing.Context(), "npm", "run", "build")
 	buildCommand.Dir = workDir
 	output, err := buildCommand.CombinedOutput()
 	if err != nil {

@@ -7,8 +7,8 @@ import (
 )
 
 func CreateContext(txCtx *transaction.TransactionContext, extensionSchemaName string) *ExtensionContext {
-	var sqlClient backend.SimpleSQLClient = backend.NewSqlClient(txCtx.GetContext(), txCtx.GetTransaction())
-	var metadataReader exaMetadata.ExaMetadataReader = exaMetadata.CreateExaMetaDataReader()
+	var sqlClient = backend.NewSqlClient(txCtx.GetContext(), txCtx.GetTransaction())
+	var metadataReader = exaMetadata.CreateExaMetaDataReader()
 	var bfsContext BucketFsContext = &bucketFsContextImpl{txCtx: txCtx}
 	return CreateContextWithClient(extensionSchemaName, txCtx, sqlClient, bfsContext, metadataReader)
 }

@@ -46,7 +46,7 @@ func SendJSONWithStatus(ctx context.Context, status int, writer http.ResponseWri
 		encoder.SetEscapeHTML(false)
 		encodeErr := encoder.Encode(data)
 		if encodeErr != nil {
-			err := fmt.Errorf("Could not send json: %w", encodeErr)
+			err := fmt.Errorf("could not send json: %w", encodeErr)
 			logger.Warn(err.Error())
 			return err
 

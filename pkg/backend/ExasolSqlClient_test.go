@@ -37,7 +37,7 @@ func (suite *ExasolSqlClientUTestSuite) createClient() SimpleSQLClient {
 
 func (suite *ExasolSqlClientUTestSuite) createMockTransaction() *sql.Tx {
 	suite.dbMock.ExpectBegin()
-	tx, err := suite.db.Begin()
+	tx, err := suite.db.BeginTx(suite.T().Context(), nil)
 	suite.Require().NoError(err)
 	return tx
 }

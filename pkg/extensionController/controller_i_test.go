@@ -267,21 +267,21 @@ func (suite *ControllerITestSuite) TestDeleteInstancesSucceeds() {
 }
 
 func (suite *ControllerITestSuite) createSchema(schemaName string) {
-	_, err := suite.exasol.GetConnection().Exec(fmt.Sprintf(`CREATE SCHEMA "%s"`, schemaName))
+	_, err := suite.exasol.GetConnection().ExecContext(suite.T().Context(), fmt.Sprintf(`CREATE SCHEMA "%s"`, schemaName))
 	if err != nil {
 		suite.FailNowf("failed to create schema %s: %v", schemaName, err.Error())
 	}
 }
 
 func (suite *ControllerITestSuite) dropSchema(schemaName string) {
-	_, err := suite.exasol.GetConnection().Exec(fmt.Sprintf(`DROP SCHEMA IF EXISTS "%s" CASCADE`, schemaName))
+	_, err := suite.exasol.GetConnection().ExecContext(suite.T().Context(), fmt.Sprintf(`DROP SCHEMA IF EXISTS "%s" CASCADE`, schemaName))
 	if err != nil {
 		suite.FailNowf("failed to drop schema %s: %v", schemaName, err.Error())
 	}
 }
 
 func (suite *ControllerITestSuite) getAllSchemaNames() []string {
-	rows, err := suite.exasol.GetConnection().Query("SELECT SCHEMA_NAME FROM EXA_ALL_SCHEMAS ORDER BY SCHEMA_NAME")
+	rows, err := suite.exasol.GetConnection().QueryContext(suite.T().Context(), "SELECT SCHEMA_NAME FROM EXA_ALL_SCHEMAS ORDER BY SCHEMA_NAME")
 	suite.Require().NoError(err)
 	defer rows.Close()
 	var schemaNames []string

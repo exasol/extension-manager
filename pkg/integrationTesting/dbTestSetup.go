@@ -52,7 +52,7 @@ func (setup *DbTestSetup) StopDb() {
 }
 
 func (setup *DbTestSetup) ExecSQL(query string) {
-	_, err := setup.connection.Exec(query)
+	_, err := setup.connection.ExecContext(setup.suite.T().Context(), query)
 	setup.suite.Require().NoError(err)
 }
 

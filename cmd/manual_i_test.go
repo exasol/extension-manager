@@ -130,7 +130,7 @@ func (suite *ManualITestSuite) createDBConnection() *sql.DB {
 }
 
 func (suite *ManualITestSuite) testConnection(db *sql.DB) {
-	row := db.QueryRow("SELECT 'a'")
+	row := db.QueryRowContext(suite.T().Context(), "SELECT 'a'")
 	var value sql.NullString
 	err := row.Scan(&value)
 	if err != nil {

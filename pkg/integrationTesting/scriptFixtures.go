@@ -1,6 +1,7 @@
 package integrationTesting
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"testing"
@@ -73,7 +74,7 @@ func createMetaDataTable(db *sql.DB, tableName string) {
 }
 
 func execSQL(db *sql.DB, sql string) {
-	_, err := db.Exec(sql)
+	_, err := db.ExecContext(context.TODO(), sql)
 	if err != nil {
 		panic(fmt.Sprintf("error executing SQL %q: %v", sql, err))
 	}

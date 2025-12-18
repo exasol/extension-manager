@@ -75,7 +75,7 @@ func (suite *BucketFsClientITestSuite) TestFindAbsolutePathNoFileFound() {
 	time.Sleep(3 * time.Second)
 	result, err := suite.findAbsolutePath("no-such-file")
 	suite.Require().EqualError(err, `file "no-such-file" not found in BucketFS`)
-	suite.Equal("", result)
+	suite.Empty(result)
 }
 
 /* [itest -> dsn~configure-bucketfs-path~1] */
