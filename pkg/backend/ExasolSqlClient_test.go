@@ -78,8 +78,8 @@ var forbiddenCommandTests = []struct {
 
 func (suite *ExasolSqlClientUTestSuite) TestExecuteValidation() {
 	for _, test := range forbiddenCommandTests {
+		client := suite.createClient()
 		suite.Run(fmt.Sprintf("running statement %q contains forbidden command %q", test.statement, test.forbiddenCommand), func() {
-			client := suite.createClient()
 			if test.forbiddenCommand != "" {
 				expectedError := fmt.Sprintf("statement %q contains forbidden command %q. Transaction handling is done by extension manager", test.statement, test.forbiddenCommand)
 				result, err := client.Execute(test.statement)
@@ -140,8 +140,8 @@ func (suite *ExasolSqlClientUTestSuite) TestQueryCloseFails() {
 
 func (suite *ExasolSqlClientUTestSuite) TestQueryValidation() {
 	for _, test := range forbiddenCommandTests {
+		client := suite.createClient()
 		suite.Run(fmt.Sprintf("running statement %q contains forbidden command %q", test.statement, test.forbiddenCommand), func() {
-			client := suite.createClient()
 			if test.forbiddenCommand != "" {
 				expectedError := fmt.Sprintf("statement %q contains forbidden command %q. Transaction handling is done by extension manager", test.statement, test.forbiddenCommand)
 				result, err := client.Query(test.statement)

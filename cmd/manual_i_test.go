@@ -141,7 +141,7 @@ func (suite *ManualITestSuite) testConnection(db *sql.DB) {
 func (suite *ManualITestSuite) getConfigValue(key string) string {
 	value := suite.config[key]
 	if value == "" {
-		suite.FailNow(fmt.Sprintf("Key %q not found in config file", key))
+		suite.FailNow(fmt.Sprintf("Key %q not found in config file manual-test.properties", key))
 	}
 	return value
 }
