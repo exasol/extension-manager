@@ -7,6 +7,7 @@
 dependencies.md                                     linguist-generated=true
 doc/changes/changelog.md                            linguist-generated=true
 go.sum                                              linguist-generated=true
+SECURITY.md                                         linguist-generated=true
 
 extension-manager-client-java/pk_generated_parent.pom               linguist-generated=true
 extension-manager-client-java/versionsMavenPluginRules.xml          linguist-generated=true
