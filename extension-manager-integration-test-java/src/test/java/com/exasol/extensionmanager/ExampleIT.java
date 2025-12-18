@@ -36,7 +36,7 @@ class ExampleIT {
     @BeforeAll
     static void setup() {
         // Overwrite default Exasol version
-        System.setProperty("com.exasol.dockerdb.image", "8.32.0");
+        System.setProperty("com.exasol.dockerdb.image", "2025.1.8");
 
         exasolTestSetup = new ExasolTestSetupFactory(Path.of("cloud-setup")).getTestSetup();
 
