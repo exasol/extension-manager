@@ -5,25 +5,25 @@
 
 ### Compile Dependencies
 
-| Dependency                                                       | License  |
-| ---------------------------------------------------------------- | -------- |
-| github.com/Nightapes/go-rest                                     | [MIT][0] |
-| github.com/dop251/goja                                           | [MIT][1] |
-| github.com/dop251/goja_nodejs                                    | [MIT][2] |
-| github.com/exasol/exasol-driver-go                               | [MIT][3] |
-| github.com/exasol/exasol-test-setup-abstraction-server/go-client | [MIT][4] |
-| github.com/go-chi/chi/v5                                         | [MIT][5] |
-| github.com/sirupsen/logrus                                       | [MIT][6] |
-| github.com/stretchr/testify                                      | [MIT][7] |
-| github.com/swaggo/http-swagger                                   | [MIT][8] |
+| Dependency                                                       | License           |
+| ---------------------------------------------------------------- | ----------------- |
+| github.com/Nightapes/go-rest                                     | [MIT][0]          |
+| github.com/dop251/goja                                           | [MIT][1]          |
+| github.com/dop251/goja_nodejs                                    | [MIT][2]          |
+| github.com/exasol/exasol-driver-go                               | [MIT][3]          |
+| github.com/exasol/exasol-test-setup-abstraction-server/go-client | [MIT][4]          |
+| github.com/go-chi/chi/v5                                         | [MIT][5]          |
+| github.com/sirupsen/logrus                                       | [MIT][6]          |
+| github.com/stretchr/testify                                      | [MIT][7]          |
+| github.com/swaggo/http-swagger                                   | [MIT][8]          |
+| golang.org/x/mod                                                 | [BSD-3-Clause][9] |
 
 ### Test Dependencies
 
-| Dependency                     | License            |
-| ------------------------------ | ------------------ |
-| github.com/DATA-DOG/go-sqlmock | [Unknown][9]       |
-| github.com/kinbiko/jsonassert  | [MIT][10]          |
-| golang.org/x/mod               | [BSD-3-Clause][11] |
+| Dependency                     | License       |
+| ------------------------------ | ------------- |
+| github.com/DATA-DOG/go-sqlmock | [Unknown][10] |
+| github.com/kinbiko/jsonassert  | [MIT][11]     |
 
 ## Extension Manager Java Client
 
@@ -163,17 +163,17 @@
 | [@exasol/extension-parameter-validator][99] | MIT     |
 
 [0]: https://github.com/Nightapes/go-rest/blob/v0.3.3/LICENSE
-[1]: https://github.com/dop251/goja/blob/bcd7cc6bf64c/LICENSE
-[2]: https://github.com/dop251/goja_nodejs/blob/86a40d630cdd/LICENSE
-[3]: https://github.com/exasol/exasol-driver-go/blob/v1.0.12/LICENSE
-[4]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v0.3.11/go-client/LICENSE
-[5]: https://github.com/go-chi/chi/blob/v5.2.1/LICENSE
+[1]: https://github.com/dop251/goja/blob/2bb4c724c0f9/LICENSE
+[2]: https://github.com/dop251/goja_nodejs/blob/5e94316bedaf/LICENSE
+[3]: https://github.com/exasol/exasol-driver-go/blob/v1.0.15/LICENSE
+[4]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v1.0.0/go-client/LICENSE
+[5]: https://github.com/go-chi/chi/blob/v5.2.3/LICENSE
 [6]: https://github.com/sirupsen/logrus/blob/v1.9.3/LICENSE
-[7]: https://github.com/stretchr/testify/blob/v1.10.0/LICENSE
+[7]: https://github.com/stretchr/testify/blob/v1.11.1/LICENSE
 [8]: https://github.com/swaggo/http-swagger/blob/v1.3.4/LICENSE
-[9]: https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE
-[10]: https://github.com/kinbiko/jsonassert/blob/HEAD/LICENSE
-[11]: https://cs.opensource.google/go/x/mod/+/v0.24.0:LICENSE
+[9]: https://cs.opensource.google/go/x/mod/+/v0.31.0:LICENSE
+[10]: https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE
+[11]: https://github.com/kinbiko/jsonassert/blob/HEAD/LICENSE
 [12]: https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-annotations
 [13]: http://www.apache.org/licenses/LICENSE-2.0.html
 [14]: https://projects.eclipse.org/projects/ee4j.jersey/jersey-client
@@ -194,7 +194,7 @@
 [29]: https://github.com/FasterXML/jackson
 [30]: http://sourceforge.net/projects/migbase64/
 [31]: http://en.wikipedia.org/wiki/BSD_licenses
-[32]: https://junit.org/junit5/
+[32]: https://junit.org/
 [33]: https://www.eclipse.org/legal/epl-v20.html
 [34]: https://www.jqno.nl/equalsverifier
 [35]: https://maven.apache.org/plugins/maven-clean-plugin/

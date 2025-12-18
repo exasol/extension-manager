@@ -10,7 +10,8 @@
     <url>https://github.com/exasol/extension-manager/</url>
     <properties>
         <revision>0.5.17</revision>
-        <junit.version>5.10.2</junit.version>
+        <!-- Version 6 requires Java >= 17 -->
+        <junit.version>5.14.1</junit.version>
         <java.version>11</java.version>
     </properties>
     <modules>
