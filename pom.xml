@@ -38,6 +38,7 @@
             <plugin>
                 <groupId>org.sonatype.ossindex.maven</groupId>
                 <artifactId>ossindex-maven-plugin</artifactId>
+                <version>3.2.0</version>
                 <configuration>
                     <excludeVulnerabilityIds>
                         <!-- com.exasol:exasol-jdbc:jar:25.2.5 -->
