@@ -40,10 +40,10 @@ jobs:
             .github/workflows/project-keeper.sh
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         if: ${{ true }}
         with:
-          node-version: "22"
+          node-version: "24"
           cache: "npm"
           cache-dependency-path: "**/package-lock.json"
 
