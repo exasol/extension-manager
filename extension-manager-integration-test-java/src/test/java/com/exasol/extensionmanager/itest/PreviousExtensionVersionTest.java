@@ -29,7 +29,7 @@ class PreviousExtensionVersionTest {
     private ExtensionManagerClient clientMock;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         lenient().when(setupMock.client()).thenReturn(clientMock);
     }
 
