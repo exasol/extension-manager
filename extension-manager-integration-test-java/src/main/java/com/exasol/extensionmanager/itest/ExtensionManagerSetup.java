@@ -61,7 +61,7 @@ public class ExtensionManagerSetup implements AutoCloseable {
      */
     public static ExtensionManagerSetup create(final ExasolTestSetup exasolTestSetup,
             final ExtensionBuilder extensionBuilder) {
-        ExasolVersionCheck.assertExasolVersion8(exasolTestSetup);
+        ExasolVersionCheck.assertExasolVersionSupported(exasolTestSetup);
         final Path extensionFolder = createTempDir();
         final ExtensionTestConfig config = ExtensionTestConfig.read();
         final ExtensionManagerProcess extensionManager = startExtensionManager(extensionBuilder, extensionFolder,

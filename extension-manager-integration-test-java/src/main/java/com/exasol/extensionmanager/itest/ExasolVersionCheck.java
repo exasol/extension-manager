@@ -16,27 +16,27 @@ public class ExasolVersionCheck {
     }
 
     /**
-     * Ensures that the given test setup is connected to an Exasol DB in version 2025.
+     * Ensures that the given test setup is connected to a supported Exasol DB version.
      * <p>
      * This executes a SQL query using the given test setup to determine the major version of the database.
      * 
      * @param testSetup test setup to check
-     * @throws AssertionError if the major version number is not {@code 8}
+     * @throws AssertionError if the major version number is less than {@code 8}
      */
-    public static void assertExasolVersion8(final ExasolTestSetup testSetup) {
+    public static void assertExasolVersionSupported(final ExasolTestSetup testSetup) {
         final int version = getExasolMajorVersion(testSetup);
         assertTrue(version >= 8, "Expected Exasol version >= 8 but got '" + version + "'");
     }
 
     /**
-     * Assumes that the given test setup is connected to a Exasol DB in version 8. *
+     * Assumes that the given test setup is connected to a supported Exasol DB version.
      * <p>
      * This executes a SQL query using the given test setup to determine the major version of the database.
      * 
      * @param testSetup test setup to check
-     * @throws org.opentest4j.TestAbortedException if the major version number is not {@code 8}
+     * @throws org.opentest4j.TestAbortedException if the major version number less than {@code 8}
      */
-    public static void assumeExasolVersion8(final ExasolTestSetup testSetup) {
+    public static void assumeSupportedExasolVersion(final ExasolTestSetup testSetup) {
         final int version = getExasolMajorVersion(testSetup);
         assumeTrue(version >= 8, "Expected Exasol version >= 8 but got '" + version + "'");
     }

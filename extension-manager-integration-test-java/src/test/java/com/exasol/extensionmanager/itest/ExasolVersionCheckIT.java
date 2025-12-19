@@ -21,12 +21,12 @@ class ExasolVersionCheckIT {
     }
 
     @Test
-    void testAssertExasolVersion8DoesNotThrow() {
-        assertDoesNotThrow(() -> ExasolVersionCheck.assertExasolVersion8(exasolTestSetup));
+    void testAssertSupportedExasolVersionDoesNotThrow() {
+        assertDoesNotThrow(() -> ExasolVersionCheck.assertExasolVersionSupported(exasolTestSetup));
     }
 
     @Test
-    void testAssumeExasolVersion8DoesNotThrow() {
-        assertDoesNotThrow(() -> ExasolVersionCheck.assumeExasolVersion8(exasolTestSetup));
+    void testAssumeSupportedExasolVersionDoesNotThrow() {
+        assertDoesNotThrow(() -> ExasolVersionCheck.assumeSupportedExasolVersion(exasolTestSetup));
     }
 }

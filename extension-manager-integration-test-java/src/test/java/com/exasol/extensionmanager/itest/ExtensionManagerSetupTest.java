@@ -49,7 +49,7 @@ class ExtensionManagerSetupTest {
                 .thenReturn(new SqlConnectionInfo("host", 8563, "user", "pass"));
         lenient().when(exasolTestSetupMock.createConnection()).thenReturn(dbConnectionMock);
         lenient().when(dbConnectionMock.createStatement()).thenReturn(statementMock);
-        simulateExasolVersion("8");
+        simulateExasolVersion(2025);
         extensionManager = ExtensionManagerSetup.create(exasolTestSetupMock, extensionBuilderMock);
     }
 
@@ -69,15 +69,15 @@ class ExtensionManagerSetupTest {
 
     @Test
     void createFailsForOldVersion() throws SQLException {
-        simulateExasolVersion("7");
+        simulateExasolVersion(7);
         final AssertionError error = assertThrows(AssertionError.class,
                 () -> ExtensionManagerSetup.create(exasolTestSetupMock, null));
-        assertThat(error.getMessage(), equalTo("Exasol version ==> expected: <8> but was: <7>"));
+        assertThat(error.getMessage(), equalTo("Expected Exasol version >= 8 but got '7' ==> expected: <true> but was: <false>"));
     }
 
-    private void simulateExasolVersion(final String version) throws SQLException {
+    private void simulateExasolVersion(final int version) throws SQLException {
         when(statementMock.executeQuery("SELECT PARAM_VALUE FROM SYS.EXA_METADATA WHERE PARAM_NAME='databaseMajorVersion'")).thenReturn(resultSetMock);
         when(resultSetMock.next()).thenReturn(true);
-        when(resultSetMock.getString(1)).thenReturn(version);
+        when(resultSetMock.getInt(1)).thenReturn(version);
     }
 }

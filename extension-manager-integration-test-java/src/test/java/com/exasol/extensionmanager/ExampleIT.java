@@ -41,7 +41,7 @@ class ExampleIT {
         exasolTestSetup = new ExasolTestSetupFactory(Path.of("cloud-setup")).getTestSetup();
 
         // Skip test in case this is an older Exasol version
-        ExasolVersionCheck.assumeExasolVersion8(exasolTestSetup);
+        ExasolVersionCheck.assumeSupportedExasolVersion(exasolTestSetup);
 
         // Create EM setup
         setup = ExtensionManagerSetup.create(exasolTestSetup, ExtensionBuilder.createDefaultNpmBuilder(
