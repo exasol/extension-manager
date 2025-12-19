@@ -228,7 +228,7 @@ EM uses a Python UDF located at [pkg/extensionController/bfs/udf](../pkg/extensi
 
 ```sh
 cd pkg/extensionController/bfs/udf
-poetry env use 3.8
+poetry env use 3.12
 poetry install
 ```
 
@@ -253,4 +253,14 @@ poetry run mypy .
 ```sh
 cd pkg/extensionController/bfs/udf
 poetry run pylint *.py
+```
+
+### Check For Outdated Dependencies
+
+```sh
+poetry show --outdated
+# Upgrade dependencies in pyproject.toml
+poetry lock
+poetry install
+poetry update # Upgrade transitive dependencies
 ```
