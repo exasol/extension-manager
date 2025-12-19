@@ -1,12 +1,17 @@
-# Extension Manager 0.5.17, released 2025-??-??
+# Extension Manager 0.5.17, released 2025-12-19
 
-Code name:
+Code name: Fix vulnerabilities CVE-2025-12383 and CVE-2024-55551
 
 ## Summary
 
-## Features
+This release fixes the following vulnerabilities by updating dependencies:
+* CVE-2025-12383 in `org.glassfish.jersey.core:jersey-client:jar:2.45`
+* CVE-2024-55551 in `com.exasol:exasol-jdbc:jar:24.2.1:runtime`
 
-* ISSUE_NUMBER: description
+## Security
+
+* #195: Fixed CVE-2025-12383 in `org.glassfish.jersey.core:jersey-client:jar:2.45`
+* #194: Fixed CVE-2024-55551 in `com.exasol:exasol-jdbc:jar:24.2.1:runtime`
 
 ## Dependency Updates
 
