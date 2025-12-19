@@ -1,6 +1,5 @@
 package com.exasol.extensionmanager.itest;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -17,7 +16,7 @@ public class ExasolVersionCheck {
     }
 
     /**
-     * Ensures that the given test setup is connected to a Exasol DB in version 8.
+     * Ensures that the given test setup is connected to an Exasol DB in version 2025.
      * <p>
      * This executes a SQL query using the given test setup to determine the major version of the database.
      * 
@@ -25,8 +24,8 @@ public class ExasolVersionCheck {
      * @throws AssertionError if the major version number is not {@code 8}
      */
     public static void assertExasolVersion8(final ExasolTestSetup testSetup) {
-        final String version = getExasolMajorVersion(testSetup);
-        assertEquals("8", version, "Exasol version");
+        final int version = getExasolMajorVersion(testSetup);
+        assertTrue(version >= 8, "Expected Exasol version >= 8 but got '" + version + "'");
     }
 
     /**
@@ -38,16 +37,16 @@ public class ExasolVersionCheck {
      * @throws org.opentest4j.TestAbortedException if the major version number is not {@code 8}
      */
     public static void assumeExasolVersion8(final ExasolTestSetup testSetup) {
-        final String version = getExasolMajorVersion(testSetup);
-        assumeTrue("8".equals(version), "Expected Exasol version 8 but got '" + version + "'");
+        final int version = getExasolMajorVersion(testSetup);
+        assumeTrue(version >= 8, "Expected Exasol version >= 8 but got '" + version + "'");
     }
 
-    static String getExasolMajorVersion(final ExasolTestSetup testSetup) {
+    static int getExasolMajorVersion(final ExasolTestSetup testSetup) {
         try (Statement stmt = testSetup.createConnection().createStatement()) {
             final ResultSet result = stmt
                     .executeQuery("SELECT PARAM_VALUE FROM SYS.EXA_METADATA WHERE PARAM_NAME='databaseMajorVersion'");
             assertTrue(result.next(), "no result");
-            return result.getString(1);
+            return result.getInt(1);
         } catch (final SQLException exception) {
             throw new IllegalStateException("Failed to query Exasol version: " + exception.getMessage(), exception);
         }

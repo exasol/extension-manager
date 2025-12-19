@@ -51,8 +51,12 @@ class ExampleIT {
     @AfterAll
     static void teardown() throws Exception {
         // Close EM setup and Exasol DB after running all tests
-        setup.close();
-        exasolTestSetup.close();
+        if (setup != null) {
+            setup.close();
+        }
+        if (exasolTestSetup != null) {
+            exasolTestSetup.close();
+        }
     }
 
     @AfterEach
