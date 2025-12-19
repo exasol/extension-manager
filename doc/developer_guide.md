@@ -252,7 +252,7 @@ poetry run mypy .
 
 ```sh
 cd pkg/extensionController/bfs/udf
-poetry run pylint *.py
+poetry run pylint ./*.py
 ```
 
 ### Check For Outdated Dependencies

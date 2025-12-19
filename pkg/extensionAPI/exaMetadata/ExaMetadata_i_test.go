@@ -25,7 +25,7 @@ func (suite *ExaMetadataITestSuite) TearDownSuite() {
 	suite.exasol.StopDb()
 }
 
-func (suite *ExaMetadataITestSuite) BeforeTest(suiteName, testName string) {
+func (suite *ExaMetadataITestSuite) BeforeTest(_suiteName, _testName string) {
 	suite.exasol.CreateConnection()
 	suite.T().Cleanup(func() {
 		suite.exasol.CloseConnection()

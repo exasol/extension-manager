@@ -41,7 +41,7 @@ func (m *TransactionStarterMock) SimulateMockTransaction() {
 			return nil, fmt.Errorf("failed to start mock transaction: %w", err)
 		}
 		return &TransactionContext{
-			context:     context.Background(),
+			context:     ctx,
 			transaction: tx,
 			db:          m.dbMock,
 			createBfsClient: func() (bfs.BucketFsAPI, error) {

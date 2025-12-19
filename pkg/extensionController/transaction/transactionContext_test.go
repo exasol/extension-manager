@@ -32,7 +32,7 @@ func (suite *TransactionContextSuite) SetupTest() {
 	suite.dbMock.MatchExpectationsInOrder(true)
 }
 
-func (suite *TransactionContextSuite) AfterTest(suiteName, testName string) {
+func (suite *TransactionContextSuite) AfterTest(_suiteName, _testName string) {
 	suite.NoError(suite.dbMock.ExpectationsWereMet())
 }
 

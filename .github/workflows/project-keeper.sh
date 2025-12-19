@@ -12,7 +12,7 @@ readonly version="5.4.4"
 
 readonly pk_jar="$HOME/.m2/repository/com/exasol/project-keeper-cli/$version/project-keeper-cli-$version.jar"
 
-if [ ! -f "$pk_jar" ]; then
+if [[ ! -f "$pk_jar" ]]; then
     echo "Downloading Project Keeper $version"
     mvn --batch-mode org.apache.maven.plugins:maven-dependency-plugin:3.6.1:get -Dartifact=com.exasol:project-keeper-cli:$version
 fi

@@ -3,7 +3,7 @@ package bfs
 import (
 	"context"
 	"database/sql"
-	_ "embed"
+	_ "embed" // Embedding file df/list_files_udf.py
 	"errors"
 	"fmt"
 	"time"

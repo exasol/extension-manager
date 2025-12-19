@@ -39,7 +39,7 @@ func TestControllerUTestSuite(t *testing.T) {
 	suite.Run(t, new(ControllerUTestSuite))
 }
 
-func (suite *ControllerUTestSuite) BeforeTest(suiteName, testName string) {
+func (suite *ControllerUTestSuite) BeforeTest(_suiteName, _testName string) {
 	suite.tempExtensionRepo = suite.T().TempDir()
 	suite.createController()
 }
@@ -83,7 +83,7 @@ func (suite *ControllerUTestSuite) simulateTransactionBeginFails(err error) {
 	suite.controller.transactionStarter = suite.transactionStarterMock.GetTransactionStarter()
 }
 
-func (suite *ControllerUTestSuite) AfterTest(suiteName, testName string) {
+func (suite *ControllerUTestSuite) AfterTest(_suiteName, _testName string) {
 	suite.NoError(suite.dbMock.ExpectationsWereMet())
 	suite.bucketFsMock.AssertExpectations(suite.T())
 	suite.metaDataMock.AssertExpectations(suite.T())

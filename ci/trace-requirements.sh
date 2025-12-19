@@ -10,7 +10,7 @@ base_dir="$( cd "$(dirname "$0")/.." >/dev/null 2>&1 ; pwd -P )"
 readonly base_dir
 readonly oft_jar="$HOME/.m2/repository/org/itsallcode/openfasttrace/openfasttrace/$oft_version/openfasttrace-$oft_version.jar"
 
-if [ ! -f "$oft_jar" ]; then
+if [[ ! -f "$oft_jar" ]]; then
     echo "Downloading OpenFastTrace $oft_version"
     mvn --batch-mode org.apache.maven.plugins:maven-dependency-plugin:3.9.0:get -Dartifact=org.itsallcode.openfasttrace:openfasttrace:$oft_version
 fi

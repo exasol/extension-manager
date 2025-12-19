@@ -34,7 +34,7 @@ jobs:
       - name: Prepare testing extension
         run: |
           cd ./extension-manager-integration-test-java/testing-extension
-          npm ci
+          npm ci --ignore-scripts
           npm run build
           cd dist
           sha256sum testing-extension.js > testing-extension.js.sha256

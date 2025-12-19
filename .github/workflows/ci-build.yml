@@ -102,7 +102,7 @@ jobs:
           go test -v -p 1 -count 1 -coverprofile=coverage.out ./...
 
       - name: Prepare testing extension
-        run: cd ./extension-manager-integration-test-java/testing-extension && npm ci
+        run: cd ./extension-manager-integration-test-java/testing-extension && npm ci --ignore-scripts
 
       - name: Build and test integration test framework
         run: mvn --batch-mode clean verify -Dcom.exasol.dockerdb.image=$EXASOL_VERSION -DtrimStackTrace=false
@@ -113,13 +113,13 @@ jobs:
         run: |
           cd registry
           echo "export const CONFIG = { owner: 'dummy-owner@example.com' }" > lib/config.ts
-          npm ci
+          npm ci --ignore-scripts
           npm run test
 
       - name: Build and test registry upload
         run: |
           cd registry-upload
-          npm ci
+          npm ci --ignore-scripts
           npm run build
           npm run lint
 
@@ -203,4 +203,4 @@ jobs:
       - name: Run type check
         run: cd pkg/extensionController/bfs/udf && poetry run mypy .
       - name: Run linter
-        run: cd pkg/extensionController/bfs/udf && poetry run pylint *.py
+        run: cd pkg/extensionController/bfs/udf && poetry run pylint ./*.py

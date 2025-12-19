@@ -38,7 +38,7 @@ func (suite *ContextSuite) SetupTest() {
 	suite.metadataReaderMock = exaMetadata.CreateExaMetaDataReaderMock(EXTENSION_SCHEMA)
 }
 
-func (suite *ContextSuite) AfterTest(suiteName, testName string) {
+func (suite *ContextSuite) AfterTest(_suiteName, _testName string) {
 	suite.NoError(suite.dbMock.ExpectationsWereMet())
 	suite.bucketFSMock.AssertExpectations(suite.T())
 	suite.metadataReaderMock.AssertExpectations(suite.T())

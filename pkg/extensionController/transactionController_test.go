@@ -60,7 +60,7 @@ func (suite *extCtrlUnitTestSuite) setupDbMock() {
 	suite.dbMock.MatchExpectationsInOrder(true)
 }
 
-func (suite *extCtrlUnitTestSuite) AfterTest(suiteName, testName string) {
+func (suite *extCtrlUnitTestSuite) AfterTest(_suiteName, _testName string) {
 	if err := suite.dbMock.ExpectationsWereMet(); err != nil {
 		suite.Failf("unfulfilled expectations", err.Error())
 	}

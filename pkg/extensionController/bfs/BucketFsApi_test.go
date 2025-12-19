@@ -33,7 +33,7 @@ func (suite *BucketFsClientUTestSuite) SetupTest() {
 	suite.dbMock.MatchExpectationsInOrder(true)
 }
 
-func (suite *BucketFsClientUTestSuite) AfterTest(suiteName, testName string) {
+func (suite *BucketFsClientUTestSuite) AfterTest(_suiteName, _testName string) {
 	suite.NoError(suite.dbMock.ExpectationsWereMet())
 }
 

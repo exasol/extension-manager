@@ -31,7 +31,7 @@ jobs:
         id: go
 
       - name: Prepare testing extension
-        run: cd ./extension-manager-integration-test-java/testing-extension && npm ci
+        run: cd ./extension-manager-integration-test-java/testing-extension && npm ci --ignore-scripts
 
       - name: Enable testcontainer reuse
         run: echo 'testcontainers.reuse.enable=true' > "$HOME/.testcontainers.properties"

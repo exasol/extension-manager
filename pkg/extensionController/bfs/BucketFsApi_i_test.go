@@ -128,7 +128,7 @@ func (suite *BucketFsClientITestSuite) createBucketFsClient() bfs.BucketFsAPI {
 	return bfsClient
 }
 
-func (suite *BucketFsClientITestSuite) uploadStringContent(fileName string, fileContent string) {
+func (suite *BucketFsClientITestSuite) uploadStringContent(fileName, fileContent string) {
 	err := suite.exasol.Exasol.UploadStringContent(fileContent, fileName)
 	if err != nil {
 		suite.FailNowf("Failed to upload file %q. Cause: %w", fileName, err)
