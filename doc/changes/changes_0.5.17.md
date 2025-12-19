@@ -114,3 +114,43 @@ Code name:
 * Updated `org.sonarsource.scanner.maven:sonar-maven-plugin:5.0.0.4389` to `5.5.0.6356`
 * Added `org.sonatype.central:central-publishing-maven-plugin:0.9.0`
 * Removed `org.sonatype.plugins:nexus-staging-maven-plugin:1.7.0`
+
+### Registry
+
+#### Compile Dependency Updates
+
+* Updated `aws-cdk-lib:2.182.0` to `2.233.0`
+* Updated `constructs:^10.4.2` to `^10.4.4`
+
+#### Development Dependency Updates
+
+* Updated `@types/node:^22.13.10` to `^25.0.3`
+* Updated `ts-jest:^29.2.6` to `^29.4.6`
+* Updated `@types/jest:^29.5.14` to `^30.0.0`
+* Updated `typescript:~5.8.2` to `~5.9.3`
+* Updated `aws-cdk:2.1003.0` to `2.1100.1`
+* Updated `jest:^29.7.0` to `^30.2.0`
+
+### Registry-upload
+
+#### Compile Dependency Updates
+
+* Updated `@aws-sdk/client-cloudfront:^3.764.0` to `^3.955.0`
+* Updated `follow-redirects:^1.15.9` to `^1.15.11`
+* Updated `@aws-sdk/client-s3:^3.758.0` to `^3.955.0`
+* Updated `octokit:^4.1.2` to `^5.0.5`
+* Updated `@aws-sdk/client-cloudformation:^3.758.0` to `^3.955.0`
+
+#### Development Dependency Updates
+
+* Updated `eslint:9.22.0` to `9.39.2`
+* Updated `@types/node:^22.13.10` to `^25.0.3`
+* Updated `typescript-eslint:^8.26.0` to `^8.50.0`
+* Updated `typescript:~5.8.2` to `~5.9.3`
+
+### ParameterValidator
+
+#### Development Dependency Updates
+
+* Updated `typescript:5.7.3` to `5.9.3`
+* Updated `esbuild:0.25.0` to `0.27.2`
