@@ -88,7 +88,7 @@ func GetLogger(context context.Context) *log.Entry {
 }
 
 func DecodeJSONBody(writer http.ResponseWriter, request *http.Request, dst interface{}) error {
-	if request.Header.Get(HeaderContentType); value != ContentTypeJson {
+	if request.Header.Get(HeaderContentType) != ContentTypeJson {
 		return apiErrors.NewAPIError(http.StatusBadRequest, "Content-Type header is not application/json")
 	}
 
