@@ -34,28 +34,24 @@ jobs:
       - name: Generate ossindex report
         run: |
           mvn org.sonatype.ossindex.maven:ossindex-maven-plugin:audit \
-              org.sonatype.ossindex.maven:ossindex-maven-plugin:audit-aggregate \
-              -Dossindex.reportFile=$(pwd)/ossindex-report.json \
-              -Dossindex.fail=false
-
-      - name: Report Security Issues
-        uses: exasol/python-toolbox/.github/actions/security-issues@main
-        with:
-          format: "maven"
-          command: "cat ossindex-report.json"
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+              org.sonatype.ossindex.maven:ossindex-maven-plugin:audit-aggregate
 
       - name: Check for Go vulnerabilities
+        if: always()
         run: |
           go install golang.org/x/vuln/cmd/govulncheck@latest
           govulncheck -version
           govulncheck -format text -mode source -scan symbol -show verbose -test ./...
 
       - name: Check registry for NPM vulnerabilities
+        if: always()
         run: cd registry && npm audit
       - name: Check registry-upload for NPM vulnerabilities
+        if: always()
         run: cd registry-upload && npm audit
       - name: Check parameterValidator for NPM vulnerabilities
+        if: always()
         run: cd pkg/parameterValidator && npm audit
       - name: Check testing-extension for NPM vulnerabilities
+        if: always()
         run: cd extension-manager-integration-test-java/testing-extension && npm audit
