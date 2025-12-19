@@ -143,7 +143,7 @@ func (suite *ExaMetadataITestSuite) readMetaDataTables(schemaName string) *exaMe
 	return metaData
 }
 
-func (suite *ExaMetadataITestSuite) readMetaDataTablesFromCustomMetadataSchema(schemaName string, metaDataSchema string) *exaMetadata.ExaMetadata {
+func (suite *ExaMetadataITestSuite) readMetaDataTablesFromCustomMetadataSchema(schemaName, metaDataSchema string) *exaMetadata.ExaMetadata {
 	tx, err := suite.exasol.GetConnection().Begin()
 	suite.Require().NoError(err)
 	metaData, err := exaMetadata.CreateExaMetaDataReaderForCustomMetadataSchema(metaDataSchema).ReadMetadataTables(tx, schemaName)
