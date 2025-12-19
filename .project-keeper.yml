@@ -44,4 +44,4 @@ excludes:
   # Project uses Go 1.25
   - "E-PK-CORE-18: Outdated content: '.github/workflows/project-keeper-verify.yml'"
   # PK has problems with Go dependencies
-  - "E-PK-CORE-53: The dependencies.md file has outdated content."
+  - regex: "E-PK-CORE-53: The dependencies\\.md file has outdated content.*"
