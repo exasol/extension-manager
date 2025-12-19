@@ -100,7 +100,7 @@
 | [mockito-junit-jupiter][76]        | [MIT][77]                         |
 | [udf-debugging-java][78]           | [MIT License][79]                 |
 | [Maven Project Version Getter][80] | [MIT License][81]                 |
-| [SLF4J JDK14 Provider][82]         | [MIT License][22]                 |
+| [SLF4J JDK14 Provider][82]         | [MIT][83]                         |
 
 ### Plugin Dependencies
 
@@ -125,12 +125,12 @@
 | [Apache Maven Source Plugin][53]                        | [Apache License, Version 2.0][28]           |
 | [Apache Maven Javadoc Plugin][58]                       | [Apache-2.0][28]                            |
 | [Central Publishing Maven Plugin][59]                   | [The Apache License, Version 2.0][28]       |
-| [Maven Failsafe Plugin][83]                             | [Apache-2.0][28]                            |
+| [Maven Failsafe Plugin][84]                             | [Apache-2.0][28]                            |
 | [JaCoCo :: Maven Plugin][60]                            | [EPL-2.0][61]                               |
 | [Quality Summarizer Maven Plugin][62]                   | [MIT License][63]                           |
 | [error-code-crawler-maven-plugin][64]                   | [MIT License][65]                           |
 | [Git Commit Id Maven Plugin][66]                        | [GNU Lesser General Public License 3.0][67] |
-| [Apache Maven JAR Plugin][84]                           | [Apache-2.0][28]                            |
+| [Apache Maven JAR Plugin][85]                           | [Apache-2.0][28]                            |
 
 ## Registry
 
@@ -138,9 +138,9 @@
 
 | Dependency               | License          |
 | ------------------------ | ---------------- |
-| [aws-cdk-lib][85]        | [Apache-2.0][86] |
-| [constructs][87]         | [Apache-2.0][88] |
-| [source-map-support][89] | [MIT][90]        |
+| [aws-cdk-lib][86]        | [Apache-2.0][87] |
+| [constructs][88]         | [Apache-2.0][89] |
+| [source-map-support][90] | [MIT][91]        |
 
 ## Registry-upload
 
@@ -148,19 +148,19 @@
 
 | Dependency                           | License          |
 | ------------------------------------ | ---------------- |
-| [@aws-sdk/client-cloudformation][91] | [Apache-2.0][92] |
-| [@aws-sdk/client-cloudfront][93]     | [Apache-2.0][92] |
-| [@aws-sdk/client-s3][94]             | [Apache-2.0][92] |
-| [follow-redirects][95]               | [MIT][96]        |
-| [octokit][97]                        | [MIT][98]        |
+| [@aws-sdk/client-cloudformation][92] | [Apache-2.0][93] |
+| [@aws-sdk/client-cloudfront][94]     | [Apache-2.0][93] |
+| [@aws-sdk/client-s3][95]             | [Apache-2.0][93] |
+| [follow-redirects][96]               | [MIT][97]        |
+| [octokit][98]                        | [MIT][99]        |
 
 ## Parametervalidator
 
 ### Compile Dependencies
 
-| Dependency                                  | License |
-| ------------------------------------------- | ------- |
-| [@exasol/extension-parameter-validator][99] | MIT     |
+| Dependency                                   | License |
+| -------------------------------------------- | ------- |
+| [@exasol/extension-parameter-validator][100] | MIT     |
 
 [0]: https://github.com/Nightapes/go-rest/blob/v0.3.3/LICENSE
 [1]: https://github.com/dop251/goja/blob/2bb4c724c0f9/LICENSE
@@ -245,20 +245,21 @@
 [80]: https://github.com/exasol/maven-project-version-getter/
 [81]: https://github.com/exasol/maven-project-version-getter/blob/main/LICENSE
 [82]: http://www.slf4j.org
-[83]: https://maven.apache.org/surefire/maven-failsafe-plugin/
-[84]: https://maven.apache.org/plugins/maven-jar-plugin/
-[85]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.182.0.tgz
-[86]: https://github.com/aws/aws-cdk
-[87]: https://registry.npmjs.org/constructs/-/constructs-10.4.2.tgz
-[88]: https://github.com/aws/constructs
-[89]: https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz
-[90]: https://github.com/evanw/node-source-map-support
-[91]: https://registry.npmjs.org/@aws-sdk/client-cloudformation/-/client-cloudformation-3.758.0.tgz
-[92]: https://github.com/aws/aws-sdk-js-v3
-[93]: https://registry.npmjs.org/@aws-sdk/client-cloudfront/-/client-cloudfront-3.764.0.tgz
-[94]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.758.0.tgz
-[95]: https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.9.tgz
-[96]: https://github.com/follow-redirects/follow-redirects
-[97]: https://registry.npmjs.org/octokit/-/octokit-4.1.2.tgz
-[98]: https://github.com/octokit/octokit.js
-[99]: https://registry.npmjs.org/@exasol/extension-parameter-validator/-/extension-parameter-validator-0.3.1.tgz
+[83]: https://opensource.org/license/mit
+[84]: https://maven.apache.org/surefire/maven-failsafe-plugin/
+[85]: https://maven.apache.org/plugins/maven-jar-plugin/
+[86]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.182.0.tgz
+[87]: https://github.com/aws/aws-cdk
+[88]: https://registry.npmjs.org/constructs/-/constructs-10.4.2.tgz
+[89]: https://github.com/aws/constructs
+[90]: https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz
+[91]: https://github.com/evanw/node-source-map-support
+[92]: https://registry.npmjs.org/@aws-sdk/client-cloudformation/-/client-cloudformation-3.758.0.tgz
+[93]: https://github.com/aws/aws-sdk-js-v3
+[94]: https://registry.npmjs.org/@aws-sdk/client-cloudfront/-/client-cloudfront-3.764.0.tgz
+[95]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.758.0.tgz
+[96]: https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.9.tgz
+[97]: https://github.com/follow-redirects/follow-redirects
+[98]: https://registry.npmjs.org/octokit/-/octokit-4.1.2.tgz
+[99]: https://github.com/octokit/octokit.js
+[100]: https://registry.npmjs.org/@exasol/extension-parameter-validator/-/extension-parameter-validator-0.3.1.tgz

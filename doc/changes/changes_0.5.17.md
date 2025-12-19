@@ -31,6 +31,9 @@ Code name:
 
 #### Compile Dependency Updates
 
+* Updated `com.fasterxml.jackson.core:jackson-annotations:2.18.2` to `2.20`
+* Updated `com.fasterxml.jackson.core:jackson-core:2.18.2` to `2.20.1`
+* Updated `com.fasterxml.jackson.core:jackson-databind:2.18.2` to `2.20.1`
 * Updated `io.swagger.core.v3:swagger-annotations:2.2.28` to `2.2.41`
 * Updated `org.glassfish.jersey.core:jersey-client:2.45` to `2.47`
 * Updated `org.glassfish.jersey.inject:jersey-hk2:2.45` to `2.47`
@@ -73,12 +76,19 @@ Code name:
 
 #### Compile Dependency Updates
 
+* Updated `com.exasol:exasol-test-setup-abstraction-java:2.1.7` to `2.1.10`
 * Updated `com.exasol:extension-manager-client-java:0.5.16` to `0.5.17`
+* Updated `com.exasol:hamcrest-resultset-matcher:1.7.0` to `1.7.2`
+* Updated `com.exasol:test-db-builder-java:3.6.0` to `3.6.4`
 * Updated `org.junit.jupiter:junit-jupiter-api:5.10.2` to `5.14.1`
 
 #### Test Dependency Updates
 
+* Updated `com.exasol:maven-project-version-getter:1.2.1` to `1.2.2`
+* Updated `com.exasol:udf-debugging-java:0.6.15` to `0.6.18`
 * Updated `org.junit.jupiter:junit-jupiter-params:5.10.2` to `5.14.1`
+* Updated `org.mockito:mockito-junit-jupiter:5.15.2` to `5.21.0`
+* Updated `org.slf4j:slf4j-jdk14:2.0.16` to `2.0.17`
 
 #### Plugin Dependency Updates
 
@@ -94,6 +104,7 @@ Code name:
 * Updated `org.apache.maven.plugins:maven-failsafe-plugin:3.5.2` to `3.5.4`
 * Updated `org.apache.maven.plugins:maven-gpg-plugin:3.2.7` to `3.2.8`
 * Updated `org.apache.maven.plugins:maven-install-plugin:3.1.3` to `3.1.4`
+* Updated `org.apache.maven.plugins:maven-jar-plugin:3.4.2` to `3.5.0`
 * Updated `org.apache.maven.plugins:maven-javadoc-plugin:3.11.1` to `3.12.0`
 * Updated `org.apache.maven.plugins:maven-resources-plugin:3.3.1` to `3.4.0`
 * Updated `org.apache.maven.plugins:maven-surefire-plugin:3.5.2` to `3.5.4`
