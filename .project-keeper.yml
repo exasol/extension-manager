@@ -43,3 +43,5 @@ excludes:
   - "E-PK-CORE-26: 'release_config.yml' exists but must not exist. Reason: Release-droid configuration is replaced by release.yml"
   # Project uses Go 1.25
   - "E-PK-CORE-18: Outdated content: '.github/workflows/project-keeper-verify.yml'"
+  # PK has problems with Go dependencies
+  - "E-PK-CORE-53: The dependencies.md file has outdated content."
