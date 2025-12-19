@@ -45,7 +45,7 @@ describe('Registry stack', () => {
                     "Origins": [
                         {
                             "S3OriginConfig": {
-                                "OriginAccessIdentity": {}
+                                "OriginAccessIdentity": ""
                             }
                         }
                     ],

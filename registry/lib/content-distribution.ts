@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { CfnOutput, RemovalPolicy } from 'aws-cdk-lib';
 import { Distribution, HttpVersion, PriceClass, SecurityPolicyProtocol } from 'aws-cdk-lib/aws-cloudfront';
-import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
+import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { BlockPublicAccess, Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
@@ -20,7 +20,7 @@ export class ContentDistributionConstruct extends Construct {
 
         const cloudfrontDistribution = new Distribution(this, "EMRegistryDistribution", {
             comment: "Extension Manager Registry",
-            defaultBehavior: { origin: new S3Origin(staticContentBucket) },
+            defaultBehavior: { origin: S3BucketOrigin.withOriginAccessControl(staticContentBucket) },
             defaultRootObject: "index.html",
             enabled: true,
             enableIpv6: true,
