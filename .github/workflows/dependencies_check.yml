@@ -2,6 +2,7 @@ name: Report Security Issues for Repository
 
 on:
   workflow_dispatch:
+  pull_request:
   schedule:
     - cron: "0 2 * * *"
 
@@ -21,6 +22,10 @@ jobs:
             11
             17
           cache: "maven"
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.25"
       - name: Install to local maven repo
         # This avoids this error:
         # [ERROR] Failed to execute goal on project extension-manager-integration-test-java: Could not resolve dependencies for project com.exasol:extension-manager-integration-test-java:jar:0.2.3: Could not find artifact com.exasol:extension-manager-client-java:jar:0.2.3 in central
@@ -39,3 +44,18 @@ jobs:
           format: "maven"
           command: "cat ossindex-report.json"
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for Go vulnerabilities
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck -version
+          govulncheck -format text -mode source -scan symbol -show verbose -test ./...
+
+      - name: Check registry for NPM vulnerabilities
+        run: cd registry && npm audit
+      - name: Check registry-upload for NPM vulnerabilities
+        run: cd registry-upload && npm audit
+      - name: Check parameterValidator for NPM vulnerabilities
+        run: cd pkg/parameterValidator && npm audit
+      - name: Check testing-extension for NPM vulnerabilities
+        run: cd extension-manager-integration-test-java/testing-extension && npm audit
