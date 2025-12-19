@@ -184,7 +184,7 @@ func (suite *ExaMetadataUTestSuite) TestGetScriptByNameReadingFails() {
 
 func (suite *ExaMetadataUTestSuite) beginTransaction() *sql.Tx {
 	suite.dbMock.ExpectBegin()
-	tx, err := suite.db.Begin()
+	tx, err := suite.db.BeginTx(suite.T().Context(), nil)
 	suite.Require().NoError(err)
 	return tx
 }
