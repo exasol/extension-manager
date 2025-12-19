@@ -12,7 +12,7 @@ import (
 
 const BUCKETFS_BASE_PATH = "bucketfs-base-path"
 
-var mockError = errors.New("mock error")
+var errMock = errors.New("mock error")
 
 type TransactionContextSuite struct {
 	suite.Suite
@@ -32,7 +32,7 @@ func (suite *TransactionContextSuite) SetupTest() {
 	suite.dbMock.MatchExpectationsInOrder(true)
 }
 
-func (suite *TransactionContextSuite) AfterTest(suiteName, testName string) {
+func (suite *TransactionContextSuite) AfterTest(_suiteName, _testName string) {
 	suite.NoError(suite.dbMock.ExpectationsWereMet())
 }
 
@@ -50,7 +50,7 @@ func (suite *TransactionContextSuite) TestBeginTransactionFailsWithEmptyBucketFs
 }
 
 func (suite *TransactionContextSuite) TestBeginTransactionFails() {
-	suite.dbMock.ExpectBegin().WillReturnError(mockError)
+	suite.dbMock.ExpectBegin().WillReturnError(errMock)
 	txCtx, err := suite.beginTransaction()
 	suite.Require().EqualError(err, "failed to begin transaction: mock error")
 	suite.Nil(txCtx)
@@ -115,7 +115,7 @@ func (suite *TransactionContextSuite) TestGetBucketFsClientFailsCreatingSchema()
 	suite.dbMock.ExpectBegin()
 	txCtx, _ := suite.beginTransaction()
 	suite.dbMock.ExpectBegin()
-	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnError(mockError)
+	suite.dbMock.ExpectExec("CREATE SCHEMA INTERNAL_\\d+").WillReturnError(errMock)
 	bfsClient, err := txCtx.GetBucketFsClient()
 	suite.Require().EqualError(err, "failed to create a schema for BucketFS list script. Cause: mock error")
 	suite.Nil(bfsClient)
@@ -155,7 +155,7 @@ func (suite *TransactionContextSuite) TestRollbackClosingBfsClientFails() {
 	_, err := txCtx.GetBucketFsClient()
 	suite.Require().NoError(err)
 
-	suite.dbMock.ExpectRollback().WillReturnError(mockError) // Rollback from BFS client
+	suite.dbMock.ExpectRollback().WillReturnError(errMock) // Rollback from BFS client
 	suite.dbMock.ExpectRollback()
 	txCtx.Rollback()
 }
@@ -194,7 +194,7 @@ func (suite *TransactionContextSuite) TestCommitClosingBfsClientFails() {
 	_, err := txCtx.GetBucketFsClient()
 	suite.Require().NoError(err)
 
-	suite.dbMock.ExpectRollback().WillReturnError(mockError) // Rollback from BFS client
+	suite.dbMock.ExpectRollback().WillReturnError(errMock) // Rollback from BFS client
 	suite.Require().EqualError(txCtx.Commit(), "failed to close BucketFS client: failed to rollback transaction to cleanup resources. Cause: mock error")
 }
 

@@ -36,12 +36,12 @@ class ExampleIT {
     @BeforeAll
     static void setup() {
         // Overwrite default Exasol version
-        System.setProperty("com.exasol.dockerdb.image", "8.32.0");
+        System.setProperty("com.exasol.dockerdb.image", "2025.1.8");
 
         exasolTestSetup = new ExasolTestSetupFactory(Path.of("cloud-setup")).getTestSetup();
 
         // Skip test in case this is an older Exasol version
-        ExasolVersionCheck.assumeExasolVersion8(exasolTestSetup);
+        ExasolVersionCheck.assumeSupportedExasolVersion(exasolTestSetup);
 
         // Create EM setup
         setup = ExtensionManagerSetup.create(exasolTestSetup, ExtensionBuilder.createDefaultNpmBuilder(
@@ -51,8 +51,12 @@ class ExampleIT {
     @AfterAll
     static void teardown() throws Exception {
         // Close EM setup and Exasol DB after running all tests
-        setup.close();
-        exasolTestSetup.close();
+        if (setup != null) {
+            setup.close();
+        }
+        if (exasolTestSetup != null) {
+            exasolTestSetup.close();
+        }
     }
 
     @AfterEach

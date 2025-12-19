@@ -15,36 +15,39 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}-build
       cancel-in-progress: true
     env:
-      EXASOL_VERSION: "8.32.0"
+      EXASOL_VERSION: "2025.1.8"
     steps:
       - name: Allow unprivileged user namespaces
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
-          go-version: "1.23"
+          go-version: "1.25"
         id: go
 
       - name: Set up JDKs
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "temurin"
           java-version: |
             11
             17
           cache: "maven"
+          server-id: ossindex
+          server-username: OSSINDEX_USERNAME
+          server-password: OSSINDEX_API_TOKEN
 
       - name: Get npm cache directory
         id: npm-cache-dir
         run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
       - name: Cache npm modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ steps.npm-cache-dir.outputs.dir }}
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -53,9 +56,9 @@ jobs:
 
       - name: Install Poetry
         run: pipx install poetry
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: "3.8"
+          python-version: "3.12"
           cache: "poetry"
           cache-dependency-path: "pkg/extensionController/bfs/udf/poetry.lock"
 
@@ -102,24 +105,26 @@ jobs:
           go test -v -p 1 -count 1 -coverprofile=coverage.out ./...
 
       - name: Prepare testing extension
-        run: cd ./extension-manager-integration-test-java/testing-extension && npm ci
+        run: cd ./extension-manager-integration-test-java/testing-extension && npm ci --ignore-scripts
 
       - name: Build and test integration test framework
         run: mvn --batch-mode clean verify -Dcom.exasol.dockerdb.image=$EXASOL_VERSION -DtrimStackTrace=false
         env:
           EXASOL_VERSION: ${{ env.EXASOL_VERSION }}
+          OSSINDEX_USERNAME: ${{ secrets.OSSINDEX_USERNAME }}
+          OSSINDEX_API_TOKEN: ${{ secrets.OSSINDEX_API_TOKEN }}
 
       - name: Build and test registry infrastructure
         run: |
           cd registry
           echo "export const CONFIG = { owner: 'dummy-owner@example.com' }" > lib/config.ts
-          npm ci
+          npm ci --ignore-scripts
           npm run test
 
       - name: Build and test registry upload
         run: |
           cd registry-upload
-          npm ci
+          npm ci --ignore-scripts
           npm run build
           npm run lint
 
@@ -129,13 +134,13 @@ jobs:
         run: rm ./pom.xml
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Upload executable
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: extension-manager binary
           path: extension-manager
@@ -151,9 +156,9 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Cache OpenFastTrace
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.m2/repository
           key: oft-${{ hashFiles('ci/trace-requirements.sh') }}
@@ -172,11 +177,11 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v9
         with:
-          version: v1.62.0
+          version: v2.7.2
           args: --timeout=15m
 
   build-python-udf:
@@ -188,12 +193,12 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install Poetry
         run: pipx install poetry
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: "3.8"
+          python-version: "3.12"
           cache: "poetry"
           cache-dependency-path: "pkg/extensionController/bfs/udf/poetry.lock"
       - name: Install dependencies
@@ -203,4 +208,4 @@ jobs:
       - name: Run type check
         run: cd pkg/extensionController/bfs/udf && poetry run mypy .
       - name: Run linter
-        run: cd pkg/extensionController/bfs/udf && poetry run pylint *.py
+        run: cd pkg/extensionController/bfs/udf && poetry run pylint ./*.py

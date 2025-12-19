@@ -75,7 +75,7 @@ func (suite *BucketFsClientITestSuite) TestFindAbsolutePathNoFileFound() {
 	time.Sleep(3 * time.Second)
 	result, err := suite.findAbsolutePath("no-such-file")
 	suite.Require().EqualError(err, `file "no-such-file" not found in BucketFS`)
-	suite.Equal("", result)
+	suite.Empty(result)
 }
 
 /* [itest -> dsn~configure-bucketfs-path~1] */
@@ -128,7 +128,7 @@ func (suite *BucketFsClientITestSuite) createBucketFsClient() bfs.BucketFsAPI {
 	return bfsClient
 }
 
-func (suite *BucketFsClientITestSuite) uploadStringContent(fileName string, fileContent string) {
+func (suite *BucketFsClientITestSuite) uploadStringContent(fileName, fileContent string) {
 	err := suite.exasol.Exasol.UploadStringContent(fileContent, fileName)
 	if err != nil {
 		suite.FailNowf("Failed to upload file %q. Cause: %w", fileName, err)

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-const defaultExasolDbVersion = "8.32.0"
+const defaultExasolDbVersion = "2025.1.8"
 
 type DbTestSetup struct {
 	suite          *suite.Suite
@@ -52,7 +52,7 @@ func (setup *DbTestSetup) StopDb() {
 }
 
 func (setup *DbTestSetup) ExecSQL(query string) {
-	_, err := setup.connection.Exec(query)
+	_, err := setup.connection.ExecContext(setup.suite.T().Context(), query)
 	setup.suite.Require().NoError(err)
 }
 

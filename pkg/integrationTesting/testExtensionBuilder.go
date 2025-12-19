@@ -1,7 +1,7 @@
 package integrationTesting
 
 import (
-	_ "embed"
+	_ "embed" // Required to embed test extension builder code
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -101,7 +101,7 @@ func (builder *TestExtensionBuilder) WithGetInstanceParameterDefinitionFunc(tsFu
 }
 
 // MockFindInstallationsFunction creates a JS findInstallations function with extension name and version.
-func MockFindInstallationsFunction(extensionName string, version string) string {
+func MockFindInstallationsFunction(extensionName, version string) string {
 	template := `return [{name: "$NAME$", version: "$VERSION$"}]`
 	filledTemplate := strings.Replace(template, "$NAME$", extensionName, 1)
 	filledTemplate = strings.Replace(filledTemplate, "$VERSION$", version, 1)
@@ -260,7 +260,7 @@ func (builder *TestExtensionBuilder) runNpmInstall(workDir string) {
 		return
 	}
 	builder.testing.Logf("Running 'npm install in %s", workDir)
-	installCommand := exec.Command("npm", "install")
+	installCommand := exec.CommandContext(builder.testing.Context(), "npm", "install")
 	installCommand.Dir = workDir
 	output, err := installCommand.CombinedOutput()
 	if err != nil {
@@ -271,7 +271,7 @@ func (builder *TestExtensionBuilder) runNpmInstall(workDir string) {
 }
 
 func (builder *TestExtensionBuilder) runNpmBuild(workDir string) {
-	buildCommand := exec.Command("npm", "run", "build")
+	buildCommand := exec.CommandContext(builder.testing.Context(), "npm", "run", "build")
 	buildCommand.Dir = workDir
 	output, err := buildCommand.CombinedOutput()
 	if err != nil {

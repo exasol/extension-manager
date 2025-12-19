@@ -1,33 +1,84 @@
-# https://golangci-lint.run/usage/configuration/
-linters:
-  enable-all: false
-  presets:
-    - bugs
-    - comment
-    - complexity
-    - error
-    - format
-    - import
-    - metalinter
-    - module
-    - performance
-    - sql
-    #- style
-    - test
-    - unused
-  disable:
-    - gofumpt # "gofmt" is OK for us, no need for stricter rules (https://github.com/mvdan/gofumpt)
-    - gci # No need to explicitly format imports using GCI (https://github.com/daixiang0/gci)
-    - depguard # No need to restrict imported packages (https://github.com/OpenPeeDeeP/depguard)
-    - err113 # Using static errors is not necessary (https://github.com/Djarvur/go-err113)
-    - wrapcheck # Wrapping errors is not necessary (https://github.com/tomarrell/wrapcheck#tldr)
-    - paralleltest # Running tests in parallel is not possible
-
-    # Fix later
-    - revive # Many naming issues, may cause breaking changes
-    - testpackage # Naming of test package causes compile errors in test
+version: "2"
 run:
   tests: true
-issues:
-  exclude-dirs:
-    - node_modules
+linters:
+  enable:
+    - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - contextcheck
+    - cyclop
+    - dupword
+    - durationcheck
+    - errchkjson
+    - errorlint
+    - exhaustive
+    - exhaustruct
+    - fatcontext
+    - funlen
+    - gocheckcompilerdirectives
+    - gochecksumtype
+    - gocognit
+    - gocritic
+    - gocyclo
+    - godot
+    - godox
+    - gomoddirectives
+    - gomodguard
+    - gosec
+    - gosmopolitan
+    - loggercheck
+    - maintidx
+    - makezero
+    - misspell
+    - musttag
+    - nestif
+    - nilerr
+    - nilnesserr
+    - noctx
+    - perfsprint
+    - prealloc
+    - protogetter
+    - reassign
+    - recvcheck
+    - rowserrcheck
+    - spancheck
+    - sqlclosecheck
+    - testableexamples
+    - testifylint
+    - thelper
+    - tparallel
+    - unparam
+    - usetesting
+    - zerologlint
+  disable:
+    - depguard
+    - err113
+    - paralleltest
+    - revive
+    - testpackage
+    - wrapcheck
+  exclusions:
+    generated: strict
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - node_modules
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: strict
+    paths:
+      - node_modules
+      - third_party$
+      - builtin$
+      - examples$

@@ -155,7 +155,7 @@ func (suite *RestAPIIntegrationTestSuite) TestDeleteInstanceSuccessfully() {
 		WithDeleteInstanceFunc("context.sqlClient.execute('select 1')").
 		Build().Publish(suite.registryServer, EXTENSION_ID)
 	response := suite.makeRequest("DELETE", suite.deleteInstance(EXTENSION_ID, "ext-version", "inst-id"), 204)
-	suite.Equal("", response)
+	suite.Empty(response)
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestDeleteInstanceFails() {
@@ -178,7 +178,7 @@ func (suite *RestAPIIntegrationTestSuite) TestUninstallExtensionSuccessfully() {
 		WithUninstallFunc("context.sqlClient.execute('select 1')").
 		Build().Publish(suite.registryServer, EXTENSION_ID)
 	response := suite.makeRequest("DELETE", suite.uninstallExtension(EXTENSION_ID, "ext-version"), 204)
-	suite.Equal("", response)
+	suite.Empty(response)
 }
 
 func (suite *RestAPIIntegrationTestSuite) TestUninstallExtensionFails() {

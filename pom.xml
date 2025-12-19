@@ -9,8 +9,9 @@
     <packaging>pom</packaging>
     <url>https://github.com/exasol/extension-manager/</url>
     <properties>
-        <revision>0.5.16</revision>
-        <junit.version>5.10.2</junit.version>
+        <revision>0.5.17</revision>
+        <!-- Version 6 requires Java >= 17 -->
+        <junit.version>5.14.1</junit.version>
         <java.version>11</java.version>
     </properties>
     <modules>
@@ -32,4 +33,20 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.sonatype.ossindex.maven</groupId>
+                <artifactId>ossindex-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <authId>ossindex</authId>
+                    <excludeVulnerabilityIds>
+                        <!-- com.exasol:exasol-jdbc:jar:25.2.5 -->
+                        <exclude>CVE-2024-55551</exclude>
+                    </excludeVulnerabilityIds>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

@@ -284,8 +284,8 @@ func (suite *ExtensionApiSuite) TestUsingExtensionWithMissingPropertiesWorks() {
 	extension, err := LoadExtension("ext-id", extensionContent)
 	suite.Require().NoError(err)
 	suite.Equal("ext-id", extension.Id)
-	suite.Equal("", extension.Category)
-	suite.Equal("", extension.Description)
+	suite.Empty(extension.Category)
+	suite.Empty(extension.Description)
 	suite.Empty(extension.BucketFsUploads)
 	suite.Empty(extension.InstallableVersions)
 }

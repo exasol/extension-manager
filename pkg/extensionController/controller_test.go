@@ -39,7 +39,7 @@ func TestControllerUTestSuite(t *testing.T) {
 	suite.Run(t, new(ControllerUTestSuite))
 }
 
-func (suite *ControllerUTestSuite) BeforeTest(suiteName, testName string) {
+func (suite *ControllerUTestSuite) BeforeTest(_suiteName, _testName string) {
 	suite.tempExtensionRepo = suite.T().TempDir()
 	suite.createController()
 }
@@ -83,7 +83,7 @@ func (suite *ControllerUTestSuite) simulateTransactionBeginFails(err error) {
 	suite.controller.transactionStarter = suite.transactionStarterMock.GetTransactionStarter()
 }
 
-func (suite *ControllerUTestSuite) AfterTest(suiteName, testName string) {
+func (suite *ControllerUTestSuite) AfterTest(_suiteName, _testName string) {
 	suite.NoError(suite.dbMock.ExpectationsWereMet())
 	suite.bucketFsMock.AssertExpectations(suite.T())
 	suite.metaDataMock.AssertExpectations(suite.T())
@@ -105,7 +105,7 @@ func (suite *ControllerUTestSuite) TestGetAllExtensionsAndBucketFSContainsJar() 
 }
 
 func (suite *ControllerUTestSuite) TestGetAllExtensionsFailsStartingTransaction() {
-	suite.simulateTransactionBeginFails(mockError)
+	suite.simulateTransactionBeginFails(errMock)
 	extensions, err := suite.controller.GetAllExtensions(mockContext(), suite.db)
 	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 	suite.Nil(extensions)
@@ -207,7 +207,7 @@ func (suite *ControllerUTestSuite) TestGetAllInstallations() {
 }
 
 func (suite *ControllerUTestSuite) TestGetAllInstallationsFailsStartingTransaction() {
-	suite.simulateTransactionBeginFails(mockError)
+	suite.simulateTransactionBeginFails(errMock)
 	installations, err := suite.controller.GetInstalledExtensions(mockContext(), suite.db)
 	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 	suite.Nil(installations)
@@ -275,7 +275,7 @@ func (suite *ControllerUTestSuite) TestFindInstancesReturnsEntries() {
 }
 
 func (suite *ControllerUTestSuite) TestFindInstancesFailsStartingTransaction() {
-	suite.simulateTransactionBeginFails(mockError)
+	suite.simulateTransactionBeginFails(errMock)
 	extensions, err := suite.controller.FindInstances(mockContext(), suite.db, EXTENSION_ID, "ver")
 	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 	suite.Nil(extensions)
@@ -333,7 +333,7 @@ func (suite *ControllerUTestSuite) TestGetParameterDefinitionsSucceeds() {
 }
 
 func (suite *ControllerUTestSuite) TestGetParameterDefinitionsFailsStartingTransaction() {
-	suite.simulateTransactionBeginFails(mockError)
+	suite.simulateTransactionBeginFails(errMock)
 	definitions, err := suite.controller.GetParameterDefinitions(mockContext(), suite.db, EXTENSION_ID, "ext-version")
 	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 	suite.Nil(definitions)
@@ -363,7 +363,7 @@ func (suite *ControllerUTestSuite) TestInstallFailsForUnknownExtensionId() {
 }
 
 func (suite *ControllerUTestSuite) TestInstallFailsStartingTransaction() {
-	suite.simulateTransactionBeginFails(mockError)
+	suite.simulateTransactionBeginFails(errMock)
 	err := suite.controller.InstallExtension(mockContext(), suite.db, EXTENSION_ID, "ver")
 	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 }
@@ -422,7 +422,7 @@ func (suite *ControllerUTestSuite) TestUninstallFailsForUnknownExtensionId() {
 }
 
 func (suite *ControllerUTestSuite) TestUninstallFailsStartingTransaction() {
-	suite.simulateTransactionBeginFails(mockError)
+	suite.simulateTransactionBeginFails(errMock)
 	err := suite.controller.UninstallExtension(mockContext(), suite.db, "unknown-extension-id", "ver")
 	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 }
@@ -522,7 +522,7 @@ func (suite *ControllerUTestSuite) TestUpgradeFailsForUnknownExtensionId() {
 }
 
 func (suite *ControllerUTestSuite) TestUpgradeFailsStartingTransaction() {
-	suite.simulateTransactionBeginFails(mockError)
+	suite.simulateTransactionBeginFails(errMock)
 	result, err := suite.controller.UpgradeExtension(mockContext(), suite.db, "unknown-extension-id")
 	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 	suite.Nil(result)
@@ -591,7 +591,7 @@ func (suite *ControllerUTestSuite) TestCreateInstanceInvalidParameters() {
 }
 
 func (suite *ControllerUTestSuite) TestCreateInstanceFailsStartingTransaction() {
-	suite.simulateTransactionBeginFails(mockError)
+	suite.simulateTransactionBeginFails(errMock)
 	instance, err := suite.controller.CreateInstance(mockContext(), suite.db, EXTENSION_ID, "0.1.0", []ParameterValue{})
 	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 	suite.Nil(instance)
@@ -660,7 +660,7 @@ func (suite *ControllerUTestSuite) TestDeleteInstanceSucceeds() {
 }
 
 func (suite *ControllerUTestSuite) TestDeleteInstanceFailsStartingTransaction() {
-	suite.simulateTransactionBeginFails(mockError)
+	suite.simulateTransactionBeginFails(errMock)
 	err := suite.controller.DeleteInstance(mockContext(), suite.db, EXTENSION_ID, "extVersion", "instId")
 	suite.Require().EqualError(err, beginTransactionFailedErrorMsg)
 }

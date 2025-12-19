@@ -46,7 +46,7 @@ func SendJSONWithStatus(ctx context.Context, status int, writer http.ResponseWri
 		encoder.SetEscapeHTML(false)
 		encodeErr := encoder.Encode(data)
 		if encodeErr != nil {
-			err := fmt.Errorf("Could not send json: %w", encodeErr)
+			err := fmt.Errorf("could not send json: %w", encodeErr)
 			logger.Warn(err.Error())
 			return err
 
@@ -89,7 +89,7 @@ func GetLogger(context context.Context) *log.Entry {
 
 func DecodeJSONBody(writer http.ResponseWriter, request *http.Request, dst interface{}) error {
 	if value := request.Header.Get(HeaderContentType); value != ContentTypeJson {
-		return apiErrors.NewAPIError(http.StatusBadRequest, "Content-Type header is not application/json")
+		return apiErrors.NewAPIError(http.StatusBadRequest, fmt.Sprintf("Content-Type header '%s' is not application/json", value))
 	}
 
 	request.Body = http.MaxBytesReader(writer, request.Body, 1048576)

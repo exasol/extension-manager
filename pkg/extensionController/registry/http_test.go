@@ -65,7 +65,7 @@ func (suite *HttpRegistrySuite) TestReadExtensionFailsWhenLoadingIndex() {
 	suite.server.SetRegistryContent(`invalid`)
 	content, err := suite.registry.ReadExtension("unknown-ext-id")
 	suite.Require().EqualError(err, fmt.Sprintf(`failed to decode index from "%s": failed to decode registry content: invalid character 'i' looking for beginning of value`, suite.server.IndexUrl()))
-	suite.Equal("", content)
+	suite.Empty(content)
 }
 
 func (suite *HttpRegistrySuite) TestReadExtensionFailsForUnknownExtension() {
@@ -73,7 +73,7 @@ func (suite *HttpRegistrySuite) TestReadExtensionFailsForUnknownExtension() {
 	suite.server.SetRegistryContent(`{"extensions":[{"id": "ext1", "url": "` + url + `"}]}`)
 	content, err := suite.registry.ReadExtension("unknown-ext-id")
 	suite.Require().ErrorContains(err, `extension "unknown-ext-id" not found`)
-	suite.Equal("", content)
+	suite.Empty(content)
 }
 
 func (suite *HttpRegistrySuite) TestReadExtensionFailsForFailedStatusCode() {
@@ -81,7 +81,7 @@ func (suite *HttpRegistrySuite) TestReadExtensionFailsForFailedStatusCode() {
 	suite.server.SetRegistryContent(`{"extensions":[{"id": "ext1", "url": "` + url + `"}]}`)
 	content, err := suite.registry.ReadExtension("ext1")
 	suite.Require().ErrorContains(err, `failed to load extension "ext1": registry at `+url+` returned status "404 Not Found"`)
-	suite.Equal("", content)
+	suite.Empty(content)
 }
 
 func (suite *HttpRegistrySuite) TestReadExtensionSucceeds() {

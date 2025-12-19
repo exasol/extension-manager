@@ -344,7 +344,7 @@ func (c *controllerImpl) createExtensionContext(txCtx *transaction.TransactionCo
 }
 
 func (c *controllerImpl) ensureSchemaExists(txCtx *transaction.TransactionContext) error {
-	_, err := txCtx.GetTransaction().Exec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"`, c.config.ExtensionSchema))
+	_, err := txCtx.GetTransaction().ExecContext(txCtx.GetContext(), fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"`, c.config.ExtensionSchema))
 	if err != nil {
 		return fmt.Errorf("failed to create schema: %w", err)
 	}
@@ -361,11 +361,11 @@ func validateParameters(parameterDefinitions []parameterValidator.ParameterDefin
 	if err != nil {
 		return fmt.Errorf("failed to validate parameters: %w", err)
 	}
-	message := ""
+	var messageBuilder strings.Builder
 	for _, r := range result {
-		message += r.Message + ", "
+		messageBuilder.WriteString(r.Message + ", ")
 	}
-	message = strings.TrimSuffix(message, ", ")
+	message := strings.TrimSuffix(messageBuilder.String(), ", ")
 	if message != "" {
 		return apiErrors.NewBadRequestErrorF("invalid parameters: %s", message)
 	}

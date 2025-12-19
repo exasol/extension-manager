@@ -10,7 +10,7 @@ import (
 	"github.com/exasol/extension-manager/pkg/extensionAPI"
 )
 
-//go:generate npm ci
+//go:generate npm ci --ignore-scripts
 //go:generate npm run build
 //go:embed parameterValidator.js
 var dependencyValidatorJs string

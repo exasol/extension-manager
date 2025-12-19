@@ -1,6 +1,7 @@
 package exaMetadata
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 )
@@ -57,7 +58,7 @@ func (r *metaDataReaderImpl) GetScriptByName(tx *sql.Tx, schemaName, scriptName 
 SELECT SCRIPT_SCHEMA, SCRIPT_NAME, SCRIPT_TYPE, SCRIPT_INPUT_TYPE, SCRIPT_RESULT_TYPE, SCRIPT_TEXT, SCRIPT_COMMENT
 FROM %s.EXA_ALL_SCRIPTS
 WHERE SCRIPT_SCHEMA=? AND SCRIPT_NAME=?`, r.metaDataSchema)
-	result, err := tx.Query(query, schemaName, scriptName)
+	result, err := tx.QueryContext(context.TODO(), query, schemaName, scriptName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read %s.EXA_ALL_SCRIPTS: %w", r.metaDataSchema, err)
 	}
@@ -78,7 +79,7 @@ func (r *metaDataReaderImpl) readExaAllScriptTable(tx *sql.Tx, schemaName string
 SELECT SCRIPT_SCHEMA, SCRIPT_NAME, SCRIPT_TYPE, SCRIPT_INPUT_TYPE, SCRIPT_RESULT_TYPE, SCRIPT_TEXT, SCRIPT_COMMENT
 FROM %s.EXA_ALL_SCRIPTS
 WHERE SCRIPT_SCHEMA=?`, r.metaDataSchema)
-	result, err := tx.Query(query, schemaName)
+	result, err := tx.QueryContext(context.TODO(), query, schemaName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read %s.EXA_ALL_SCRIPTS: %w", r.metaDataSchema, err)
 	}
@@ -126,7 +127,7 @@ func (r *metaDataReaderImpl) readExaAllVirtualSchemasTable(tx *sql.Tx) (*ExaVirt
 	query := fmt.Sprintf(`
 SELECT SCHEMA_NAME, SCHEMA_OWNER, ADAPTER_SCRIPT_SCHEMA, ADAPTER_SCRIPT_NAME, ADAPTER_NOTES
 FROM %s.EXA_ALL_VIRTUAL_SCHEMAS`, r.metaDataSchema)
-	result, err := tx.Query(query)
+	result, err := tx.QueryContext(context.TODO(), query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read %s.EXA_ALL_VIRTUAL_SCHEMAS: %w", r.metaDataSchema, err)
 	}

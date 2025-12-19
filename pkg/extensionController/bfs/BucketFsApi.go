@@ -3,7 +3,7 @@ package bfs
 import (
 	"context"
 	"database/sql"
-	_ "embed"
+	_ "embed" // Embedding file df/list_files_udf.py
 	"errors"
 	"fmt"
 	"time"
@@ -46,7 +46,7 @@ func CreateBucketFsAPI(bucketFsBasePath string, ctx context.Context, db *sql.DB)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a transaction. Cause: %w", err)
 	}
-	udfScriptName, err := createUdfScript(transaction)
+	udfScriptName, err := createUdfScript(ctx, transaction)
 	if err != nil {
 		_ = transaction.Rollback()
 		return nil, err
@@ -63,12 +63,12 @@ type bucketFsAPIImpl struct {
 /* [impl -> dsn~extension-components~1]. */
 func (bfs bucketFsAPIImpl) ListFiles() ([]BfsFile, error) {
 	t0 := time.Now()
-	statement, err := bfs.transaction.Prepare("SELECT " + bfs.udfScriptName + "(?) ORDER BY FULL_PATH") //nolint:gosec // SQL string concatenation is safe here
+	statement, err := bfs.transaction.PrepareContext(context.TODO(), "SELECT "+bfs.udfScriptName+"(?) ORDER BY FULL_PATH") //nolint:gosec // SQL string concatenation is safe here
 	if err != nil {
 		return nil, fmt.Errorf("failed to create prepared statement for listing files. Cause: %w", err)
 	}
 	defer statement.Close()
-	result, err := statement.Query(bfs.bucketFsBasePath)
+	result, err := statement.QueryContext(context.TODO(), bfs.bucketFsBasePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list files. Cause: %w", err)
 	}
@@ -88,12 +88,12 @@ func (bfs bucketFsAPIImpl) ListFiles() ([]BfsFile, error) {
 func (bfs bucketFsAPIImpl) FindAbsolutePath(fileName string) (string, error) {
 	t0 := time.Now()
 	query := fmt.Sprintf(`SELECT FULL_PATH FROM (SELECT %s(?)) WHERE FILE_NAME = ? ORDER BY FULL_PATH LIMIT 1`, bfs.udfScriptName) //nolint:gosec // SQL string concatenation is safe here
-	statement, err := bfs.transaction.Prepare(query)
+	statement, err := bfs.transaction.PrepareContext(context.TODO(), query)
 	if err != nil {
 		return "", fmt.Errorf("failed to create prepared statement for running list files UDF. Cause: %w", err)
 	}
 	defer statement.Close()
-	result, err := statement.Query(bfs.bucketFsBasePath, fileName)
+	result, err := statement.QueryContext(context.TODO(), bfs.bucketFsBasePath, fileName)
 	if err != nil {
 		return "", fmt.Errorf("failed to find absolute path in BucketFS using UDF. Cause: %w", err)
 	}
@@ -116,10 +116,10 @@ func (bfs bucketFsAPIImpl) FindAbsolutePath(fileName string) (string, error) {
 //go:embed udf/list_files_udf.py
 var listFilesRecursivelyUdfContent string
 
-func createUdfScript(transaction *sql.Tx) (string, error) {
+func createUdfScript(ctx context.Context, transaction *sql.Tx) (string, error) {
 	t0 := time.Now()
 	schemaName := fmt.Sprintf("INTERNAL_%v", t0.Unix())
-	_, err := transaction.Exec("CREATE SCHEMA " + schemaName)
+	_, err := transaction.ExecContext(ctx, "CREATE SCHEMA "+schemaName)
 	if err != nil {
 		return "", fmt.Errorf("failed to create a schema for BucketFS list script. Cause: %w", err)
 	}
@@ -128,7 +128,7 @@ func createUdfScript(transaction *sql.Tx) (string, error) {
 	EMITS ("FILE_NAME" VARCHAR(250), "FULL_PATH" VARCHAR(500), "SIZE" DECIMAL(18,0)) AS
 %s
 /`, udfScriptName, listFilesRecursivelyUdfContent)
-	_, err = transaction.Exec(script)
+	_, err = transaction.ExecContext(ctx, script)
 	if err != nil {
 		return "", fmt.Errorf("failed to create UDF script for listing bucket. Cause: %w", err)
 	}

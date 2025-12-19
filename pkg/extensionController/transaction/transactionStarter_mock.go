@@ -36,12 +36,12 @@ func (m *TransactionStarterMock) SimulateTransactionFailed(err error) {
 
 func (m *TransactionStarterMock) SimulateMockTransaction() {
 	m.transactionStarter = func(ctx context.Context, db *sql.DB, bucketFsBasePath string) (*TransactionContext, error) {
-		tx, err := m.dbMock.Begin()
+		tx, err := m.dbMock.BeginTx(ctx, nil)
 		if err != nil {
 			return nil, fmt.Errorf("failed to start mock transaction: %w", err)
 		}
 		return &TransactionContext{
-			context:     context.Background(),
+			context:     ctx,
 			transaction: tx,
 			db:          m.dbMock,
 			createBfsClient: func() (bfs.BucketFsAPI, error) {

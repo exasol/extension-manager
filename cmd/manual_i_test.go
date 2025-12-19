@@ -130,7 +130,7 @@ func (suite *ManualITestSuite) createDBConnection() *sql.DB {
 }
 
 func (suite *ManualITestSuite) testConnection(db *sql.DB) {
-	row := db.QueryRow("SELECT 'a'")
+	row := db.QueryRowContext(suite.T().Context(), "SELECT 'a'")
 	var value sql.NullString
 	err := row.Scan(&value)
 	if err != nil {
@@ -141,7 +141,7 @@ func (suite *ManualITestSuite) testConnection(db *sql.DB) {
 func (suite *ManualITestSuite) getConfigValue(key string) string {
 	value := suite.config[key]
 	if value == "" {
-		suite.FailNow(fmt.Sprintf("Key %q not found in config file", key))
+		suite.FailNow(fmt.Sprintf("Key %q not found in config file manual-test.properties", key))
 	}
 	return value
 }

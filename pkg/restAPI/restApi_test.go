@@ -35,7 +35,7 @@ const (
 	VALID_DB_ARGS             = "?dbHost=host&dbPort=8563"
 )
 
-var mockError = errors.New("mock error")
+var errMock = errors.New("mock error")
 
 func TestRestApiSuite(t *testing.T) {
 	suite.Run(t, new(RestAPISuite))
@@ -76,9 +76,9 @@ func (suite *RestAPISuite) TestGetInstallationsSuccessfully() {
 }
 
 func (suite *RestAPISuite) TestGetInstallationsFailed() {
-	suite.controller.On("GetInstalledExtensions", mock.Anything, mock.Anything).Return(nil, mockError)
+	suite.controller.On("GetInstalledExtensions", mock.Anything, mock.Anything).Return(nil, errMock)
 	responseString := suite.makeRequest("GET", LIST_INSTALLED_EXTENSIONS+VALID_DB_ARGS, "", 500)
-	suite.isInternalServerError(responseString, mockError)
+	suite.isInternalServerError(responseString, errMock)
 }
 
 // GetAllExtensions
@@ -97,9 +97,9 @@ func (suite *RestAPISuite) TestGetAllExtensionsSuccessfully() {
 }
 
 func (suite *RestAPISuite) TestGetAllExtensionsFails() {
-	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return(nil, mockError)
+	suite.controller.On("GetAllExtensions", mock.Anything, mock.Anything).Return(nil, errMock)
 	responseString := suite.makeRequest("GET", LIST_AVAILABLE_EXTENSIONS+VALID_DB_ARGS, "", 500)
-	suite.isInternalServerError(responseString, mockError)
+	suite.isInternalServerError(responseString, errMock)
 }
 
 // GetExtensionDetails
@@ -118,9 +118,9 @@ func (suite *RestAPISuite) TestGetExtensionDetailsSuccessfully() {
 }
 
 func (suite *RestAPISuite) TestGetExtensionDetailsFails() {
-	suite.controller.On("GetParameterDefinitions", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(nil, mockError)
+	suite.controller.On("GetParameterDefinitions", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(nil, errMock)
 	responseString := suite.makeRequest("GET", GET_EXTENSION_DETAILS+VALID_DB_ARGS, "", 500)
-	suite.isInternalServerError(responseString, mockError)
+	suite.isInternalServerError(responseString, errMock)
 }
 
 // Install extension
@@ -130,15 +130,15 @@ func (suite *RestAPISuite) TestInstallExtensionsSuccessfully() {
 	for _, test := range authSuccessTests {
 		suite.Run(test.authHeader, func() {
 			responseString := suite.restApi.makeRequestWithAuthHeader("PUT", INSTALL_EXT_URL+VALID_DB_ARGS, test.authHeader, `{}`, 204)
-			suite.Equal("", responseString)
+			suite.Empty(responseString)
 		})
 	}
 }
 
 func (suite *RestAPISuite) TestInstallExtensionsFailed() {
-	suite.controller.On("InstallExtension", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(mockError)
+	suite.controller.On("InstallExtension", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(errMock)
 	responseString := suite.makeRequest("PUT", INSTALL_EXT_URL+VALID_DB_ARGS, `{}`, 500)
-	suite.isInternalServerError(responseString, mockError)
+	suite.isInternalServerError(responseString, errMock)
 }
 
 // Uninstall extension
@@ -148,15 +148,15 @@ func (suite *RestAPISuite) TestUninstallExtensionsSuccessfully() {
 	for _, test := range authSuccessTests {
 		suite.Run(test.authHeader, func() {
 			responseString := suite.restApi.makeRequestWithAuthHeader("DELETE", UNINSTALL_EXT_URL+VALID_DB_ARGS, test.authHeader, "", 204)
-			suite.Equal("", responseString)
+			suite.Empty(responseString)
 		})
 	}
 }
 
 func (suite *RestAPISuite) TestUninstallExtensionsFailed() {
-	suite.controller.On("UninstallExtension", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(mockError)
+	suite.controller.On("UninstallExtension", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(errMock)
 	responseString := suite.makeRequest("DELETE", UNINSTALL_EXT_URL+"?extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563", "", 500)
-	suite.isInternalServerError(responseString, mockError)
+	suite.isInternalServerError(responseString, errMock)
 }
 
 // Upgrade extension
@@ -173,9 +173,9 @@ func (suite *RestAPISuite) TestUpgradeExtensionsSuccessfully() {
 }
 
 func (suite *RestAPISuite) TestUpgradeExtensionsFailsWithGenericError() {
-	suite.controller.On("UpgradeExtension", mock.Anything, mock.Anything, "ext-id").Return(nil, mockError)
+	suite.controller.On("UpgradeExtension", mock.Anything, mock.Anything, "ext-id").Return(nil, errMock)
 	responseString := suite.makeRequest("POST", UPGRADE_EXT_URL+"?extensionId=ext-id&extensionVersion=ver&dbHost=host&dbPort=8563", "", 500)
-	suite.isInternalServerError(responseString, mockError)
+	suite.isInternalServerError(responseString, errMock)
 }
 
 func (suite *RestAPISuite) TestUpgradeExtensionsFailsWithAPIError() {
@@ -206,10 +206,10 @@ func (suite *RestAPISuite) TestCreateInstanceFailedInvalidPayload() {
 }
 
 func (suite *RestAPISuite) TestCreateInstanceFailed() {
-	suite.controller.On("CreateInstance", mock.Anything, mock.Anything, "ext-id", "ext-version", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return(nil, mockError)
+	suite.controller.On("CreateInstance", mock.Anything, mock.Anything, "ext-id", "ext-version", []extensionController.ParameterValue{{Name: "p1", Value: "v1"}}).Return(nil, errMock)
 	responseString := suite.makeRequest("POST", CREATE_INSTANCE_URL+VALID_DB_ARGS,
 		`{"parameterValues": [{"name":"p1", "value":"v1"}]}`, 500)
-	suite.isInternalServerError(responseString, mockError)
+	suite.isInternalServerError(responseString, errMock)
 }
 
 // List instances
@@ -225,9 +225,9 @@ func (suite *RestAPISuite) TestListInstancesSuccessfully() {
 }
 
 func (suite *RestAPISuite) TestListInstancesFailedGenericError() {
-	suite.controller.On("FindInstances", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(nil, mockError)
+	suite.controller.On("FindInstances", mock.Anything, mock.Anything, "ext-id", "ext-version").Return(nil, errMock)
 	responseString := suite.restApi.makeRequestWithAuthHeader("GET", LIST_INSTANCES_URL+VALID_DB_ARGS, "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "", 500)
-	suite.isInternalServerError(responseString, mockError)
+	suite.isInternalServerError(responseString, errMock)
 }
 
 func (suite *RestAPISuite) TestListInstancesFailedApiError() {
@@ -243,15 +243,15 @@ func (suite *RestAPISuite) TestDeleteInstanceSuccessfully() {
 	for _, test := range authSuccessTests {
 		suite.Run(test.authHeader, func() {
 			responseString := suite.restApi.makeRequestWithAuthHeader("DELETE", DELETE_INSTANCE_URL+VALID_DB_ARGS, test.authHeader, "", 204)
-			suite.Equal("", responseString)
+			suite.Empty(responseString)
 		})
 	}
 }
 
 func (suite *RestAPISuite) TestDeleteInstanceFailedGenericError() {
-	suite.controller.On("DeleteInstance", mock.Anything, mock.Anything, "ext-id", "ext-version", "inst-id").Return(mockError)
+	suite.controller.On("DeleteInstance", mock.Anything, mock.Anything, "ext-id", "ext-version", "inst-id").Return(errMock)
 	responseString := suite.restApi.makeRequestWithAuthHeader("DELETE", DELETE_INSTANCE_URL+VALID_DB_ARGS, "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "", 500)
-	suite.isInternalServerError(responseString, mockError)
+	suite.isInternalServerError(responseString, errMock)
 }
 
 func (suite *RestAPISuite) TestDeleteInstanceFailedApiError() {

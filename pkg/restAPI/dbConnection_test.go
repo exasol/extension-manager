@@ -26,8 +26,8 @@ func (suite *ApiContextSuite) TestExtractUserPasswordExample() {
 func (suite *ApiContextSuite) TestExtractUserPasswordInvalidBase64() {
 	user, password, err := extractUserPassword("invalid base64")
 	suite.Require().EqualError(err, "invalid basic auth header \"invalid base64\": illegal base64 data at input byte 7")
-	suite.Equal("", user)
-	suite.Equal("", password)
+	suite.Empty(user)
+	suite.Empty(password)
 }
 
 func (suite *ApiContextSuite) TestExtractUserPassword() {
@@ -52,8 +52,8 @@ func (suite *ApiContextSuite) TestExtractUserPassword() {
 				suite.Equal(test.expectedPassword, password)
 			} else {
 				suite.Require().EqualError(err, test.expectedError)
-				suite.Equal("", user)
-				suite.Equal("", password)
+				suite.Empty(user)
+				suite.Empty(password)
 			}
 		})
 	}
