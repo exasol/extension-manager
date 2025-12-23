@@ -1,12 +1,10 @@
-# Extension Manager 0.5.18, released 2025-??-??
+# Extension Manager 0.5.18, released 2025-12-23
 
-Code name:
+Code name: Fix Maven Central Deployment
 
 ## Summary
 
-## Features
-
-* ISSUE_NUMBER: description
+This release fixes the Maven Central release process.
 
 ## Dependency Updates
 
