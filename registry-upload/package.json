@@ -18,9 +18,9 @@
     "typescript": "~5.9.3"
   },
   "dependencies": {
-    "@aws-sdk/client-cloudformation": "^3.955.0",
-    "@aws-sdk/client-cloudfront": "^3.955.0",
-    "@aws-sdk/client-s3": "^3.955.0",
+    "@aws-sdk/client-cloudformation": "^3.995.0",
+    "@aws-sdk/client-cloudfront": "^3.995.0",
+    "@aws-sdk/client-s3": "^3.995.0",
     "follow-redirects": "^1.15.11",
     "octokit": "^5.0.5"
   }
