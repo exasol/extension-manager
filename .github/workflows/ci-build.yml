@@ -15,7 +15,7 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}-build
       cancel-in-progress: true
     env:
-      EXASOL_VERSION: "2025.1.8"
+      EXASOL_VERSION: "2025.2.1"
     steps:
       - name: Allow unprivileged user namespaces
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
