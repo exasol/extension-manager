@@ -316,7 +316,7 @@ func (c *controllerImpl) convertAndValidate(txCtx *transaction.TransactionContex
 }
 
 func convertParameters(parameterValues []ParameterValue) extensionAPI.ParameterValues {
-	values := []extensionAPI.ParameterValue{}
+	values := make([]extensionAPI.ParameterValue, 0, len(parameterValues))
 	for _, p := range parameterValues {
 		values = append(values, extensionAPI.ParameterValue{Name: p.Name, Value: p.Value})
 	}

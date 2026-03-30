@@ -2,6 +2,7 @@ package integrationTesting
 
 import (
 	"fmt"
+	"html"
 	"net/http"
 	"net/http/httptest"
 
@@ -49,7 +50,7 @@ func (s *MockRegistryServer) Start() {
 
 func (s *MockRegistryServer) sendResponse(w http.ResponseWriter, content string, status int) {
 	w.WriteHeader(status)
-	_, err := w.Write([]byte(content))
+	_, err := w.Write([]byte(html.EscapeString(content)))
 	s.suite.Require().NoError(err)
 }
 
