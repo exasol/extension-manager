@@ -42,6 +42,6 @@ excludes:
   - "E-PK-CORE-26: '.github/workflows/release_droid_release_on_maven_central.yml' exists but must not exist. Reason: Release-droid workflows are replaced by release.yml"
   - "E-PK-CORE-26: 'release_config.yml' exists but must not exist. Reason: Release-droid configuration is replaced by release.yml"
   # Project uses Go 1.25
-  #- "E-PK-CORE-18: Outdated content: '.github/workflows/project-keeper-verify.yml'"
+  - "E-PK-CORE-18: Outdated content: '.github/workflows/project-keeper-verify.yml'"
   # PK has problems with Go dependencies
   #- regex: "E-PK-CORE-53: The dependencies\\.md file has outdated content.*"
