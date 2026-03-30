@@ -20,7 +20,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-test-setup-abstraction-java</artifactId>
-            <version>2.1.10</version>
+            <version>2.1.11</version>
             <exclusions>
                 <exclusion>
                     <!-- Fix CVE-2017-10355 -->
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.21.0</version>
+            <version>5.23.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
