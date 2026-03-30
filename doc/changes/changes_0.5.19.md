@@ -83,6 +83,7 @@ Code name:
 * Updated `@types/node:^25.0.3` to `^25.5.0`
 * Updated `aws-cdk:2.1100.1` to `2.1114.1`
 * Updated `jest:^30.2.0` to `^30.3.0`
+* Removed `@types/prettier:3.0.0`
 
 ### Registry-upload
 
@@ -95,8 +96,10 @@ Code name:
 #### Development Dependency Updates
 
 * Updated `eslint:9.39.2` to `10.1.0`
+* Added `@eslint/js:10.0.1`
 * Updated `@types/node:^25.0.3` to `^25.5.0`
 * Updated `typescript-eslint:^8.50.0` to `^8.57.2`
+* Removed `@types/prettier:3.0.0`
 
 ### ParameterValidator
 

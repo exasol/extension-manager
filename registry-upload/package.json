@@ -11,8 +11,8 @@
   "devDependencies": {
     "@types/follow-redirects": "^1.14.4",
     "@types/node": "^25.5.0",
-    "@types/prettier": "3.0.0",
     "eslint": "10.1.0",
+    "@eslint/js": "10.0.1",
     "typescript-eslint": "^8.57.2",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.3"
