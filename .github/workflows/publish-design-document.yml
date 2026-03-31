@@ -2,7 +2,6 @@ name: Publish design document
 
 on:
   workflow_dispatch:
-  pull_request:
   push:
     branches:
       - main
@@ -38,8 +37,8 @@ jobs:
   deploy:
     if: ${{ github.ref == 'refs/heads/main' }}
     permissions:
-      id-token: write
-      pages: write
+      id-token: write # to deploy to Pages
+      pages: write # to verify the deployment originates from an appropriate source
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
