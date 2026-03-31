@@ -1,36 +1,38 @@
 name: Project Keeper Verify
 on:
   push:
-    branches:
-      - main
-  pull_request:
-  workflow_dispatch:
+    branches: [main, release/*]
 
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+  workflow_dispatch: null
 jobs:
   project-keeper-verify:
     runs-on: ubuntu-latest
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
+      {
+        group: "${{ github.workflow }}-${{ github.ref }}",
+        cancel-in-progress: true,
+      }
     steps:
-      - name: Checkout the repository
-        id: checkout
+      - id: checkout
+        name: Checkout the repository
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Set up JDKs
+        with: { fetch-depth: 0 }
+      - id: setup-java
+        name: Set up JDKs
         uses: actions/setup-java@v5
         with:
-          distribution: "temurin"
-          java-version: |
+          distribution: temurin
+          java-version: |-
             11
             17
           cache-dependency-path: |
             .github/workflows/project-keeper-verify.yml
             .github/workflows/project-keeper.sh
-
-      - name: Set up Go
+      - id: setup-go
+        name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version: "1.25"
@@ -38,14 +40,18 @@ jobs:
             **/go.sum
             .github/workflows/project-keeper-verify.yml
             .github/workflows/project-keeper.sh
-
-      - name: Set up Node
+      - id: setup-node
+        name: Set up Node
         uses: actions/setup-node@v6
         if: ${{ true }}
         with:
-          node-version: "24"
-          cache: "npm"
-          cache-dependency-path: "**/package-lock.json"
-
-      - name: Project Keeper Verify
-        run: ./.github/workflows/project-keeper.sh
+          {
+            node-version: "22",
+            cache: npm,
+            cache-dependency-path: "**/package-lock.json",
+          }
+      - {
+          id: project-keeper-verify,
+          name: Project Keeper Verify,
+          run: ./.github/workflows/project-keeper.sh verify,
+        }

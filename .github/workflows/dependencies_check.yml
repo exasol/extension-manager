@@ -45,7 +45,7 @@ jobs:
 
       - name: Check registry for NPM vulnerabilities
         if: always()
-        run: cd registry && npm audit
+        run: cd registry && npm audit --audit-level=high # Suppress warning about unfixable vulnerability https://github.com/advisories/GHSA-f886-m6hf-6m8v (requires an update of aws-cdk-lib)
       - name: Check registry-upload for NPM vulnerabilities
         if: always()
         run: cd registry-upload && npm audit

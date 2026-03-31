@@ -49,6 +49,7 @@ func (s *MockRegistryServer) Start() {
 
 func (s *MockRegistryServer) sendResponse(w http.ResponseWriter, content string, status int) {
 	w.WriteHeader(status)
+	// #nosec G705 -- mock server for testing only.
 	_, err := w.Write([]byte(content))
 	s.suite.Require().NoError(err)
 }
