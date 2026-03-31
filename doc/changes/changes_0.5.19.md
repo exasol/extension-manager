@@ -1,12 +1,23 @@
-# Extension Manager 0.5.19, released 2026-??-??
+# Extension Manager 0.5.19, released 2026-03-31
 
-Code name:
+Code name: Update dependencies on top of 0.5.18
 
 ## Summary
 
+This release fixes the following vulnerabilities in dependencies:
+* [#117: Handlebars.js has a Property Access Validation Bypass in container.lookup Low Development](https://github.com/exasol/extension-manager/security/dependabot/117)
+* [#116: Handlebars.js has a Prototype Method Access Control Gap via Missing __lookupSetter__ Blocklist Entry](https://github.com/exasol/extension-manager/security/dependabot/116)
+* [#115: brace-expansion: Zero-step sequence causes process hang and memory exhaustion](https://github.com/exasol/extension-manager/security/dependabot/115)
+* [#114: brace-expansion: Zero-step sequence causes process hang and memory exhaustion](https://github.com/exasol/extension-manager/security/dependabot/114)
+* [#113: Handlebars.js has JavaScript Injection in CLI Precompiler via Unescaped Names and Options](https://github.com/exasol/extension-manager/security/dependabot/113)
+* [#112: Handlebars.js has JavaScript Injection via AST Type Confusion when passing an object as dynamic partial](https://github.com/exasol/extension-manager/security/dependabot/112)
+* [#111: Handlebars.js has Denial of Service via Malformed Decorator Syntax in Template Compilation](https://github.com/exasol/extension-manager/security/dependabot/111)
+* [#110: Handlebars.js has JavaScript Injection via AST Type Confusion by tampering @partial-block](https://github.com/exasol/extension-manager/security/dependabot/110)
+* [#109: Handlebars.js has JavaScript Injection via AST Type Confusion](https://github.com/exasol/extension-manager/security/dependabot/109)
+
 ## Security
 
-* ISSUE_NUMBER: description
+* #211: Fix vulnerabilities in dependencies reported by Dependabot
 
 ## Dependency Updates
 
