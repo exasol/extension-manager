@@ -1,7 +1,8 @@
-name: Render design
+name: Publish design document
 
 on:
   workflow_dispatch:
+  pull_request:
   push:
     branches:
       - main
@@ -35,7 +36,7 @@ jobs:
           path: ./gh-pages/
 
   deploy:
-    #if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.ref == 'refs/heads/main' }}
     permissions:
       id-token: write
       pages: write
