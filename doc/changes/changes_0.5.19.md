@@ -5,6 +5,7 @@ Code name: Update dependencies on top of 0.5.18
 ## Summary
 
 This release fixes the following vulnerabilities in dependencies:
+* [#118: Pygments has Regular Expression Denial of Service (ReDoS) due to Inefficient Regex for GUID Matching](https://github.com/exasol/extension-manager/security/dependabot/118)
 * [#117: Handlebars.js has a Property Access Validation Bypass in container.lookup Low Development](https://github.com/exasol/extension-manager/security/dependabot/117)
 * [#116: Handlebars.js has a Prototype Method Access Control Gap via Missing __lookupSetter__ Blocklist Entry](https://github.com/exasol/extension-manager/security/dependabot/116)
 * [#115: brace-expansion: Zero-step sequence causes process hang and memory exhaustion](https://github.com/exasol/extension-manager/security/dependabot/115)
@@ -14,6 +15,7 @@ This release fixes the following vulnerabilities in dependencies:
 * [#111: Handlebars.js has Denial of Service via Malformed Decorator Syntax in Template Compilation](https://github.com/exasol/extension-manager/security/dependabot/111)
 * [#110: Handlebars.js has JavaScript Injection via AST Type Confusion by tampering @partial-block](https://github.com/exasol/extension-manager/security/dependabot/110)
 * [#109: Handlebars.js has JavaScript Injection via AST Type Confusion](https://github.com/exasol/extension-manager/security/dependabot/109)
+* [#88: jackson-core: Number Length Constraint Bypass in Async Parser Leads to Potential DoS Condition](https://github.com/exasol/extension-manager/security/dependabot/88)
 
 ## Security
 
@@ -92,7 +94,7 @@ This release fixes the following vulnerabilities in dependencies:
 #### Development Dependency Updates
 
 * Updated `@types/node:^25.0.3` to `^25.5.0`
-* Updated `aws-cdk:2.1100.1` to `2.1114.1`
+* Updated `aws-cdk:2.1100.1` to `2.1115.0`
 * Updated `jest:^30.2.0` to `^30.3.0`
 * Removed `@types/prettier:3.0.0`
 
