@@ -1,4 +1,4 @@
-name: Publish design document
+name: Render design document
 
 on:
   workflow_dispatch:
