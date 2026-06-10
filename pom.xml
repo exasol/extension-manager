@@ -9,9 +9,9 @@
     <packaging>pom</packaging>
     <url>https://github.com/exasol/extension-manager/</url>
     <properties>
-        <revision>0.5.19</revision>
+        <revision>0.5.20</revision>
         <!-- Version 6 requires Java >= 17 -->
-        <junit.version>5.14.3</junit.version>
+        <junit.version>5.14.4</junit.version>
         <java.version>11</java.version>
     </properties>
     <modules>
@@ -26,10 +26,6 @@
                 <version>3.2.0</version>
                 <configuration>
                     <authId>ossindex</authId>
-                    <excludeVulnerabilityIds>
-                        <!-- com.exasol:exasol-jdbc:jar:25.2.5 -->
-                        <exclude>CVE-2024-55551</exclude>
-                    </excludeVulnerabilityIds>
                 </configuration>
             </plugin>
             <plugin>
