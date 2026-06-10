@@ -1,12 +1,26 @@
-# Extension Manager 0.5.20, released 2026-??-??
+# Extension Manager 0.5.20, released 2026-06-11
 
-Code name:
+Code name: Fix vulnerabilities in Go and NPM dependencies
 
 ## Summary
 
-## Features
+This release fixes vulnerabilities in the Go toolchain and in JavaScript dependencies used by the registry and upload tooling.
 
-* ISSUE_NUMBER: description
+Fixed vulnerabilities:
+* Go standard library, [`net/textproto`](https://pkg.go.dev/vuln/GO-2026-5039): arbitrary inputs are included in errors without any escaping.
+* Go standard library, [`crypto/x509`](https://pkg.go.dev/vuln/GO-2026-5037): inefficient candidate hostname parsing.
+* Go standard library, [`mime`](https://pkg.go.dev/vuln/GO-2026-5038): quadratic complexity in `WordDecoder.DecodeHeader`.
+* Go module, [`golang.org/x/crypto`](https://pkg.go.dev/vuln/?q=golang.org%2Fx%2Fcrypto): SSH vulnerabilities including deadlocks on unexpected responses, memory leaks when rejecting channels, server panics during `CheckHostKey`/`Authenticate`, bypass of certificate restrictions, byte arithmetic underflow and panic, and SSH agent constraint handling issues.
+* Go module, [`golang.org/x/net`](https://pkg.go.dev/vuln/?q=golang.org%2Fx%2Fnet): infinite loop in HTTP/2 transport when given a bad `SETTINGS_MAX_FRAME_SIZE`.
+* npm, [`brace-expansion`](https://github.com/advisories/GHSA-f886-m6hf-6m8v) and [`brace-expansion`](https://github.com/advisories/GHSA-jxxr-4gwj-5jf2): zero-step sequences can cause process hangs and memory exhaustion; large numeric ranges can defeat documented `max` DoS protection.
+* npm, [`fast-uri`](https://github.com/advisories/GHSA-q3j6-qgpj-74h6) and [`fast-uri`](https://github.com/advisories/GHSA-v39h-62p7-jpjc): percent-encoded dot segments can enable path traversal; percent-encoded authority delimiters can cause host confusion.
+* npm, [`fast-xml-builder`](https://github.com/advisories/GHSA-5wm8-gmm8-39j9): attribute values with unwanted quotes can bypass malicious or unwanted attributes.
+* npm, [`fast-xml-parser`](https://github.com/advisories/GHSA-gh4j-gqv2-49f6): XML comments and CDATA can be injected via unescaped delimiters.
+* npm, [`follow-redirects`](https://github.com/advisories/GHSA-r4q5-vmmm-2653): custom authentication headers can leak to cross-domain redirect targets.
+
+## Security
+
+* #219: Fix vulnerabilities in Go and NPM dependencies
 
 ## Dependency Updates
 
