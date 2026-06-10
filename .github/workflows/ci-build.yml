@@ -65,10 +65,12 @@ jobs:
       - name: Calculate Python test coverage
         run: |
           cd pkg/extensionController/bfs/udf
-          poetry install --no-root
+          poetry install
           poetry run pytest --cov=list_files_udf --cov-report xml --cov-report term
           echo "Fixing source references for sonar"
           sed --in-place 's@<source></source>@<source>pkg/extensionController/bfs/udf/</source>@' coverage.xml
+        env:
+          POETRY_INSTALLER_ONLY_BINARY: ":all:"
 
       - name: Enable testcontainer reuse
         run: echo 'testcontainers.reuse.enable=true' > "$HOME/.testcontainers.properties"
@@ -134,8 +136,16 @@ jobs:
         # "Maven project detected. You should run the goal 'org.sonarsource.scanner.maven:sonar' during build rather than using this GitHub Action."
         run: rm ./pom.xml
 
+      - name: Collect Java libraries for Sonar
+        id: collect-java-libraries
+        run: |
+          echo "libraries=$(find "$HOME/.m2/repository" -name '*.jar' -print | sort | paste -sd, -)" >> "$GITHUB_OUTPUT"
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@713881670b6b3676cda39549040e2d88c70d582e # v8.2.0
+        with:
+          args: >
+            -Dsonar.java.libraries=${{ steps.collect-java-libraries.outputs.libraries }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -209,7 +219,9 @@ jobs:
           cache: "poetry"
           cache-dependency-path: "pkg/extensionController/bfs/udf/poetry.lock"
       - name: Install dependencies
-        run: cd pkg/extensionController/bfs/udf && poetry install --no-root
+        run: cd pkg/extensionController/bfs/udf && poetry install
+        env:
+          POETRY_INSTALLER_ONLY_BINARY: ":all:"
       - name: Run tests
         run: cd pkg/extensionController/bfs/udf && poetry run pytest --cov=list_files_udf
       - name: Run type check
