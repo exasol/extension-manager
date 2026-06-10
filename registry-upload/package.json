@@ -4,24 +4,21 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "upload": "node --loader ts-node/esm src/main.ts",
-    "generate": "node --loader ts-node/esm src/generate.ts",
+    "upload": "npm run build && node dist/main.js",
+    "generate": "npm run build && node dist/generate.js",
     "lint": "eslint --report-unused-disable-directives --exit-on-fatal-error ./src/"
   },
   "devDependencies": {
-    "@types/follow-redirects": "^1.14.4",
-    "@types/node": "^25.5.0",
-    "eslint": "10.1.0",
+    "@types/node": "^25.9.2",
+    "eslint": "10.4.1",
     "@eslint/js": "10.0.1",
-    "typescript-eslint": "^8.57.2",
-    "ts-node": "^10.9.2",
-    "typescript": "~5.9.3"
+    "typescript-eslint": "^8.61.0",
+    "typescript": "~6.0.3"
   },
   "dependencies": {
-    "@aws-sdk/client-cloudformation": "^3.1019.0",
-    "@aws-sdk/client-cloudfront": "^3.1019.0",
-    "@aws-sdk/client-s3": "^3.1019.0",
-    "follow-redirects": "^1.15.11",
+    "@aws-sdk/client-cloudformation": "^3.1065.0",
+    "@aws-sdk/client-cloudfront": "^3.1065.0",
+    "@aws-sdk/client-s3": "^3.1065.0",
     "octokit": "^5.0.5"
   }
 }

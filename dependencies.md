@@ -151,27 +151,26 @@
 | [@aws-sdk/client-cloudformation][92] | [Apache-2.0][93] |
 | [@aws-sdk/client-cloudfront][94]     | [Apache-2.0][93] |
 | [@aws-sdk/client-s3][95]             | [Apache-2.0][93] |
-| [follow-redirects][96]               | [MIT][97]        |
-| [octokit][98]                        | [MIT][99]        |
+| [octokit][96]                        | [MIT][97]        |
 
 ## Parametervalidator
 
 ### Compile Dependencies
 
-| Dependency                                   | License |
-| -------------------------------------------- | ------- |
-| [@exasol/extension-parameter-validator][100] | MIT     |
+| Dependency                                  | License   |
+| ------------------------------------------- | --------- |
+| [@exasol/extension-parameter-validator][98] | [MIT][99] |
 
 [0]: https://github.com/Nightapes/go-rest/blob/v0.3.3/LICENSE
-[1]: https://github.com/dop251/goja/blob/065cd970411c/LICENSE
+[1]: https://github.com/dop251/goja/blob/348e6bea910d/LICENSE
 [2]: https://github.com/dop251/goja_nodejs/blob/1f56ff5bcf14/LICENSE
-[3]: https://github.com/exasol/exasol-driver-go/blob/v1.0.16/LICENSE
-[4]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v1.0.0/go-client/LICENSE
-[5]: https://github.com/go-chi/chi/blob/v5.2.5/LICENSE
+[3]: https://github.com/exasol/exasol-driver-go/blob/v1.0.17/LICENSE
+[4]: https://github.com/exasol/exasol-test-setup-abstraction-server/blob/go-client/v1.0.1/go-client/LICENSE
+[5]: https://github.com/go-chi/chi/blob/v5.3.0/LICENSE
 [6]: https://github.com/sirupsen/logrus/blob/v1.9.4/LICENSE
 [7]: https://github.com/stretchr/testify/blob/v1.11.1/LICENSE
 [8]: https://github.com/swaggo/http-swagger/blob/v1.3.4/LICENSE
-[9]: https://cs.opensource.google/go/x/mod/+/v0.34.0:LICENSE
+[9]: https://cs.opensource.google/go/x/mod/+/v0.37.0:LICENSE
 [10]: https://github.com/DATA-DOG/go-sqlmock/blob/master/LICENSE
 [11]: https://github.com/kinbiko/jsonassert/blob/HEAD/LICENSE
 [12]: https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-annotations
@@ -248,18 +247,17 @@
 [83]: https://opensource.org/license/mit
 [84]: https://maven.apache.org/surefire/maven-failsafe-plugin/
 [85]: https://maven.apache.org/plugins/maven-jar-plugin/
-[86]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.245.0.tgz
+[86]: https://registry.npmjs.org/aws-cdk-lib/-/aws-cdk-lib-2.258.1.tgz
 [87]: https://github.com/aws/aws-cdk
 [88]: https://registry.npmjs.org/constructs/-/constructs-10.6.0.tgz
 [89]: https://github.com/aws/constructs
 [90]: https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz
 [91]: https://github.com/evanw/node-source-map-support
-[92]: https://registry.npmjs.org/@aws-sdk/client-cloudformation/-/client-cloudformation-3.1019.0.tgz
+[92]: https://registry.npmjs.org/@aws-sdk/client-cloudformation/-/client-cloudformation-3.1065.0.tgz
 [93]: https://github.com/aws/aws-sdk-js-v3
-[94]: https://registry.npmjs.org/@aws-sdk/client-cloudfront/-/client-cloudfront-3.1019.0.tgz
-[95]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.1019.0.tgz
-[96]: https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.11.tgz
-[97]: https://github.com/follow-redirects/follow-redirects
-[98]: https://registry.npmjs.org/octokit/-/octokit-5.0.5.tgz
-[99]: https://github.com/octokit/octokit.js
-[100]: https://registry.npmjs.org/@exasol/extension-parameter-validator/-/extension-parameter-validator-0.3.1.tgz
+[94]: https://registry.npmjs.org/@aws-sdk/client-cloudfront/-/client-cloudfront-3.1065.0.tgz
+[95]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.1065.0.tgz
+[96]: https://registry.npmjs.org/octokit/-/octokit-5.0.5.tgz
+[97]: https://github.com/octokit/octokit.js
+[98]: https://registry.npmjs.org/@exasol/extension-parameter-validator/-/extension-parameter-validator-0.3.2.tgz
+[99]: https://github.com/exasol/extension-parameter-validator
