@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   pull_request:
   schedule:
-    - cron: "0 2 * * *"
+    - cron: "42 22 * * 0"
 
 jobs:
   report_security_issues:
@@ -25,7 +25,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: "1.25"
+          go-version: "1.26.4"
       - name: Install to local maven repo
         # This avoids this error:
         # [ERROR] Failed to execute goal on project extension-manager-integration-test-java: Could not resolve dependencies for project com.exasol:extension-manager-integration-test-java:jar:0.2.3: Could not find artifact com.exasol:extension-manager-client-java:jar:0.2.3 in central

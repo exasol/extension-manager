@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -15,7 +15,7 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}-build
       cancel-in-progress: true
     env:
-      EXASOL_VERSION: "2025.2.1"
+      EXASOL_VERSION: "2026.1.0"
     steps:
       - name: Allow unprivileged user namespaces
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
@@ -24,12 +24,12 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: "1.25"
-        id: go
+          go-version: "1.26.4"
 
       - name: Set up JDKs
         uses: actions/setup-java@v5
@@ -65,7 +65,7 @@ jobs:
       - name: Calculate Python test coverage
         run: |
           cd pkg/extensionController/bfs/udf
-          poetry install
+          poetry install --no-root
           poetry run pytest --cov=list_files_udf --cov-report xml --cov-report term
           echo "Fixing source references for sonar"
           sed --in-place 's@<source></source>@<source>pkg/extensionController/bfs/udf/</source>@' coverage.xml
@@ -75,8 +75,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          go get -t ./...
-          echo Revert go.sum modification by previous "go get"
+          go mod download
+          go mod verify
+          echo Revert go.sum modification by go mod download
           go mod tidy
 
       - name: Check generated code
@@ -202,10 +203,19 @@ jobs:
           cache: "poetry"
           cache-dependency-path: "pkg/extensionController/bfs/udf/poetry.lock"
       - name: Install dependencies
-        run: cd pkg/extensionController/bfs/udf && poetry install
+        run: cd pkg/extensionController/bfs/udf && poetry install --no-root
       - name: Run tests
         run: cd pkg/extensionController/bfs/udf && poetry run pytest --cov=list_files_udf
       - name: Run type check
         run: cd pkg/extensionController/bfs/udf && poetry run mypy .
       - name: Run linter
         run: cd pkg/extensionController/bfs/udf && poetry run pylint ./*.py
+
+
+  build:
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read
+    needs: [build-and-test, trace-requirements, static-code-analysis-go, build-python-udf]
+    steps:
+      - run: echo "Build successful."

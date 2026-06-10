@@ -21,7 +21,6 @@ Code name:
 
 #### Test Dependency Updates
 
-* Updated `nl.jqno.equalsverifier:equalsverifier:3.19.4` to `4.5`
 * Updated `org.junit.jupiter:junit-jupiter-api:5.14.3` to `5.14.4`
 * Updated `org.junit.jupiter:junit-jupiter-params:5.14.3` to `5.14.4`
 
