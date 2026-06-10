@@ -135,7 +135,7 @@ jobs:
         run: rm ./pom.xml
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v7
+        uses: SonarSource/sonarqube-scan-action@713881670b6b3676cda39549040e2d88c70d582e # v8.2.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -158,6 +158,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Cache OpenFastTrace
         uses: actions/cache@v5
         with:
@@ -179,10 +181,12 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v6
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.11.4
+          persist-credentials: false
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9.2.1
+        with:
+          version: v2.12.2
           args: --timeout=15m
 
   build-python-udf:
@@ -195,6 +199,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Install Poetry
         run: pipx install poetry
       - uses: actions/setup-python@v6
