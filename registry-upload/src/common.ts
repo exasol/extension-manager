@@ -9,7 +9,8 @@ export function getAvailableStages(): string[] {
 export function getExtensionGitHubRepos(): string[] {
     // "oracle-virtual-schema" extension is not yet released, see https://github.com/exasol/oracle-virtual-schema/issues/45
     return ["s3-document-files-virtual-schema", "row-level-security-lua", "cloud-storage-extension",
-        "kafka-connector-extension", "kinesis-connector-extension"]
+        // "kafka-connector-extension", release contains no extension
+        "kinesis-connector-extension"]
 }
 
 export interface CommandLineArgs {

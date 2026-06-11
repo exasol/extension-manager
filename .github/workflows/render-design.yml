@@ -17,11 +17,13 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Setup Pages
         uses: actions/configure-pages@v6
       - name: Install Tools
         run: |
-          pip install pandoc-plantuml-filter
+          pip --only-binary :all: install pandoc-plantuml-filter
           sudo apt-get install -y pandoc plantuml
       - name: Generate Doc
         run: |
@@ -30,7 +32,7 @@ jobs:
           pandoc ../doc/design.md -o design.html --filter pandoc-plantuml
           pandoc ../doc/system_requirements.md -o system_requirements.html --filter pandoc-plantuml
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ./gh-pages/
 
@@ -42,7 +44,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: build
     steps:
       - name: Deploy to GitHub Pages

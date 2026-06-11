@@ -3,7 +3,12 @@
     "target": "ES2018",
     "module": "commonjs",
     "lib": [
-      "es2018"
+      "es2018",
+      "esnext.disposable"
+    ],
+    "types": [
+      "node",
+      "jest"
     ],
     "declaration": true,
     "strict": true,
