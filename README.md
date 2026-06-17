@@ -1,5 +1,9 @@
 # Exasol Extension Manager
 
+## &#9888; Deprecation Warning &#9888;
+
+This project is deprecated and not maintained any more.
+
 [![Go Reference](https://pkg.go.dev/badge/github.com/exasol/extension-manager.svg)](https://pkg.go.dev/github.com/exasol/extension-manager)
 [![Build Status](https://github.com/exasol/extension-manager/actions/workflows/ci-build.yml/badge.svg)](https://github.com/exasol/extension-manager/actions/workflows/ci-build.yml)
 Extension Manager Java Client: [![Maven Central &ndash; Extension Manager Java Client](https://img.shields.io/maven-central/v/com.exasol/extension-manager-client-java)](https://search.maven.org/artifact/com.exasol/extension-manager-client-java), Extension integration tests library: [![Maven Central &ndash; Extension integration tests library](https://img.shields.io/maven-central/v/com.exasol/extension-manager-integration-test-java)](https://search.maven.org/artifact/com.exasol/extension-manager-integration-test-java)
